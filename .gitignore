@@ -1,0 +1,3 @@
+node_modules
+src/config/secret.ts
+.DS_Store

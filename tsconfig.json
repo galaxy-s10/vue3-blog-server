@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    // "lib": ["es2015"],
+    "esModuleInterop": true,// esm和cjs混用
+    // "strict": false, // 默认:false
+    // "suppressImplicitAnyIndexErrors": true, // 默认false。
+    // "noImplicitAny": true, // Turning on noImplicitAny however TypeScript will issue an error whenever it would have inferred any:
+    // "jsx": "react-jsx"
+  },
+  "ts-node": {
+    "transpileOnly": true,//只编译，报警告或者错误一样运行
+  }
+  // "include": ["src/a.ts"]
+}
