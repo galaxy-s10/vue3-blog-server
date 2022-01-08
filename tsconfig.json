@@ -7,6 +7,10 @@
     // "suppressImplicitAnyIndexErrors": true, // 默认false。
     // "noImplicitAny": true, // Turning on noImplicitAny however TypeScript will issue an error whenever it would have inferred any:
     // "jsx": "react-jsx"
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "ts-node": {
     "transpileOnly": true,//只编译，报警告或者错误一样运行

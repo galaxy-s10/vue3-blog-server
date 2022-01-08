@@ -16,8 +16,8 @@ class ThemeService {
   async create(theme) {
     // const res = await themeModel.create(theme, { validate: true });//使用sequence的验证。
     // try {
-    const res = await fn2();
-    // const res = await themeModel.create(theme);
+    // const res = await fn2();
+    const res = await themeModel.create(theme);
     console.log(res, '00');
     return res;
     // } catch (err) {

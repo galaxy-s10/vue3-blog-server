@@ -1,6 +1,5 @@
 import { Context } from 'koa';
-
-const { _ERROR, _chalk } = require('../utils/chalkTip');
+import { _ERROR, _chalk } from '../chalkTip';
 
 const errorHandler = function ({
   ctx,
@@ -13,7 +12,7 @@ const errorHandler = function ({
   error: any;
   message?: string;
 }) {
-  console.log(_ERROR('↓↓↓↓↓↓↓↓↓↓ 开始接受错误 ↓↓↓↓↓↓↓↓↓↓'));
+  console.log(_ERROR('↓↓↓↓↓↓↓↓↓↓ 开始接收错误 ↓↓↓↓↓↓↓↓↓↓'));
   if (ctx) {
     // 如果捕获的错误有ctx，代表是接口地址报错
     console.log(_chalk.redBright(`url: ${ctx.request.url}`));

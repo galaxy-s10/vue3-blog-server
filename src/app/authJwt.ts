@@ -1,8 +1,9 @@
-import { secret } from '../config/secret';
-import User from '../model/user.model';
+import jwt from 'jsonwebtoken';
+import { jwtSecret } from '@/config/secret';
+import User from '@/model/user.model';
 import getUserStatus from './getUserStatus';
 
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 
 const authJwt = (req): Promise<{ code: number; message: string }> => {
   return new Promise((resolve, reject) => {
@@ -12,8 +13,8 @@ const authJwt = (req): Promise<{ code: number; message: string }> => {
       return;
     }
     const token = req.headers.authorization?.split(' ')[1];
-
-    jwt.verify(token, secret, async (err, decode) => {
+    jwt.verify(token, jwtSecret, {}, async (err, decode) => {
+      console.log(decode, 986);
       if (err) {
         // 判断非法/过期token
         resolve({ code: 401, message: err.message });
@@ -21,11 +22,15 @@ const authJwt = (req): Promise<{ code: number; message: string }> => {
       }
       // 防止修改密码后，原本的token还能用
       const userResult = await User.findOne({
-        attributes: ['token'],
+        attributes: {
+          exclude: ['password'],
+        },
         where: {
           id: decode.userInfo.id,
         },
       });
+      console.log(JSON.stringify(userResult), 252);
+
       if (userResult.token !== token) {
         console.log('登录信息过期!');
         resolve({ code: 401, message: '登录信息过期!' });
@@ -41,4 +46,12 @@ const authJwt = (req): Promise<{ code: number; message: string }> => {
   });
 };
 
-export default authJwt;
+// 生成jwt
+const signJwt = (value: { userInfo: any; exp: number }): string => {
+  console.log('生成jwt');
+  const res = jwt.sign(value, jwtSecret);
+  console.log(res);
+  return res;
+};
+
+export { authJwt, signJwt };

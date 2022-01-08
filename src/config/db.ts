@@ -1,8 +1,9 @@
 // import Sequelize = require('sequelize');
 import { Sequelize } from 'sequelize';
-import { mysqlConfig } from './secret';
 
-const { _ERROR, _SUCCESS } = require('../utils/chalkTip');
+import { _ERROR, _SUCCESS } from '@/app/chalkTip';
+
+import { mysqlConfig } from './secret';
 
 // const Sequelize = require('sequelize');
 

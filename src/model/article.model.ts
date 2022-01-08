@@ -33,7 +33,7 @@ const Article = sequelize.define(
       defaultValue: null,
     },
     content: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT('long'),
       allowNull: false,
     },
     click: {

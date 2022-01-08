@@ -2,11 +2,11 @@ import { Context } from 'koa';
 
 const successHandler = ({
   ctx,
-  result,
+  data,
   message,
 }: {
   ctx: Context;
-  result: any;
+  data: any;
   message?: string;
 }) => {
   const status = 200;
@@ -30,7 +30,7 @@ const successHandler = ({
       defaultMessage = '操作成功!';
   }
   ctx.status = status;
-  ctx.body = { code: status, result, message: message || defaultMessage };
+  ctx.body = { code: status, data, message: message || defaultMessage };
 };
 
 export default successHandler;

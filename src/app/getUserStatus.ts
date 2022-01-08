@@ -1,4 +1,4 @@
-import User from '../model/user.model';
+import User from '@/model/user.model';
 
 async function getUserStatus(id) {
   const userResult = await User.findOne({

@@ -1,6 +1,6 @@
 import Router from 'koa-router';
-import articleController from '../controller/article.controller';
-import { verifyProp } from '../middleware/article.middleware';
+import articleController from '@/controller/article.controller';
+import { verifyProp } from '@/middleware/article.middleware';
 
 const articleRouter = new Router({ prefix: '/article' });
 

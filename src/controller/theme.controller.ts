@@ -1,19 +1,32 @@
 // import themeModel from '../model/theme.model';
 import { Context } from 'koa';
-import errorHandler from '../app/error-handle';
-import successHandler from '../app/success-handle';
-import { emitError } from '../utils';
-import themeService from '../service/theme.service';
 
+import { emitError } from '@/app/handler/emit-error';
+import errorHandler from '@/app/handler/error-handle';
+import successHandler from '@/app/handler/success-handle';
+import themeService from '@/service/theme.service';
+
+const fn2 = async () => {
+  console.log('dddd');
+  const xx = await new Promise((res, rej) => {
+    setTimeout(() => {
+      console.log('fn2');
+      res(100);
+    }, 1000);
+  });
+  return xx;
+};
 class ThemeController {
   async create(ctx: Context, next) {
     try {
       console.log('创建主题');
       const prop = ctx.request.body;
+      ctx.body = '1111';
+
+      // const result = await fn2();
       const result = await themeService.create(prop);
-      // successHandler({ ctx, result });
       console.log(result, 987);
-      ctx.body = 'gdsg';
+      ctx.body = result;
       console.log(ctx.body, 4343);
       // await next();
     } catch (error) {
@@ -23,9 +36,8 @@ class ThemeController {
       // next();
       // console.log(2222, ctx.status, this);
       // console.log(ctx.body);
-      // emitError({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
       // ctx.status = 200;
-      ctx.body = '2353555';
 
       // next();
     }
@@ -42,7 +54,7 @@ class ThemeController {
         })
       );
 
-      successHandler({ ctx, result });
+      successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error: error.message });
       await next();

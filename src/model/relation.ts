@@ -1,24 +1,22 @@
-const Article = require('./article.model');
-const ArticleTag = require('./articleTag.model');
-const Comment = require('./comment.model');
-const User = require('./user.model');
-const ThirdUser = require('./thirdUser');
-const Tag = require('./tag.model');
-const Link = require('./link.model');
-const Music = require('./music.model');
-const Auth = require('./auth.model');
-const Role = require('./role.model');
-const RoleAuth = require('./roleAuth.model');
-const UserRole = require('./userRole.model');
-const Type = require('./type.model');
-const ArticleType = require('./articleType.model');
-const Log = require('./log.model');
-const DayData = require('./dayData.model');
-const VisitorLog = require('./visitorLog.model');
-const Star = require('./star.model');
-const Frontend = require('./frontend.model');
-const UserArticle = require('./usserArticle.model');
-const QiniuData = require('./qiniuData.model');
+import Article from './article.model';
+import ArticleTag from './articleTag.model';
+import ArticleType from './articleType.model';
+import Auth from './auth.model';
+import Comment from './comment.model';
+import DayData from './dayData.model';
+import Log from './log.model';
+import QiniuData from './qiniuData.model';
+import Role from './role.model';
+import RoleAuth from './roleAuth.model';
+import Star from './star.model';
+import Tag from './tag.model';
+import ThirdUser from './thirdUser.model';
+import Type from './type.model';
+import User from './user.model';
+import UserArticle from './userArticle.model';
+import UserRole from './userRole.model';
+import VisitorLog from './visitorLog.model';
+
 // 一对一关联：belongsTo，hasOne
 // 一对多关联：hasMany
 // 多对多关联：belongsToMany
