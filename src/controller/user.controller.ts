@@ -52,8 +52,7 @@ class UserController {
           userInfo,
           exp: Math.floor(Date.now() / 1000) + 60 * 60 * exp,
         });
-        console.log(token, 876);
-        await User.update({ token }, { where: { id: userInfo.id } });
+        await User.update({ token }, { where: { id: userInfo.id } }); // 每次登录都更新token
         successHandler({ ctx, data: token });
       } else {
         successHandler({ ctx, data: userInfo, message: '账号或密码错误！' });

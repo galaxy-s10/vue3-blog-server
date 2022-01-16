@@ -15,6 +15,7 @@ const DayData = sequelize.define(
     },
   },
   {
+    timestamps: false,
     freezeTableName: true,
   }
 );
