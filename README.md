@@ -15,10 +15,10 @@
 yarn install
 ```
 
-启动本地服务，默认运行在 `localhost:3100` 端口
+启动本地服务，默认运行在 `localhost:3200` 端口
 
 ```bash
-yarn run serve
+yarn run start
 ```
 
 # 注意
