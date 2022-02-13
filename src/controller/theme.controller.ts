@@ -1,66 +1,92 @@
-// import themeModel from '../model/theme.model';
 import { Context } from 'koa';
 
-import { emitError } from '@/app/handler/emit-error';
 import errorHandler from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
+import { ITheme } from '@/interface';
 import themeService from '@/service/theme.service';
 
-const fn2 = async () => {
-  console.log('dddd');
-  const xx = await new Promise((res, rej) => {
-    setTimeout(() => {
-      console.log('fn2');
-      res(100);
-    }, 1000);
-  });
-  return xx;
-};
 class ThemeController {
-  async create(ctx: Context, next) {
+  async getList(ctx: Context, next) {
     try {
-      console.log('创建主题');
-      const prop = ctx.request.body;
-      ctx.body = '1111';
-
-      // const result = await fn2();
-      const result = await themeService.create(prop);
-      console.log(result, 987);
-      ctx.body = result;
-      console.log(ctx.body, 4343);
-      // await next();
-    } catch (error) {
-      console.log('报错222');
-      console.log(error);
-      // console.log(ctx.body);
-      // next();
-      // console.log(2222, ctx.status, this);
-      // console.log(ctx.body);
-      emitError({ ctx, code: 400, error });
-      // ctx.status = 200;
-
-      // next();
-    }
-    // console.log('sdgsdg');
-  }
-
-  async list(ctx: Context, next) {
-    try {
-      const prop = ctx.request.body;
-      const result = await themeService.getList(prop);
-      console.log(
-        result.rows[0].get({
-          plain: true,
-        })
-      );
-
+      const {
+        nowPage = '1',
+        pageSize = '10',
+        orderBy = 'asc',
+        orderName = 'id',
+      } = ctx.request.query;
+      const result = await themeService.getList({
+        nowPage,
+        pageSize,
+        orderBy,
+        orderName,
+      });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error: error.message });
-      await next();
+      errorHandler({ ctx, code: 400, error });
     }
+    await next();
+  }
+
+  async find(ctx: Context, next) {
+    try {
+      const id = +ctx.params.id;
+      const result = await themeService.find(id);
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async update(ctx: Context, next) {
+    try {
+      const id = +ctx.params.id;
+      const { model, key, value, lang }: ITheme = ctx.request.body;
+      const result = await themeService.update({
+        id,
+        model,
+        key,
+        value,
+        lang,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async create(ctx: Context, next) {
+    try {
+      const { model, key, value, lang }: ITheme = ctx.request.body;
+      const result = await themeService.create({
+        model,
+        key,
+        value,
+        lang,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async delete(ctx: Context, next) {
+    try {
+      const id = +ctx.params.id;
+      const isExist = await themeService.isExist([id]);
+      if (!isExist) {
+        errorHandler({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        return;
+      }
+      const result = await themeService.delete(id);
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
   }
 }
 
-const controller = new ThemeController();
-export default controller;
+export default new ThemeController();

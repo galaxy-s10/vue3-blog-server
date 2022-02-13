@@ -3,10 +3,10 @@ import { jwtSecret } from '@/config/secret';
 import User from '@/model/user.model';
 import getUserStatus from './getUserStatus';
 
-// const jwt = require('jsonwebtoken');
-
-const authJwt = (req): Promise<{ code: number; message: string }> => {
-  return new Promise((resolve, reject) => {
+const authJwt = (
+  req
+): Promise<{ code: number; message: string; userInfo?: any }> => {
+  return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (req.headers.authorization === undefined) {
       resolve({ code: 401, message: '未登录!' });
@@ -14,7 +14,6 @@ const authJwt = (req): Promise<{ code: number; message: string }> => {
     }
     const token = req.headers.authorization?.split(' ')[1];
     jwt.verify(token, jwtSecret, {}, async (err, decode) => {
-      console.log(decode, 986);
       if (err) {
         // 判断非法/过期token
         resolve({ code: 401, message: err.message });
@@ -29,28 +28,28 @@ const authJwt = (req): Promise<{ code: number; message: string }> => {
           id: decode.userInfo.id,
         },
       });
-      console.log(JSON.stringify(userResult), 252);
 
       if (userResult.token !== token) {
         console.log('登录信息过期!');
         resolve({ code: 401, message: '登录信息过期!' });
         return;
       }
-      const userState = await getUserStatus(userResult.id);
-      if (userState.code !== 200) {
-        resolve(userState);
+      const userStatus = await getUserStatus(userResult.id);
+      if (userStatus.code !== 200) {
+        resolve(userStatus);
         return;
       }
-      resolve({ code: 200, message: '验证token通过!' });
+      resolve({ code: 200, message: '验证token通过!', userInfo: userResult });
     });
   });
 };
 
 // 生成jwt
 const signJwt = (value: { userInfo: any; exp: number }): string => {
-  console.log('生成jwt');
-  const res = jwt.sign(value, jwtSecret);
-  console.log(res);
+  const res = jwt.sign(
+    { ...value, exp: Math.floor(Date.now() / 1000) + 60 * 60 * value.exp },
+    jwtSecret
+  );
   return res;
 };
 

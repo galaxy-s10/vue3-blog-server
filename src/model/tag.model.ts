@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Tag = sequelize.define(
+const tagModel = sequelize.define(
   'tag',
   {
     id: {
@@ -18,10 +19,13 @@ const Tag = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Tag.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Tag;
+
+initTable(tagModel);
+export default tagModel;

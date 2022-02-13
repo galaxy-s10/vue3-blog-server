@@ -1,14 +1,13 @@
-// import articleTagModel from '../model/articleTag.model';
-import articleTagModel from '../model/dayData.model';
+import articleTagModel from '@/model/articleTag.model';
 
 class ArticleTagService {
-  async create(article) {
-    const res = await articleTagModel.create(article);
+  async create(props) {
+    const res = await articleTagModel.create(props);
     return res;
   }
 
-  async getList(article) {
-    const res = await articleTagModel.findAndCountAll({});
+  async getList() {
+    const res = await articleTagModel.findAndCountAll();
     return res;
   }
 }

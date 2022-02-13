@@ -4,6 +4,13 @@ import { verifyProp } from '@/middleware/article.middleware';
 
 const articleRouter = new Router({ prefix: '/article' });
 
+// 文章列表
+articleRouter.get('/list', articleController.getList);
+
+// 查找文章
+articleRouter.get('/find/:id', articleController.find);
+
+// 新增文章
 articleRouter.post('/create', verifyProp, articleController.create);
-articleRouter.get('/list', articleController.list);
+
 export default articleRouter;

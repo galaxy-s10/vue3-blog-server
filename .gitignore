@@ -1,7 +1,6 @@
 node_modules
 src/config/secret.ts
-.DS_Store
-*/.DS_Store
+**/.DS_Store
 .vscode
 yarn.lock
 package-lock.json

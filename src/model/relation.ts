@@ -1,3 +1,5 @@
+import { _INFO } from '@/app/chalkTip';
+
 import Article from './article.model';
 import ArticleTag from './articleTag.model';
 import ArticleType from './articleType.model';
@@ -13,168 +15,302 @@ import Tag from './tag.model';
 import ThirdUser from './thirdUser.model';
 import Type from './type.model';
 import User from './user.model';
+import QqUser from './qqUser.model';
+import GithubUser from './githubUser.model';
 import UserArticle from './userArticle.model';
 import UserRole from './userRole.model';
 import VisitorLog from './visitorLog.model';
 
-// 一对一关联：belongsTo，hasOne
-// 一对多关联：hasMany
-// 多对多关联：belongsToMany
+console.log(_INFO('加载了relation'));
 
-Comment.belongsTo(User, {
-  as: 'from_user',
-  foreignKey: 'from_user_id',
-  targetKey: 'id',
-});
-Comment.belongsTo(User, {
-  as: 'to_user',
-  foreignKey: 'to_user_id',
-  targetKey: 'id',
-});
+/**
+ * https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html
+ * A 称为 源 模型,而 B 称为 目标 模型.
+ * A.hasOne(B) 关联意味着 A 和 B 之间存在一对一的关系,外键在目标模型(B)中定义.
+ * A.belongsTo(B)关联意味着 A 和 B 之间存在一对一的关系,外键在源模型中定义(A).
+ * A.hasMany(B) 关联意味着 A 和 B 之间存在一对多关系,外键在目标模型(B)中定义.
+ * A.belongsToMany(B, { through: 'C' }) 关联意味着将表 C 用作联结表,在 A 和 B 之间存在多对多关系. 具有外键(例如,aId 和 bId). Sequelize 将自动创建此模型 C(除非已经存在),并在其上定义适当的外键.
+ * Foo.belongsToMany(Bar, { through: 'foo_bar', sourceKey: 'name', targetKey: 'title' }); 这将创建带有字段 `fooName` 和 `barTitle` 的联结表 `foo_bar`.
+ * A.belongsToMany(B) 包含一个额外的表(联结表),因此 sourceKey 和 targetKey 均可用,其中 sourceKey 对应于A(源)中的某个字段而 targetKey 对应于 B(目标)中的某个字段.
+ * belongsToMany中，foreignKey 定义联结关系中源模型的 key,而 otherKey 定义目标模型中的 key
+ */
 
-// Article有很多Comment,也就是Article是主键表,Comment是外键表。外键在Comment表里,主键在Article里
-Article.hasMany(Comment, { foreignKey: 'article_id', sourceKey: 'id' });
-// Comment属于Article,也就是Article是主键表,Comment是外键表。外键在Comment表里,主键在Article表里
-Comment.belongsTo(Article, { foreignKey: 'article_id', targetKey: 'id' });
+/**
+ * A 称为 源 模型,而 B 称为 目标 模型.
+ * sourceKey:用作源表中关联键的字段的名称。默认为源表的主键
+ * targetKey:要用作目标表中关联键的字段的名称。默认为目标表的主键
+ * otherKey:联接表中外键的名称（表示目标模型）或表示另一列类型定义的对象的名称（有关语法，
+ * 请参见“Sequelize.define”）。使用对象时，可以添加“name”属性来设置列的名称。默认为目标的名称+目标的主键
+ * foreignKey:目标表中外键的名称，或表示外部列类型定义的对象的名称（有关语法，
+ * 请参见'Sequelize.define'。使用对象时，可以添加“name”属性来设置列的名称。默认为源的名称+源的主键
+ */
 
-Tag.hasMany(ArticleTag, { foreignKey: 'tag_id', sourceKey: 'id' });
-ArticleTag.belongsTo(Article, { foreignKey: 'article_id', targetKey: 'id' });
-ArticleTag.belongsTo(Tag, { foreignKey: 'tag_id', targetKey: 'id' });
+// Auth.belongsTo(Auth, {
+//   foreignKey: 'id',
+//   targetKey: 'p_id',
+//   onDelete: 'CASCADE',
+//   hooks: true,
+//   constraints: false,
+// });
 
-Article.belongsToMany(Tag, {
-  through: ArticleTag,
-  foreignKey: 'article_id',
-  otherKey: 'tag_id',
-});
-Tag.belongsToMany(Article, {
-  through: ArticleTag,
-  foreignKey: 'tag_id',
-  otherKey: 'article_id',
-});
+// Auth.hasMany(Auth, {
+//   foreignKey: 'p_id',
+//   sourceKey: 'id',
+//   as: 'auth_children',
+//   onDelete: 'CASCADE',
+//   hooks: true,
+//   constraints: false,
+// });
 
-// 2020-11-08新增
-UserRole.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' });
-UserRole.belongsTo(Role, { foreignKey: 'role_id', targetKey: 'id' });
+// User.hasMany(Star, {
+//   foreignKey: 'to_user_id',
+//   sourceKey: 'id',
+//   constraints: false,
+// });
 
-RoleAuth.belongsTo(Auth, { foreignKey: 'auth_id', targetKey: 'id' });
-RoleAuth.belongsTo(Role, { foreignKey: 'role_id', targetKey: 'id' });
-
-Role.belongsToMany(User, {
-  through: UserRole,
-  foreignKey: 'role_id',
-  otherKey: 'user_id',
-});
-User.belongsToMany(Role, {
-  through: UserRole,
-  foreignKey: 'user_id',
-  otherKey: 'role_id',
-});
-
-UserRole.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' });
-UserRole.belongsTo(Role, { foreignKey: 'role_id', targetKey: 'id' });
-
-Role.belongsToMany(Auth, {
-  through: RoleAuth,
-  foreignKey: 'role_id',
-  otherKey: 'auth_id',
-});
-Auth.belongsToMany(Role, {
-  through: RoleAuth,
-  foreignKey: 'auth_id',
-  otherKey: 'role_id',
+User.belongsToMany(Article, {
+  through: UserArticle,
+  // sourceKey: 'id', // 默认为源表的主键
+  // targetKey: 'id', // 默认为目标表的主键
+  foreignKey: 'user_id', // 目标表中外键的名称
+  otherKey: 'article_id', // 联接表中外键的名称
+  constraints: false, // 不生成物理外键
 });
 
-User.hasMany(Log, { foreignKey: 'user_id', sourceKey: 'id' });
-Log.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' });
-
-Role.belongsTo(Role, { as: 'p_role', foreignKey: 'p_id', sourceKey: 'id' });
-// Role.hasMany(Role, { as: "h_role", foreignKey: 'id', sourceKey: 'p_id' })
-Auth.hasMany(Auth, { foreignKey: 'id', sourceKey: 'p_id' }); // ??????
-
-// 点赞
-Star.belongsTo(Article, { foreignKey: 'article_id', targetKey: 'id' });
-Star.belongsTo(Comment, { foreignKey: 'comment_id', targetKey: 'id' });
-Star.belongsTo(User, { foreignKey: 'from_user_id', targetKey: 'id' });
-
-Article.hasMany(Star, { foreignKey: 'article_id', sourceKey: 'id' });
-User.hasMany(Star, { foreignKey: 'to_user_id', sourceKey: 'id' });
-User.hasMany(Star, {
-  as: 'userHasStar',
-  foreignKey: 'to_user_id',
-  sourceKey: 'id',
-});
-
-Comment.hasMany(Star, { foreignKey: 'comment_id', sourceKey: 'id' });
-
-Star.belongsTo(User, {
-  as: 'from_user',
-  foreignKey: 'from_user_id',
-  targetKey: 'id',
-});
-Star.belongsTo(User, {
-  as: 'to_user',
-  foreignKey: 'to_user_id',
-  targetKey: 'id',
-});
-
-// 评论回复
-// Comment.belongsTo(Comment, { as: "huifu", foreignKey: "to_comment_id", targetKey: "id" })
-// 自连接的源键其实可以不写，不写默认就是mode里定义的主键
-// Comment.hasMany(Comment, { as: "huifu", foreignKey: "to_comment_id", sourceKey: "id" })
-Comment.hasMany(Comment, {
-  as: 'huifu',
-  foreignKey: 'to_comment_id',
-  sourceKey: 'id',
-});
-Comment.hasMany(Comment, {
-  as: 'huifucount',
-  foreignKey: 'to_comment_id',
-  sourceKey: 'id',
-});
-
-// UserArticle.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' })
-// UserArticle.belongsTo(Article, { foreignKey: 'article_id', targetKey: 'id' })
-// Article.hasOne(UserArticle, { foreignKey: 'article_id', targetKey: 'id' })
 Article.belongsToMany(User, {
   through: UserArticle,
   foreignKey: 'article_id',
   otherKey: 'user_id',
+  constraints: false,
 });
-// Article.belongsToMany(User, { through: UserArticle, as: 'ppp', foreignKey: 'article_id', otherKey: 'user_id' })
-User.belongsToMany(Article, {
-  through: UserArticle,
-  foreignKey: 'user_id',
-  otherKey: 'article_id',
-});
-// User.belongsToMany(Article, { through: UserArticle, as: 'qqq',foreignKey: 'user_id', otherKey: 'article_id' })
-
-User.hasMany(UserArticle, { foreignKey: 'user_id', sourceKey: 'id' });
-UserArticle.belongsTo(User, { foreignKey: 'id', sourceKey: 'user_id' });
-
-// Type.hasMany(ArticleType, { foreignKey: 'tag_id', sourceKey: 'id' })
-ArticleType.belongsTo(Article, { foreignKey: 'article_id', targetKey: 'id' });
-ArticleType.belongsTo(Type, { foreignKey: 'type_id', targetKey: 'id' });
 
 Article.belongsToMany(Type, {
   through: ArticleType,
   foreignKey: 'article_id',
   otherKey: 'type_id',
+  constraints: false,
 });
+
 Type.belongsToMany(Article, {
   through: ArticleType,
   foreignKey: 'type_id',
   otherKey: 'article_id',
+  constraints: false,
 });
 
-QiniuData.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' });
+Article.belongsToMany(Tag, {
+  through: ArticleTag,
+  foreignKey: 'article_id',
+  otherKey: 'tag_id',
+  constraints: false,
+});
+
+Tag.belongsToMany(Article, {
+  through: ArticleTag,
+  foreignKey: 'tag_id',
+  otherKey: 'article_id',
+  constraints: false,
+});
+
+Comment.belongsTo(User, {
+  as: 'from_user',
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+Comment.belongsTo(User, {
+  as: 'to_user',
+  foreignKey: 'to_user_id',
+  constraints: false,
+});
+
+Article.hasMany(Comment, {
+  foreignKey: 'article_id',
+  constraints: false,
+});
+
+Comment.belongsTo(Article, {
+  foreignKey: 'article_id',
+  constraints: false,
+});
+
+Comment.hasMany(Star, {
+  foreignKey: 'comment_id',
+  constraints: false,
+});
+Star.belongsTo(Comment, {
+  foreignKey: 'comment_id',
+  constraints: false,
+});
+
+Comment.hasMany(Comment, {
+  as: 'children_comment',
+  foreignKey: 'to_comment_id',
+  constraints: false,
+});
+
+Star.belongsTo(Article, {
+  foreignKey: 'article_id',
+  constraints: false,
+});
+
+Article.hasMany(Star, {
+  foreignKey: 'article_id',
+  constraints: false,
+});
+
+Star.belongsTo(User, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
+Star.belongsTo(User, {
+  as: 'from_user',
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+Star.belongsTo(User, {
+  as: 'to_user',
+  foreignKey: 'to_user_id',
+  constraints: false,
+});
+
+User.belongsToMany(Role, {
+  through: UserRole,
+  foreignKey: 'user_id',
+  otherKey: 'role_id',
+  constraints: false,
+});
+
+Role.belongsToMany(User, {
+  through: UserRole,
+  foreignKey: 'role_id',
+  otherKey: 'user_id',
+  constraints: false,
+});
+
+Role.belongsToMany(Auth, {
+  through: RoleAuth,
+  foreignKey: 'role_id',
+  otherKey: 'auth_id',
+  constraints: false,
+});
+
+Auth.belongsToMany(Role, {
+  through: RoleAuth,
+  foreignKey: 'auth_id',
+  otherKey: 'role_id',
+  constraints: false,
+});
+
+Role.belongsTo(Role, {
+  as: 'p_role',
+  foreignKey: 'p_id',
+  constraints: false,
+});
+
+Auth.belongsTo(Auth, {
+  as: 'p_auth',
+  foreignKey: 'p_id',
+  constraints: false,
+});
+
+User.hasMany(Log, {
+  foreignKey: 'user_id',
+  constraints: false,
+});
+Log.belongsTo(User, {
+  foreignKey: 'user_id',
+  constraints: false,
+});
+
+GithubUser.belongsToMany(User, {
+  through: ThirdUser,
+  foreignKey: 'third_user_id',
+  otherKey: 'user_id',
+  sourceKey: 'github_id',
+  constraints: false,
+});
+User.belongsToMany(GithubUser, {
+  through: ThirdUser,
+  foreignKey: 'user_id',
+  otherKey: 'third_user_id',
+  targetKey: 'github_id',
+  constraints: false,
+});
+
+QqUser.belongsToMany(User, {
+  through: ThirdUser,
+  foreignKey: 'third_user_id',
+  otherKey: 'user_id',
+  sourceKey: 'unionid',
+  constraints: false,
+});
+User.belongsToMany(QqUser, {
+  through: ThirdUser,
+  foreignKey: 'user_id',
+  otherKey: 'third_user_id',
+  targetKey: 'unionid',
+  constraints: false,
+});
+
+User.hasMany(Star, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
+User.hasMany(Comment, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
+Star.belongsTo(User, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
+Comment.belongsTo(User, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
+Role.belongsToMany(User, {
+  through: UserRole,
+  foreignKey: 'role_id',
+  otherKey: 'user_id',
+  constraints: false,
+});
+User.belongsToMany(Role, {
+  through: UserRole,
+  foreignKey: 'user_id',
+  otherKey: 'role_id',
+  constraints: false,
+});
+
+// =================
+
+QiniuData.belongsTo(User, {
+  foreignKey: 'user_id',
+  constraints: false,
+});
 
 // 流量统计
-// Day.hasMany(VisitorLog, { foreignKey: "day2", sourceKey: "createdAt" })
-VisitorLog.belongsTo(DayData, {
-  foreignKey: 'createdAt',
-  sourceKey: 'today',
-});
-
-// 用户多平台
-User.hasMany(ThirdUser, { foreignKey: 'userid', sourceKey: 'id' });
-ThirdUser.belongsTo(User, { foreignKey: 'id', sourceKey: 'userid' });
+// DayData.belongsTo(VisitorLog, { foreignKey: 'today' });
+// DayData.hasMany(VisitorLog, { foreignKey: 'today', sourceKey: 'createdAt' });
+// VisitorLog.belongsTo(DayData, {
+//   foreignKey: 'createdAt',
+//   // targetKey: 'today',
+// });
+// Article有很多Comment,也就是Article是主键表,Comment是外键表。外键在Comment表里,主键在Article里
+// DayData.hasMany(VisitorLog, { foreignKey: 'today', sourceKey: 'createdAt' });
+// Comment属于Article,也就是Article是主键表,Comment是外键表。外键在Comment表里,主键在Article表里
+// VisitorLog.belongsTo(DayData, {
+//   foreignKey: 'createdAt',
+//   sourceKey: 'today',
+//   // targetKey: 'createdAt',
+// });
+// DayData.hasMany(VisitorLog, {
+//   foreignKey: 'today1',
+//   sourceKey: 'today',
+//   // targetKey: 'createdAt',
+//   constraints: false,
+// });

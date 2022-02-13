@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const VisitorLog = sequelize.define(
-  'visitorLog',
+const visitorLogModel = sequelize.define(
+  'visitor_log',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -12,23 +13,27 @@ const VisitorLog = sequelize.define(
     },
     user_id: {
       type: DataTypes.INTEGER,
+      defaultValue: -1, // -1:游客 非-1:用户
     },
     ip: {
       type: DataTypes.STRING(50),
     },
-    state: {
+    status: {
       type: DataTypes.INTEGER,
+      defaultValue: 1, // -1:非法 1:正常
     },
-    data: {
-      type: DataTypes.STRING(300),
+    ip_data: {
+      type: DataTypes.STRING,
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// VisitorLog.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default VisitorLog;
+initTable(visitorLogModel);
+export default visitorLogModel;

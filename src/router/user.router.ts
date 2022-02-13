@@ -4,10 +4,30 @@ import { verifyProp } from '@/middleware/user.middleware';
 
 const userRouter = new Router({ prefix: '/user' });
 
-// WARN:中间件接收两个参数，ctx和next，如果这个中间件是异步的（即加了async），
-// 则这个中间件必须调用next时必须加上await，如果是直接next，就会直接返回404给前端！
-userRouter.get('/list', verifyProp, userController.list);
-userRouter.post('/create', verifyProp, userController.create);
-userRouter.get('/login', userController.login);
+/**
+ * WARN:中间件接收两个参数，ctx和next，如果这个中间件是异步的（即加了async）
+ * 则这个中间件必须调用next时必须加上await，如果是直接next，就会直接返回404给前端！不会继续触发下一个中间件！！！
+ */
+
+// 用户列表
+userRouter.get('/list', userController.list);
+
+// 用户登录
+userRouter.post('/login', verifyProp, userController.login);
+
+// 获取用户信息
+userRouter.get('/get_user_info', userController.getUserInfo);
+
+// 创建用户
+userRouter.post('/create', userController.create);
+
+// 查找用户
+userRouter.get('/find/:id', userController.find);
+
+// 更新用户
+userRouter.put('/update/:id', userController.update);
+
+// 删除用户
+userRouter.delete('/delete/:id', userController.delete);
 
 export default userRouter;

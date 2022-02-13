@@ -2,11 +2,12 @@
 // import * as Sequelize from 'sequelize'; // 这种写法有提示。
 // import Sequelize = require('sequelize'); // 这种写法有提示。
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
 // const Sequelize = require('sequelize');
 
-const Theme = sequelize.define(
+const themeModel = sequelize.define(
   // 这将控制自动生成的foreignKey和关联命名的名称
   'theme',
   {
@@ -45,10 +46,13 @@ const Theme = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Theme.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Theme;
+
+initTable(themeModel);
+export default themeModel;

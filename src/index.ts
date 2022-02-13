@@ -1,18 +1,20 @@
 import Koa from 'koa';
 // const Koa = require('koa');
+import bodyParser from 'koa-bodyparser';
 import aliasOk from './app/alias';
+import emitError from './app/handler/emit-error';
 import errorHandler from './app/handler/error-handle';
 import verifyHandler from './middleware/verify.middleware';
 import useRoutes from './router/index';
 
 aliasOk();
 
-const bodyParser = require('koa-bodyparser');
-const { _INFO } = require('@/app/chalkTip');
+const { _SUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
 
-const port = 3100;
+const port = 3200;
+
 app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set(
@@ -26,9 +28,17 @@ app.use(async (ctx, next) => {
     await next();
   }
 });
-app.use(bodyParser()); // 注意顺序，需要在所有路由加载前解析
 
-app.use(verifyHandler); // 全局接口验证
+// 这个bodyParser有个问题，如果前端传的数据有误，经过这个中间件解析的时候，解析到错误了，还是会继续next()。
+app.use(
+  bodyParser({
+    onerror: (error, ctx) => {
+      emitError({ ctx, code: 500, error, message: 'body parse error' });
+    },
+  })
+); // 注意顺序，需要在所有路由加载前解析
+
+app.use(verifyHandler); // 注意顺序，需要在所有路由加载前进行接口验证
 
 // @ts-ignore
 app.useRoutes = useRoutes;
@@ -38,5 +48,5 @@ app.useRoutes();
 app.on('error', errorHandler); // 全局错误处理
 
 app.listen(port, () => {
-  console.log(_INFO(`监听${port}端口成功!`));
+  console.log(_SUCCESS(`监听${port}端口成功!`));
 });

@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const UserArticle = sequelize.define(
-  'userArticle',
+const userArticleModel = sequelize.define(
+  'user_article',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -12,17 +13,27 @@ const UserArticle = sequelize.define(
     },
     user_id: {
       type: DataTypes.INTEGER,
+      // references: {
+      //   model: userModel,
+      //   key: 'id',
+      // },
     },
     article_id: {
       type: DataTypes.INTEGER,
+      // references: {
+      //   model: articleModel,
+      //   key: 'id',
+      // },
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// UserArticle.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default UserArticle;
+initTable(userArticleModel);
+export default userArticleModel;

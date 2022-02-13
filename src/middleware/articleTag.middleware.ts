@@ -1,34 +1,22 @@
 import { Context } from 'koa';
 import Joi from 'joi';
-import { emitError } from '@/app/handler/emit-error';
+import emitError from '@/app/handler/emit-error';
+
+const schema = Joi.object({
+  article_id: Joi.number(),
+  tag_id: Joi.number(),
+});
 
 export const verifyProp = async (ctx: Context, next) => {
-  const prop = ctx.request.body;
-
-  const schema = Joi.object({
-    isComment: [1, 2],
-    status: ['1', '2'],
-    a: Joi.string(),
-    v: Joi.string(),
-    vs: Joi.string(),
-  });
+  const props = ctx.request.body;
   try {
-    const res = await schema.validateAsync(
-      { isComment: '1', status: 1 },
-      {
-        abortEarly: false,
-        allowUnknown: false,
-        presence: 'required',
-      }
-    );
-    console.log('joi验证通过', res);
-  } catch (error) {
-    // console.log('joi验证不通过', error); // "isComment" must be one of [1, 2]. "status" must be one of [1, 2]
-    return emitError({
-      ctx,
-      code: 400,
-      error,
-      // error: error.message,
+    await schema.validateAsync(props, {
+      abortEarly: false,
+      allowUnknown: false,
+      convert: false,
     });
+    await next();
+  } catch (error) {
+    emitError({ ctx, code: 400, error });
   }
 };

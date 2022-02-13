@@ -2,13 +2,14 @@
 // import * as Sequelize from 'sequelize'; // 这种写法有提示。
 // import Sequelize = require('sequelize'); // 这种写法有提示。
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
 // const Sequelize = require('sequelize');
 
-const Article = sequelize.define(
+const articleModel = sequelize.define(
   // 这将控制自动生成的foreignKey和关联命名的名称
-  'article',
+  'article', // 模型名称
   {
     id: {
       type: DataTypes.INTEGER,
@@ -17,20 +18,24 @@ const Article = sequelize.define(
       autoIncrement: true,
     },
     title: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(30),
       allowNull: false,
+    },
+    desc: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
     is_comment: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // 1开启，2关闭
+      defaultValue: 1, // 1:开启评论 2:关闭评论
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // 1正常，2非法
+      defaultValue: 1, // 1:审核通过 2:未审核
     },
-    img: {
-      type: DataTypes.STRING(150),
-      defaultValue: null,
+    head_img: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
     content: {
       type: DataTypes.TEXT('long'),
@@ -42,10 +47,13 @@ const Article = sequelize.define(
     },
   },
   {
-    freezeTableName: true,
+    paranoid: true,
+    freezeTableName: true, // 你可以使用 freezeTableName: true 参数停止 Sequelize 执行自动复数化. 这样,Sequelize 将推断表名称等于模型名称,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Article.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Article;
+
+initTable(articleModel);
+export default articleModel;

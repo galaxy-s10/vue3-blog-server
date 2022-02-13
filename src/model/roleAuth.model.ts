@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const RoleAuth = sequelize.define(
-  'roleAuth',
+const roleAuthModel = sequelize.define(
+  'role_auth',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -18,10 +19,13 @@ const RoleAuth = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// RoleAuth.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default RoleAuth;
+
+initTable(roleAuthModel);
+export default roleAuthModel;

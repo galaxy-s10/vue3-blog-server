@@ -1,48 +1,63 @@
 import Sequelize from 'sequelize';
-import themeModel from '../model/theme.model';
 
-const fn2 = async () => {
-  console.log('dddd');
-  const xx = await new Promise((res, rej) => {
-    setTimeout(() => {
-      console.log('fn2');
-      res(100);
-    }, 1000);
-  });
-  return xx;
-};
+import { ITheme } from '@/interface';
+import themeModel from '@/model/theme.model';
+import { handlePaging } from '@/utils';
 
+const { Op } = Sequelize;
 class ThemeService {
-  async create(theme) {
-    // const res = await themeModel.create(theme, { validate: true });//使用sequence的验证。
-    // try {
-    // const res = await fn2();
-    const res = await themeModel.create(theme);
-    console.log(res, '00');
-    return res;
-    // } catch (err) {
-    //   console.log(333);
-    //   // return err;
-    // }
+  /** 主题是否存在 */
+  async isExist(theme_ids: number[]) {
+    const res = await themeModel.findAll({
+      where: {
+        id: {
+          [Op.or]: theme_ids,
+        },
+      },
+    });
+    return res.length === theme_ids.length;
   }
 
-  async getList(theme) {
-    const res = await themeModel.findAndCountAll({
-      // attributes: {
-      //   include: [
-      //     [
-      //       Sequelize.fn(
-      //         'DATE_FORMAT',
-      //         Sequelize.col('createdAt'),
-      //         '%Y-%m-%d %H:%i:%s'
-      //       ),
-      //       'createdAt',
-      //     ],
-      //   ],
-      // },
+  /** 主题列表 */
+  async getList({ nowPage, pageSize, orderBy, orderName }) {
+    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
+    const limit = parseInt(pageSize, 10);
+    const result = await themeModel.findAndCountAll({
+      order: [[orderName, orderBy]],
+      limit,
+      offset,
     });
-    // console.log(Sequelize.fn('upper', Sequelize.col('key')), 3333);
-    return res;
+    return handlePaging(nowPage, pageSize, result);
+  }
+
+  /** 查找主题 */
+  async find(id: number) {
+    const result = await themeModel.findOne({ where: { id } });
+    return result;
+  }
+
+  /** 修改主题 */
+  async update({ id, model, key, value, lang }: ITheme) {
+    const result = await themeModel.update(
+      { model, key, value, lang },
+      { where: { id } }
+    );
+    return result;
+  }
+
+  /** 创建主题 */
+  async create({ model, key, value, lang }: ITheme) {
+    const result = await themeModel.create({ model, key, value, lang });
+    return result;
+  }
+
+  /** 删除主题 */
+  async delete(id: number) {
+    const result = await themeModel.destroy({
+      where: { id },
+      individualHooks: true,
+    });
+    return result;
   }
 }
 

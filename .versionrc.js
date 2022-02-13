@@ -1,10 +1,6 @@
-const { _INFO, emoji } = require('./src/app/chalkTip');
+const { _INFO } = require('./src/app/chalkTip');
 
-console.log(
-  _INFO(`读取：${__filename.slice(__dirname.length + 1)}`),
-  emoji.get('white_check_mark')
-);
-
+console.log(_INFO(`读取：${__filename.slice(__dirname.length + 1)}`));
 module.exports = {
   types: [
     { type: 'feat', section: 'Features', hidden: false },

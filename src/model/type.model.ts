@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Type = sequelize.define(
+const typeModel = sequelize.define(
   'type',
   {
     id: {
@@ -15,10 +16,13 @@ const Type = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Type.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Type;
+
+initTable(typeModel);
+export default typeModel;

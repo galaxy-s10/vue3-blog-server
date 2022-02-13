@@ -1,10 +1,12 @@
 // https://github.com/demopark/sequelize-docs-Zh-CN/blob/master/core-concepts/model-basics.md#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
+import userService from '@/service/user.service';
 
 const MD5 = require('crypto-js/md5');
 
-const User = sequelize.define(
+const userModel = sequelize.define(
   'user',
   {
     id: {
@@ -13,10 +15,14 @@ const User = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
+    // uuid: {
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4, // 或 Sequelize.UUIDV1
+    // },
     username: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      unique: true,
+      // unique: true,
       // unique: {
       //   name: '???',
       //   msg: '存在同名用户！',
@@ -24,14 +30,14 @@ const User = sequelize.define(
       validate: {
         // 其实不管isUnique叫啥名字，都会执行。
         // 如果验证是异步的，则需要添加第二个参数done，在验证结束后执行done回调
-        async isUnique(username, done) {
-          const res = await User.findOne({ where: { username } });
-          if (res) {
-            done(new Error('存在同名用户！'));
-          } else {
-            done();
-          }
-        },
+        // async isUnique(username, done) {
+        //   const isSameName = await userService.isSameName(username);
+        //   if (isSameName) {
+        //     done(new Error('已存在同名用户！'));
+        //   } else {
+        //     done();
+        //   }
+        // },
       },
     },
     password: {
@@ -56,44 +62,41 @@ const User = sequelize.define(
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1,
+      defaultValue: 1, // 1:正常 2:禁用 3:非法
     },
     avatar: {
-      type: DataTypes.STRING(150),
-      defaultValue: null,
+      type: DataTypes.STRING(100),
     },
     title: {
       type: DataTypes.STRING(50),
       defaultValue: '这个人很懒，什么也没有留下',
     },
     token: {
-      type: DataTypes.TEXT,
-      defaultValue: null,
+      type: DataTypes.TEXT('long'),
     },
   },
   {
     hooks: {
       // https://github.com/demopark/sequelize-docs-Zh-CN/blob/master/other-topics/hooks.md
-      afterValidate(User, options) {
-        if (User.changed('password')) {
-          User.password = MD5(User.password).toString();
+      afterValidate(instance: any) {
+        if (instance.changed('password')) {
+          // eslint-disable-next-line no-param-reassign
+          instance.password = MD5(instance.password).toString();
         }
       },
     },
+    paranoid: true,
     // timestamps: false, // 将createdAt和updatedAt时间戳添加到模型中。默认为true。
     /**
      * 如果freezeTableName为true，sequelize将不会尝试更改DAO名称以获取表名。
      * 否则，dao名称将是复数的。默认为false。
      */
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-User.addHook('beforeCreate', () => {
-  console.log('beforeCreate');
-});
-
-// User.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default User;
+initTable(userModel);
+export default userModel;

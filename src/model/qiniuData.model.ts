@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const QiniuData = sequelize.define(
-  'qiniuData',
+const qiniuDataModel = sequelize.define(
+  'qiniu_data',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -30,11 +31,13 @@ const QiniuData = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// QiniuData.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default QiniuData;
+initTable(qiniuDataModel);
+export default qiniuDataModel;

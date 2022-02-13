@@ -1,6 +1,6 @@
 import User from '@/model/user.model';
 
-async function getUserStatus(id) {
+const getUserStatus = async (id) => {
   const userResult = await User.findOne({
     attributes: ['status'],
     where: {
@@ -11,6 +11,6 @@ async function getUserStatus(id) {
     return { code: 403, message: '该账号已被禁用!' };
   }
   return { code: 200, message: '账号状态正常' };
-}
+};
 
 export default getUserStatus;

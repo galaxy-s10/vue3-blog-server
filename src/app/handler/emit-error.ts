@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 
 /** 发射错误 */
-export const emitError = ({
+const emitError = ({
   ctx,
   code,
   error,
@@ -13,6 +13,7 @@ export const emitError = ({
   message?: string;
 }) => {
   console.log('发射错误');
-  // console.log(ctx, code, error, message);
   return ctx.app.emit('error', { ctx, code, error, message });
 };
+
+export default emitError;

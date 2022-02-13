@@ -1,12 +1,19 @@
+import Router from 'koa-router';
+
 const fs = require('fs');
 
-const useRoutes = function () {
+const router = new Router();
+
+function useRoutes() {
   fs.readdirSync(__dirname).forEach((file) => {
     if (file === 'index.ts') return;
     // eslint-disable-next-line
-    const router = require(`./${file}`).default;
+    const linkRouter = require(`./${file}`).default;
+    this.use(linkRouter.routes()).use(linkRouter.allowedMethods());
+    // router.use('/front', linkRouter.routes()).use(linkRouter.allowedMethods());
+    router.use('/admin', linkRouter.routes()).use(linkRouter.allowedMethods());
     this.use(router.routes()).use(router.allowedMethods());
   });
-};
+}
 
 export default useRoutes;

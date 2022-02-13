@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Link = sequelize.define(
+const linkModel = sequelize.define(
   'link',
   {
     id: {
@@ -10,35 +11,34 @@ const Link = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
-    ip: {
-      type: DataTypes.STRING(50),
-    },
     email: {
       type: DataTypes.STRING(100),
     },
     name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
     },
     avatar: {
       type: DataTypes.STRING(100),
     },
-    description: {
-      type: DataTypes.STRING(50),
+    desc: {
+      type: DataTypes.STRING(100),
     },
     url: {
       type: DataTypes.STRING(100),
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1,
+      defaultValue: 1, // 1:审核通过 2:未审核
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// Link.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Link;
+initTable(linkModel);
+export default linkModel;

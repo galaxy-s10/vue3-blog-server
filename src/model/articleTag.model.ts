@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const ArticleTag = sequelize.define(
-  'articleTag',
+const articleTagModel = sequelize.define(
+  'article_tag',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -20,10 +21,13 @@ const ArticleTag = sequelize.define(
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// ArticleTag.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default ArticleTag;
+
+initTable(articleTagModel);
+export default articleTagModel;

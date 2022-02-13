@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const ThirdUser = sequelize.define(
-  'thirdUser',
+const thirdUserModel = sequelize.define(
+  'third_user',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,29 +11,28 @@ const ThirdUser = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
-    userid: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    platform: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    platform_openid: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    platform_token: {
+    third_user_id: {
       type: DataTypes.STRING,
-      defaultValue: null,
+      allowNull: false,
+    },
+    third_platform: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1, // 1:博客 2:qq 3:github
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// ThirdUser.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default ThirdUser;
+initTable(thirdUserModel);
+export default thirdUserModel;

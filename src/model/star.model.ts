@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Star = sequelize.define(
+const starModel = sequelize.define(
   'star',
   {
     id: {
@@ -12,26 +13,28 @@ const Star = sequelize.define(
     },
     article_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1,
+      defaultValue: -1, // -1:给用户的star 非-1:给这篇文章的star
     },
     comment_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1,
+      defaultValue: -1, // -1:给文章的star 非-1:给这条评论的star
     },
     from_user_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1,
     },
     to_user_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1,
+      defaultValue: -1, // -1:给文章的star 非-1:给这个用户star
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Star.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Star;
+
+initTable(starModel);
+export default starModel;

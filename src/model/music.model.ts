@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Music = sequelize.define(
+const musicModel = sequelize.define(
   'music',
   {
     id: {
@@ -13,26 +14,28 @@ const Music = sequelize.define(
     name: {
       type: DataTypes.STRING(50),
     },
-    img: {
+    cover_pic: {
       type: DataTypes.STRING(100),
     },
     author: {
       type: DataTypes.STRING(50),
     },
-    url: {
+    audio_url: {
       type: DataTypes.STRING(100),
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1,
+      defaultValue: 1, // 1:审核通过 2:未审核
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// Music.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Music;
+initTable(musicModel);
+export default musicModel;

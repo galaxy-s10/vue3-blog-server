@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const Comment = sequelize.define(
+const commentModel = sequelize.define(
   'comment',
   {
     id: {
@@ -12,28 +13,45 @@ const Comment = sequelize.define(
     },
     article_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1,
+      defaultValue: -1, // -1:留言板的评论 非-1:文章的评论
+    },
+    to_comment_id: {
+      type: DataTypes.INTEGER,
+      defaultValue: -1, // -1:楼主 非-1:
     },
     from_user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    to_comment_id: {
-      type: DataTypes.INTEGER,
-      defaultValue: -1,
-    },
     to_user_id: {
       type: DataTypes.INTEGER,
+      defaultValue: -1, // -1:楼主 非-1:在楼主下回复的用户
     },
     content: {
+      type: DataTypes.TEXT('long'),
+    },
+    children_comment_total: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    ua: {
+      type: DataTypes.STRING,
+    },
+    ip: {
+      type: DataTypes.STRING,
+    },
+    ip_data: {
       type: DataTypes.STRING,
     },
   },
   {
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
-// Comment.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default Comment;
+
+initTable(commentModel);
+export default commentModel;

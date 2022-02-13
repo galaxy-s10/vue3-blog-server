@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
-const DayData = sequelize.define(
-  'dayData',
+const dayDataModel = sequelize.define(
+  'day_data',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -11,16 +12,23 @@ const DayData = sequelize.define(
       autoIncrement: true,
     },
     today: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.DATE,
     },
   },
   {
-    timestamps: false,
+    // indexes: [
+    //   {
+    //     name: 'today',
+    //     fields: ['today'],
+    //   },
+    // ],
+    paranoid: true,
     freezeTableName: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   }
 );
 
-// DayData.sync({ force: true }).then((res) => {
-//   console.log('将创建表,如果表已经存在,则将其首先删除', res);
-// });
-export default DayData;
+initTable(dayDataModel);
+export default dayDataModel;

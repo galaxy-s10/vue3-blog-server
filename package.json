@@ -1,15 +1,15 @@
 {
   "name": "react-blog-server",
   "version": "1.0.0",
-  "author": "shuisheng <2274751790@qq.com>",
   "license": "MIT",
+  "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
+    "commit": "cz",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint-fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
-    "serve": "nodemon ./src/index.ts",
     "prepare": "husky install",
-    "commit": "cz",
-    "release": "standard-version"
+    "release": "standard-version",
+    "start": "nodemon ./src/index.ts"
   },
   "config": {
     "commitizen": {
@@ -21,16 +21,19 @@
     "@types/koa": "^2.13.4",
     "@types/koa-bodyparser": "^4.3.4",
     "@types/koa-router": "^7.4.4",
+    "@types/request": "^2.48.8",
     "@types/validator": "^13.7.0",
     "chalk": "^4.1.2",
     "crypto-js": "^4.1.1",
-    "joi": "^17.4.2",
+    "joi": "^17.5.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.1.1",
+    "module-alias": "^2.2.2",
     "mysql2": "^2.3.3",
     "node-emoji": "^1.11.0",
+    "request": "^2.88.2",
     "sequelize": "^6.12.0-alpha.1",
     "typescript": "^4.5.2"
   },
@@ -49,7 +52,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.0",
     "lint-staged": "^12.1.6",
-    "module-alias": "^2.2.2",
     "nodemon": "^2.0.15",
     "prettier": "^2.4.1",
     "standard-version": "^9.3.2",
