@@ -105,6 +105,8 @@ class VisitorLogController {
           code: 403,
           error: '检测到频繁操作，此ip已被禁用，请联系管理员处理!',
         });
+      } else if (ip === '127.0.0.1') {
+        successHandler({ ctx, data: '开发环境下调用~' });
       } else {
         const ip_data = await positionService.get(ip);
         const result = await visitorLogService.create({
