@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
+import path from 'path';
 import { jwtSecret } from '@/config/secret';
-import User from '@/model/user.model';
 import getUserStatus from './getUserStatus';
+import { IUser } from '@/interface';
 
 const authJwt = (
   req
-): Promise<{ code: number; message: string; userInfo?: any }> => {
+): Promise<{ code: number; message: string; userInfo?: IUser }> => {
   return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (req.headers.authorization === undefined) {
@@ -19,8 +20,13 @@ const authJwt = (
         resolve({ code: 401, message: err.message });
         return;
       }
+      // eslint-disable-next-line
+      const userModel = require(path.resolve(
+        __dirname,
+        `../model/user.model.ts`
+      )).default;
       // 防止修改密码后，原本的token还能用
-      const userResult = await User.findOne({
+      const userResult = await userModel.findOne({
         attributes: {
           exclude: ['password'],
         },

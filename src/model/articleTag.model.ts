@@ -21,6 +21,16 @@ const articleTagModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'article_id',
+        fields: ['article_id'],
+      },
+      {
+        name: 'tag_id',
+        fields: ['tag_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

@@ -28,6 +28,24 @@ const starModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'article_id',
+        fields: ['article_id'],
+      },
+      {
+        name: 'comment_id',
+        fields: ['comment_id'],
+      },
+      {
+        name: 'from_user_id',
+        fields: ['from_user_id'],
+      },
+      {
+        name: 'to_user_id',
+        fields: ['to_user_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

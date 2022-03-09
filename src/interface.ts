@@ -30,8 +30,8 @@ export interface IIpdata {
 
 export interface IUser {
   id?: number;
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
   status?: number;
   avatar?: string;
   title?: string;
@@ -97,6 +97,7 @@ export interface ILog {
   id?: number;
   user_id: number;
   api_user_agent: string;
+  api_sql_duration?: number;
   api_from: number;
   api_ip: string;
   api_hostname: string;
@@ -120,6 +121,7 @@ export interface IArticle {
   tag_ids?: number[];
   type_ids?: number[];
   user_ids: number[];
+  keyword?: string;
 }
 export interface IComment {
   id?: number;
@@ -129,7 +131,8 @@ export interface IComment {
   ua: string;
   ip: string;
   ip_data: string;
-  to_comment_id?: number;
+  parent_comment_id?: number;
+  reply_comment_id?: number;
   article_id?: number;
   to_user_id?: number;
   p_comment?: any[];
@@ -147,8 +150,8 @@ export interface IAuth {
 }
 export interface IStar {
   id?: number;
-  article_id?: number;
-  comment_id?: number;
+  article_id: number;
+  comment_id: number;
   to_user_id?: number;
   from_user_id: number;
 }

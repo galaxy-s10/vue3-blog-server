@@ -19,6 +19,16 @@ const roleAuthModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'role_id',
+        fields: ['role_id'],
+      },
+      {
+        name: 'auth_id',
+        fields: ['auth_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

@@ -2,7 +2,7 @@
 import { Sequelize } from 'sequelize';
 
 import { _ERROR, _INFO, _SUCCESS } from '@/app/chalkTip';
-import { deleteAllForeignKeys } from '@/utils/index';
+import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 
 import { mysqlConfig } from './secret';
 
@@ -42,7 +42,7 @@ const loadAllModel = () => {
     // eslint-disable-next-line
     require(`${modelDir}/${file}`).default;
   });
-  console.log(_INFO(`加载所有model~`));
+  console.log(_SUCCESS(`加载所有model成功~`));
 };
 
 /**
@@ -68,6 +68,7 @@ const init = async (v) => {
     switch (v) {
       case 1:
         await deleteAllForeignKeys();
+        await deleteAllIndexs();
         await deleteAllTable();
         loadAllModel();
         await sequelize.sync({ force: true }); // 将创建表,如果表已经存在,则将其首先删除
@@ -101,8 +102,8 @@ const init = async (v) => {
     console.log(
       _SUCCESS(`连接${mysqlConfig.host}的${mysqlConfig.database}数据库成功！`)
     );
-    // init(1);
-    // init(2);
+    // init(1); //初始化数据库
+    // init(2); //校正数据库
     init(3);
   } catch (err) {
     console.error(

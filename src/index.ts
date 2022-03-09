@@ -1,6 +1,10 @@
 import Koa from 'koa';
-// const Koa = require('koa');
 import bodyParser from 'koa-bodyparser';
+import conditional from 'koa-conditional-get';
+import etag from 'koa-etag';
+import staticService from 'koa-static'; // CJS: require('koa-static')
+import path from 'path';
+
 import aliasOk from './app/alias';
 import emitError from './app/handler/emit-error';
 import errorHandler from './app/handler/error-handle';
@@ -14,6 +18,12 @@ const { _SUCCESS } = require('@/app/chalkTip');
 const app = new Koa();
 
 const port = 3200;
+app.use(conditional());
+app.use(etag());
+
+app.use(
+  staticService(path.join(`${__dirname}/public/`), { maxage: 60 * 1000 }) // 静态目录的文件缓存一分钟
+);
 
 app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*');

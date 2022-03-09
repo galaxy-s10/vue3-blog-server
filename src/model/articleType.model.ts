@@ -19,6 +19,16 @@ const articleTypeModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'article_id',
+        fields: ['article_id'],
+      },
+      {
+        name: 'type_id',
+        fields: ['type_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

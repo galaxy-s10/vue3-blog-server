@@ -68,6 +68,7 @@ class LogService {
   async create({
     user_id,
     api_user_agent,
+    api_sql_duration,
     api_from,
     api_ip,
     api_hostname,
@@ -81,6 +82,7 @@ class LogService {
     const result = await logModel.create({
       user_id,
       api_user_agent,
+      api_sql_duration,
       api_from,
       api_ip,
       api_hostname,

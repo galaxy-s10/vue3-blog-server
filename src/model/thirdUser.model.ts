@@ -26,6 +26,16 @@ const thirdUserModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'user_id',
+        fields: ['user_id'],
+      },
+      {
+        name: 'third_user_id',
+        fields: ['third_user_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

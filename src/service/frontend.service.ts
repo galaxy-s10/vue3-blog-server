@@ -1,3 +1,4 @@
+import Sequelize from 'sequelize';
 import { IFrontend } from '@/interface';
 import frontendModel from '@/model/frontend.model';
 import articleModel from '@/model/article.model';
@@ -5,6 +6,8 @@ import commentModel from '@/model/comment.model';
 import userModel from '@/model/user.model';
 import qqUserModel from '@/model/qqUser.model';
 import visitorLogModel from '@/model/visitorLog.model';
+
+const { fn, Op, col, literal } = Sequelize;
 
 class FrontendService {
   /** 查找前端设置 */
@@ -14,7 +17,6 @@ class FrontendService {
     const comment_total = await commentModel.count();
     const user_total = await userModel.count();
     const qq_user_total = await qqUserModel.count();
-    const visitor_log_total = await visitorLogModel.count();
     const result = await frontendModel.findOne({ where: { id } });
     return {
       frontend: result,
@@ -30,9 +32,6 @@ class FrontendService {
       },
       comment: {
         total: comment_total,
-      },
-      visitor_log: {
-        total: visitor_log_total,
       },
     };
   }

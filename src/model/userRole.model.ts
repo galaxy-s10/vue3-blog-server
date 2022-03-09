@@ -19,6 +19,16 @@ const userRoleModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'user_id',
+        fields: ['user_id'],
+      },
+      {
+        name: 'role_id',
+        fields: ['role_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

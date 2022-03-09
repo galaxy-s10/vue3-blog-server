@@ -137,14 +137,38 @@ Comment.hasMany(Star, {
   foreignKey: 'comment_id',
   constraints: false,
 });
+Comment.hasOne(Star, {
+  foreignKey: 'comment_id',
+  constraints: false,
+  as: 'is_star',
+});
 Star.belongsTo(Comment, {
   foreignKey: 'comment_id',
   constraints: false,
+  // as: 'all_star',
 });
+// Star.belongsTo(Comment, {
+//   foreignKey: 'comment_id',
+//   constraints: false,
+//   as: 'is_star',
+// });
 
 Comment.hasMany(Comment, {
   as: 'children_comment',
-  foreignKey: 'to_comment_id',
+  foreignKey: 'parent_comment_id',
+  constraints: false,
+});
+
+// Comment.hasMany(Comment, {
+//   // 为了分页时候的所有子评论数量，使用连接查询，但是这样太耗性能了，单独搞个字段维护吧
+//   as: 'all_comment',
+//   foreignKey: 'parent_comment_id',
+//   constraints: false,
+// });
+
+Comment.belongsTo(Comment, {
+  as: 'reply_comment',
+  foreignKey: 'reply_comment_id',
   constraints: false,
 });
 
@@ -158,10 +182,10 @@ Article.hasMany(Star, {
   constraints: false,
 });
 
-Star.belongsTo(User, {
-  foreignKey: 'from_user_id',
-  constraints: false,
-});
+// Star.belongsTo(User, {
+//   foreignKey: 'from_user_id',
+//   constraints: false,
+// });
 
 Star.belongsTo(User, {
   as: 'from_user',
@@ -253,19 +277,30 @@ User.belongsToMany(QqUser, {
   constraints: false,
 });
 
+// 发出的star
 User.hasMany(Star, {
   foreignKey: 'from_user_id',
   constraints: false,
+  as: 'send_stars',
+});
+// 收到的star
+User.hasMany(Star, {
+  foreignKey: 'to_user_id',
+  constraints: false,
+  as: 'receive_stars',
 });
 
+// 发出的评论
 User.hasMany(Comment, {
   foreignKey: 'from_user_id',
   constraints: false,
+  as: 'send_comments',
 });
-
-Star.belongsTo(User, {
-  foreignKey: 'from_user_id',
+// 收到的评论
+User.hasMany(Comment, {
+  foreignKey: 'to_user_id',
   constraints: false,
+  as: 'receive_comments',
 });
 
 Comment.belongsTo(User, {

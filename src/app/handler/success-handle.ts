@@ -30,11 +30,15 @@ const successHandler = ({
     default:
       defaultMessage = '操作成功!';
   }
+  // 不手动设置状态的话，默认是404，delete方法返回400
+  ctx.status = status;
+  ctx.body = { code: status, data, message: message || defaultMessage };
   const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
   authJwt(ctx.request).then((res) => {
     logService.create({
       user_id: res.userInfo?.id || -1,
       api_user_agent: ctx.request.headers['user-agent'],
+      api_sql_duration: data.sql_duration,
       api_from: isAdmin ? 2 : 1,
       api_body: JSON.stringify(ctx.request.body || {}),
       api_query: JSON.stringify(ctx.query),
@@ -44,8 +48,6 @@ const successHandler = ({
       api_path: ctx.request.path,
     });
   });
-  ctx.status = status;
-  ctx.body = { code: status, data, message: message || defaultMessage };
 };
 
 export default successHandler;

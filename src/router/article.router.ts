@@ -7,6 +7,9 @@ const articleRouter = new Router({ prefix: '/article' });
 // 文章列表
 articleRouter.get('/list', articleController.getList);
 
+// 搜索文章列表
+articleRouter.get('/keyword_list', articleController.getKeywordList);
+
 // 查找文章
 articleRouter.get('/find/:id', articleController.find);
 

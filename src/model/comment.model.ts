@@ -15,7 +15,11 @@ const commentModel = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: -1, // -1:留言板的评论 非-1:文章的评论
     },
-    to_comment_id: {
+    parent_comment_id: {
+      type: DataTypes.INTEGER,
+      defaultValue: -1, // -1:楼主 非-1:
+    },
+    reply_comment_id: {
       type: DataTypes.INTEGER,
       defaultValue: -1, // -1:楼主 非-1:
     },
@@ -34,6 +38,10 @@ const commentModel = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    star_total: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
     ua: {
       type: DataTypes.STRING,
     },
@@ -45,6 +53,28 @@ const commentModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'article_id',
+        fields: ['article_id'],
+      },
+      {
+        name: 'parent_comment_id',
+        fields: ['parent_comment_id'],
+      },
+      {
+        name: 'reply_comment_id',
+        fields: ['reply_comment_id'],
+      },
+      {
+        name: 'from_user_id',
+        fields: ['from_user_id'],
+      },
+      {
+        name: 'to_user_id',
+        fields: ['to_user_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

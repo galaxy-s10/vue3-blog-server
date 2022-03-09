@@ -7,6 +7,66 @@ import { authJwt } from '@/app/authJwt';
 import positionService from '@/service/position.service';
 
 class VisitorLogController {
+  async getHistoryVisitTotal(ctx: Context, next) {
+    try {
+      const { orderBy = 'asc', orderName = 'ip' } = ctx.request.query;
+      const result = await visitorLogService.getHistoryVisitTotal({
+        orderBy,
+        orderName,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async getDayVisitTotal(ctx: Context, next) {
+    try {
+      const {
+        orderBy = 'asc',
+        orderName = 'ip',
+        startTime,
+        endTime,
+      } = ctx.request.query;
+      const result = await visitorLogService.getDayVisitTotal({
+        orderBy,
+        orderName,
+        startTime,
+        endTime,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async getIpVisitTotal(ctx: Context, next) {
+    try {
+      const {
+        nowPage = '1',
+        pageSize = '10',
+        orderBy = 'asc',
+        orderName = 'ip',
+        startTime,
+        endTime,
+      } = ctx.request.query;
+      const result = await visitorLogService.getIpVisitTotal({
+        nowPage,
+        pageSize,
+        orderBy,
+        orderName,
+        startTime,
+        endTime,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
   async getList(ctx: Context, next) {
     try {
       const {

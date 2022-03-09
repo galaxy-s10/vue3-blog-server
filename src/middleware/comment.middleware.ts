@@ -4,8 +4,9 @@ import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
   article_id: Joi.number(),
-  to_comment_id: Joi.number(),
-  from_user_id: Joi.number().required(),
+  parent_comment_id: Joi.number(),
+  reply_comment_id: Joi.number(),
+  from_user_id: Joi.number(),
   to_user_id: Joi.number(),
   content: Joi.string().min(5).max(50).required(),
 });

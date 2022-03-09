@@ -7,6 +7,7 @@ import commentService from '@/service/comment.service';
 import userService from '@/service/user.service';
 import articleService from '@/service/article.service';
 import positionService from '@/service/position.service';
+import { authJwt } from '@/app/authJwt';
 
 class CommentController {
   async getArticleCommentList(ctx: Context, next) {
@@ -18,14 +19,34 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'id',
       } = ctx.request.query;
+      const { code, userInfo } = await authJwt(ctx.request);
+      let from_user_id = -1;
+      if (code === 200) {
+        from_user_id = userInfo.id;
+      }
       const result = await commentService.getArticleCommentList({
         article_id,
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        from_user_id,
       });
       successHandler({ ctx, data: result });
+      // const {
+      //   nowPage = '1',
+      //   pageSize = '10',
+      //   orderBy = 'asc',
+      //   orderName = 'id',
+      // } = ctx.request.query;
+      // const result = await commentService.getArticleCommentList({
+      //   article_id,
+      //   nowPage,
+      //   pageSize,
+      //   orderBy,
+      //   orderName,
+      // });
+      // successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });
     }
@@ -64,31 +85,39 @@ class CommentController {
     try {
       const {
         article_id,
-        from_user_id,
         to_user_id,
-        to_comment_id,
+        parent_comment_id,
+        reply_comment_id,
         content,
       }: IComment = ctx.request.body;
+      const { code, userInfo } = await authJwt(ctx.request);
+      let from_user_id = -1;
+      if (code === 200) {
+        from_user_id = userInfo.id;
+      }
       const articleIsExist =
         article_id === -1 ? true : await articleService.isExist([article_id]);
       if (!articleIsExist) {
         throw new Error(`不存在id为${article_id}的文章!`);
       }
+      const commentIdArr = [
+        ...new Set(
+          [parent_comment_id, reply_comment_id].filter((v) => v !== -1)
+        ),
+      ];
       const commentIsExist =
-        to_comment_id === -1
+        commentIdArr.length === 0
           ? true
-          : await commentService.isExist([to_comment_id]);
+          : await commentService.isExist(commentIdArr);
       if (!commentIsExist) {
-        throw new Error(`不存在id为${to_comment_id}的评论!`);
+        throw new Error(`不存在id为${commentIdArr}的评论!`);
       }
-      const userIsExist = await userService.isExist(
-        [from_user_id, to_user_id].filter((v) => v !== -1)
-      );
+      const userIsExist =
+        to_user_id === -1 ? true : await userService.isExist([to_user_id]);
       if (!userIsExist) {
-        throw new Error(
-          `用户id:${[from_user_id, to_user_id]}中存在不存在的用户!`
-        );
+        throw new Error(`不存在id为${[to_user_id]}的用户!`);
       }
+      console.log('ssssssss');
       const ua = ctx.request.headers['user-agent'];
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
       const ip_data = await positionService.get(ip);
@@ -96,7 +125,8 @@ class CommentController {
         article_id,
         from_user_id,
         to_user_id,
-        to_comment_id,
+        parent_comment_id,
+        reply_comment_id,
         content,
         ua,
         ip,
@@ -112,46 +142,59 @@ class CommentController {
   async getCommentList(ctx: Context, next) {
     try {
       const {
+        article_id = '-1',
         childrenPageSize = '3',
         nowPage = '1',
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
+      const { code, userInfo } = await authJwt(ctx.request);
+      let from_user_id = -1;
+      if (code === 200) {
+        from_user_id = userInfo.id;
+      }
       const result = await commentService.getCommentList({
         childrenPageSize,
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        from_user_id,
+        article_id,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { ...result } });
     } catch (error) {
+      console.log(error, 222221);
       errorHandler({ ctx, code: 400, error });
     }
     await next();
   }
 
-  /**
-   * WARN:需要重新整理逻辑。
-   */
   async getChildrenCommentList(ctx: Context, next) {
     try {
       const {
         article_id,
-        to_comment_id,
+        parent_comment_id,
         nowPage = '1',
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
+      console.log(ctx.request.query);
+      const { code, userInfo } = await authJwt(ctx.request);
+      let from_user_id = -1;
+      if (code === 200) {
+        from_user_id = userInfo.id;
+      }
       const result = await commentService.getChildrenCommentList({
-        article_id,
-        to_comment_id,
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        from_user_id,
+        parent_comment_id,
+        article_id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

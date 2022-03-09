@@ -3,7 +3,7 @@ import Sequelize from 'sequelize';
 import visitorLogModel from '@/model/visitorLog.model';
 import { formateDate, handlePaging } from '@/utils';
 
-const { Op } = Sequelize;
+const { fn, Op, col, literal } = Sequelize;
 
 class VisitorLogService {
   /** 访客日志是否存在 */
@@ -16,6 +16,72 @@ class VisitorLogService {
       },
     });
     return res.length === user_ids.length;
+  }
+
+  /** 获取当天访客访问数据 */
+  async getDayVisitTotal({ orderBy, orderName, startTime, endTime }) {
+    let timeWhere: any = null;
+    if (startTime && startTime) {
+      timeWhere = {
+        [Op.between]: [startTime, endTime],
+      };
+    }
+    const result = await visitorLogModel.findAll({
+      attributes: ['ip', [fn('count', col('id')), 'total']],
+      group: 'ip',
+      order: [[orderName, orderBy]],
+      where: { created_at: timeWhere },
+    });
+    return {
+      visitor_total: result.length,
+      visit_total: result.reduce((pre, cur) => {
+        return cur.get().total + pre;
+      }, 0),
+    };
+  }
+
+  /** 获取历史访问数据 */
+  async getHistoryVisitTotal({ orderBy, orderName }) {
+    const result = await visitorLogModel.findAll({
+      attributes: ['ip', [fn('count', col('id')), 'total']],
+      group: 'ip',
+      order: [[orderName, orderBy]],
+    });
+    return {
+      visitor_total: result.length,
+      visit_total: result.reduce((pre, cur) => {
+        return cur.get().total + pre;
+      }, 0),
+    };
+  }
+
+  /** 获取每个访客访问的次数 */
+  async getIpVisitTotal({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    startTime,
+    endTime,
+  }) {
+    let timeWhere: any = null;
+    if (startTime && startTime) {
+      timeWhere = {
+        [Op.between]: [startTime, endTime],
+      };
+    }
+    console.log(timeWhere, 2222);
+    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
+    const limit = parseInt(pageSize, 10);
+    const result = await visitorLogModel.findAll({
+      attributes: ['ip', [fn('count', col('id')), 'total']],
+      group: 'ip',
+      order: [[orderName, orderBy]],
+      limit,
+      offset,
+      where: { created_at: timeWhere },
+    });
+    return handlePaging(nowPage, pageSize, result);
   }
 
   /** 获取访客日志列表 */

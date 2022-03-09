@@ -138,6 +138,7 @@ class UserController {
       const { code, userInfo, message } = await authJwt(ctx.request);
       if (code === 200) {
         const result = await userService.getUserInfo(userInfo?.id);
+        console.log(result, 322);
         successHandler({ ctx, data: result });
       } else {
         errorHandler({ ctx, code, error: message });

@@ -23,6 +23,12 @@ const roleModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'p_id',
+        fields: ['p_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

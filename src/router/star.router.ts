@@ -19,7 +19,7 @@ starRouter.put('/update/:id', verifyProp, starController.update);
 // 删除star
 starRouter.delete('/delete/:id', starController.delete);
 
-// 删除文章star
-starRouter.delete('/delete/article', starController.deleteArticleStar);
+// 删除评论/文章star
+starRouter.delete('/delete/other', starController.deleteOtherStar);
 
 export default starRouter;

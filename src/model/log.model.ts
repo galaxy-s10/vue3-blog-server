@@ -15,6 +15,9 @@ const logModel = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: -1, // -1:游客 非-1:用户
     },
+    api_sql_duration: {
+      type: DataTypes.INTEGER,
+    },
     api_user_agent: {
       type: DataTypes.STRING,
     },
@@ -47,6 +50,12 @@ const logModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'user_id',
+        fields: ['user_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

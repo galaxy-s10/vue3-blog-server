@@ -44,17 +44,49 @@ export const deleteAllForeignKeys = async () => {
     const res1 = await Promise.all(allConstraint);
     const allConstraint1 = [];
     res1.forEach((v) => {
-      const tabName = Object.keys(v)[0];
-      const constraint = v[tabName];
+      const tableName = Object.keys(v)[0];
+      const constraint = v[tableName];
       constraint.forEach((item) => {
-        allConstraint1.push(queryInterface.removeConstraint(tabName, item));
+        allConstraint1.push(queryInterface.removeConstraint(tableName, item));
       });
-      console.log(_INFO(`当前${tabName}表的外键: ${constraint}`));
+      console.log(_INFO(`当前${tableName}表的外键: ${constraint}`));
     });
     await Promise.all(allConstraint1);
     console.log(_SUCCESS('删除所有外键成功！'));
   } catch (err) {
     console.log(_ERROR('删除所有外键失败！'), err);
+  }
+};
+
+/**
+ * 删除所有索引（除了PRIMARY）
+ */
+export const deleteAllIndexs = async () => {
+  try {
+    const queryInterface = sequelize.getQueryInterface();
+    const allTables = await queryInterface.showAllTables();
+    console.log(_INFO(`所有表:${allTables}`));
+    const allIndexs = [];
+    allTables.forEach((v) => {
+      allIndexs.push(queryInterface.showIndex(v));
+    });
+    const res1 = await Promise.all(allIndexs);
+    const allIndexs1 = [];
+    res1.forEach((v: any[]) => {
+      const { tableName } = v[0];
+      const indexStrArr = [];
+      v.forEach((x) => {
+        indexStrArr.push(x.name);
+        if (x.name !== 'PRIMARY') {
+          allIndexs1.push(queryInterface.removeIndex(tableName, x.name));
+        }
+      });
+      console.log(_INFO(`当前${tableName}表的索引: ${indexStrArr}`));
+    });
+    await Promise.all(allIndexs1);
+    console.log(_SUCCESS('删除所有索引成功！'));
+  } catch (err) {
+    console.log(_ERROR('删除所有索引失败！'), err);
   }
 };
 
@@ -74,7 +106,7 @@ export const initTable = async (model: any, method?: 'force' | 'alter') => {
       await model.sync({ alter: true });
       console.log(_SUCCESS(`${model.tableName}表刚刚同步成功！`));
     } else {
-      console.log(_INFO(`加载了${model.tableName}表`));
+      console.log(_INFO(`加载数据库${model.tableName}表`));
     }
   } catch (err) {
     console.log(_ERROR(`initTable失败`), err);

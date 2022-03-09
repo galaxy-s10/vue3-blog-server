@@ -16,6 +16,15 @@ class FrontendController {
     await next();
   }
 
+  async getDetail1(ctx: Context, next) {
+    try {
+      successHandler({ ctx, data: 111 });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
   async update(ctx: Context, next) {
     try {
       const id = +ctx.params.id;

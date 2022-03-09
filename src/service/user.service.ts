@@ -104,8 +104,13 @@ class UserService {
 
   /** 获取用户信息 */
   async getUserInfo(id: number) {
-    const result = await userModel.findOne({
+    const userInfo: any = await userModel.findOne({
       include: [
+        {
+          model: articleModel,
+          attributes: ['id'],
+          through: { attributes: [] },
+        },
         {
           model: qqUserModel,
         },
@@ -113,23 +118,58 @@ class UserService {
           model: githubUserModel,
         },
         {
-          model: articleModel,
+          model: roleModel,
+          through: { attributes: [] },
         },
         {
           model: commentModel,
+          attributes: ['id'],
+          as: 'send_comments',
+        },
+        {
+          model: commentModel,
+          attributes: ['id'],
+          as: 'receive_comments',
         },
         {
           model: starModel,
+          as: 'receive_stars',
+          attributes: ['id'],
         },
         {
-          model: roleModel,
+          model: starModel,
+          as: 'send_stars',
+          attributes: ['id'],
         },
       ],
       attributes: {
         exclude: ['password', 'token'],
+        include: [
+          // [
+          //   literal(
+          //     `(select count(*) from comment where from_user_id = ${id})`
+          //   ),
+          //   'comment_total',
+          // ],
+          // [
+          //   literal(`(select count(*) from star where to_user_id = ${id})`),
+          //   'receive_star_total',
+          // ],
+        ],
       },
       where: { id },
     });
+    const result = userInfo.get();
+    result.send_comments_total = result.send_comments.length;
+    result.receive_comments_total = result.receive_comments.length;
+    result.send_stars_total = result.send_stars.length;
+    result.receive_stars_total = result.receive_stars.length;
+    result.articles_total = result.articles.length;
+    delete result.send_comments;
+    delete result.receive_comments;
+    delete result.send_stars;
+    delete result.receive_stars;
+    delete result.articles;
     return result;
   }
 

@@ -2,13 +2,13 @@ import Sequelize from 'sequelize';
 
 import { ITag } from '@/interface';
 import articleModel from '@/model/article.model';
-import commentModel from '@/model/comment.model';
-import starModel from '@/model/star.model';
 import tagModel from '@/model/tag.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
+import commentModel from '@/model/comment.model';
+import starModel from '@/model/star.model';
 
-const { Op } = Sequelize;
+const { Op, fn, col, literal } = Sequelize;
 
 class TagService {
   /** 标签是否存在 */
@@ -31,8 +31,44 @@ class TagService {
       order: [[orderName, orderBy]],
       limit,
       offset,
-      include: [{ model: articleModel }],
+      include: [
+        {
+          model: articleModel,
+          attributes: ['id'],
+          through: { attributes: [] },
+        },
+      ],
+      attributes: {
+        include: [],
+      },
     });
+    result.rows.forEach((item) => {
+      const v = item.get();
+      v.article_total = v.articles.length;
+      delete v.articles;
+    });
+    // const count = await tagModel.count();
+    // const result = await tagModel.findAll({
+    //   order: [[orderName, orderBy]],
+    //   limit,
+    //   offset,
+    //   include: [
+    //     { model: articleModel, attributes: [], through: { attributes: [] } },
+    //   ],
+    //   attributes: {
+    //     include: [
+    //       [literal(`(select count(distinct articles.id))`), 'article_total'],
+    //     ],
+    //     // include: [
+    //     //   [
+    //     //     literal(`(select count(*) from article_tag where article_id = id)`),
+    //     //     'article_total',
+    //     //   ],
+    //     // ],
+    //   },
+    //   group: ['id'],
+    //   subQuery: false,
+    // });
     return handlePaging(nowPage, pageSize, result);
   }
 
@@ -40,35 +76,45 @@ class TagService {
   async getArticleList({ tag_id, nowPage, pageSize }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    const result = await articleModel.findAndCountAll({
+    const inst = await tagModel.findOne({ where: { id: tag_id } });
+    // @ts-ignore
+    const count = await inst.countArticles();
+    // @ts-ignore
+    const result = await inst.getArticles({
+      limit,
+      offset,
       include: [
         {
           model: tagModel,
-          where: { id: tag_id },
+          through: {
+            attributes: [],
+          },
         },
         {
           model: commentModel,
+          attributes: ['id'],
         },
-        {
-          model: starModel,
-          where: {
-            to_user_id: -1,
-          },
-          required: false,
-        },
+        { model: starModel, attributes: ['id'] },
         {
           attributes: { exclude: ['password', 'token'] },
           model: userModel,
-        },
-        {
-          model: commentModel,
+          through: {
+            attributes: [],
+          },
         },
       ],
-      limit,
-      offset,
-      distinct: true,
+      attributes: {
+        exclude: ['content'],
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    result.forEach((item) => {
+      const v = item.get();
+      v.star_total = v.stars.length;
+      v.comment_total = v.comments.length;
+      delete v.stars;
+      delete v.comments;
+    });
+    return handlePaging(nowPage, pageSize, { rows: result, count });
   }
 
   /** 查找标签 */

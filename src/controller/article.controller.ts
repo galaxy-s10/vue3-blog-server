@@ -8,6 +8,7 @@ import articleService from '@/service/article.service';
 import tagService from '@/service/tag.service';
 import typeService from '@/service/type.service';
 import userService from '@/service/user.service';
+import { authJwt } from '@/app/authJwt';
 
 class ArticleController {
   async create(ctx: Context, next) {
@@ -58,7 +59,12 @@ class ArticleController {
   async find(ctx: Context, next) {
     try {
       const id = +ctx.params.id;
-      const result = await articleService.find(id);
+      const { code, userInfo } = await authJwt(ctx.request);
+      let from_user_id = -1;
+      if (code === 200) {
+        from_user_id = userInfo.id;
+      }
+      const result = await articleService.find(id, from_user_id);
       successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });
@@ -69,6 +75,7 @@ class ArticleController {
   async getList(ctx: Context, next) {
     try {
       const {
+        keyword = '',
         tag_ids = '',
         type_ids = '',
         user_ids = '',
@@ -78,6 +85,7 @@ class ArticleController {
         orderName = 'id',
       } = ctx.request.query;
       const result = await articleService.getList({
+        keyword,
         tag_ids,
         type_ids,
         user_ids,
@@ -85,6 +93,25 @@ class ArticleController {
         pageSize,
         orderBy,
         orderName,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async getKeywordList(ctx: Context, next) {
+    try {
+      const {
+        keyword = '',
+        nowPage = '1',
+        pageSize = '10',
+      } = ctx.request.query;
+      const result = await articleService.getKeywordList({
+        keyword,
+        nowPage,
+        pageSize,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

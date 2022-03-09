@@ -1,6 +1,7 @@
 import { Context } from 'koa';
+import path from 'path';
 import { _ERROR, _chalk } from '../chalkTip';
-import logService from '@/service/log.service';
+// import logService from '@/service/log.service';
 import { authJwt } from '../authJwt';
 
 const errorHandler = ({
@@ -14,13 +15,12 @@ const errorHandler = ({
   error: any;
   message?: string;
 }) => {
-  console.log(
-    _ERROR(
-      `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
-    )
-  );
-  const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
   if (ctx) {
+    console.log(
+      _ERROR(
+        `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
+      )
+    );
     // 如果捕获的错误有ctx，代表是接口地址报错
     console.log(_chalk.redBright(`code: ${code}`));
     console.log(_chalk.redBright(`params:`), ctx.params);
@@ -56,31 +56,39 @@ const errorHandler = ({
       stack: error.stack,
       message: message || defaultMessage,
     };
-  } else {
-    console.log(_ERROR('未知报错：'));
-    console.log(arguments);
-  }
-  authJwt(ctx.request).then((res) => {
-    logService.create({
-      user_id: res.userInfo?.id || -1,
-      api_user_agent: ctx.request.headers['user-agent'],
-      api_from: isAdmin ? 2 : 1,
-      api_body: JSON.stringify(ctx.request.body || {}),
-      api_query: JSON.stringify(ctx.query),
-      api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
-      api_method: ctx.request.method,
-      api_hostname: ctx.request.hostname,
-      api_path: ctx.request.path,
-      api_err_msg: message || error.toString(),
-      api_err_stack: JSON.stringify(error.stack),
-    });
-  });
+    const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
 
-  console.log(
-    _ERROR(
-      `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`
-    )
-  );
+    authJwt(ctx.request).then((res) => {
+      // eslint-disable-next-line
+      const logService = require(path.resolve(
+        __dirname,
+        `../../service/log.service.ts`
+      )).default;
+      logService.create({
+        user_id: res.userInfo?.id || -1,
+        api_user_agent: ctx.request.headers['user-agent'],
+        api_from: isAdmin ? 2 : 1,
+        api_body: JSON.stringify(ctx.request.body || {}),
+        api_query: JSON.stringify(ctx.query),
+        api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
+        api_method: ctx.request.method,
+        api_hostname: ctx.request.hostname,
+        api_path: ctx.request.path,
+        api_err_msg: message || error.toString(),
+        api_err_stack: JSON.stringify(error.stack),
+      });
+    });
+
+    console.log(
+      _ERROR(
+        `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`
+      )
+    );
+  } else {
+    console.log(_ERROR(`↓↓↓↓↓↓↓↓↓↓ 接收到未知报错 ↓↓↓↓↓↓↓↓↓↓`));
+    console.log(arguments);
+    console.log(_ERROR(`↑↑↑↑↑↑↑↑↑↑ 接收到未知报错 ↑↑↑↑↑↑↑↑↑↑`));
+  }
 };
 
 export default errorHandler;

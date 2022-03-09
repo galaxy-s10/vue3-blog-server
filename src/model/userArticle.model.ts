@@ -27,6 +27,16 @@ const userArticleModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'user_id',
+        fields: ['user_id'],
+      },
+      {
+        name: 'article_id',
+        fields: ['article_id'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

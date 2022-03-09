@@ -5,7 +5,7 @@ import emitError from '@/app/handler/emit-error';
 const schema = Joi.object({
   article_id: Joi.number(),
   comment_id: Joi.number(),
-  from_user_id: Joi.number().required(),
+  from_user_id: Joi.number(),
   to_user_id: Joi.number(),
 });
 

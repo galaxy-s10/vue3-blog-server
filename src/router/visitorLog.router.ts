@@ -4,6 +4,15 @@ import { verifyProp } from '@/middleware/visitorLog.middleware';
 
 const visitorLogRouter = new Router({ prefix: '/visitor_log' });
 
+// 获取历史访问数据
+visitorLogRouter.get('/history', visitorLogController.getHistoryVisitTotal);
+
+// 获取当天访问数据
+visitorLogRouter.get('/day', visitorLogController.getDayVisitTotal);
+
+// 获取ip访问总数
+visitorLogRouter.get('/ip_total', visitorLogController.getIpVisitTotal);
+
 // 访客日志列表
 visitorLogRouter.get('/list', visitorLogController.getList);
 

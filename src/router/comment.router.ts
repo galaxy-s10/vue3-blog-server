@@ -14,10 +14,7 @@ commentRouter.get(
 commentRouter.get('/comment', commentController.getCommentList);
 
 // 子级评论列表
-commentRouter.get(
-  '/comment_children',
-  commentController.getChildrenCommentList
-);
+commentRouter.get('/child_comment', commentController.getChildrenCommentList);
 
 // 创建评论
 commentRouter.post('/create', verifyProp, commentController.create);
