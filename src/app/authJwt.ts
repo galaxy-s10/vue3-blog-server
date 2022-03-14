@@ -7,7 +7,7 @@ import { IUser } from '@/interface';
 const authJwt = (
   req
 ): Promise<{ code: number; message: string; userInfo?: IUser }> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // 首先判断请求头有没有authorization
     if (req.headers.authorization === undefined) {
       resolve({ code: 401, message: '未登录!' });
@@ -17,7 +17,8 @@ const authJwt = (
     jwt.verify(token, jwtSecret, {}, async (err, decode) => {
       if (err) {
         // 判断非法/过期token
-        resolve({ code: 401, message: err.message });
+        // eslint-disable-next-line prefer-promise-reject-errors
+        reject({ code: 401, message: '登录信息过期!' });
         return;
       }
       // eslint-disable-next-line
@@ -34,10 +35,17 @@ const authJwt = (
           id: decode.userInfo.id,
         },
       });
-
+      console.log(userResult, 6666);
+      if (!userResult) {
+        // 防止token是正确的，但是这个用户已经被删除了。
+        // eslint-disable-next-line prefer-promise-reject-errors
+        reject({ code: 401, message: '该用户不存在!' });
+        return;
+      }
       if (userResult.token !== token) {
-        console.log('登录信息过期!');
-        resolve({ code: 401, message: '登录信息过期!' });
+        // 单点登录
+        // eslint-disable-next-line prefer-promise-reject-errors
+        reject({ code: 401, message: '登录信息过期!' });
         return;
       }
       const userStatus = await getUserStatus(userResult.id);

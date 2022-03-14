@@ -25,7 +25,7 @@ const userModel = sequelize.define(
       // unique: true,
       // unique: {
       //   name: '???',
-      //   msg: '存在同名用户！',
+      //   msg: '存在同名用户!',
       // },
       validate: {
         // 其实不管isUnique叫啥名字，都会执行。
@@ -33,7 +33,7 @@ const userModel = sequelize.define(
         // async isUnique(username, done) {
         //   const isSameName = await userService.isSameName(username);
         //   if (isSameName) {
-        //     done(new Error('已存在同名用户！'));
+        //     done(new Error('已存在同名用户!'));
         //   } else {
         //     done();
         //   }
@@ -43,22 +43,22 @@ const userModel = sequelize.define(
     password: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      validate: {
-        /**
-         * 不匹配[0-9]+$,即不匹配从头到尾都是数字
-         * 不匹配[a-zA-Z]+$，即不匹配从头到尾都是字母
-         * 不匹配[_]+$，即不匹配从头到尾都是下划线
-         * 匹配[0-9a-zA-Z_]{8,16}，即只匹配数字或字母或下划线，最少8个最多16个
-         * 总结：只匹配8到16位的数字或字母或下划线，且不能全是数字/字母/下划线
-         */
-        // is: /(?![0-9]+$)(?![a-zA-Z]+$)[0-9a-zA-A]{8,16}/g,
-        regPwd(value: string) {
-          const reg = /(?![0-9]+$)(?![a-zA-Z]+$)(?![_]+$)[0-9a-zA-A_]{8,16}/g;
-          if (!reg.test(value)) {
-            throw new Error('密码格式错误!');
-          }
-        },
-      },
+      // validate: {
+      //   /**
+      //    * 不匹配[0-9]+$,即不匹配从头到尾都是数字
+      //    * 不匹配[a-zA-Z]+$，即不匹配从头到尾都是字母
+      //    * 不匹配[_]+$，即不匹配从头到尾都是下划线
+      //    * 匹配[0-9a-zA-Z_]{8,16}，即只匹配数字或字母或下划线，最少8个最多16个
+      //    * 总结：只匹配8到16位的数字或字母或下划线，且不能全是数字/字母/下划线
+      //    */
+      //   // is: /(?![0-9]+$)(?![a-zA-Z]+$)[0-9a-zA-A]{8,16}/g,
+      //   regPwd(value: string) {
+      //     const reg = /(?![0-9]+$)(?![a-zA-Z]+$)(?![_]+$)[0-9a-zA-A_]{8,16}/g;
+      //     if (!reg.test(value)) {
+      //       throw new Error('密码格式错误!');
+      //     }
+      //   },
+      // },
     },
     status: {
       type: DataTypes.INTEGER,
@@ -78,12 +78,12 @@ const userModel = sequelize.define(
   {
     hooks: {
       // https://github.com/demopark/sequelize-docs-Zh-CN/blob/master/other-topics/hooks.md
-      afterValidate(instance: any) {
-        if (instance.changed('password')) {
-          // eslint-disable-next-line no-param-reassign
-          instance.password = MD5(instance.password).toString();
-        }
-      },
+      // afterValidate(instance: any) {
+      //   if (instance.changed('password')) {
+      //     // eslint-disable-next-line no-param-reassign
+      //     instance.password = MD5(instance.password).toString();
+      //   }
+      // },
     },
     paranoid: true,
     // timestamps: false, // 将createdAt和updatedAt时间戳添加到模型中。默认为true。

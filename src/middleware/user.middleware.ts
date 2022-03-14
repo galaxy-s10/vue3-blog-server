@@ -3,8 +3,9 @@ import Joi from 'joi';
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
-  username: Joi.string().min(3).max(12).required(),
-  password: Joi.string().min(6).max(18).required(),
+  id: Joi.number(),
+  username: Joi.string().min(3).max(12),
+  password: Joi.string().min(6).max(18),
   // username: Joi.string()
   //   .pattern(/[0-9a-zA-Z_]{6,12}$/)
   //   .required(),

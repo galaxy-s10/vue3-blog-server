@@ -52,9 +52,9 @@ export const deleteAllForeignKeys = async () => {
       console.log(_INFO(`当前${tableName}表的外键: ${constraint}`));
     });
     await Promise.all(allConstraint1);
-    console.log(_SUCCESS('删除所有外键成功！'));
+    console.log(_SUCCESS('删除所有外键成功!'));
   } catch (err) {
-    console.log(_ERROR('删除所有外键失败！'), err);
+    console.log(_ERROR('删除所有外键失败!'), err);
   }
 };
 
@@ -84,9 +84,9 @@ export const deleteAllIndexs = async () => {
       console.log(_INFO(`当前${tableName}表的索引: ${indexStrArr}`));
     });
     await Promise.all(allIndexs1);
-    console.log(_SUCCESS('删除所有索引成功！'));
+    console.log(_SUCCESS('删除所有索引成功!'));
   } catch (err) {
-    console.log(_ERROR('删除所有索引失败！'), err);
+    console.log(_ERROR('删除所有索引失败!'), err);
   }
 };
 
@@ -100,11 +100,11 @@ export const initTable = async (model: any, method?: 'force' | 'alter') => {
     if (method === 'force') {
       await deleteAllForeignKeys();
       await model.sync({ force: true });
-      console.log(_SUCCESS(`${model.tableName}表刚刚(重新)创建！`));
+      console.log(_SUCCESS(`${model.tableName}表刚刚(重新)创建!`));
     } else if (method === 'alter') {
       await deleteAllForeignKeys();
       await model.sync({ alter: true });
-      console.log(_SUCCESS(`${model.tableName}表刚刚同步成功！`));
+      console.log(_SUCCESS(`${model.tableName}表刚刚同步成功!`));
     } else {
       console.log(_INFO(`加载数据库${model.tableName}表`));
     }
@@ -120,4 +120,23 @@ export const initTable = async (model: any, method?: 'force' | 'alter') => {
  */
 export const getUrl = (url: string) => {
   return url.replace(/\?.+/, '');
+};
+
+/**
+ * 获取[min,max]之间的随机整数
+ * 例如：[10,30],[-21,32],[-100,-20]
+ */
+export const getRandomInt = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+/**
+ * 获取随机字符串
+ */
+export const randomString = (length: number): string => {
+  const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let res = '';
+  for (let i = 0; i < length; i += 1) {
+    res += str.charAt(getRandomInt(0, str.length - 1));
+  }
+  return res;
 };

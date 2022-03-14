@@ -1,18 +1,11 @@
 import MD5 from 'crypto-js/md5';
 import { Context } from 'koa';
-import request from 'request';
 
 import { authJwt, signJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
 import errorHandler from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
-import {
-  qq_client_id,
-  qq_client_secret,
-  qq_redirect_uri,
-} from '@/config/secret';
 import { IList, IUser } from '@/interface';
-import ThirdUser from '@/model/thirdUser.model';
 import User from '@/model/user.model';
 import userService from '@/service/user.service';
 
@@ -55,10 +48,10 @@ class UserController {
 
   login = async (ctx: Context, next) => {
     try {
-      const { username, password, exp = 24 } = ctx.request.body;
-      const userInfo = await User.findOne({
+      const { id, password, exp = 24 } = ctx.request.body;
+      const userInfo: any = await User.findOne({
         attributes: { exclude: ['password', 'token'] },
-        where: { username, password: MD5(password).toString() },
+        where: { id, password },
       });
       if (userInfo) {
         /**
@@ -78,7 +71,7 @@ class UserController {
         successHandler({
           ctx,
           data: userInfo,
-          message: '账号或密码错误！',
+          message: '账号或密码错误!',
         });
       }
     } catch (error) {
@@ -138,13 +131,12 @@ class UserController {
       const { code, userInfo, message } = await authJwt(ctx.request);
       if (code === 200) {
         const result = await userService.getUserInfo(userInfo?.id);
-        console.log(result, 322);
         successHandler({ ctx, data: result });
       } else {
         errorHandler({ ctx, code, error: message });
       }
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      errorHandler({ ctx, code: 401, error, message: error.message });
     }
     await next();
   }

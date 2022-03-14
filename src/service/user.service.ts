@@ -202,7 +202,7 @@ class UserService {
 
   /** 创建用户 */
   async create({ username, password, title, avatar }: IUser) {
-    const result = await userModel.create({
+    const result: any = await userModel.create({
       username,
       password,
       title,

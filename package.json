@@ -1,6 +1,7 @@
 {
   "name": "react-blog-server",
-  "version": "1.0.0",
+  "version": "0.0.1",
+  "repository": "https://github.com/galaxy-s10/react-blog-server.git",
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
@@ -8,6 +9,7 @@
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint-fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
     "prepare": "husky install",
+    "push": "cz && standard-version",
     "release": "standard-version",
     "start": "nodemon ./src/index.ts"
   },

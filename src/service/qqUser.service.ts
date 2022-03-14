@@ -8,17 +8,36 @@ import { handlePaging } from '@/utils';
 const { Op } = Sequelize;
 
 class UserService {
-  /** qq用户是否存在 */
-  async isExist(unionids: number[]) {
-    console.log(unionids, 22222);
+  /** 所有应用里面是否存在qq用户 */
+  async isExistUnionid(unionid: any) {
+    const res = await qqUserModel.count({
+      where: {
+        unionid,
+      },
+    });
+    return res === 1;
+  }
+
+  /** 同一个应用里面是否存在qq用户 */
+  async isExistClientIdUnionid(client_id: any, unionid: any) {
+    const res = await qqUserModel.count({
+      where: {
+        client_id,
+        unionid,
+      },
+    });
+    return res === 1;
+  }
+
+  async isExist(ids: number[]) {
     const res = await qqUserModel.findAll({
       where: {
-        unionid: {
-          [Op.or]: unionids,
+        id: {
+          [Op.or]: ids,
         },
       },
     });
-    return res.length === unionids.length;
+    return res.length === ids.length;
   }
 
   /** 获取qq用户列表 */

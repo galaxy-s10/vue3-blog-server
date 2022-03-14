@@ -30,8 +30,8 @@ export interface IIpdata {
 
 export interface IUser {
   id?: number;
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
   status?: number;
   avatar?: string;
   title?: string;
