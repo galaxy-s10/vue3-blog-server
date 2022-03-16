@@ -1,14 +1,14 @@
 {
   "name": "react-blog-server",
-  "version": "0.0.1",
-  "repository": "https://github.com/galaxy-s10/react-blog-server.git",
+  "version": "0.0.2",
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
     "commit": "cz",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
-    "lint-fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
+    "lint:fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
     "prepare": "husky install",
+    "prettier": "prettier --write .",
     "push": "cz && standard-version",
     "release": "standard-version",
     "start": "nodemon ./src/index.ts"
@@ -39,6 +39,7 @@
     "module-alias": "^2.2.2",
     "mysql2": "^2.3.3",
     "node-emoji": "^1.11.0",
+    "nodemailer": "^6.7.2",
     "request": "^2.88.2",
     "sequelize": "^6.12.0-alpha.1",
     "typescript": "^4.5.2"
@@ -52,14 +53,13 @@
     "@typescript-eslint/parser": "^5.4.0",
     "commitizen": "^4.2.4",
     "eslint": "^8.2.0",
-    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.0",
     "lint-staged": "^12.1.6",
     "nodemon": "^2.0.15",
-    "prettier": "^2.4.1",
+    "prettier": "^2.6.0",
     "standard-version": "^9.3.2",
     "ts-node": "^10.4.0"
   }

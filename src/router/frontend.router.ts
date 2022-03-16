@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import frontendController from '@/controller/frontend.controller';
 
 const frontendRouter = new Router({ prefix: '/frontend' });

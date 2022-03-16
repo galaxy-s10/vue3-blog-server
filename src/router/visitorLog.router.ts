@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import visitorLogController from '@/controller/visitorLog.controller';
 import { verifyProp } from '@/middleware/visitorLog.middleware';
 

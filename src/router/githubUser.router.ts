@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import githubUserController from '@/controller/githubUser.controller';
 
 const githubUserRouter = new Router({ prefix: '/github_user' });

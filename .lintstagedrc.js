@@ -1,7 +1,11 @@
-const { _INFO } = require('./src/app/chalkTip');
+const chalk = require('chalk');
 
-console.log(_INFO(`读取：${__filename.slice(__dirname.length + 1)}`));
+console.log(
+  `${chalk.bgBlueBright.black(' INFO ')} ${chalk.blueBright(
+    `读取了: ${__filename.slice(__dirname.length + 1)}`
+  )}`
+);
 
 module.exports = {
-  '*.{js,jsx,ts,tsx}': ['prettier --write'],
+  '*.{js,ts}': ['prettier --write'],
 };

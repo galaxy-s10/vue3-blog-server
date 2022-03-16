@@ -1,5 +1,6 @@
 import { Context } from 'koa';
 
+import { authJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
 import errorHandler from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
@@ -8,7 +9,6 @@ import articleService from '@/service/article.service';
 import tagService from '@/service/tag.service';
 import typeService from '@/service/type.service';
 import userService from '@/service/user.service';
-import { authJwt } from '@/app/authJwt';
 
 class ArticleController {
   async create(ctx: Context, next) {
@@ -75,7 +75,6 @@ class ArticleController {
   async getList(ctx: Context, next) {
     try {
       const {
-        keyword = '',
         tag_ids = '',
         type_ids = '',
         user_ids = '',
@@ -83,9 +82,10 @@ class ArticleController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
+        status = '1',
       } = ctx.request.query;
+      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await articleService.getList({
-        keyword,
         tag_ids,
         type_ids,
         user_ids,
@@ -93,6 +93,7 @@ class ArticleController {
         pageSize,
         orderBy,
         orderName,
+        status: isAdmin ? status : 1,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -107,11 +108,14 @@ class ArticleController {
         keyword = '',
         nowPage = '1',
         pageSize = '10',
+        status = '1',
       } = ctx.request.query;
+      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await articleService.getKeywordList({
         keyword,
         nowPage,
         pageSize,
+        status: isAdmin ? status : 1,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

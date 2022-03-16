@@ -1,10 +1,10 @@
 import { Context } from 'koa';
 
+import { authJwt } from '@/app/authJwt';
 import errorHandler from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
-import visitorLogService from '@/service/visitorLog.service';
-import { authJwt } from '@/app/authJwt';
 import positionService from '@/service/position.service';
+import visitorLogService from '@/service/visitorLog.service';
 
 class VisitorLogController {
   async getHistoryVisitTotal(ctx: Context, next) {

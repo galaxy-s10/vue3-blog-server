@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import roleController from '@/controller/role.controller';
 import { verifyProp } from '@/middleware/role.middleware';
 

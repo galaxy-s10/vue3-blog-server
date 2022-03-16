@@ -8,6 +8,8 @@
     // "noImplicitAny": true, // Turning on noImplicitAny however TypeScript will issue an error whenever it would have inferred any:
     // "jsx": "react-jsx"
     "downlevelIteration": true, // [...new Set([1,2,1])]
+    "forceConsistentCasingInFileNames": true, //在文件名中强制使用一致的大小写
+    "skipLibCheck": true, //跳过d.ts声明文件的类型检查。
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]

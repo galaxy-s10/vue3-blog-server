@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import themeController from '@/controller/theme.controller';
 
 const themeRouter = new Router({ prefix: '/theme' });

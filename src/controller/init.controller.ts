@@ -1,13 +1,12 @@
 import { Context } from 'koa';
 
+import sequelize from '../config/db';
+
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import Auth from '@/model/auth.model';
 import Role from '@/model/role.model';
 import RoleAuth from '@/model/roleAuth.model';
-
-import sequelize from '../config/db';
-
 import {
   bulkCreateAuth,
   bulkCreateRole,

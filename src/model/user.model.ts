@@ -1,8 +1,9 @@
 // https://github.com/demopark/sequelize-docs-Zh-CN/blob/master/core-concepts/model-basics.md#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B
 import { DataTypes } from 'sequelize';
+
 import sequelize from '@/config/db';
-import { initTable } from '@/utils';
 import userService from '@/service/user.service';
+import { initTable } from '@/utils';
 
 const MD5 = require('crypto-js/md5');
 

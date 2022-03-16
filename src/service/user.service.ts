@@ -2,14 +2,14 @@ import Sequelize from 'sequelize';
 
 import { IUserList } from '@/controller/user.controller';
 import { IUser } from '@/interface';
+import articleModel from '@/model/article.model';
+import commentModel from '@/model/comment.model';
+import githubUserModel from '@/model/githubUser.model';
 import qqUserModel from '@/model/qqUser.model';
+import roleModel from '@/model/role.model';
+import starModel from '@/model/star.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
-import articleModel from '@/model/article.model';
-import starModel from '@/model/star.model';
-import commentModel from '@/model/comment.model';
-import roleModel from '@/model/role.model';
-import githubUserModel from '@/model/githubUser.model';
 
 const { Op, where, literal } = Sequelize;
 

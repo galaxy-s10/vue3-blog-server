@@ -1,4 +1,4 @@
-import { _ERROR, _SUCCESS, _INFO } from '@/app/chalkTip';
+import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/app/chalkTip';
 import sequelize from '@/config/db';
 
 /**
@@ -36,7 +36,7 @@ export const deleteAllForeignKeys = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
-    console.log(_INFO(`所有表:${allTables}`));
+    console.log(chalkINFO(`所有表:${allTables}`));
     const allConstraint = [];
     allTables.forEach((v) => {
       allConstraint.push(queryInterface.getForeignKeysForTables([v]));
@@ -49,12 +49,12 @@ export const deleteAllForeignKeys = async () => {
       constraint.forEach((item) => {
         allConstraint1.push(queryInterface.removeConstraint(tableName, item));
       });
-      console.log(_INFO(`当前${tableName}表的外键: ${constraint}`));
+      console.log(chalkINFO(`当前${tableName}表的外键: ${constraint}`));
     });
     await Promise.all(allConstraint1);
-    console.log(_SUCCESS('删除所有外键成功!'));
+    console.log(chalkSUCCESS('删除所有外键成功!'));
   } catch (err) {
-    console.log(_ERROR('删除所有外键失败!'), err);
+    console.log(chalkERROR('删除所有外键失败!'), err);
   }
 };
 
@@ -65,7 +65,7 @@ export const deleteAllIndexs = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
-    console.log(_INFO(`所有表:${allTables}`));
+    console.log(chalkINFO(`所有表:${allTables}`));
     const allIndexs = [];
     allTables.forEach((v) => {
       allIndexs.push(queryInterface.showIndex(v));
@@ -81,12 +81,12 @@ export const deleteAllIndexs = async () => {
           allIndexs1.push(queryInterface.removeIndex(tableName, x.name));
         }
       });
-      console.log(_INFO(`当前${tableName}表的索引: ${indexStrArr}`));
+      console.log(chalkINFO(`当前${tableName}表的索引: ${indexStrArr}`));
     });
     await Promise.all(allIndexs1);
-    console.log(_SUCCESS('删除所有索引成功!'));
+    console.log(chalkSUCCESS('删除所有索引成功!'));
   } catch (err) {
-    console.log(_ERROR('删除所有索引失败!'), err);
+    console.log(chalkERROR('删除所有索引失败!'), err);
   }
 };
 
@@ -100,16 +100,16 @@ export const initTable = async (model: any, method?: 'force' | 'alter') => {
     if (method === 'force') {
       await deleteAllForeignKeys();
       await model.sync({ force: true });
-      console.log(_SUCCESS(`${model.tableName}表刚刚(重新)创建!`));
+      console.log(chalkSUCCESS(`${model.tableName}表刚刚(重新)创建!`));
     } else if (method === 'alter') {
       await deleteAllForeignKeys();
       await model.sync({ alter: true });
-      console.log(_SUCCESS(`${model.tableName}表刚刚同步成功!`));
+      console.log(chalkSUCCESS(`${model.tableName}表刚刚同步成功!`));
     } else {
-      console.log(_INFO(`加载数据库${model.tableName}表`));
+      console.log(chalkINFO(`加载数据库${model.tableName}表`));
     }
   } catch (err) {
-    console.log(_ERROR(`initTable失败`), err);
+    console.log(chalkERROR(`initTable失败`), err);
   }
 };
 

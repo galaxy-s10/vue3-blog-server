@@ -1,6 +1,8 @@
 import { Context } from 'koa';
-import logService from '@/service/log.service';
+
 import { authJwt } from '../authJwt';
+
+import logService from '@/service/log.service';
 
 const successHandler = ({
   ctx,

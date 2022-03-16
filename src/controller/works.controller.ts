@@ -2,11 +2,10 @@ import { Context } from 'koa';
 
 import errorHandler from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
-import { ILink } from '@/interface';
-import linkService from '@/service/link.service';
-import SendEmailModel from '@/utils/sendEmail';
+import { IWorks } from '@/interface';
+import worksService from '@/service/works.service';
 
-class LinkController {
+class worksController {
   async getList(ctx: Context, next) {
     try {
       const {
@@ -17,7 +16,7 @@ class LinkController {
         status = '1',
       } = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-      const result = await linkService.getList({
+      const result = await worksService.getList({
         nowPage,
         pageSize,
         orderBy,
@@ -34,7 +33,7 @@ class LinkController {
   async find(ctx: Context, next) {
     try {
       const id = +ctx.params.id;
-      const result = await linkService.find(id);
+      const result = await worksService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });
@@ -45,19 +44,19 @@ class LinkController {
   async update(ctx: Context, next) {
     try {
       const id = +ctx.params.id;
-      const { email, name, avatar, desc, url, status }: ILink =
+      const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
-      const isExist = await linkService.isExist([id]);
+      const isExist = await worksService.isExist([id]);
       if (!isExist) {
         errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
-      const result = await linkService.update({
+      const result = await worksService.update({
         id,
-        email,
         name,
-        avatar,
         desc,
+        bg_url,
+        priority,
         url,
         status,
       });
@@ -70,27 +69,17 @@ class LinkController {
 
   async create(ctx: Context, next) {
     try {
-      const { email, name, avatar, desc, url, status }: ILink =
+      const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-      const result = await linkService.create({
-        email,
+      const result = await worksService.create({
         name,
-        avatar,
         desc,
+        bg_url,
+        priority,
         url,
         status: isAdmin ? status : 1,
       });
-      const mailOptions = {
-        from: '自然博客 <2274751790@qq.com>', // sender address
-        to: '2274751790@qq.com', // list of receivers
-        subject: '收到友链申请记录', // Subject line
-        // 发送text或者html格式
-        // text: 'Hello world?', // plain text body
-        html: `<h1>收到:${name}的友链申请，请及时处理~</h1>`, // html body
-      };
-      const emailMode = new SendEmailModel(mailOptions);
-      await emailMode.send();
       successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });
@@ -101,12 +90,12 @@ class LinkController {
   async delete(ctx: Context, next) {
     try {
       const id = +ctx.params.id;
-      const isExist = await linkService.isExist([id]);
+      const isExist = await worksService.isExist([id]);
       if (!isExist) {
         errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
-      const result = await linkService.delete(id);
+      const result = await worksService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });
@@ -115,4 +104,4 @@ class LinkController {
   }
 }
 
-export default new LinkController();
+export default new worksController();

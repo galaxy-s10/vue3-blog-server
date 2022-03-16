@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import initController from '@/controller/init.controller';
 
 const initRouter = new Router({ prefix: '/init' });

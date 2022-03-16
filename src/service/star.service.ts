@@ -1,9 +1,10 @@
 import Sequelize from 'sequelize';
-import starModel from '@/model/star.model';
+
 import { IStar } from '@/interface';
-import commentModel from '@/model/comment.model';
-import userModel from '@/model/user.model';
 import articleModel from '@/model/article.model';
+import commentModel from '@/model/comment.model';
+import starModel from '@/model/star.model';
+import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;

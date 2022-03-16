@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+
 import sequelize from '@/config/db';
 import { initTable } from '@/utils';
 

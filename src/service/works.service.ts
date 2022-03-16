@@ -1,15 +1,15 @@
 import Sequelize from 'sequelize';
 
-import { ILink } from '@/interface';
-import linkModel from '@/model/link.model';
+import { IWorks } from '@/interface';
+import worksModel from '@/model/works.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-class LinkService {
-  /** 友链是否存在 */
+class worksService {
+  /** 作品是否存在 */
   async isExist(link_ids: number[]) {
-    const res = await linkModel.findAll({
+    const res = await worksModel.findAll({
       where: {
         id: {
           [Op.or]: link_ids,
@@ -19,11 +19,11 @@ class LinkService {
     return res.length === link_ids.length;
   }
 
-  /** 获取友链列表 */
+  /** 获取作品列表 */
   async getList({ nowPage, pageSize, orderBy, orderName, status }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    const result = await linkModel.findAndCountAll({
+    const result = await worksModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
@@ -34,24 +34,24 @@ class LinkService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 查找友链 */
+  /** 查找作品 */
   async find(id: number) {
-    const result = await linkModel.findOne({ where: { id } });
+    const result = await worksModel.findOne({ where: { id } });
     return result;
   }
 
-  /** 修改友链 */
-  async update({ id, email, name, avatar, desc, url, status }: ILink) {
-    const result = await linkModel.update(
+  /** 修改作品 */
+  async update({ id, email, name, avatar, desc, url, status }: IWorks) {
+    const result = await worksModel.update(
       { email, name, avatar, desc, url, status },
       { where: { id } }
     );
     return result;
   }
 
-  /** 创建友链 */
-  async create({ email, name, avatar, desc, url, status }: ILink) {
-    const result = await linkModel.create({
+  /** 创建作品 */
+  async create({ email, name, avatar, desc, url, status }: IWorks) {
+    const result = await worksModel.create({
       email,
       name,
       avatar,
@@ -62,9 +62,9 @@ class LinkService {
     return result;
   }
 
-  /** 删除友链 */
+  /** 删除作品 */
   async delete(id: number) {
-    const result = await linkModel.destroy({
+    const result = await worksModel.destroy({
       where: { id },
       individualHooks: true,
     });
@@ -72,4 +72,4 @@ class LinkService {
   }
 }
 
-export default new LinkService();
+export default new worksService();

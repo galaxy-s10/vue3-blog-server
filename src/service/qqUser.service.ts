@@ -111,8 +111,6 @@ class UserService {
   }: IQqUser) {
     const result = await qqUserModel.update(
       {
-        client_id,
-        openid,
         nickname,
         figureurl,
         figureurl_1,
@@ -125,7 +123,7 @@ class UserService {
         province,
         year,
       },
-      { where: { unionid } }
+      { where: { client_id, openid, unionid } }
     );
     return result;
   }

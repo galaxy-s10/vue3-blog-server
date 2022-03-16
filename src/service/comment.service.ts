@@ -1,13 +1,13 @@
 import Sequelize from 'sequelize';
-import commentModel from '@/model/comment.model';
-import { IComment } from '@/interface';
 
+import { authJwt } from '@/app/authJwt';
+import { IComment } from '@/interface';
 import articleModel from '@/model/article.model';
+import commentModel from '@/model/comment.model';
+import roleModel from '@/model/role.model';
 import starModel from '@/model/star.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
-import roleModel from '@/model/role.model';
-import { authJwt } from '@/app/authJwt';
 
 const { Op, fn, col, literal } = Sequelize;
 

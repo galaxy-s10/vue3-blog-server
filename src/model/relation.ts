@@ -1,13 +1,13 @@
-import { _INFO } from '@/app/chalkTip';
-
 import Article from './article.model';
 import ArticleTag from './articleTag.model';
 import ArticleType from './articleType.model';
 import Auth from './auth.model';
 import Comment from './comment.model';
 import DayData from './dayData.model';
+import GithubUser from './githubUser.model';
 import Log from './log.model';
 import QiniuData from './qiniuData.model';
+import QqUser from './qqUser.model';
 import Role from './role.model';
 import RoleAuth from './roleAuth.model';
 import Star from './star.model';
@@ -15,13 +15,13 @@ import Tag from './tag.model';
 import ThirdUser from './thirdUser.model';
 import Type from './type.model';
 import User from './user.model';
-import QqUser from './qqUser.model';
-import GithubUser from './githubUser.model';
 import UserArticle from './userArticle.model';
 import UserRole from './userRole.model';
 import VisitorLog from './visitorLog.model';
 
-console.log(_INFO('加载了relation'));
+import { chalkINFO } from '@/app/chalkTip';
+
+console.log(chalkINFO('加载了relation'));
 
 /**
  * https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html

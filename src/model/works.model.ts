@@ -3,8 +3,8 @@ import { DataTypes } from 'sequelize';
 import sequelize from '@/config/db';
 import { initTable } from '@/utils';
 
-const musicModel = sequelize.define(
-  'music',
+const worksModel = sequelize.define(
+  'works',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,16 +13,19 @@ const musicModel = sequelize.define(
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING(50),
-    },
-    cover_pic: {
       type: DataTypes.STRING(100),
     },
-    author: {
-      type: DataTypes.STRING(50),
-    },
-    audio_url: {
+    desc: {
       type: DataTypes.STRING(100),
+    },
+    bg_url: {
+      type: DataTypes.STRING(100),
+    },
+    url: {
+      type: DataTypes.STRING(100),
+    },
+    priority: {
+      type: DataTypes.INTEGER, // 权重
     },
     status: {
       type: DataTypes.INTEGER,
@@ -38,5 +41,5 @@ const musicModel = sequelize.define(
   }
 );
 
-initTable(musicModel);
-export default musicModel;
+initTable(worksModel);
+export default worksModel;

@@ -1,13 +1,14 @@
-import { Context } from 'koa';
 import Joi from 'joi';
+import { Context } from 'koa';
+
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
   email: Joi.string().min(3).max(50),
   name: Joi.string().min(3).max(50).required(),
-  avatar: Joi.string().min(5).max(50).required(),
+  avatar: Joi.string().min(5).max(80).required(),
   desc: Joi.string().min(3).max(50).required(),
-  url: Joi.string().min(5).max(50).required(),
+  url: Joi.string().min(5).max(80).required(),
   status: [1, 2],
 });
 

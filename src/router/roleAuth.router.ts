@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import roleAuthController from '@/controller/roleAuth.controller';
 
 const roleAuthRouter = new Router({ prefix: '/role_auth' });

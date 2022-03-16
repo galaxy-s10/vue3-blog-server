@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import linkController from '@/controller/link.controller';
 import { verifyProp } from '@/middleware/link.middleware';
 

@@ -1,7 +1,10 @@
-import jwt from 'jsonwebtoken';
 import path from 'path';
-import { jwtSecret } from '@/config/secret';
+
+import jwt from 'jsonwebtoken';
+
 import getUserStatus from './getUserStatus';
+
+import { jwtSecret } from '@/config/secret';
 import { IUser } from '@/interface';
 
 const authJwt = (

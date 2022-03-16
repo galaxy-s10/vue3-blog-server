@@ -2,6 +2,7 @@
 // import * as Sequelize from 'sequelize'; // 这种写法有提示。
 // import Sequelize = require('sequelize'); // 这种写法有提示。
 import { DataTypes } from 'sequelize';
+
 import sequelize from '@/config/db';
 import { initTable } from '@/utils';
 

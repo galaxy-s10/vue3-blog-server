@@ -118,7 +118,6 @@ class ArticleService {
 
   /** 获取文章列表 */
   async getList({
-    keyword,
     tag_ids,
     type_ids,
     user_ids,
@@ -126,6 +125,7 @@ class ArticleService {
     pageSize,
     orderBy,
     orderName,
+    status,
   }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
@@ -203,6 +203,7 @@ class ArticleService {
           // ],
         ],
       },
+      where: { status },
       distinct: true,
       order: [[orderName, orderBy]],
       // group: ['article.id'],
@@ -221,7 +222,7 @@ class ArticleService {
   }
 
   /** 搜索文章 */
-  async getKeywordList({ keyword, nowPage, pageSize }) {
+  async getKeywordList({ keyword, nowPage, pageSize, status }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     let keywordWhere: any = null;
@@ -245,7 +246,7 @@ class ArticleService {
       ];
     }
     const result = await articleModel.findAndCountAll({
-      where: { [Op.or]: keywordWhere },
+      where: { [Op.or]: keywordWhere, status },
       distinct: true,
       limit,
       offset,

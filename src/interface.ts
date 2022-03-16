@@ -86,6 +86,15 @@ export interface ILink {
   url: string;
   status?: number;
 }
+export interface IWorks {
+  id?: number;
+  name: string;
+  desc: string;
+  url: string;
+  bg_url: string;
+  priority: string;
+  status: number;
+}
 
 export interface ITag {
   id?: number;

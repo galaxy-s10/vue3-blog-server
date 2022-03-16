@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+
 import userController from '@/controller/user.controller';
 import { verifyProp } from '@/middleware/user.middleware';
 

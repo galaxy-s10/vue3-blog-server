@@ -203,6 +203,7 @@ class QqUserController {
         oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
         openid: OauthInfo.openid,
       });
+      console.log(qqUserInfo, 3333333);
       if (qqUserInfo.ret < 0) throw new Error(JSON.stringify(qqUserInfo));
       // 先判断当前的应用是否存在这个qq用户
       const isExist = await qqUserService.isExistClientIdUnionid(

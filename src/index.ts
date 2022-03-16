@@ -1,9 +1,10 @@
+import path from 'path';
+
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
 import staticService from 'koa-static'; // CJS: require('koa-static')
-import path from 'path';
 
 import aliasOk from './app/alias';
 import emitError from './app/handler/emit-error';
@@ -13,7 +14,7 @@ import useRoutes from './router/index';
 
 aliasOk();
 
-const { _SUCCESS } = require('@/app/chalkTip');
+const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
 
@@ -58,5 +59,5 @@ app.useRoutes();
 app.on('error', errorHandler); // 全局错误处理
 
 app.listen(port, () => {
-  console.log(_SUCCESS(`监听${port}端口成功!`));
+  console.log(chalkSUCCESS(`监听${port}端口成功!`));
 });

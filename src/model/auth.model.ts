@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { initTable } from '@/utils';
+
 import sequelize from '@/config/db';
+import { initTable } from '@/utils';
 
 const authModel = sequelize.define(
   'auth',

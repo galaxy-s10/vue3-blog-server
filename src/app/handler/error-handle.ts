@@ -1,8 +1,10 @@
-import { Context } from 'koa';
 import path from 'path';
-import { _ERROR, _chalk } from '../chalkTip';
-// import logService from '@/service/log.service';
+
+import { Context } from 'koa';
+
 import { authJwt } from '../authJwt';
+import { chalkERROR, chalk } from '../chalkTip';
+// import logService from '@/service/log.service';
 
 const errorHandler = ({
   ctx,
@@ -17,17 +19,17 @@ const errorHandler = ({
 }) => {
   if (ctx) {
     console.log(
-      _ERROR(
+      chalkERROR(
         `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
       )
     );
     // 如果捕获的错误有ctx，代表是接口地址报错
-    console.log(_chalk.redBright(`code: ${code}`));
-    console.log(_chalk.redBright(`params:`), ctx.params);
-    console.log(_chalk.redBright(`body:`), ctx.request.body);
-    console.log(_chalk.redBright(`error: ${error}`));
-    console.log(_chalk.redBright(`stack: ${error.stack}`));
-    console.log(_chalk.redBright(`message: ${message}`));
+    console.log(chalk.redBright(`code: ${code}`));
+    console.log(chalk.redBright(`params:`), ctx.params);
+    console.log(chalk.redBright(`body:`), ctx.request.body);
+    console.log(chalk.redBright(`error: ${error}`));
+    console.log(chalk.redBright(`stack: ${error.stack}`));
+    console.log(chalk.redBright(`message: ${message}`));
 
     let status;
     let defaultMessage;
@@ -80,14 +82,14 @@ const errorHandler = ({
     });
 
     console.log(
-      _ERROR(
+      chalkERROR(
         `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`
       )
     );
   } else {
-    console.log(_ERROR(`↓↓↓↓↓↓↓↓↓↓ 接收到未知报错 ↓↓↓↓↓↓↓↓↓↓`));
+    console.log(chalkERROR(`↓↓↓↓↓↓↓↓↓↓ 接收到未知报错 ↓↓↓↓↓↓↓↓↓↓`));
     console.log(arguments);
-    console.log(_ERROR(`↑↑↑↑↑↑↑↑↑↑ 接收到未知报错 ↑↑↑↑↑↑↑↑↑↑`));
+    console.log(chalkERROR(`↑↑↑↑↑↑↑↑↑↑ 接收到未知报错 ↑↑↑↑↑↑↑↑↑↑`));
   }
 };
 

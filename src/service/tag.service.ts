@@ -2,11 +2,11 @@ import Sequelize from 'sequelize';
 
 import { ITag } from '@/interface';
 import articleModel from '@/model/article.model';
+import commentModel from '@/model/comment.model';
+import starModel from '@/model/star.model';
 import tagModel from '@/model/tag.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
-import commentModel from '@/model/comment.model';
-import starModel from '@/model/star.model';
 
 const { Op, fn, col, literal } = Sequelize;
 

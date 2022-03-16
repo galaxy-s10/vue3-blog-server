@@ -1,7 +1,8 @@
 import Router from 'koa-router';
 
 const fs = require('fs');
-const { _SUCCESS } = require('@/app/chalkTip');
+
+const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const router = new Router();
 
@@ -14,7 +15,7 @@ function useRoutes() {
     // router.use('/front', linkRouter.routes()).use(linkRouter.allowedMethods());
     router.use('/admin', linkRouter.routes()).use(linkRouter.allowedMethods());
     this.use(router.routes()).use(router.allowedMethods());
-    console.log(_SUCCESS(`加载${file}路由`));
+    console.log(chalkSUCCESS(`加载${file}路由`));
   });
 }
 

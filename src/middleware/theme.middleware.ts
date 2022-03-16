@@ -1,5 +1,6 @@
-import { Context } from 'koa';
 import Joi from 'joi';
+import { Context } from 'koa';
+
 import emitError from '@/app/handler/emit-error';
 
 export const verifyProp = async (ctx: Context, next) => {

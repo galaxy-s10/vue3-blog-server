@@ -1,34 +1,22 @@
 import { Context } from 'koa';
+
 import { authJwt } from '@/app/authJwt';
-import { _INFO } from '@/app/chalkTip';
+import { chalkINFO } from '@/app/chalkTip';
 import emitError from '@/app/handler/emit-error';
 
 const whiteList = [
-  '/admin/user/login',
-  '/admin/user/create',
-  '/user/create',
-  '/user/login',
   '/init/role',
   '/init/auth',
   '/init/roleAuth',
   '/init/dayData',
-  '/tag/list',
-  '/type/list',
-  '/article/list',
-  '/article/find',
-  '/user/list',
-  '/star/list',
-  '/comment/article',
-  '/comment/comment',
-  '/music/list',
-  '/link/list',
   '/visitor_log/create',
+  '/link/create',
 ];
 
 const verify = async (ctx: Context, next) => {
   const url = ctx.request.path;
   console.log(
-    _INFO(
+    chalkINFO(
       `↓↓↓↓↓↓↓↓↓↓ ${new Date().toLocaleString()} 监听 ${
         ctx.request.method
       } ${url} 开始 ↓↓↓↓↓↓↓↓↓↓`
@@ -37,7 +25,7 @@ const verify = async (ctx: Context, next) => {
   try {
     const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
     if (isAdmin) {
-      console.log(_INFO('当前请求的是后台接口'));
+      console.log(chalkINFO('当前请求的是后台接口'));
       const jwtResult = await authJwt(ctx.req);
       if (jwtResult.code !== 200) {
         emitError({
@@ -55,7 +43,7 @@ const verify = async (ctx: Context, next) => {
         await next();
       }
     } else {
-      console.log(_INFO('当前请求的是前台接口'));
+      console.log(chalkINFO('当前请求的是前台接口'));
       if (ctx.request.method === 'GET' || whiteList.indexOf(url) !== -1) {
         await next();
       } else {
@@ -86,7 +74,7 @@ const verify = async (ctx: Context, next) => {
     };
   }
   console.log(
-    _INFO(
+    chalkINFO(
       `↑↑↑↑↑↑↑↑↑↑ ${new Date().toLocaleString()} 监听 ${
         ctx.request.method
       } ${url} 结束 ↑↑↑↑↑↑↑↑↑↑`

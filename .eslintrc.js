@@ -1,11 +1,20 @@
+const chalk = require('chalk');
+
+console.log(
+  `${chalk.bgBlueBright.black(' INFO ')} ${chalk.blueBright(
+    `读取了: ${__filename.slice(__dirname.length + 1)}`
+  )}`
+);
+
 module.exports = {
   env: {
     browser: true,
-    commonjs: true,
+    node: true,
     // es2021: true,
   },
   extends: [
-    'airbnb-base', // airbnb的eslint规范，indent：2，即一个缩进两个空格，qutoes：single，即单引号，max-len：一行100
+    'eslint:recommended',
+    'plugin:import/recommended',
     'plugin:prettier/recommended', // prettierrc配置文件声明了singleQuote:true,即单引号，printWidth：80，即一行80，且prettier默认一个缩进四个空格
   ],
   parserOptions: {
@@ -13,7 +22,7 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: [],
+  plugins: ['import'],
   overrides: [
     {
       files: ['*.ts'],
@@ -26,18 +35,35 @@ module.exports = {
           jsx: true,
         },
       },
-      plugins: ['@typescript-eslint'],
-      extends: ['airbnb-base', 'plugin:prettier/recommended'],
+      plugins: ['@typescript-eslint', 'import'],
+      extends: [
+        'eslint:recommended',
+        'plugin:import/recommended',
+        'plugin:prettier/recommended', // prettierrc配置文件声明了singleQuote:true,即单引号，printWidth：80，即一行80，且prettier默认一个缩进四个空格
+      ],
       rules: {
         // '@typescript-eslint/no-var-requires': 0, // 关闭这条规则，否则，ts中不能使用类似 var foo = require("foo")的语句，但可以使用类似require("foo")的语句
         'no-console': 0, // 此规则不允许调用console对象的方法。
-        // camelcase: [
-        //   'error',
-        //   {
-        //     properties: 'never',
-        //     ignoreDestructuring: true,
-        //   },
-        // ],
+        'import/order': [
+          'error',
+          {
+            groups: [
+              'builtin',
+              'external',
+              'internal',
+              ['sibling', 'parent'],
+              'index',
+              'object',
+              'type',
+            ],
+            'newlines-between': 'always', // 强制或禁止导入组之间的新行：
+            // 根据导入路径按字母顺序对每个组内的顺序进行排序
+            alphabetize: {
+              order: 'asc' /* 按升序排序。选项：['ignore', 'asc', 'desc'] */,
+              caseInsensitive: true /* 忽略大小写。选项：[true, false] */,
+            },
+          },
+        ],
         camelcase: 0,
         'import/no-unresolved': 0, // 导入资源的时候没有后缀会报这个错，这里关掉他
         'import/extensions': 0, // 省略导入源路径中的文件扩展名
@@ -71,6 +97,26 @@ module.exports = {
       // 'FunctionExpression',
       // 'ForInStatement',
       { selector: 'ForInStatement', message: '不建议使用for in' },
+    ],
+    'import/order': [
+      'error',
+      {
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          ['sibling', 'parent'],
+          'index',
+          'object',
+          'type',
+        ],
+        'newlines-between': 'always', // 强制或禁止导入组之间的新行：
+        // 根据导入路径按字母顺序对每个组内的顺序进行排序
+        alphabetize: {
+          order: 'asc' /* 按升序排序。选项：['ignore', 'asc', 'desc'] */,
+          caseInsensitive: true /* 忽略大小写。选项：[true, false] */,
+        },
+      },
     ],
     'guard-for-in': 0, // 当for in循环不使用if语句过滤其结果时，它会发出警告
     'no-nested-ternary': 0, // 禁止嵌套三元
