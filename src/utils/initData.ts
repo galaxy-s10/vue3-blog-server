@@ -44,8 +44,9 @@ const initAuth = () => {
   let id = 1;
   const authResult = [];
   auth.forEach((v) => {
+    id += 1;
     v.p_id = 0;
-    v.id = id++;
+    v.id = id;
     authResult.push(v);
   });
 
@@ -132,8 +133,9 @@ const initRoleAuth = () => {
   const roleAuth = [];
   let id = 1;
   auth.forEach((v) => {
+    id += 1;
     roleAuth.push({
-      id: id++,
+      id,
       role_id: 4,
       auth_id: v.id,
     });

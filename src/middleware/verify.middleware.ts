@@ -11,6 +11,7 @@ const whiteList = [
   '/init/dayData',
   '/visitor_log/create',
   '/link/create',
+  '/qiniu/upload',
 ];
 
 const verify = async (ctx: Context, next) => {

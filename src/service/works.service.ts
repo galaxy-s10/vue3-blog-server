@@ -6,7 +6,7 @@ import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-class worksService {
+class WorksService {
   /** 作品是否存在 */
   async isExist(link_ids: number[]) {
     const res = await worksModel.findAll({
@@ -72,4 +72,4 @@ class worksService {
   }
 }
 
-export default new worksService();
+export default new WorksService();

@@ -9,8 +9,11 @@ import staticService from 'koa-static'; // CJS: require('koa-static')
 import aliasOk from './app/alias';
 import emitError from './app/handler/emit-error';
 import errorHandler from './app/handler/error-handle';
+import { connectDb } from './config/db';
 import verifyHandler from './middleware/verify.middleware';
 import useRoutes from './router/index';
+
+import '@/utils/backupsDb';
 
 aliasOk();
 
@@ -53,8 +56,15 @@ app.use(verifyHandler); // 注意顺序，需要在所有路由加载前进行�
 
 // @ts-ignore
 app.useRoutes = useRoutes;
-// @ts-ignore
-app.useRoutes();
+
+connectDb()
+  .then(() => {
+    // @ts-ignore
+    app.useRoutes();
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 app.on('error', errorHandler); // 全局错误处理
 

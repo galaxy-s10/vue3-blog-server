@@ -8,8 +8,6 @@ import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 
 const fs = require('fs');
 
-// const Sequelize = require('sequelize');
-
 const sequelize = new Sequelize(
   mysqlConfig.database,
   mysqlConfig.username,
@@ -93,26 +91,23 @@ const init = async (v) => {
   }
 };
 
-(async () => {
-  console.log(
-    chalkINFO(`开始连接${mysqlConfig.host}的${mysqlConfig.database}数据库...`)
-  );
+export const connectDb = async () => {
   try {
-    await sequelize.authenticate();
     console.log(
-      chalkSUCCESS(
-        `连接${mysqlConfig.host}的${mysqlConfig.database}数据库成功!`
-      )
+      chalkINFO(`开始连接${mysqlConfig.host}的${mysqlConfig.database}数据库...`)
     );
+    await sequelize.authenticate();
+    const okMsg = `连接${mysqlConfig.host}的${mysqlConfig.database}数据库成功!`;
+    console.log(chalkSUCCESS(okMsg));
     // init(1); //初始化数据库
     // init(2); //校正数据库
     init(3);
-  } catch (err) {
-    console.error(
-      chalkERROR(`连接${mysqlConfig.host}的${mysqlConfig.database}数据库失败!`),
-      err
-    );
+    return okMsg;
+  } catch (error) {
+    const errMsg = `连接${mysqlConfig.host}的${mysqlConfig.database}数据库失败!`;
+    console.error(chalkERROR(errMsg), error);
+    throw new Error(errMsg);
   }
-})();
+};
 
 export default sequelize;

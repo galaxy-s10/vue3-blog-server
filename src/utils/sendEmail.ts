@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-import { qq_email_user, qq_email_pass } from '../config/secret';
+import { qq_email_user, qq_email_pass } from '@/config/secret';
 
 class sendEmail {
   from: any;
