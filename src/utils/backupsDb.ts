@@ -96,8 +96,6 @@ const conner = () => {
       password: sshConfig.password,
     });
 };
-conner();
-
 // https://github.com/node-schedule/node-schedule#cron-style-scheduling
 // 每分钟的第30秒触发： '30 * * * * *'
 // 每小时的1分30秒触发 ：'30 1 * * * *'
@@ -105,8 +103,23 @@ conner();
 // 每月的1日1点1分30秒触发 ：'30 1 1 1 * *'
 // 2016年的1月1日1点1分30秒触发 ：'30 1 1 1 2016 *'
 // 每周1的1点1分30秒触发 ：'30 1 1 * * 1'
-// schedule.scheduleJob('0 0 0 * * *', () => {
-schedule.scheduleJob('*/50 * * * * *', () => {
-  console.log('每24小时备份一次数据库');
-  // conner();
+// 上面的太反人类了。
+const rule = new schedule.RecurrenceRule();
+// 每隔10秒执行，设置 rule.second =[0,10,20,30,40,50]即可。
+// 每秒执行就是rule.second =[0,1,2,3......59]
+// 每分钟0秒执行就是rule.second =0
+// 每小时30分执行就是rule.minute =30;rule.second =0;
+// 每天0点执行就是rule.hour =0;rule.minute =0;rule.second =0;
+// 每月1号的10点就是rule.date =1;rule.hour =10;rule.minute =0;rule.second =0;
+// 每周1，3，5的0点和12点就是rule.dayOfWeek =[1,3,5];rule.hour =[0,12];rule.minute =0;rule.second =0;
+
+// const allSecond = []; // [0,1,2,3,4,5.....59]
+// for (let i = 0; i < 60; i += 1) {
+//   allSecond.push(i);
+// }
+// rule.second = allSecond;
+rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22];
+schedule.scheduleJob(rule, () => {
+  console.log('每3小时备份一次数据库');
+  conner();
 });
