@@ -41,6 +41,7 @@ class TagService {
       attributes: {
         include: [],
       },
+      distinct: true,
     });
     result.rows.forEach((item) => {
       const v = item.get();

@@ -74,6 +74,20 @@ const qqUserModel = sequelize.define(
     },
   },
   {
+    indexes: [
+      {
+        name: 'client_id',
+        fields: ['client_id'],
+      },
+      {
+        name: 'openid',
+        fields: ['openid'],
+      },
+      {
+        name: 'unionid',
+        fields: ['unionid'],
+      },
+    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',

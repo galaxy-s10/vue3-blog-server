@@ -2,6 +2,7 @@ import Sequelize from 'sequelize';
 
 import { ILog } from '@/interface';
 import logModel from '@/model/log.model';
+import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
@@ -19,9 +20,15 @@ class LogService {
   }
 
   /** 获取日志列表 */
-  async getList(props) {
-    const res = await logModel.findAndCountAll(props);
-    return res;
+  async getList({ nowPage, pageSize, orderBy, orderName }) {
+    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
+    const limit = parseInt(pageSize, 10);
+    const result = await logModel.findAndCountAll({
+      order: [[orderName, orderBy]],
+      limit,
+      offset,
+    });
+    return handlePaging(nowPage, pageSize, result);
   }
 
   /** 查找日志 */

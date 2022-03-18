@@ -8,8 +8,18 @@ import logService from '@/service/log.service';
 class LogController {
   async getList(ctx: Context, next) {
     try {
-      const prop = ctx.request.body;
-      const result = await logService.getList(prop);
+      const {
+        nowPage = '1',
+        pageSize = '10',
+        orderBy = 'asc',
+        orderName = 'id',
+      } = ctx.request.query;
+      const result = await logService.getList({
+        nowPage,
+        pageSize,
+        orderBy,
+        orderName,
+      });
       successHandler({ ctx, data: result });
     } catch (error) {
       errorHandler({ ctx, code: 400, error });

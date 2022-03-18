@@ -64,7 +64,7 @@ module.exports = {
         'import/extensions': 0, // 省略导入源路径中的文件扩展名
         // 'no-unused-expressions': [2, { allowShortCircuit: true }], // 期望一个赋值或函数调用，却看到了一个表达式，允许&&
         'class-methods-use-this': 0, // 类方法如果不使用this的话会报错
-        // 'import/prefer-default-export': 0, // 当模块只有一个导出时，更喜欢使用默认导出而不是命名导出。
+        'import/prefer-default-export': 0, // 当模块只有一个导出时，更喜欢使用默认导出而不是命名导出。
         // 'object-curly-newline': [
         //   // 在打开大括号之后和关闭大括号之前强制执行一致的换行符，这条规则和prettier冲突
         //   'error',

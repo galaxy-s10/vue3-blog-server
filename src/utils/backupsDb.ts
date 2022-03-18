@@ -102,7 +102,7 @@ const conner = () => {
 // 2016年的1月1日1点1分30秒触发 ：'30 1 1 1 2016 *'
 // 每周1的1点1分30秒触发 ：'30 1 1 * * 1'
 // 上面的太反人类了。
-const rule = new schedule.RecurrenceRule();
+
 // 每隔10秒执行，设置 rule.second =[0,10,20,30,40,50]即可。
 // 每秒执行就是rule.second =[0,1,2,3......59]
 // 每分钟0秒执行就是rule.second =0
@@ -117,16 +117,16 @@ const rule = new schedule.RecurrenceRule();
 // }
 // rule.second = allSecond;
 /**
+ * rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22]
  * 每三小时执行一次，切记还要添加rule.minute = 0，否则会造成如：到了00：00：00的时候，执行了任务
  * 00：01：00，又会一次执行任务，00：02：00，又会一次执行任务，以此类推，直到00：59：00，还会一次执行任务，
  * 等到了01：00：00时候才不会执行，后面的也是以此类推，因此得加上rule.minute = 0才可以，
  * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
  */
-
-// rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22];
+const rule = new schedule.RecurrenceRule();
 rule.hour = [0, 12];
 rule.minute = 0;
-schedule.scheduleJob(rule, () => {
-  console.log('执行定时任务', dayjs().format('YYYY-MM-DD HH:mm:ss'));
+export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
+  console.log('执行dbJob定时任务', dayjs().format('YYYY-MM-DD HH:mm:ss'));
   conner();
 });

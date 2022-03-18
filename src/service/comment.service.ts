@@ -24,6 +24,18 @@ class CommentService {
     return res.length === comment_ids.length;
   }
 
+  /** 获取评论列表 */
+  async getList({ nowPage, pageSize, orderBy, orderName }) {
+    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
+    const limit = parseInt(pageSize, 10);
+    const result = await commentModel.findAndCountAll({
+      order: [[orderName, orderBy]],
+      limit,
+      offset,
+    });
+    return handlePaging(nowPage, pageSize, result);
+  }
+
   /** 文章评论列表 */
   async getArticleCommentList({
     article_id,

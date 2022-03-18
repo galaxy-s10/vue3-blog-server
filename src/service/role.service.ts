@@ -1,8 +1,8 @@
 import Sequelize from 'sequelize';
 
 import { IRole } from '@/interface';
+import authModel from '@/model/auth.model';
 import roleModel from '@/model/role.model';
-import roleAuthModel from '@/model/roleAuth.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
@@ -26,12 +26,13 @@ class RoleService {
     const result = await roleModel.findAndCountAll({
       include: [
         {
-          model: roleAuthModel,
+          model: authModel,
         },
       ],
       order: [[orderName, orderBy]],
       limit,
       offset,
+      distinct: true,
     });
     return handlePaging(nowPage, pageSize, result);
   }

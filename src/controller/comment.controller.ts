@@ -10,6 +10,27 @@ import positionService from '@/service/position.service';
 import userService from '@/service/user.service';
 
 class CommentController {
+  async getList(ctx: Context, next) {
+    try {
+      const {
+        nowPage = '1',
+        pageSize = '10',
+        orderBy = 'asc',
+        orderName = 'id',
+      } = ctx.request.query;
+      const result = await commentService.getList({
+        nowPage,
+        pageSize,
+        orderBy,
+        orderName,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      errorHandler({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
   async getArticleCommentList(ctx: Context, next) {
     try {
       const article_id = +ctx.params.article_id;
