@@ -10,6 +10,7 @@ const whiteList = [
   '/init/roleAuth',
   '/init/dayData',
   '/visitor_log/create',
+  '/user/login', // 这个接口是post的
   '/link/create',
   '/qiniu/upload',
 ];

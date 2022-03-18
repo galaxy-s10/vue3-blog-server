@@ -123,7 +123,8 @@ const rule = new schedule.RecurrenceRule();
  * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
  */
 
-rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22];
+// rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22];
+rule.hour = [0, 12];
 rule.minute = 0;
 schedule.scheduleJob(rule, () => {
   console.log('执行定时任务', dayjs().format('YYYY-MM-DD HH:mm:ss'));
