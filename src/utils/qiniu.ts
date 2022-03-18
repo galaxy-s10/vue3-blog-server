@@ -88,7 +88,7 @@ class QiniuModel {
     const bucket = 'hssblog';
     const key = filename;
     return new Promise((resolve, reject) => {
-      bucketManager.delete(bucket, key, function (err, respBody, respInfo) {
+      bucketManager.delete(bucket, key, (err, respBody, respInfo) => {
         if (respInfo.statusCode === 200) {
           resolve({ respInfo });
         } else {
@@ -101,10 +101,7 @@ class QiniuModel {
   // 获取七牛云文件
   getList(prefix, limit, marker) {
     const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
-    const config = new qiniu.conf.Config();
-    // config.useHttpsDomain = true;
-    // @ts-ignore
-    config.zone = qiniu.zone.Zone_z2;
+    const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     const bucket = 'hssblog';
     // var options = {
@@ -114,27 +111,20 @@ class QiniuModel {
     // };
     const options = {};
     return new Promise((resolve, reject) => {
-      bucketManager.listPrefix(
-        bucket,
-        options,
-        function (err, respBody, respInfo) {
-          if (respInfo.statusCode === 200) {
-            resolve({ respInfo });
-          } else {
-            reject({ err });
-          }
+      bucketManager.listPrefix(bucket, options, (err, respBody, respInfo) => {
+        if (respInfo.statusCode === 200) {
+          resolve({ respInfo });
+        } else {
+          reject({ err });
         }
-      );
+      });
     });
   }
 
   // 修改七牛云文件
   updateQiniu(srcBucket, srcKey, destBucket, destKey) {
     const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
-    const config = new qiniu.conf.Config();
-    // config.useHttpsDomain = true;
-    // @ts-ignore
-    config.zone = qiniu.zone.Zone_z0;
+    const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 
     // var srcBucket;      //源空间
@@ -153,7 +143,7 @@ class QiniuModel {
         destBucket,
         destKey,
         options,
-        function (err, respBody, respInfo) {
+        (err, respBody, respInfo) => {
           if (respInfo.statusCode === 200) {
             resolve({ respInfo });
           } else {

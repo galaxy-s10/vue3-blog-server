@@ -7,13 +7,14 @@ import etag from 'koa-etag';
 import staticService from 'koa-static'; // CJS: require('koa-static')
 
 import aliasOk from './app/alias';
+import { chalkINFO, chalkWRAN } from './app/chalkTip';
 import emitError from './app/handler/emit-error';
 import errorHandler from './app/handler/error-handle';
 import { connectDb } from './config/db';
 import verifyHandler from './middleware/verify.middleware';
 import useRoutes from './router/index';
 
-import '@/utils/backupsDb';
+// import '@/utils/backupsDb';
 
 aliasOk();
 
@@ -61,6 +62,13 @@ connectDb()
   .then(() => {
     // @ts-ignore
     app.useRoutes();
+    if (process.env.REACT_BLOG_SERVER_ENV === 'development') {
+      console.log(chalkWRAN('本地开发模式，不执行定时任务'));
+    } else {
+      console.log(chalkINFO('非本地开发模式，执行定时任务'));
+      // eslint-disable-next-line global-require
+      require('@/utils/backupsDb');
+    }
   })
   .catch((error) => {
     console.log(error);

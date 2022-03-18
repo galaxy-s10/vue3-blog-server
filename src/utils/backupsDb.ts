@@ -2,10 +2,8 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
-import { chalkINFO } from '@/app/chalkTip';
 import { mysqlConfig, sshConfig } from '@/config/secret';
 import qiniuController from '@/utils/qiniu';
-
 // 备份目录
 const backupsDirectory = '/node/backups/';
 
@@ -50,7 +48,7 @@ const conner = () => {
               qiniuController
                 .uploadBackupsDb(`${backupsDirectory + fileName}.sql`)
                 .then(() => {
-                  console.log('备份成功');
+                  console.log('备份成功!');
                 })
                 .catch((err) => {
                   console.log('备份失败!', err);
@@ -118,8 +116,16 @@ const rule = new schedule.RecurrenceRule();
 //   allSecond.push(i);
 // }
 // rule.second = allSecond;
+/**
+ * 每三小时执行一次，切记还要添加rule.minute = 0，否则会造成如：到了00：00：00的时候，执行了任务
+ * 00：01：00，又会一次执行任务，00：02：00，又会一次执行任务，以此类推，直到00：59：00，还会一次执行任务，
+ * 等到了01：00：00时候才不会执行，后面的也是以此类推，因此得加上rule.minute = 0才可以，
+ * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
+ */
+
 rule.hour = [0, 3, 6, 9, 12, 14, 16, 18, 20, 22];
+rule.minute = 0;
 schedule.scheduleJob(rule, () => {
-  console.log('每3小时备份一次数据库');
+  console.log('执行定时任务', dayjs().format('YYYY-MM-DD HH:mm:ss'));
   conner();
 });
