@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IFrontend } from '@/interface';
 import frontendService from '@/service/frontend.service';
@@ -11,7 +11,7 @@ class FrontendController {
       const result = await frontendService.find(1);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -20,7 +20,7 @@ class FrontendController {
     try {
       successHandler({ ctx, data: 111 });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -49,7 +49,7 @@ class FrontendController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import { ILog } from '@/interface';
 import logService from '@/service/log.service';
@@ -22,7 +22,7 @@ class LogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class LogController {
       const result = await logService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -56,7 +56,7 @@ class LogController {
       }: ILog = ctx.request.body;
       const isExist = await logService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的日志!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的日志!` });
         return;
       }
       const result = await logService.update({
@@ -75,7 +75,7 @@ class LogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -110,7 +110,7 @@ class LogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -120,13 +120,13 @@ class LogController {
       const id = +ctx.params.id;
       const isExist = await logService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的日志!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的日志!` });
         return;
       }
       const result = await logService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

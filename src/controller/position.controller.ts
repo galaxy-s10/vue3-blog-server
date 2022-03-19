@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import positionService from '@/service/position.service';
 
@@ -12,7 +12,7 @@ class PositionController {
       );
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

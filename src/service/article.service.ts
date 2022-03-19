@@ -14,7 +14,6 @@ const { fn, Op, col, literal } = Sequelize;
 class ArticleService {
   /** 文章是否存在 */
   async isExist(article_ids: number[]) {
-    console.log(article_ids, 2222);
     const res = await articleModel.findAll({
       where: {
         id: {

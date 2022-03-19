@@ -2,8 +2,7 @@ import { Context } from 'koa';
 import request from 'request';
 
 import { signJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/emit-error';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import {
   www_qq_client_id,
@@ -179,9 +178,7 @@ class QqUserController {
   login = async (ctx: Context, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
-      const { origin, host } = ctx.request;
-      console.log('originorigin', origin);
-      console.log('ctx.requestctx.request', ctx.request);
+      const { host } = ctx.request;
       const platformMap = {
         'www.hsslive.cn': 'www',
         'admin.hsslive.cn': 'admin',
@@ -203,7 +200,6 @@ class QqUserController {
         oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
         openid: OauthInfo.openid,
       });
-      console.log(qqUserInfo, 3333333);
       if (qqUserInfo.ret < 0) throw new Error(JSON.stringify(qqUserInfo));
       // 先判断当前的应用是否存在这个qq用户
       const isExist = await qqUserService.isExistClientIdUnionid(
@@ -336,7 +332,7 @@ class QqUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -347,7 +343,7 @@ class QqUserController {
       const result = await qqUserService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -388,7 +384,7 @@ class QqUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -398,13 +394,13 @@ class QqUserController {
       const id = +ctx.params.id;
       const isExist = await qqUserService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的qq用户!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的qq用户!` });
         return;
       }
       const result = await qqUserService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

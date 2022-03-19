@@ -1,8 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/emit-error';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import { IArticle } from '@/interface';
 import articleService from '@/service/article.service';
@@ -67,7 +66,7 @@ class ArticleController {
       const result = await articleService.find(id, from_user_id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -97,7 +96,7 @@ class ArticleController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -119,7 +118,7 @@ class ArticleController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

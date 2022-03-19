@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IComment } from '@/interface';
 import articleService from '@/service/article.service';
@@ -26,7 +26,7 @@ class CommentController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -69,7 +69,7 @@ class CommentController {
       // });
       // successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -80,7 +80,7 @@ class CommentController {
       const result = await commentService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -91,13 +91,13 @@ class CommentController {
       const { name, color }: IComment = ctx.request.body;
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
       const result = await commentService.update({ id, name, color });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -138,7 +138,6 @@ class CommentController {
       if (!userIsExist) {
         throw new Error(`不存在id为${[to_user_id]}的用户!`);
       }
-      console.log('ssssssss');
       const ua = ctx.request.headers['user-agent'];
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
       const ip_data = await positionService.get(ip);
@@ -155,7 +154,7 @@ class CommentController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -186,8 +185,7 @@ class CommentController {
       });
       successHandler({ ctx, data: { ...result } });
     } catch (error) {
-      console.log(error, 222221);
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -202,7 +200,6 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
-      console.log(ctx.request.query);
       const { code, userInfo } = await authJwt(ctx.request);
       let from_user_id = -1;
       if (code === 200) {
@@ -219,7 +216,7 @@ class CommentController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -229,13 +226,13 @@ class CommentController {
       const id = +ctx.params.id;
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
       const result = await commentService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

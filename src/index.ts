@@ -9,7 +9,6 @@ import staticService from 'koa-static'; // CJS: require('koa-static')
 import aliasOk from './app/alias';
 import { chalkINFO, chalkWRAN } from './app/chalkTip';
 import emitError from './app/handler/emit-error';
-import errorHandler from './app/handler/error-handle';
 import { connectDb } from './config/db';
 import verifyHandler from './middleware/verify.middleware';
 import useRoutes from './router/index';
@@ -74,7 +73,7 @@ connectDb()
     console.log(error);
   });
 
-app.on('error', errorHandler); // 全局错误处理
+app.on('error', emitError); // 全局错误处理
 
 app.listen(port, () => {
   console.log(chalkSUCCESS(`监听${port}端口成功!`));

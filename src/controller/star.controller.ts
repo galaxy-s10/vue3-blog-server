@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IStar } from '@/interface';
 import articleService from '@/service/article.service';
@@ -26,7 +26,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -37,7 +37,7 @@ class StarController {
       const result = await starService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -49,7 +49,7 @@ class StarController {
         ctx.request.body;
       const isExist = await starService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的star!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的star!` });
         return;
       }
       const result = await starService.update({
@@ -61,7 +61,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -97,7 +97,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -132,7 +132,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -162,7 +162,6 @@ class StarController {
       if (!userIsExist) {
         throw new Error(`不存在id为${[to_user_id]}的用户!`);
       }
-      console.log('llll');
       const result = await starService.create({
         article_id,
         to_user_id,
@@ -171,7 +170,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -205,7 +204,7 @@ class StarController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -215,13 +214,13 @@ class StarController {
       const id = +ctx.params.id;
       const isExist = await starService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的star!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的star!` });
         return;
       }
       const result = await starService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -232,7 +231,7 @@ class StarController {
       const articleIsExist =
         article_id === -1 ? true : await articleService.isExist([article_id]);
       if (!articleIsExist) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `不存在id为${article_id}的文章!`,
@@ -242,7 +241,7 @@ class StarController {
       const commentIsExist =
         comment_id === -1 ? true : await commentService.isExist([comment_id]);
       if (!commentIsExist) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `不存在id为${comment_id}的评论!`,
@@ -259,10 +258,9 @@ class StarController {
         comment_id,
         from_user_id,
       });
-      console.log(result, 22222);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

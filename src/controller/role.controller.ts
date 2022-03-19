@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IRole } from '@/interface';
 import roleService from '@/service/role.service';
@@ -22,7 +22,7 @@ class RoleController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class RoleController {
       const result = await roleService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -44,7 +44,7 @@ class RoleController {
       const { p_id, role_name, role_description }: IRole = ctx.request.body;
       const isExist = p_id === 0 ? true : await roleService.isExist([p_id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${p_id}的角色!` });
+        emitError({ ctx, code: 400, error: `不存在id为${p_id}的角色!` });
         return;
       }
       const result = await roleService.update({
@@ -55,7 +55,7 @@ class RoleController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -65,7 +65,7 @@ class RoleController {
       const { p_id, role_name, role_description }: IRole = ctx.request.body;
       const isExist = p_id === 0 ? true : await roleService.isExist([p_id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${p_id}的角色!` });
+        emitError({ ctx, code: 400, error: `不存在id为${p_id}的角色!` });
         return;
       }
       const result = await roleService.create({
@@ -75,7 +75,7 @@ class RoleController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -85,13 +85,13 @@ class RoleController {
       const id = +ctx.params.id;
       const isExist = await roleService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的角色!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的角色!` });
         return;
       }
       const result = await roleService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

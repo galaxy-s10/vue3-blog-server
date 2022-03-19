@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IThirdUser } from '@/interface';
 import thirdUserService from '@/service/thirdUser.service';
@@ -22,7 +22,7 @@ class ThirdUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class ThirdUserController {
       const result = await thirdUserService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -45,7 +45,7 @@ class ThirdUserController {
         ctx.request.body;
       const isExist = await thirdUserService.isExist([id]);
       if (!isExist) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `不存在id为${id}的第三方用户记录!`,
@@ -60,7 +60,7 @@ class ThirdUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -76,7 +76,7 @@ class ThirdUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -86,7 +86,7 @@ class ThirdUserController {
       const id = +ctx.params.id;
       const isExist = await thirdUserService.isExist([id]);
       if (!isExist) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `不存在id为${id}的第三方用户记录!`,
@@ -96,7 +96,7 @@ class ThirdUserController {
       const result = await thirdUserService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

@@ -179,7 +179,6 @@ class CommentService {
       };
       lastRes.push(obj);
     });
-    console.log(lastRes, 22222222211);
     return {
       ...handlePaging(nowPage, pageSize, { ...result, rows: lastRes }),
       total,
@@ -462,7 +461,6 @@ class CommentService {
         }
       );
     }
-    console.log(res, 2222222);
     return result;
   }
 }

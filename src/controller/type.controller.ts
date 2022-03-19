@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IType } from '@/interface';
 import typeService from '@/service/type.service';
@@ -22,7 +22,7 @@ class TypeController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class TypeController {
       const result = await typeService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -44,13 +44,13 @@ class TypeController {
       const { name }: IType = ctx.request.body;
       const isExist = await typeService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的分类!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的分类!` });
         return;
       }
       const result = await typeService.update({ id, name });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -61,7 +61,7 @@ class TypeController {
       const result = await typeService.create({ name });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -71,13 +71,13 @@ class TypeController {
       const id = +ctx.params.id;
       const isExist = await typeService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的分类!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的分类!` });
         return;
       }
       const result = await typeService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

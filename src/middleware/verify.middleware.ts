@@ -2,17 +2,18 @@ import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import { chalkINFO } from '@/app/chalkTip';
-import emitError from '@/app/handler/emit-error';
+import emitError from '@/app/handler/error-handle';
 
+// 白名单内的接口不需要判断token
 const whiteList = [
   '/init/role',
   '/init/auth',
   '/init/roleAuth',
   '/init/dayData',
-  '/visitor_log/create',
-  '/user/login', // 这个接口是post的
-  '/link/create',
-  '/qiniu/upload',
+  '/visitor_log/create', // 前台的这个接口是post的
+  '/user/login', // 前台的这个接口是post的
+  '/link/create', // 前台的这个接口是post的
+  '/admin/user/login', // 后台的这个接口是post的
 ];
 
 const verify = async (ctx: Context, next) => {
@@ -28,13 +29,17 @@ const verify = async (ctx: Context, next) => {
     const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
     if (isAdmin) {
       console.log(chalkINFO('当前请求的是后台接口'));
-      const jwtResult = await authJwt(ctx.req);
-      if (jwtResult.code !== 200) {
+      if (whiteList.indexOf(url) !== -1) {
+        await next();
+        return;
+      }
+      const { code, userInfo, message } = await authJwt(ctx.req);
+      if (code !== 200) {
         emitError({
           ctx,
-          code: jwtResult.code,
-          error: jwtResult.message,
-          message: jwtResult.message,
+          code,
+          error: message,
+          message,
         });
       } else {
         /**
@@ -48,32 +53,35 @@ const verify = async (ctx: Context, next) => {
       console.log(chalkINFO('当前请求的是前台接口'));
       if (ctx.request.method === 'GET' || whiteList.indexOf(url) !== -1) {
         await next();
+        return;
+      }
+      const { code, userInfo, message } = await authJwt(ctx.req);
+      if (code !== 200) {
+        emitError({
+          ctx,
+          code,
+          error: message,
+          message,
+        });
       } else {
-        const jwtResult = await authJwt(ctx.req);
-        if (jwtResult.code !== 200) {
-          emitError({
-            ctx,
-            code: jwtResult.code,
-            error: jwtResult.message,
-            message: jwtResult.message,
-          });
-        } else {
-          /**
-           * 这里必须await next()，因为路由匹配肯定是先匹配这个app.use的，
-           * 如果这里匹配完成后直接next()了，就会返回数据了（404），也就是不会
-           * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
-           */
-          await next();
-        }
+        /**
+         * 因为这个verify.middleware是最先执行的中间件路由，
+         * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
+         * 必须使用await next()，如果这里使用next()，就会返回数据了（404），也就是不会
+         * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
+         */
+        await next();
+        return;
       }
     }
   } catch (error) {
-    // 代码逻辑报错也返回给前端，但这种情况开发时一般可以把握，不需要做这个兜底。
-    ctx.status = 500;
-    ctx.body = {
-      code: 500,
-      error: error.message,
-    };
+    // catch错误（不仅仅authJwt的错误，也包括了try里面的所有报错）返回给前端，但try里面的代码错误开发者尽量把握。
+    emitError({
+      ctx,
+      code: error.code,
+      error,
+      message: error.message,
+    });
   }
   console.log(
     chalkINFO(

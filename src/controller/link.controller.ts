@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { ILink } from '@/interface';
 import linkService from '@/service/link.service';
@@ -26,7 +26,7 @@ class LinkController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -37,7 +37,7 @@ class LinkController {
       const result = await linkService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -49,7 +49,7 @@ class LinkController {
         ctx.request.body;
       const isExist = await linkService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
       const result = await linkService.update({
@@ -63,7 +63,7 @@ class LinkController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -93,7 +93,7 @@ class LinkController {
       await emailMode.send();
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -103,13 +103,13 @@ class LinkController {
       const id = +ctx.params.id;
       const isExist = await linkService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
       const result = await linkService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

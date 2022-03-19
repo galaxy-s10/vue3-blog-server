@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IWorks } from '@/interface';
 import worksService from '@/service/works.service';
@@ -25,7 +25,7 @@ class worksController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -36,7 +36,7 @@ class worksController {
       const result = await worksService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -48,7 +48,7 @@ class worksController {
         ctx.request.body;
       const isExist = await worksService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
       const result = await worksService.update({
@@ -62,7 +62,7 @@ class worksController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -82,7 +82,7 @@ class worksController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -92,13 +92,13 @@ class worksController {
       const id = +ctx.params.id;
       const isExist = await worksService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
       const result = await worksService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

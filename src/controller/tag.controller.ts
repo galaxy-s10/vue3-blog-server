@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { ITag } from '@/interface';
 import tagService from '@/service/tag.service';
@@ -22,7 +22,7 @@ class TagController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class TagController {
       const result = await tagService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -44,13 +44,13 @@ class TagController {
       const { name, color }: ITag = ctx.request.body;
       const isExist = await tagService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
       const result = await tagService.update({ id, name, color });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -61,7 +61,7 @@ class TagController {
       const result = await tagService.create({ name, color });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -77,7 +77,7 @@ class TagController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -87,13 +87,13 @@ class TagController {
       const id = +ctx.params.id;
       const isExist = await tagService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
       const result = await tagService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

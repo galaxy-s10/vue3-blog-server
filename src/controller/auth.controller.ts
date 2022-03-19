@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';
@@ -22,7 +22,7 @@ class AuthController {
       });
       successHandler({ ctx, data: { rows, count } });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -32,7 +32,7 @@ class AuthController {
       const { rows, count } = await authService.getNestList();
       successHandler({ ctx, data: { rows, count } });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -43,7 +43,7 @@ class AuthController {
       const { rows, count } = await authService.getUserAuth(id);
       successHandler({ ctx, data: { rows, count } });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -54,7 +54,7 @@ class AuthController {
       const result = await authService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -65,7 +65,7 @@ class AuthController {
       const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
       const isExist = p_id === 0 ? true : await authService.isExist([p_id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
+        emitError({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
         return;
       }
       const result = await authService.update({
@@ -76,7 +76,7 @@ class AuthController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -86,7 +86,7 @@ class AuthController {
       const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
       const isExist = p_id === 0 ? true : await authService.isExist([p_id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
+        emitError({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
         return;
       }
       const result = await authService.create({
@@ -96,7 +96,7 @@ class AuthController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -106,13 +106,13 @@ class AuthController {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的权限!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
         return;
       }
       const result = await authService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

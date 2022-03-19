@@ -35,22 +35,24 @@ const successHandler = ({
   // 不手动设置状态的话，默认是404，delete方法返回400
   ctx.status = status;
   ctx.body = { code: status, data, message: message || defaultMessage };
-  if (!ctx.request.headers['x-real-ip']) return;
-  const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-  authJwt(ctx.request).then((res) => {
-    logService.create({
-      user_id: res.userInfo?.id || -1,
-      api_user_agent: ctx.request.headers['user-agent'],
-      api_sql_duration: data.sql_duration,
-      api_from: isAdmin ? 2 : 1,
-      api_body: JSON.stringify(ctx.request.body || {}),
-      api_query: JSON.stringify(ctx.query),
-      api_ip: ctx.request.headers['x-real-ip'] as string,
-      api_method: ctx.request.method,
-      api_hostname: ctx.request.hostname,
-      api_path: ctx.request.path,
+
+  if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
+    const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+    authJwt(ctx.request).then((res) => {
+      logService.create({
+        user_id: res.userInfo?.id || -1,
+        api_user_agent: ctx.request.headers['user-agent'],
+        api_sql_duration: data.sql_duration,
+        api_from: isAdmin ? 2 : 1,
+        api_body: JSON.stringify(ctx.request.body || {}),
+        api_query: JSON.stringify(ctx.query),
+        api_ip: ctx.request.headers['x-real-ip'] as string,
+        api_method: ctx.request.method,
+        api_hostname: ctx.request.hostname,
+        api_path: ctx.request.path,
+      });
     });
-  });
+  }
 };
 
 export default successHandler;

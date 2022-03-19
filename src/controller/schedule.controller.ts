@@ -2,7 +2,7 @@ import { Context } from 'koa';
 import schedule from 'node-schedule';
 
 import { authJwt } from '@/app/authJwt';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { dbJob } from '@/utils/backupsDb';
 
@@ -21,7 +21,7 @@ class ScheduleController {
         });
       }
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -30,11 +30,11 @@ class ScheduleController {
     try {
       const { code, userInfo, message } = await authJwt(ctx.request);
       if (code !== 200) {
-        errorHandler({ ctx, code: 400, error: message });
+        emitError({ ctx, code: 400, error: message });
         return;
       }
       if (userInfo.id !== 1) {
-        errorHandler({
+        emitError({
           ctx,
           code: 403,
           error: '权限不够哦~',
@@ -55,7 +55,7 @@ class ScheduleController {
         });
       }
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

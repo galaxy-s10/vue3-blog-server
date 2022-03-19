@@ -70,7 +70,6 @@ class VisitorLogService {
         [Op.between]: [startTime, endTime],
       };
     }
-    console.log(timeWhere, 2222);
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const result = await visitorLogModel.findAll({

@@ -2,8 +2,7 @@ import MD5 from 'crypto-js/md5';
 import { Context } from 'koa';
 
 import { authJwt, signJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/emit-error';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import { IList, IUser } from '@/interface';
 import User from '@/model/user.model';
@@ -21,7 +20,7 @@ class UserController {
       const { username, password, title, avatar }: IUser = ctx.request.body;
       const isExistSameName = await userService.isSameName(username);
       if (isExistSameName) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `已存在用户名为${username}的用户!`,
@@ -110,7 +109,7 @@ class UserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -121,7 +120,7 @@ class UserController {
       const result = await userService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -133,10 +132,10 @@ class UserController {
         const result = await userService.getUserInfo(userInfo?.id);
         successHandler({ ctx, data: result });
       } else {
-        errorHandler({ ctx, code, error: message });
+        emitError({ ctx, code, error: message });
       }
     } catch (error) {
-      errorHandler({ ctx, code: 401, error, message: error.message });
+      emitError({ ctx, code: 401, error, message: error.message });
     }
     await next();
   }
@@ -148,12 +147,12 @@ class UserController {
         ctx.request.body;
       const isExist = await userService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的用户!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的用户!` });
         return;
       }
       const isExistSameName = await userService.isSameName(username);
       if (isExistSameName && isExistSameName.id !== id) {
-        errorHandler({
+        emitError({
           ctx,
           code: 400,
           error: `已存在用户名为${username}的用户!`,
@@ -170,7 +169,7 @@ class UserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -180,13 +179,13 @@ class UserController {
       const id = +ctx.params.id;
       const isExist = await userService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的用户!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的用户!` });
         return;
       }
       const result = await userService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

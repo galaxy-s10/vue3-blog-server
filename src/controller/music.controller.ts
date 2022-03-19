@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IMusic } from '@/interface';
 import musicService from '@/service/music.service';
@@ -22,7 +22,7 @@ class MusicController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -33,7 +33,7 @@ class MusicController {
       const result = await musicService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -44,7 +44,7 @@ class MusicController {
       const { name, img, author, url, status }: IMusic = ctx.request.body;
       const isExist = await musicService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
         return;
       }
       const result = await musicService.update({
@@ -56,7 +56,7 @@ class MusicController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -73,7 +73,7 @@ class MusicController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -83,13 +83,13 @@ class MusicController {
       const id = +ctx.params.id;
       const isExist = await musicService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
         return;
       }
       const result = await musicService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

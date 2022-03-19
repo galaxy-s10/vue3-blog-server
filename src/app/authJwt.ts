@@ -29,6 +29,7 @@ const authJwt = (
         __dirname,
         `../model/user.model.ts`
       )).default;
+
       // 防止修改密码后，原本的token还能用
       const userResult = await userModel.findOne({
         attributes: {
@@ -38,7 +39,6 @@ const authJwt = (
           id: decode.userInfo.id,
         },
       });
-      console.log(userResult, 6666);
       if (!userResult) {
         // 防止token是正确的，但是这个用户已经被删除了。
         // eslint-disable-next-line prefer-promise-reject-errors

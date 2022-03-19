@@ -1,10 +1,9 @@
-import path from 'path';
-
 import { Context } from 'koa';
 
 import { authJwt } from '../authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
-// import logService from '@/service/log.service';
+
+import logService from '@/service/log.service';
 
 const errorHandler = ({
   ctx,
@@ -51,6 +50,8 @@ const errorHandler = ({
         status = 404;
         defaultMessage = '未找到!';
     }
+    // 不手动设置状态的话，默认是404（delete方法返回400），因此，即使走到了error-handle，且ctx.body返回了数据
+    // 但是没有手动设置status的话，一样返回不了数据，因为status状态码都返回404了。
     ctx.status = status;
     ctx.body = {
       code: status,
@@ -58,28 +59,29 @@ const errorHandler = ({
       stack: error.stack,
       message: message || defaultMessage,
     };
-    const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
 
-    authJwt(ctx.request).then((res) => {
-      // eslint-disable-next-line
-      const logService = require(path.resolve(
-        __dirname,
-        `../../service/log.service.ts`
-      )).default;
-      logService.create({
-        user_id: res.userInfo?.id || -1,
-        api_user_agent: ctx.request.headers['user-agent'],
-        api_from: isAdmin ? 2 : 1,
-        api_body: JSON.stringify(ctx.request.body || {}),
-        api_query: JSON.stringify(ctx.query),
-        api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
-        api_method: ctx.request.method,
-        api_hostname: ctx.request.hostname,
-        api_path: ctx.request.path,
-        api_err_msg: message || error.toString(),
-        api_err_stack: JSON.stringify(error.stack),
-      });
-    });
+    if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
+      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+      authJwt(ctx.request)
+        .then((res) => {
+          logService.create({
+            user_id: res.userInfo?.id || -1,
+            api_user_agent: ctx.request.headers['user-agent'],
+            api_from: isAdmin ? 2 : 1,
+            api_body: JSON.stringify(ctx.request.body || {}),
+            api_query: JSON.stringify(ctx.query),
+            api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
+            api_method: ctx.request.method,
+            api_hostname: ctx.request.hostname,
+            api_path: ctx.request.path,
+            api_err_msg: message || error.toString(),
+            api_err_stack: JSON.stringify(error.stack),
+          });
+        })
+        .catch((err) => {
+          console.log('error-handle的authJwt错误', err);
+        });
+    }
 
     console.log(
       chalkERROR(

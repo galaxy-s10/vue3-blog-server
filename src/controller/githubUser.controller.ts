@@ -2,8 +2,7 @@ import { Context } from 'koa';
 import request from 'request';
 
 import { signJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/emit-error';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/error-handle';
 import successHandler from '@/app/handler/success-handle';
 import {
   github_client_id,
@@ -107,8 +106,6 @@ class GithubUserController {
         },
         (error, response, body) => {
           if (!error) {
-            console.log(response, 3333);
-            console.log(body, 1111);
             resolve(JSON.parse(body));
           }
         }
@@ -131,13 +128,11 @@ class GithubUserController {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
       const accessToken = await this.getAccessToken(code);
-      console.log('获取access_token成功');
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
       let OauthInfo: any = await this.getMeOauth({
         access_token: accessToken.access_token,
       });
       const isExist = await githubUserService.isExist([OauthInfo.id]);
-      console.log(OauthInfo, 11111122);
       OauthInfo = {
         ...OauthInfo,
         github_id: OauthInfo.id,
@@ -236,7 +231,7 @@ class GithubUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -247,7 +242,7 @@ class GithubUserController {
       const result = await githubUserService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -280,7 +275,7 @@ class GithubUserController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -290,13 +285,13 @@ class GithubUserController {
       const id = +ctx.params.id;
       const isExist = await githubUserService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的github用户!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的github用户!` });
         return;
       }
       const result = await githubUserService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }

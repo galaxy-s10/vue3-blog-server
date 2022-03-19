@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
-import errorHandler from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import positionService from '@/service/position.service';
 import visitorLogService from '@/service/visitorLog.service';
@@ -16,7 +16,7 @@ class VisitorLogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -37,7 +37,7 @@ class VisitorLogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -62,7 +62,7 @@ class VisitorLogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -83,7 +83,7 @@ class VisitorLogController {
       });
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -100,7 +100,7 @@ class VisitorLogController {
           ip,
           user_id: userInfo?.id || -1,
         });
-        errorHandler({
+        emitError({
           ctx,
           code: 403,
           error: '检测到频繁操作，此ip已被禁用，请联系管理员处理!',
@@ -117,7 +117,7 @@ class VisitorLogController {
         successHandler({ ctx, data: result });
       }
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
@@ -127,13 +127,13 @@ class VisitorLogController {
       const id = +ctx.params.id;
       const isExist = await visitorLogService.isExist([id]);
       if (!isExist) {
-        errorHandler({ ctx, code: 400, error: `不存在id为${id}的访客日志!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的访客日志!` });
         return;
       }
       const result = await visitorLogService.delete(id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      errorHandler({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error });
     }
     await next();
   }
