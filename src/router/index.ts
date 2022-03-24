@@ -14,7 +14,7 @@ function useRoutes() {
     this.use(linkRouter.routes()).use(linkRouter.allowedMethods());
     // router.use('/front', linkRouter.routes()).use(linkRouter.allowedMethods());
     router.use('/admin', linkRouter.routes()).use(linkRouter.allowedMethods());
-    this.use(router.routes()).use(router.allowedMethods());
+    this.use(router.routes()).use(router.allowedMethods()); // 这个有啥用？？？
     console.log(chalkSUCCESS(`加载${file}路由`));
   });
 }

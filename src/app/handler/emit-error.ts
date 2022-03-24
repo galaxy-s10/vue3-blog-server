@@ -1,5 +1,7 @@
 import { Context } from 'koa';
 
+import { chalkWRAN } from '../chalkTip';
+
 /** 发射错误 */
 const emitError = ({
   ctx,
@@ -12,8 +14,8 @@ const emitError = ({
   error: any;
   message?: string;
 }) => {
-  console.log('发射错误');
-  return ctx.app.emit('error', { ctx, code, error, message });
+  console.log(chalkWRAN('发射错误'));
+  ctx.app.emit('error', { code, error, message }, ctx);
 };
 
 export default emitError;

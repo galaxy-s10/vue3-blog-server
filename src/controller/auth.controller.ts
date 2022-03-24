@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';

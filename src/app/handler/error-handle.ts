@@ -5,23 +5,21 @@ import { chalkERROR, chalk } from '../chalkTip';
 
 import logService from '@/service/log.service';
 
-const errorHandler = ({
-  ctx,
-  code,
-  error,
-  message,
-}: {
-  ctx: Context;
-  code: number;
-  error: any;
-  message?: string;
-}) => {
-  if (ctx) {
-    console.log(
-      chalkERROR(
-        `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
-      )
-    );
+const errorHandler = (
+  err: { code: number; error: any; message?: string },
+  ctx: Context
+) => {
+  const { code, error, message } = err;
+  console.log(
+    chalkERROR(
+      `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
+    )
+  );
+  if (!code) {
+    console.log(chalkERROR(`系统未知错误(不是通过手动调用emitError触发的)`));
+    console.log(err);
+    ctx.body = err;
+  } else {
     // 如果捕获的错误有ctx，代表是接口地址报错
     console.log(chalk.redBright(`code: ${code}`));
     console.log(chalk.redBright(`params:`), ctx.params);
@@ -59,7 +57,6 @@ const errorHandler = ({
       stack: error.stack,
       message: message || defaultMessage,
     };
-
     if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       authJwt(ctx.request)
@@ -78,21 +75,17 @@ const errorHandler = ({
             api_err_stack: JSON.stringify(error.stack),
           });
         })
-        .catch((err) => {
-          console.log('error-handle的authJwt错误', err);
+        .catch((e) => {
+          console.log('error-handle的authJwt错误', e);
         });
     }
-
-    console.log(
-      chalkERROR(
-        `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`
-      )
-    );
-  } else {
-    console.log(chalkERROR(`↓↓↓↓↓↓↓↓↓↓ 接收到未知报错 ↓↓↓↓↓↓↓↓↓↓`));
-    console.log(arguments);
-    console.log(chalkERROR(`↑↑↑↑↑↑↑↑↑↑ 接收到未知报错 ↑↑↑↑↑↑↑↑↑↑`));
   }
+
+  console.log(
+    chalkERROR(
+      `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`
+    )
+  );
 };
 
 export default errorHandler;

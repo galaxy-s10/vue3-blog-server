@@ -2,8 +2,10 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
+import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { mysqlConfig, sshConfig } from '@/config/secret';
 import qiniuController from '@/utils/qiniu';
+
 // 备份目录
 const backupsDirectory = '/node/backups/';
 
@@ -127,6 +129,12 @@ const rule = new schedule.RecurrenceRule();
 rule.hour = [0, 12];
 rule.minute = 0;
 export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
-  console.log('执行dbJob定时任务', dayjs().format('YYYY-MM-DD HH:mm:ss'));
-  conner();
+  if (process.env.REACT_BLOG_SERVER_ENV === 'development') {
+    console.log(chalkWRAN('本地开发模式，不执行定时任务'));
+  } else {
+    console.log(
+      chalkINFO(`执行dbJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`)
+    );
+    conner();
+  }
 });

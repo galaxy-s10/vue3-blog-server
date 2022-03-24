@@ -22,18 +22,26 @@ const schema = Joi.object({
 export const verifyProp = async (ctx: Context, next) => {
   const prop = ctx.request.body;
   try {
+    console.log('user-verifyProp');
     await schema.validateAsync(prop, {
       abortEarly: false, // when true，在第一个错误时停止验证，否则返回找到的所有错误。默认为true.
       allowUnknown: false, // 当true，允许对象包含被忽略的未知键。默认为false.
       // presence: 'required', // schema加上required()或者设置presence: 'required'。防止prop为undefined时也能通过验证
       convert: false,
     });
-    await next();
+    console.log('llllllllllk');
   } catch (error) {
+    console.log(
+      '这里不仅仅会捕获joi的错误，后面的中间件报的错也会捕获到',
+      error
+    );
+    // 这里不仅仅会捕获joi的错误，后面的中间件报的错也会捕获到
     emitError({
       ctx,
       code: 400,
       error,
     });
+    return;
   }
+  await next();
 };

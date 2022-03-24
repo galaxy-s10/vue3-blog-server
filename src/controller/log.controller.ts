@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { ILog } from '@/interface';
 import logService from '@/service/log.service';

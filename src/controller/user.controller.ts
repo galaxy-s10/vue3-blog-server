@@ -2,7 +2,7 @@ import MD5 from 'crypto-js/md5';
 import { Context } from 'koa';
 
 import { authJwt, signJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IList, IUser } from '@/interface';
 import User from '@/model/user.model';
@@ -17,9 +17,12 @@ export interface IUserList extends IList {
 class UserController {
   async create(ctx: Context, next) {
     try {
+      console.log(111111111);
       const { username, password, title, avatar }: IUser = ctx.request.body;
       const isExistSameName = await userService.isSameName(username);
+      console.log(2222222);
       if (isExistSameName) {
+        console.log('kkkkkkk');
         emitError({
           ctx,
           code: 400,
@@ -41,6 +44,7 @@ class UserController {
        */
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
@@ -74,7 +78,12 @@ class UserController {
         });
       }
     } catch (error) {
-      emitError({ ctx, code: 400, error });
+      emitError({
+        ctx,
+        code: 400,
+        error,
+      });
+      return;
     }
     /**
      * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要

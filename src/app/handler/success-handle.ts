@@ -1,6 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '../authJwt';
+import { chalkSUCCESS } from '../chalkTip';
 
 import logService from '@/service/log.service';
 
@@ -13,6 +14,7 @@ const successHandler = ({
   data: any;
   message?: string;
 }) => {
+  console.log(chalkSUCCESS(`↓↓↓↓↓↓↓↓↓↓ success-handle ↓↓↓↓↓↓↓↓↓↓`));
   const status = 200;
   const methods = ctx.request.method;
   let defaultMessage;
@@ -32,9 +34,16 @@ const successHandler = ({
     default:
       defaultMessage = '操作成功!';
   }
-  // 不手动设置状态的话，默认是404，delete方法返回400
-  ctx.status = status;
+  if (!ctx.header['session-csrf']) {
+    ctx.cookies.set('csrf-token', ctx.csrf, { httpOnly: false });
+  } else {
+    console.log(ctx.csrf);
+  }
+  console.log(ctx.csrf);
+  console.log(ctx.session);
+  ctx.status = status; // 不手动设置状态的话，默认是404，delete方法返回400
   ctx.body = { code: status, data, message: message || defaultMessage };
+  console.log(chalkSUCCESS(`↑↑↑↑↑↑↑↑↑↑ success-handle ↑↑↑↑↑↑↑↑↑↑`));
 
   if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
     const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;

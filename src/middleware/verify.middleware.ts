@@ -2,7 +2,7 @@ import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import { chalkINFO } from '@/app/chalkTip';
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 
 // 白名单内的接口不需要判断token
 const whiteList = [
@@ -11,9 +11,11 @@ const whiteList = [
   '/init/roleAuth',
   '/init/dayData',
   '/visitor_log/create', // 前台的这个接口是post的
+  '/user/create', // 前台的这个接口是post的
   '/user/login', // 前台的这个接口是post的
   '/link/create', // 前台的这个接口是post的
   '/admin/user/login', // 后台的这个接口是post的
+  '/admin/csrf/get', // 后台的这个接口是试探csrf的
 ];
 
 const verify = async (ctx: Context, next) => {
@@ -31,17 +33,17 @@ const verify = async (ctx: Context, next) => {
       console.log(chalkINFO('当前请求的是后台接口'));
       if (whiteList.indexOf(url) !== -1) {
         await next();
-        return;
-      }
-      const { code, userInfo, message } = await authJwt(ctx.req);
-      if (code !== 200) {
-        emitError({
-          ctx,
-          code,
-          error: message,
-          message,
-        });
       } else {
+        const { code, message } = await authJwt(ctx.req);
+        if (code !== 200) {
+          emitError({
+            ctx,
+            code,
+            error: message,
+            message,
+          });
+          return;
+        }
         /**
          * 这里必须await next()，因为路由匹配肯定是先匹配这个app.use的，
          * 如果这里匹配完成后直接next()了，就会返回数据了（404），也就是不会
@@ -53,17 +55,17 @@ const verify = async (ctx: Context, next) => {
       console.log(chalkINFO('当前请求的是前台接口'));
       if (ctx.request.method === 'GET' || whiteList.indexOf(url) !== -1) {
         await next();
-        return;
-      }
-      const { code, userInfo, message } = await authJwt(ctx.req);
-      if (code !== 200) {
-        emitError({
-          ctx,
-          code,
-          error: message,
-          message,
-        });
       } else {
+        const { code, message } = await authJwt(ctx.req);
+        if (code !== 200) {
+          emitError({
+            ctx,
+            code,
+            error: message,
+            message,
+          });
+          return;
+        }
         /**
          * 因为这个verify.middleware是最先执行的中间件路由，
          * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
@@ -71,7 +73,6 @@ const verify = async (ctx: Context, next) => {
          * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
          */
         await next();
-        return;
       }
     }
   } catch (error) {
@@ -82,6 +83,7 @@ const verify = async (ctx: Context, next) => {
       error,
       message: error.message,
     });
+    return;
   }
   console.log(
     chalkINFO(

@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IArticle } from '@/interface';
 import articleService from '@/service/article.service';

@@ -3,19 +3,19 @@ import path from 'path';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import conditional from 'koa-conditional-get';
+import convert from 'koa-convert';
+import CSRF from 'koa-csrf';
 import etag from 'koa-etag';
-import staticService from 'koa-static'; // CJS: require('koa-static')
+import session from 'koa-generic-session';
+import staticService from 'koa-static';
 
 import aliasOk from './app/alias';
-import { chalkINFO, chalkWRAN } from './app/chalkTip';
 import errorHandler from './app/handler/error-handle';
 import { connectDb } from './config/db';
-import verifyHandler from './middleware/verify.middleware';
+import verifyMiddleware from './middleware/verify.middleware';
 import useRoutes from './router/index';
 
-// import '@/utils/backupsDb';
-
-aliasOk();
+aliasOk(); // 添加别名路径
 
 const { chalkSUCCESS } = require('@/app/chalkTip');
 
@@ -43,17 +43,60 @@ app.use(async (ctx, next) => {
   }
 });
 
+// set the session keys
+// app.keys = [Math.random().toString(36).slice(2)];
+app.keys = ['aaaa', 'bbb', 'ccc'];
+
+// add session support
+app.use(
+  convert(
+    session({
+      key: 'session-csrf', // cookie 名称默认为koa.sid
+      cookie: {
+        path: '/',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 单位毫秒
+        overwrite: true,
+        /**
+         * 如果设置true，即加密cookie，则app.keys必须设置值，否则会报错。而且如果设置true，另一个同名的cookie。附加的sig后缀也将被发送
+         * 如果设置false，即cookie不加密，不用设置app.keys
+         */
+        signed: true,
+      },
+    })
+  )
+);
+
 // 这个bodyParser有个问题，如果前端传的数据有误，经过这个中间件解析的时候，解析到错误了，还是会继续next()。
 app.use(
   bodyParser({
     onerror: (error, ctx) => {
-      // 这个代码其实返回不到前端。
-      errorHandler({ ctx, code: 500, error, message: 'body parse error' });
+      console.log('bodyParser解析错误', error);
+      ctx.status = 400;
+      ctx.res.end('bodyParser解析错误');
     },
   })
 ); // 注意顺序，需要在所有路由加载前解析
 
-app.use(verifyHandler); // 注意顺序，需要在所有路由加载前进行接口验证
+// add the CSRF middleware
+app.use(
+  new CSRF({
+    invalidTokenMessage: '不允许跨站请求!',
+    invalidTokenStatusCode: 403,
+    excludedMethods: ['GET', 'HEAD', 'OPTIONS'], // 这三个方法不需要验证
+    disableQuery: false,
+  })
+);
+// const ccc = new CSRF({
+//   invalidTokenMessage: '不允许跨站请求!',
+//   invalidTokenStatusCode: 403,
+//   excludedMethods: ['GET', 'HEAD', 'OPTIONS'], // 这三个方法不需要验证
+//   disableQuery: false,
+// });
+
+// console.log(ccc);
+
+app.use(verifyMiddleware); // 注意顺序，需要在所有路由加载前进行接口验证
 
 // @ts-ignore
 app.useRoutes = useRoutes;
@@ -62,13 +105,6 @@ connectDb()
   .then(() => {
     // @ts-ignore
     app.useRoutes();
-    if (process.env.REACT_BLOG_SERVER_ENV === 'development') {
-      console.log(chalkWRAN('本地开发模式，不执行定时任务'));
-    } else {
-      console.log(chalkINFO('非本地开发模式，执行定时任务'));
-      // eslint-disable-next-line global-require
-      require('@/utils/backupsDb');
-    }
   })
   .catch((error) => {
     console.log(error);

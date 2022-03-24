@@ -2,7 +2,7 @@ import { Context } from 'koa';
 import request from 'request';
 
 import { signJwt } from '@/app/authJwt';
-import emitError from '@/app/handler/error-handle';
+import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
   www_qq_client_id,
