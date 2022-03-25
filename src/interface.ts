@@ -32,6 +32,7 @@ export interface IUser {
   id?: number;
   username?: string;
   password?: string;
+  email?: string;
   status?: number;
   avatar?: string;
   title?: string;
@@ -55,6 +56,39 @@ export interface IQqUser {
   province: string;
   year: string;
   ret?: number;
+}
+export interface IGithubUser {
+  id?: unknown;
+  client_id?: unknown;
+  login?: unknown;
+  github_id?: unknown;
+  node_id?: unknown;
+  avatar_url?: unknown;
+  gravatar_id?: unknown;
+  url?: unknown;
+  html_url?: unknown;
+  type?: unknown;
+  site_admin?: unknown;
+  name?: unknown;
+  company?: unknown;
+  blog?: unknown;
+  location?: unknown;
+  email?: unknown;
+  hireable?: unknown;
+  bio?: unknown;
+  twitter_username?: unknown;
+  public_repos?: unknown;
+  public_gists?: unknown;
+  followers?: unknown;
+  following?: unknown;
+  github_created_at?: unknown;
+  github_updated_at?: unknown;
+  private_gists?: unknown;
+  total_private_repos?: unknown;
+  owned_private_repos?: unknown;
+  disk_usage?: unknown;
+  collaborators?: unknown;
+  two_factor_authentication?: unknown;
 }
 
 export interface IType {

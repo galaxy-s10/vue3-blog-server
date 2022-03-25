@@ -1,12 +1,15 @@
 import Sequelize from 'sequelize';
 
-import { IQqUserList } from '@/controller/qqUser.controller';
-import { IQqUser } from '@/interface';
+import { IList, IGithubUser } from '@/interface';
 import githubUserModel from '@/model/githubUser.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
+export interface IGithubUserList extends IList {
+  created_at?: string;
+  updated_at?: string;
+}
 class UserService {
   /** github用户是否存在 */
   async isExist(github_ids: number[]) {
@@ -22,18 +25,16 @@ class UserService {
 
   /** 获取github用户列表 */
   async getList({
-    nickname,
     nowPage,
     pageSize,
     orderBy,
     orderName,
     created_at,
     updated_at,
-  }: IQqUserList) {
+  }: IGithubUserList) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const where1: any = {};
-    const where2 = [];
     if (created_at) {
       where1.created_at = {
         [Op.between]: [created_at, `${created_at} 23:59:59`],
@@ -44,13 +45,6 @@ class UserService {
         [Op.between]: [updated_at, `${updated_at} 23:59:59`],
       };
     }
-    if (nickname) {
-      where2.push({
-        nickname: {
-          [Op.like]: `%${nickname}%`,
-        },
-      });
-    }
     const result = await githubUserModel.findAndCountAll({
       attributes: {
         exclude: ['password', 'token'],
@@ -60,7 +54,6 @@ class UserService {
       offset,
       where: {
         ...where1,
-        ...where2,
       },
     });
     return handlePaging(nowPage, pageSize, result);
@@ -73,38 +66,19 @@ class UserService {
   }
 
   /** 修改github用户 */
-  async update({
-    client_id,
-    openid,
-    unionid,
-    nickname,
-    figureurl_qq,
-    constellation,
-    gender,
-    city,
-    province,
-    year,
-  }: IQqUser) {
+  async update(githubProps: IGithubUser) {
     const result = await githubUserModel.update(
       {
-        client_id,
-        openid,
-        nickname,
-        figureurl_qq,
-        constellation,
-        gender,
-        city,
-        province,
-        year,
+        ...githubProps,
       },
-      { where: { unionid } }
+      { where: { id: githubProps.id } }
     );
     return result;
   }
 
   /** 创建github用户 */
-  async create(props) {
-    const result = await githubUserModel.create(props);
+  async create(githubProps) {
+    const result = await githubUserModel.create(githubProps);
     return result;
   }
 

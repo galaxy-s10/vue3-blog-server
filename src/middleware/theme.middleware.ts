@@ -1,9 +1,9 @@
 import Joi from 'joi';
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 
-export const verifyProp = async (ctx: Context, next) => {
+export const verifyProp = async (ctx: ParameterizedContext, next) => {
   const prop = ctx.request.body;
   const schema = Joi.object({
     model: Joi.string().min(3).max(50).required(),

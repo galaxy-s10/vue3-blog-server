@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { chalkWRAN } from '../chalkTip';
 
@@ -9,7 +9,7 @@ const emitError = ({
   error,
   message,
 }: {
-  ctx: Context;
+  ctx: ParameterizedContext;
   code: number;
   error: any;
   message?: string;

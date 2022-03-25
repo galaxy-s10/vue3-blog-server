@@ -1,11 +1,11 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import roleAuthService from '@/service/roleAuth.service';
 
 class RoleAuthController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const result = await roleAuthService.getList();
       successHandler({ ctx, data: result });

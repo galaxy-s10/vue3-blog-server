@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
@@ -10,7 +10,7 @@ import positionService from '@/service/position.service';
 import userService from '@/service/user.service';
 
 class CommentController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -31,7 +31,7 @@ class CommentController {
     await next();
   }
 
-  async getArticleCommentList(ctx: Context, next) {
+  async getArticleCommentList(ctx: ParameterizedContext, next) {
     try {
       const article_id = +ctx.params.article_id;
       const {
@@ -74,7 +74,7 @@ class CommentController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await commentService.find(id);
@@ -85,7 +85,7 @@ class CommentController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { name, color }: IComment = ctx.request.body;
@@ -102,7 +102,7 @@ class CommentController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const {
         article_id,
@@ -159,7 +159,7 @@ class CommentController {
     await next();
   }
 
-  async getCommentList(ctx: Context, next) {
+  async getCommentList(ctx: ParameterizedContext, next) {
     try {
       const {
         article_id = '-1',
@@ -190,7 +190,7 @@ class CommentController {
     await next();
   }
 
-  async getChildrenCommentList(ctx: Context, next) {
+  async getChildrenCommentList(ctx: ParameterizedContext, next) {
     try {
       const {
         article_id,
@@ -221,7 +221,7 @@ class CommentController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await commentService.isExist([id]);

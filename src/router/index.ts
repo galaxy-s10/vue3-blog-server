@@ -1,8 +1,8 @@
 import Router from 'koa-router';
 
-const fs = require('fs');
+import { chalkSUCCESS } from '@/app/chalkTip';
 
-const { chalkSUCCESS } = require('@/app/chalkTip');
+const fs = require('fs');
 
 const router = new Router();
 

@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 import schedule from 'node-schedule';
 
 import { authJwt } from '@/app/authJwt';
@@ -7,7 +7,7 @@ import successHandler from '@/app/handler/success-handle';
 import { dbJob } from '@/utils/backupsDb';
 
 class ScheduleController {
-  async getDbJob(ctx: Context, next) {
+  async getDbJob(ctx: ParameterizedContext, next) {
     try {
       if (schedule.scheduledJobs.dbJob && dbJob) {
         successHandler({
@@ -26,7 +26,7 @@ class ScheduleController {
     await next();
   }
 
-  async invokeDbJob(ctx: Context, next) {
+  async invokeDbJob(ctx: ParameterizedContext, next) {
     try {
       const { code, userInfo, message } = await authJwt(ctx.request);
       if (code !== 200) {

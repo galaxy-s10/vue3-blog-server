@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { IType } from '@/interface';
 import typeService from '@/service/type.service';
 
 class TypeController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class TypeController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await typeService.find(id);
@@ -38,7 +38,7 @@ class TypeController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { name }: IType = ctx.request.body;
@@ -55,7 +55,7 @@ class TypeController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { name }: IType = ctx.request.body;
       const result = await typeService.create({ name });
@@ -66,7 +66,7 @@ class TypeController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await typeService.isExist([id]);

@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 import request from 'request';
 
 import { signJwt } from '@/app/authJwt';
@@ -26,7 +26,7 @@ export interface IQqUserList extends IList {
   updated_at?: string;
 }
 class QqUserController {
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const {
         client_id,
@@ -175,7 +175,7 @@ class QqUserController {
    *  3.2，存在相同的unionid代表已经在本站登录注册过了，直接通过third_user表找到对应的user表的
    * 用户，更新一下该用户的token即可。
    */
-  login = async (ctx: Context, next) => {
+  login = async (ctx: ParameterizedContext, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
       const { host } = ctx.request;
@@ -307,7 +307,7 @@ class QqUserController {
     await next();
   };
 
-  async list(ctx: Context, next) {
+  async list(ctx: ParameterizedContext, next) {
     try {
       // @ts-ignore
       const {
@@ -337,7 +337,7 @@ class QqUserController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await qqUserService.find(id);
@@ -348,7 +348,7 @@ class QqUserController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const {
         client_id,
@@ -389,7 +389,7 @@ class QqUserController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await qqUserService.isExist([id]);

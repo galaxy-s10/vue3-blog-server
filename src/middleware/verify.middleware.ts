@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import { chalkINFO } from '@/app/chalkTip';
@@ -14,11 +14,12 @@ const whiteList = [
   '/user/create', // 前台的这个接口是post的
   '/user/login', // 前台的这个接口是post的
   '/link/create', // 前台的这个接口是post的
+  '/email/send', // 前台的这个接口是post的
   '/admin/user/login', // 后台的这个接口是post的
   '/admin/csrf/get', // 后台的这个接口是试探csrf的
 ];
 
-const verify = async (ctx: Context, next) => {
+const verify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
   console.log(
     chalkINFO(

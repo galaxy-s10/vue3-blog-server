@@ -1,13 +1,14 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { mailOptionsConfig } from '@/config/secret';
 import { ILink } from '@/interface';
 import linkService from '@/service/link.service';
 import SendEmailModel from '@/utils/sendEmail';
 
 class LinkController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -31,7 +32,7 @@ class LinkController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await linkService.find(id);
@@ -42,7 +43,7 @@ class LinkController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { email, name, avatar, desc, url, status }: ILink =
@@ -68,7 +69,7 @@ class LinkController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { email, name, avatar, desc, url, status }: ILink =
         ctx.request.body;
@@ -82,11 +83,10 @@ class LinkController {
         status: isAdmin ? status : 1,
       });
       const mailOptions = {
-        from: '自然博客 <2274751790@qq.com>', // sender address
-        to: '2274751790@qq.com', // list of receivers
-        subject: '收到友链申请记录', // Subject line
-        // 发送text或者html格式
-        // text: 'Hello world?', // plain text body
+        from: mailOptionsConfig.from, // sender address
+        to: mailOptionsConfig.to, // list of receivers
+        subject: `收到${name}的友链申请`, // Subject line
+        text: `收到:${name}的友链申请，请及时处理~`, // plain text body
         html: `<h1>收到:${name}的友链申请，请及时处理~</h1>`, // html body
       };
       const emailMode = new SendEmailModel(mailOptions);
@@ -98,7 +98,7 @@ class LinkController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await linkService.isExist([id]);

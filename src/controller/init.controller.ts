@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import sequelize from '../config/db';
 
@@ -40,7 +40,7 @@ END
 const sql3 = `call insert_many_dates(3650)`;
 
 class InitController {
-  async createAuth(ctx: Context, next) {
+  async createAuth(ctx: ParameterizedContext, next) {
     try {
       await Auth.bulkCreate(bulkCreateAuth);
       successHandler({ ctx, data: '初始化auth成功!' });
@@ -50,7 +50,7 @@ class InitController {
     await next();
   }
 
-  async createRole(ctx: Context, next) {
+  async createRole(ctx: ParameterizedContext, next) {
     try {
       await Role.bulkCreate(bulkCreateRole);
       successHandler({ ctx, data: '初始化role成功!' });
@@ -60,7 +60,7 @@ class InitController {
     await next();
   }
 
-  async createRoleAuth(ctx: Context, next) {
+  async createRoleAuth(ctx: ParameterizedContext) {
     try {
       await RoleAuth.bulkCreate(bulkCreateRoleAuth);
       successHandler({ ctx, data: '初始化RoleAuth成功!' });
@@ -69,7 +69,7 @@ class InitController {
     }
   }
 
-  async createDayData(ctx: Context, next) {
+  async createDayData(ctx: ParameterizedContext, next) {
     try {
       await sequelize.query(sql1);
       await sequelize.query(sql2);

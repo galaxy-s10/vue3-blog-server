@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { IRole } from '@/interface';
 import roleService from '@/service/role.service';
 
 class RoleController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class RoleController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await roleService.find(id);
@@ -38,7 +38,7 @@ class RoleController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { p_id, role_name, role_description }: IRole = ctx.request.body;
@@ -60,7 +60,7 @@ class RoleController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { p_id, role_name, role_description }: IRole = ctx.request.body;
       const isExist = p_id === 0 ? true : await roleService.isExist([p_id]);
@@ -80,7 +80,7 @@ class RoleController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await roleService.isExist([id]);

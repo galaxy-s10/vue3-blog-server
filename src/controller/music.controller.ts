@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { IMusic } from '@/interface';
 import musicService from '@/service/music.service';
 
 class MusicController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class MusicController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await musicService.find(id);
@@ -38,7 +38,7 @@ class MusicController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { name, img, author, url, status }: IMusic = ctx.request.body;
@@ -61,7 +61,7 @@ class MusicController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { name, img, author, url, status }: IMusic = ctx.request.body;
       const result = await musicService.create({
@@ -78,7 +78,7 @@ class MusicController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await musicService.isExist([id]);

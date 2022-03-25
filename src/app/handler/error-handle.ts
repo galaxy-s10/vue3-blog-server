@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '../authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
@@ -7,7 +7,7 @@ import logService from '@/service/log.service';
 
 const errorHandler = (
   err: { code: number; error: any; message?: string },
-  ctx: Context
+  ctx: ParameterizedContext
 ) => {
   const { code, error, message } = err;
   console.log(
@@ -80,7 +80,6 @@ const errorHandler = (
         });
     }
   }
-
   console.log(
     chalkERROR(
       `↑↑↑↑↑↑↑↑↑↑ 接收 ${ctx.request.method} ${ctx.request.url} 错误完成 ↑↑↑↑↑↑↑↑↑↑`

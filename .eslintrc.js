@@ -7,6 +7,12 @@ console.log(
 );
 
 module.exports = {
+  /**
+   * 默认情况下，ESLint 会在所有父文件夹中查找配置文件，直到根目录。如果您希望所有项目都遵循某种约定，这可能很有用，
+   * 但有时会导致意想不到的结果。要将 ESLint 限制为特定项目，请将其放置"root": true在.eslintrc.*文件或文件eslintConfig的字段中
+   * ，package.json或者放在.eslintrc.*项目根级别的文件中。
+   */
+  root: true,
   env: {
     browser: true,
     node: true,
@@ -79,13 +85,11 @@ module.exports = {
       },
     },
   ],
-  /**
-   * rules优先级最高，会覆盖上面的
-   */
+  // rules优先级最高，会覆盖上面的
   rules: {
-    //   // 0 => off
-    //   // 1 => warn
-    //   // 2 => error
+    // 0 => off
+    // 1 => warn
+    // 2 => error
     camelcase: 0,
     'no-console': 0,
     'import/order': [

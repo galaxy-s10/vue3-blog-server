@@ -3,7 +3,6 @@ import ArticleTag from './articleTag.model';
 import ArticleType from './articleType.model';
 import Auth from './auth.model';
 import Comment from './comment.model';
-import DayData from './dayData.model';
 import GithubUser from './githubUser.model';
 import Log from './log.model';
 import QiniuData from './qiniuData.model';
@@ -17,7 +16,6 @@ import Type from './type.model';
 import User from './user.model';
 import UserArticle from './userArticle.model';
 import UserRole from './userRole.model';
-import VisitorLog from './visitorLog.model';
 
 import { chalkINFO } from '@/app/chalkTip';
 

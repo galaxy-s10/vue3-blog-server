@@ -6,7 +6,6 @@ import commentModel from '@/model/comment.model';
 import frontendModel from '@/model/frontend.model';
 import qqUserModel from '@/model/qqUser.model';
 import userModel from '@/model/user.model';
-import visitorLogModel from '@/model/visitorLog.model';
 
 const { fn, Op, col, literal } = Sequelize;
 

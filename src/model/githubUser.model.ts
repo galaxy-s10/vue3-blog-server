@@ -13,6 +13,7 @@ const githubUserModel = sequelize.define(
       autoIncrement: true,
     },
     client_id: {
+      // https://github.com/settings/applications里面的Client ID
       type: DataTypes.STRING,
     },
     login: {
@@ -43,27 +44,35 @@ const githubUserModel = sequelize.define(
       type: DataTypes.STRING,
     },
     name: {
+      // 用户的新名称。
       type: DataTypes.STRING,
     },
     company: {
+      // 用户的新公司。
       type: DataTypes.STRING,
     },
     blog: {
+      // 用户的新博客 URL。
       type: DataTypes.STRING,
     },
     location: {
+      // 用户的新位置。
       type: DataTypes.STRING,
     },
     email: {
+      // 用户公开可见的电子邮件地址。
       type: DataTypes.STRING,
     },
     hireable: {
+      // 用户的新招聘可用性。
       type: DataTypes.STRING,
     },
     bio: {
+      // 用户的新短传。
       type: DataTypes.STRING,
     },
     twitter_username: {
+      // 用户的新 Twitter 用户名。
       type: DataTypes.STRING,
     },
     public_repos: {

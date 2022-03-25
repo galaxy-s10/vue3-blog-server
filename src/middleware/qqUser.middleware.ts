@@ -1,9 +1,9 @@
 import Joi from 'joi';
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 
-export const verifyProp = async (ctx: Context, next) => {
+export const verifyProp = async (ctx: ParameterizedContext, next) => {
   try {
     await next();
   } catch (error) {

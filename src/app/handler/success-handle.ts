@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '../authJwt';
 import { chalkSUCCESS } from '../chalkTip';
@@ -10,7 +10,7 @@ const successHandler = ({
   data,
   message,
 }: {
-  ctx: Context;
+  ctx: ParameterizedContext;
   data: any;
   message?: string;
 }) => {

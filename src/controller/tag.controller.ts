@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { ITag } from '@/interface';
 import tagService from '@/service/tag.service';
 
 class TagController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class TagController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await tagService.find(id);
@@ -38,7 +38,7 @@ class TagController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { name, color }: ITag = ctx.request.body;
@@ -55,7 +55,7 @@ class TagController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { name, color }: ITag = ctx.request.body;
       const result = await tagService.create({ name, color });
@@ -66,7 +66,7 @@ class TagController {
     await next();
   }
 
-  async getArticleList(ctx: Context, next) {
+  async getArticleList(ctx: ParameterizedContext, next) {
     try {
       const tag_id = +ctx.params.tag_id;
       const { nowPage = '1', pageSize = '10' }: any = ctx.request.query;
@@ -82,7 +82,7 @@ class TagController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await tagService.isExist([id]);

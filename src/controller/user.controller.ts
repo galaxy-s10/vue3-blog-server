@@ -1,5 +1,5 @@
 import MD5 from 'crypto-js/md5';
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
@@ -15,14 +15,11 @@ export interface IUserList extends IList {
   updated_at: string;
 }
 class UserController {
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
-      console.log(111111111);
       const { username, password, title, avatar }: IUser = ctx.request.body;
       const isExistSameName = await userService.isSameName(username);
-      console.log(2222222);
       if (isExistSameName) {
-        console.log('kkkkkkk');
         emitError({
           ctx,
           code: 400,
@@ -49,7 +46,7 @@ class UserController {
     await next();
   }
 
-  login = async (ctx: Context, next) => {
+  login = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, password, exp = 24 } = ctx.request.body;
       const userInfo: any = await User.findOne({
@@ -93,7 +90,7 @@ class UserController {
     await next();
   };
 
-  async list(ctx: Context, next) {
+  async list(ctx: ParameterizedContext, next) {
     try {
       // @ts-ignore
       const {
@@ -123,7 +120,7 @@ class UserController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await userService.find(id);
@@ -134,7 +131,7 @@ class UserController {
     await next();
   }
 
-  async getUserInfo(ctx: Context, next) {
+  async getUserInfo(ctx: ParameterizedContext, next) {
     try {
       const { code, userInfo, message } = await authJwt(ctx.request);
       if (code === 200) {
@@ -149,7 +146,7 @@ class UserController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { username, password, title, status, avatar }: IUser =
@@ -183,7 +180,7 @@ class UserController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await userService.isExist([id]);

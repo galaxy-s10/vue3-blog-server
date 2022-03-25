@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';
 
 class AuthController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class AuthController {
     await next();
   }
 
-  async getNestList(ctx: Context, next) {
+  async getNestList(ctx: ParameterizedContext, next) {
     try {
       const { rows, count } = await authService.getNestList();
       successHandler({ ctx, data: { rows, count } });
@@ -37,7 +37,7 @@ class AuthController {
     await next();
   }
 
-  async getUserAuth(ctx: Context, next) {
+  async getUserAuth(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.userid;
       const { rows, count } = await authService.getUserAuth(id);
@@ -48,7 +48,7 @@ class AuthController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await authService.find(id);
@@ -59,7 +59,7 @@ class AuthController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
@@ -81,7 +81,7 @@ class AuthController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
       const isExist = p_id === 0 ? true : await authService.isExist([p_id]);
@@ -101,7 +101,7 @@ class AuthController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);

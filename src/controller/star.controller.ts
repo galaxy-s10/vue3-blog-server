@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
@@ -10,7 +10,7 @@ import starService from '@/service/star.service';
 import userService from '@/service/user.service';
 
 class StarController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -31,7 +31,7 @@ class StarController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await starService.find(id);
@@ -42,7 +42,7 @@ class StarController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { article_id, to_user_id, from_user_id, comment_id }: IStar =
@@ -66,7 +66,7 @@ class StarController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { article_id, to_user_id, comment_id }: IStar = ctx.request.body;
       const { code, userInfo } = await authJwt(ctx.request);
@@ -102,7 +102,7 @@ class StarController {
     await next();
   }
 
-  async starForArticle(ctx: Context, next) {
+  async starForArticle(ctx: ParameterizedContext, next) {
     try {
       const { article_id, to_user_id, comment_id }: IStar = ctx.request.body;
       const { code, userInfo } = await authJwt(ctx.request);
@@ -137,7 +137,7 @@ class StarController {
     await next();
   }
 
-  async starForUser(ctx: Context, next) {
+  async starForUser(ctx: ParameterizedContext, next) {
     try {
       const {
         article_id = -1,
@@ -175,7 +175,7 @@ class StarController {
     await next();
   }
 
-  async create11(ctx: Context, next) {
+  async create11(ctx: ParameterizedContext, next) {
     try {
       const {
         article_id = -1,
@@ -209,7 +209,7 @@ class StarController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await starService.isExist([id]);
@@ -225,7 +225,7 @@ class StarController {
     await next();
   }
 
-  async deleteOtherStar(ctx: Context, next) {
+  async deleteOtherStar(ctx: ParameterizedContext, next) {
     try {
       const { article_id = -1, comment_id = -1 }: IStar = ctx.request.body;
       const articleIsExist =

@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -6,7 +6,7 @@ import { IThirdUser } from '@/interface';
 import thirdUserService from '@/service/thirdUser.service';
 
 class ThirdUserController {
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -27,7 +27,7 @@ class ThirdUserController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const result = await thirdUserService.find(id);
@@ -38,7 +38,7 @@ class ThirdUserController {
     await next();
   }
 
-  async update(ctx: Context, next) {
+  async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { user_id, third_platform, third_user_id }: IThirdUser =
@@ -65,7 +65,7 @@ class ThirdUserController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const { user_id, third_platform, third_user_id }: IThirdUser =
         ctx.request.body;
@@ -81,7 +81,7 @@ class ThirdUserController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await thirdUserService.isExist([id]);

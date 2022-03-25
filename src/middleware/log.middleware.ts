@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 
@@ -15,7 +15,7 @@ const schema = Joi.object({
   api_body: Joi.string(),
 });
 
-export const verifyProp = async (ctx: Context, next) => {
+export const verifyProp = async (ctx: ParameterizedContext, next) => {
   const props = ctx.request.body;
   try {
     await schema.validateAsync(props, {

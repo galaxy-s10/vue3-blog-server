@@ -1,12 +1,7 @@
-import path from 'path';
+import userModel from '@/model/user.model';
 
-const getUserStatus = async (id) => {
-  // eslint-disable-next-line
-  const userModel = require(path.resolve(
-    __dirname,
-    `../model/user.model.ts`
-  )).default;
-  const userResult = await userModel.findOne({
+const getUserStatus = async (id = -1) => {
+  const userResult: any = await userModel.findOne({
     attributes: ['status'],
     where: {
       id,

@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
@@ -10,7 +10,7 @@ import typeService from '@/service/type.service';
 import userService from '@/service/user.service';
 
 class ArticleController {
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const {
         title,
@@ -55,7 +55,7 @@ class ArticleController {
     await next();
   }
 
-  async find(ctx: Context, next) {
+  async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const { code, userInfo } = await authJwt(ctx.request);
@@ -71,7 +71,7 @@ class ArticleController {
     await next();
   }
 
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         tag_ids = '',
@@ -101,7 +101,7 @@ class ArticleController {
     await next();
   }
 
-  async getKeywordList(ctx: Context, next) {
+  async getKeywordList(ctx: ParameterizedContext, next) {
     try {
       const {
         keyword = '',

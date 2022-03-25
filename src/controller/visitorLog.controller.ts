@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/authJwt';
 import emitError from '@/app/handler/emit-error';
@@ -7,7 +7,7 @@ import positionService from '@/service/position.service';
 import visitorLogService from '@/service/visitorLog.service';
 
 class VisitorLogController {
-  async getHistoryVisitTotal(ctx: Context, next) {
+  async getHistoryVisitTotal(ctx: ParameterizedContext, next) {
     try {
       const { orderBy = 'asc', orderName = 'ip' } = ctx.request.query;
       const result = await visitorLogService.getHistoryVisitTotal({
@@ -21,7 +21,7 @@ class VisitorLogController {
     await next();
   }
 
-  async getDayVisitTotal(ctx: Context, next) {
+  async getDayVisitTotal(ctx: ParameterizedContext, next) {
     try {
       const {
         orderBy = 'asc',
@@ -42,7 +42,7 @@ class VisitorLogController {
     await next();
   }
 
-  async getIpVisitTotal(ctx: Context, next) {
+  async getIpVisitTotal(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -67,7 +67,7 @@ class VisitorLogController {
     await next();
   }
 
-  async getList(ctx: Context, next) {
+  async getList(ctx: ParameterizedContext, next) {
     try {
       const {
         nowPage = '1',
@@ -88,7 +88,7 @@ class VisitorLogController {
     await next();
   }
 
-  async create(ctx: Context, next) {
+  async create(ctx: ParameterizedContext, next) {
     try {
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
       const { userInfo } = await authJwt(ctx.request);
@@ -122,7 +122,7 @@ class VisitorLogController {
     await next();
   }
 
-  async delete(ctx: Context, next) {
+  async delete(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
       const isExist = await visitorLogService.isExist([id]);

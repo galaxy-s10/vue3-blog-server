@@ -1,9 +1,7 @@
 import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/app/chalkTip';
 import sequelize from '@/config/db';
 
-/**
- * 转换时间格式
- */
+/** 转换时间格式 */
 export const formateDate = (datetime) => {
   function addDateZero(num) {
     return num < 10 ? `0${num}` : num;
@@ -17,9 +15,7 @@ export const formateDate = (datetime) => {
   return formatdatetime;
 };
 
-/**
- * 处理返回的分页数据
- */
+/** 处理返回的分页数据 */
 export const handlePaging = (nowPage, pageSize, result) => {
   const { count } = result;
   const obj: any = {};
@@ -29,9 +25,7 @@ export const handlePaging = (nowPage, pageSize, result) => {
   return { ...obj, ...result };
 };
 
-/**
- * 删除所有外键
- */
+/** 删除所有外键 */
 export const deleteAllForeignKeys = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();
@@ -58,9 +52,7 @@ export const deleteAllForeignKeys = async () => {
   }
 };
 
-/**
- * 删除所有索引（除了PRIMARY）
- */
+/** 删除所有索引（除了PRIMARY） */
 export const deleteAllIndexs = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();

@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { Context } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 
@@ -9,7 +9,7 @@ const schema = Joi.object({
   role_description: Joi.string().min(3).max(30),
 });
 
-const verifyProp = async (ctx: Context, next) => {
+const verifyProp = async (ctx: ParameterizedContext, next) => {
   const props = ctx.request.body;
   try {
     await schema.validateAsync(props, {

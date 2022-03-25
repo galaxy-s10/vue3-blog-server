@@ -2,10 +2,14 @@
 
 基于 Typescript + Node 搭建的后端项目模板，并主要使用了以下插件：
 
-- koa2.x
-- sequelize6.x
+- koa
+- sequelize
 - mysql2
+- redis
+- node-schedule
+- nodemailer
 - jsonwebtoken
+
 
 # 运行
 

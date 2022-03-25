@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 
 import { qq_email_user, qq_email_pass } from '@/config/secret';
 
-class sendEmail {
+class SendEmail {
   from: any;
 
   to: any;
@@ -11,11 +11,14 @@ class sendEmail {
 
   html: any;
 
+  text: any;
+
   constructor(payload) {
     this.from = payload.from;
     this.to = payload.to;
     this.subject = payload.subject;
     this.html = payload.html;
+    this.text = payload.text;
   }
 
   send() {
@@ -35,8 +38,7 @@ class sendEmail {
         from: this.from, // sender address
         to: this.to, // list of receivers
         subject: this.subject, // Subject line
-        // 发送text或者html格式
-        // text: 'Hello world?', // plain text body
+        text: this.text, // plain text body
         html: this.html, // html body
       };
 
@@ -52,4 +54,4 @@ class sendEmail {
   }
 }
 
-export default sendEmail;
+export default SendEmail;

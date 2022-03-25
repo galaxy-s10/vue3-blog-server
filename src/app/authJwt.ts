@@ -1,11 +1,10 @@
-import path from 'path';
-
 import jwt from 'jsonwebtoken';
 
 import getUserStatus from './getUserStatus';
 
 import { jwtSecret } from '@/config/secret';
 import { IUser } from '@/interface';
+import userModel from '@/model/user.model';
 
 const authJwt = (
   req
@@ -17,21 +16,16 @@ const authJwt = (
       return;
     }
     const token = req.headers.authorization?.split(' ')[1];
-    jwt.verify(token, jwtSecret, {}, async (err, decode) => {
+    jwt.verify(token, jwtSecret, {}, async (err, decode: jwt.JwtPayload) => {
       if (err) {
         // 判断非法/过期token
         // eslint-disable-next-line prefer-promise-reject-errors
         reject({ code: 401, message: '登录信息过期!' });
         return;
       }
-      // eslint-disable-next-line
-      const userModel = require(path.resolve(
-        __dirname,
-        `../model/user.model.ts`
-      )).default;
 
       // 防止修改密码后，原本的token还能用
-      const userResult = await userModel.findOne({
+      const userResult: any = await userModel.findOne({
         attributes: {
           exclude: ['password'],
         },
