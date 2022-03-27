@@ -69,21 +69,22 @@ class QqUserController {
        */
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
 
-  async getAccessToken(code, platform) {
-    if (platform === '') return null;
+  async getAccessToken(code, isAdmin: boolean) {
     // 注意此code会在10分钟内过期。
     const params: any = {};
     params.code = code;
-    params.client_id =
-      platform === 'www' ? www_qq_client_id : admin_qq_client_id;
-    params.client_secret =
-      platform === 'www' ? www_qq_client_secret : admin_qq_client_secret;
-    params.redirect_uri =
-      platform === 'www' ? www_qq_redirect_uri : admin_qq_redirect_uri;
+    params.client_id = !isAdmin ? www_qq_client_id : admin_qq_client_id;
+    params.client_secret = !isAdmin
+      ? www_qq_client_secret
+      : admin_qq_client_secret;
+    params.redirect_uri = !isAdmin
+      ? www_qq_redirect_uri
+      : admin_qq_redirect_uri;
     params.grant_type = 'authorization_code';
     params.fmt = 'json';
     // https://wiki.connect.qq.com/%E4%BD%BF%E7%94%A8authorization_code%E8%8E%B7%E5%8F%96access_token
@@ -180,17 +181,8 @@ class QqUserController {
   login = async (ctx: ParameterizedContext, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
-      const { host } = ctx.request;
-      const platformMap = {
-        'www.hsslive.cn': 'www',
-        'admin.hsslive.cn': 'admin',
-      };
-      const clientIdMap = {
-        'www.hsslive.cn': www_qq_client_id,
-        'admin.hsslive.cn': admin_qq_client_id,
-      };
-      const accessToken = await this.getAccessToken(code, platformMap[host]);
-      if (!platformMap[host]) throw new Error('非法platform!');
+      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+      const accessToken = await this.getAccessToken(code, isAdmin);
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
       const OauthInfo: any = await this.getMeOauth({
         access_token: accessToken.access_token,
@@ -202,12 +194,14 @@ class QqUserController {
         oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
         openid: OauthInfo.openid,
       });
+      console.log('llllllll');
       if (qqUserInfo.ret < 0) throw new Error(JSON.stringify(qqUserInfo));
       // 先判断当前的应用是否存在这个qq用户
       const isExist = await qqUserService.isExistClientIdUnionid(
-        clientIdMap[host],
+        isAdmin ? admin_qq_client_id : www_qq_client_id,
         OauthInfo.unionid
       );
+      console.log(isExist, 333);
       if (!isExist) {
         // 如果当前的应用不存在这个qq用户，再判断所有应用里面存不存在这个qq用户
         const isExist2 = await qqUserService.isExistUnionid(OauthInfo.unionid);
@@ -227,7 +221,7 @@ class QqUserController {
           await thirdUserService.create({
             user_id: createUserRes?.id,
             third_user_id: createQqUserRes.id,
-            third_platform: platformMap[host] === 'www' ? 2 : 3,
+            third_platform: !isAdmin ? 2 : 3,
           });
           const token = signJwt({
             userInfo: {
@@ -244,14 +238,17 @@ class QqUserController {
           ctx.cookies.set('token', token, { httpOnly: false });
           successHandler({ ctx, data: token, message: 'qq登录成功!' });
         } else {
+          console.log('-----');
           // qq_user表里面找这个用户原本绑定的qq用户
-          const oldQqUser: any = await qqUserService.findByDetail({
-            unionid: OauthInfo.unionid,
-          });
+          const oldQqUser: any = await qqUserService.findByUnionid(
+            OauthInfo.unionid
+          );
+          console.log('qq_user表里面找这个用户原本绑定的qq用户', oldQqUser);
+          console.log('qq_user表里面找这个用户原本绑定的qq用户', oldQqUser.id);
           // third_user里面找这个用户原本绑定的user表里的用户
           const oldThirdUser: any = await thirdUserService.findUser({
             third_user_id: oldQqUser.id,
-            third_platform: platformMap[host] !== 'www' ? 2 : 3, // 如果当前是admin接口，则代表这个用户是在www接口绑定过。
+            third_platform: isAdmin ? 2 : 3, // 如果当前是admin接口，则代表这个用户是在www接口绑定过。
           });
           // 如果在所有应用里面，存在这个qq用户，则代表third_user里面肯定有他的记录
           // 因为当前应用没有该qq用户（只是所有应用里面有它而已），所以先在qq表插入记录
@@ -261,11 +258,12 @@ class QqUserController {
             unionid: OauthInfo.unionid,
             openid: OauthInfo.openid,
           });
+          console.log('third_user里面新建', createQqUserRes.id);
           // third_user里面新建
           await thirdUserService.create({
             user_id: oldThirdUser?.user_id,
             third_user_id: createQqUserRes.id,
-            third_platform: platformMap[host] === 'www' ? 2 : 3,
+            third_platform: !isAdmin ? 2 : 3,
           });
           const userInfo: any = await userService.find(oldThirdUser.user_id);
 
@@ -286,16 +284,20 @@ class QqUserController {
         }
       } else {
         // 如果当前的应用存在这个qq用户
-        const oldQqUser: any = await qqUserService.update({
+        await qqUserService.update({
           ...qqUserInfo,
           client_id: OauthInfo.client_id,
           unionid: OauthInfo.unionid,
           openid: OauthInfo.openid,
         });
-        const thirdUserInfo: any = await thirdUserService.findUser({
-          third_platform: platformMap[host] === 'www' ? 2 : 3,
-          third_user_id: oldQqUser.id,
-        });
+        const oldQqUser: any = await qqUserService.findByUnionid(
+          OauthInfo.unionid
+        );
+        console.log(oldQqUser.id, 3333);
+        const thirdUserInfo: any = await thirdUserService.findUserByThirdUserId(
+          oldQqUser.id
+        );
+        console.log(thirdUserInfo, 777);
         const userInfo: any = await userService.find(thirdUserInfo.user_id);
         const token = signJwt({
           userInfo: {
@@ -313,6 +315,7 @@ class QqUserController {
       }
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     /**
      * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
@@ -348,6 +351,7 @@ class QqUserController {
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
@@ -359,6 +363,7 @@ class QqUserController {
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
@@ -400,6 +405,7 @@ class QqUserController {
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
@@ -416,6 +422,7 @@ class QqUserController {
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }

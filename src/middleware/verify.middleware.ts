@@ -36,8 +36,6 @@ const verify = async (ctx: ParameterizedContext, next) => {
     const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
     if (isAdmin) {
       console.log(chalkINFO('当前请求的是后台接口'));
-      await next(); // WARN:测试用，记得删
-      return; // WARN:测试用，记得删
       if (backendWhiteList.indexOf(url) !== -1) {
         await next();
       } else {

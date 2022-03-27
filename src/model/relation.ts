@@ -22,7 +22,6 @@ import UserRole from './userRole.model';
 import { chalkINFO } from '@/app/chalkTip';
 
 console.log(chalkINFO('加载了relation'));
-console.log(EmailUser);
 /**
  * https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html
  * A 称为 源 模型,而 B 称为 目标 模型.

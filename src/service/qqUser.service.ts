@@ -95,17 +95,9 @@ class UserService {
   }
 
   /** 根据详细信息查找qq用户 */
-  async findByDetail({
-    openid,
-    unionid,
-    client_id,
-  }: {
-    openid?: string;
-    unionid: string;
-    client_id?: number;
-  }) {
+  async findByUnionid(unionid) {
     const result = await qqUserModel.findOne({
-      where: { openid, unionid, client_id },
+      where: { unionid },
     });
     return result;
   }

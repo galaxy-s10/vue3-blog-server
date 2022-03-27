@@ -45,6 +45,14 @@ class TagService {
     return result;
   }
 
+  /** 根据third_user_id查找第三方用户表里的用户 */
+  async findUserByThirdUserId(third_user_id) {
+    const result = await thirdUserModel.findOne({
+      where: { third_user_id },
+    });
+    return result;
+  }
+
   /** 修改第三方用户记录 */
   async update({ id, user_id, third_platform, third_user_id }: IThirdUser) {
     const result = await thirdUserModel.update(
