@@ -38,6 +38,11 @@ export interface IUser {
   title?: string;
   token?: string;
 }
+export interface IEmail {
+  id?: number;
+  email: string;
+  code?: string;
+}
 
 export interface IQqUser {
   id?: number;
@@ -107,8 +112,8 @@ export interface IMusic {
 export interface IThirdUser {
   id?: number;
   user_id: string;
-  third_user_id: string;
-  third_platform: string;
+  third_user_id: number;
+  third_platform: number;
 }
 
 export interface ILink {

@@ -6,7 +6,7 @@ import { chalkERROR, chalk } from '../chalkTip';
 import logService from '@/service/log.service';
 
 const errorHandler = (
-  err: { code: number; error: any; message?: string },
+  err: { code: number; error?: any; message?: string },
   ctx: ParameterizedContext
 ) => {
   const { code, error, message } = err;
@@ -21,16 +21,17 @@ const errorHandler = (
     ctx.body = err;
   } else {
     // 如果捕获的错误有ctx，代表是接口地址报错
-    console.log(chalk.redBright(`code: ${code}`));
-    console.log(chalk.redBright(`params:`), ctx.params);
-    console.log(chalk.redBright(`body:`), ctx.request.body);
-    console.log(chalk.redBright(`error: ${error}`));
-    console.log(chalk.redBright(`stack: ${error.stack}`));
-    console.log(chalk.redBright(`message: ${message}`));
+    console.log(chalk.redBright('code:'), code);
+    console.log(chalk.redBright('query:'), { ...ctx.request.query });
+    console.log(chalk.redBright('body:'), ctx.request.body);
+    console.log(chalk.redBright('error:'), error);
+    console.log(chalk.redBright('stack:'), error?.stack);
+    console.log(chalk.redBright('message:'), message);
 
     let status;
     let defaultMessage;
-
+    const env = process.env.REACT_BLOG_SERVER_ENV;
+    console.log(env, 333333);
     switch (code) {
       case 400:
         status = 400;
@@ -53,11 +54,11 @@ const errorHandler = (
     ctx.status = status;
     ctx.body = {
       code: status,
-      error: { message: error?.message || null, error },
-      stack: error.stack,
+      error,
+      stack: env === 'development' && error?.stack,
       message: message || defaultMessage,
     };
-    if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
+    if (env !== 'development') {
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       authJwt(ctx.request)
         .then((res) => {
@@ -71,8 +72,8 @@ const errorHandler = (
             api_method: ctx.request.method,
             api_hostname: ctx.request.hostname,
             api_path: ctx.request.path,
-            api_err_msg: message || error.toString(),
-            api_err_stack: JSON.stringify(error.stack),
+            api_err_msg: message || error?.toString(),
+            api_err_stack: JSON.stringify(error?.stack),
           });
         })
         .catch((e) => {

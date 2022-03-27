@@ -13,11 +13,17 @@ const userRouter = new Router({ prefix: '/user' });
 // 用户列表
 userRouter.get('/list', userController.list);
 
-// 用户登录
+// 邮箱+密码用户登录
 userRouter.post('/login', verifyProp, userController.login);
+
+// 邮箱+验证码登录
+userRouter.post('/code_login', verifyProp, userController.codeLogin);
 
 // 获取用户信息
 userRouter.get('/get_user_info', userController.getUserInfo);
+
+// 用户注册
+userRouter.post('/register', userController.register);
 
 // 创建用户
 userRouter.post('/create', userController.create);

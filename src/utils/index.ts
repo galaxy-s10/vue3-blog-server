@@ -121,14 +121,22 @@ export const getUrl = (url: string) => {
 export const getRandomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-/**
- * 获取随机字符串
- */
+/** 获取随机字符串 */
 export const randomString = (length: number): string => {
   const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let res = '';
   for (let i = 0; i < length; i += 1) {
     res += str.charAt(getRandomInt(0, str.length - 1));
   }
+  return res;
+};
+
+/**
+ * 获取随机数字字符串
+ * length: 长度，不能大于16
+ */
+export const randomNumber = (length: number): number => {
+  const str = Math.random().toString().slice(2);
+  const res = +str.slice(str.length - length);
   return res;
 };

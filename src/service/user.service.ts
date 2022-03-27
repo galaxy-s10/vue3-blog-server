@@ -4,6 +4,7 @@ import { IUserList } from '@/controller/user.controller';
 import { IUser } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
+import emailModel from '@/model/emailUser.model';
 import githubUserModel from '@/model/githubUser.model';
 import qqUserModel from '@/model/qqUser.model';
 import roleModel from '@/model/role.model';
@@ -113,9 +114,32 @@ class UserService {
         },
         {
           model: qqUserModel,
+          through: {
+            attributes: ['third_platform'],
+            where: {
+              third_platform: {
+                [Op.or]: [2, 3], // 2,3是qq平台，2是前台，3是后台
+              },
+            },
+          },
         },
         {
           model: githubUserModel,
+          through: {
+            attributes: ['third_platform'],
+            where: {
+              third_platform: 4, // 4是github平台
+            },
+          },
+        },
+        {
+          model: emailModel,
+          through: {
+            attributes: [],
+            where: {
+              third_platform: 5, // 5是邮箱平台
+            },
+          },
         },
         {
           model: roleModel,

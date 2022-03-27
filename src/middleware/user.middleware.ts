@@ -15,6 +15,8 @@ const schema = Joi.object({
   //   .required(),
   title: Joi.string().min(3).max(50),
   avatar: Joi.string().min(3).max(50),
+  email: Joi.string().min(3).max(80),
+  code: Joi.string(),
   status: [1, 2, 3],
   exp: Joi.number(),
 });

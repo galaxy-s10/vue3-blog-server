@@ -120,7 +120,7 @@ class GithubUserController {
         await thirdUserModel.create({
           user_id: userInfo?.id,
           third_user_id: OauthInfo.github_id,
-          third_platform: 3,
+          third_platform: 4,
         });
         const token = signJwt({
           userInfo: {
@@ -141,7 +141,7 @@ class GithubUserController {
           client_id: OauthInfo.client_id,
         });
         const userInfo1: any = await thirdUserService.findUser({
-          third_platform: 3,
+          third_platform: 4,
           third_user_id: OauthInfo.github_id,
         });
         const userInfo: any = await userService.find(userInfo1.user_id);

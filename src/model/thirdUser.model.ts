@@ -23,7 +23,7 @@ const thirdUserModel = sequelize.define(
     third_platform: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1, // 1:博客 2:qq 3:github
+      defaultValue: 1, // 1:博客 2:qq前台 3:qq后台 4:github 5:邮箱
     },
   },
   {

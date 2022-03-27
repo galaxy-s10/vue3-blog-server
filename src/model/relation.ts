@@ -3,6 +3,7 @@ import ArticleTag from './articleTag.model';
 import ArticleType from './articleType.model';
 import Auth from './auth.model';
 import Comment from './comment.model';
+import EmailUser from './emailUser.model';
 import GithubUser from './githubUser.model';
 import Log from './log.model';
 import QiniuData from './qiniuData.model';
@@ -12,6 +13,7 @@ import RoleAuth from './roleAuth.model';
 import Star from './star.model';
 import Tag from './tag.model';
 import ThirdUser from './thirdUser.model';
+import thirdUserModel from './thirdUser.model';
 import Type from './type.model';
 import User from './user.model';
 import UserArticle from './userArticle.model';
@@ -20,7 +22,7 @@ import UserRole from './userRole.model';
 import { chalkINFO } from '@/app/chalkTip';
 
 console.log(chalkINFO('加载了relation'));
-
+console.log(EmailUser);
 /**
  * https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html
  * A 称为 源 模型,而 B 称为 目标 模型.
@@ -245,33 +247,73 @@ Log.belongsTo(User, {
   constraints: false,
 });
 
+/**
+ * 一对一的话，这样就可以根据根据邮件表查出来第三方用户表，第三方表里面再查出来用户，但是感觉比较臃肿。
+ * 所以还是直接用多对多查询吧，虽然多对多查出来的是一个数组。
+ThirdUser.belongsTo(User, {
+  foreignKey: 'third_user_id',
+  constraints: false,
+});
+ThirdUser.belongsTo(Email, {
+  foreignKey: 'third_user_id',
+  constraints: false,
+});
+Email.hasOne(ThirdUser, {
+  foreignKey: 'third_user_id',
+  constraints: false,
+});
+ */
+EmailUser.belongsToMany(User, {
+  through: ThirdUser,
+  foreignKey: 'third_user_id',
+  otherKey: 'user_id',
+  sourceKey: 'id',
+  constraints: false,
+});
+User.belongsToMany(EmailUser, {
+  through: ThirdUser,
+  foreignKey: 'user_id',
+  otherKey: 'third_user_id',
+  targetKey: 'id',
+  constraints: false,
+});
+
 GithubUser.belongsToMany(User, {
   through: ThirdUser,
   foreignKey: 'third_user_id',
   otherKey: 'user_id',
-  sourceKey: 'github_id',
+  sourceKey: 'id',
   constraints: false,
 });
 User.belongsToMany(GithubUser, {
   through: ThirdUser,
   foreignKey: 'user_id',
   otherKey: 'third_user_id',
-  targetKey: 'github_id',
+  targetKey: 'id',
   constraints: false,
 });
 
+ThirdUser.belongsTo(User, {
+  foreignKey: 'third_user_id',
+  constraints: false,
+});
+// thirdUserModel.belongsTo(QqUser, {
+//   foreignKey: 'third_user_id',
+//   constraints: false,
+//   as: 'third_user1',
+// });
 QqUser.belongsToMany(User, {
   through: ThirdUser,
   foreignKey: 'third_user_id',
   otherKey: 'user_id',
-  sourceKey: 'unionid',
+  sourceKey: 'id',
   constraints: false,
 });
 User.belongsToMany(QqUser, {
   through: ThirdUser,
   foreignKey: 'user_id',
   otherKey: 'third_user_id',
-  targetKey: 'unionid',
+  targetKey: 'id',
   constraints: false,
 });
 

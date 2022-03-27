@@ -11,7 +11,7 @@ const successHandler = ({
   message,
 }: {
   ctx: ParameterizedContext;
-  data: any;
+  data?: any;
   message?: string;
 }) => {
   console.log(chalkSUCCESS(`↓↓↓↓↓↓↓↓↓↓ success-handle ↓↓↓↓↓↓↓↓↓↓`));
@@ -51,7 +51,7 @@ const successHandler = ({
       logService.create({
         user_id: res.userInfo?.id || -1,
         api_user_agent: ctx.request.headers['user-agent'],
-        api_sql_duration: data.sql_duration,
+        api_sql_duration: data?.sql_duration,
         api_from: isAdmin ? 2 : 1,
         api_body: JSON.stringify(ctx.request.body || {}),
         api_query: JSON.stringify(ctx.query),

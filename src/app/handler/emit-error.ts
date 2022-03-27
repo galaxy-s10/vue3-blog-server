@@ -11,7 +11,7 @@ const emitError = ({
 }: {
   ctx: ParameterizedContext;
   code: number;
-  error: any;
+  error?: any;
   message?: string;
 }) => {
   console.log(chalkWRAN('发射错误'));

@@ -61,9 +61,6 @@ const userModel = sequelize.define(
       //   },
       // },
     },
-    email: {
-      type: DataTypes.STRING(100),
-    },
     status: {
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:正常 2:禁用 3:非法

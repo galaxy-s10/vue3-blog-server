@@ -25,6 +25,7 @@ export interface IQqUserList extends IList {
   created_at?: string;
   updated_at?: string;
 }
+
 class QqUserController {
   async create(ctx: ParameterizedContext, next) {
     try {
@@ -172,8 +173,9 @@ class QqUserController {
    * 3，判断qq_user表里面有没有存在相同的unionid，
    *  3.1，如果没有存在相同的unionid，即代表是首次登录，在qq_user表里面给他新增一条记录,并
    * 且默认给他新建并且绑定一个用户。
-   *  3.2，存在相同的unionid代表已经在本站登录注册过了，直接通过third_user表找到对应的user表的
-   * 用户，更新一下该用户的token即可。
+   *  3.2，存在相同的unionid代表已经在本站登录注册过了，
+   *    3.2.1，判断有没有openid，qq表里面没用openid的话在qq_user表里面给他新增一条记录，并且绑定再到third_user里面绑定
+   * 原本的用户，最好再更新一下该用户的token即可。
    */
   login = async (ctx: ParameterizedContext, next) => {
     try {
@@ -211,50 +213,62 @@ class QqUserController {
         const isExist2 = await qqUserService.isExistUnionid(OauthInfo.unionid);
         // 如果所有应用里也不存在这个qq用户，则在qq表和user表都插入一条记录，并在third_user绑定
         if (!isExist2) {
-          await qqUserService.create({
+          const createQqUserRes: any = await qqUserService.create({
             ...qqUserInfo,
             client_id: OauthInfo.client_id,
             unionid: OauthInfo.unionid,
             openid: OauthInfo.openid,
           });
-          const userInfo: any = await userService.create({
-            username: `qq_${qqUserInfo.nickname}`,
+          const createUserRes: any = await userService.create({
+            username: `qq_${createQqUserRes.nickname}`,
             password: randomString(8),
-            avatar: qqUserInfo.figureurl_2,
+            avatar: createQqUserRes.figureurl_2,
           });
-          await thirdUserModel.create({
-            user_id: userInfo?.id,
-            third_user_id: OauthInfo.unionid,
-            third_platform: 2,
+          await thirdUserService.create({
+            user_id: createUserRes?.id,
+            third_user_id: createQqUserRes.id,
+            third_platform: platformMap[host] === 'www' ? 2 : 3,
           });
           const token = signJwt({
             userInfo: {
-              ...JSON.parse(JSON.stringify(userInfo)),
+              ...JSON.parse(JSON.stringify(createUserRes)),
               qq_users: undefined,
               password: undefined,
             },
             exp: 24,
           });
           await userService.update({
-            id: userInfo?.id,
+            id: createUserRes?.id,
             token,
           });
           ctx.cookies.set('token', token, { httpOnly: false });
           successHandler({ ctx, data: token, message: 'qq登录成功!' });
         } else {
+          // qq_user表里面找这个用户原本绑定的qq用户
+          const oldQqUser: any = await qqUserService.findByDetail({
+            unionid: OauthInfo.unionid,
+          });
+          // third_user里面找这个用户原本绑定的user表里的用户
+          const oldThirdUser: any = await thirdUserService.findUser({
+            third_user_id: oldQqUser.id,
+            third_platform: platformMap[host] !== 'www' ? 2 : 3, // 如果当前是admin接口，则代表这个用户是在www接口绑定过。
+          });
           // 如果在所有应用里面，存在这个qq用户，则代表third_user里面肯定有他的记录
           // 因为当前应用没有该qq用户（只是所有应用里面有它而已），所以先在qq表插入记录
-          await qqUserService.create({
+          const createQqUserRes: any = await qqUserService.create({
             ...qqUserInfo,
             client_id: OauthInfo.client_id,
             unionid: OauthInfo.unionid,
             openid: OauthInfo.openid,
           });
-          const thirdUserInfo: any = await thirdUserService.findUser({
-            third_platform: 2,
-            third_user_id: OauthInfo.unionid,
+          // third_user里面新建
+          await thirdUserService.create({
+            user_id: oldThirdUser?.user_id,
+            third_user_id: createQqUserRes.id,
+            third_platform: platformMap[host] === 'www' ? 2 : 3,
           });
-          const userInfo: any = await userService.find(thirdUserInfo.user_id);
+          const userInfo: any = await userService.find(oldThirdUser.user_id);
+
           const token = signJwt({
             userInfo: {
               ...JSON.parse(JSON.stringify(userInfo)),
@@ -271,15 +285,16 @@ class QqUserController {
           successHandler({ ctx, data: token, message: 'qq登录成功!' });
         }
       } else {
-        await qqUserService.update({
+        // 如果当前的应用存在这个qq用户
+        const oldQqUser: any = await qqUserService.update({
           ...qqUserInfo,
           client_id: OauthInfo.client_id,
           unionid: OauthInfo.unionid,
           openid: OauthInfo.openid,
         });
         const thirdUserInfo: any = await thirdUserService.findUser({
-          third_platform: 2,
-          third_user_id: OauthInfo.unionid,
+          third_platform: platformMap[host] === 'www' ? 2 : 3,
+          third_user_id: oldQqUser.id,
         });
         const userInfo: any = await userService.find(thirdUserInfo.user_id);
         const token = signJwt({

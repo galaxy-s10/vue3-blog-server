@@ -30,6 +30,18 @@ class CommentService {
     const limit = parseInt(pageSize, 10);
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
+      include: [
+        {
+          model: userModel,
+          attributes: { exclude: ['password', 'token'] },
+          as: 'from_user',
+        },
+        {
+          model: userModel,
+          attributes: { exclude: ['password', 'token'] },
+          as: 'to_user',
+        },
+      ],
       limit,
       offset,
     });
