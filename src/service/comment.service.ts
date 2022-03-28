@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { authJwt } from '@/app/authJwt';
+import { authJwt } from '@/app/auth/authJwt';
 import { IComment } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';

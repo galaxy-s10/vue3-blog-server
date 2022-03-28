@@ -111,7 +111,7 @@ export interface IMusic {
 }
 export interface IThirdUser {
   id?: number;
-  user_id: string;
+  user_id: number;
   third_user_id: number;
   third_platform: number;
 }

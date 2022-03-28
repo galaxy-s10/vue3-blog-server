@@ -140,3 +140,27 @@ export const randomNumber = (length: number): number => {
   const res = +str.slice(str.length - length);
   return res;
 };
+
+/**
+ *
+ * @param code 验证码
+ * @param desc 验证码作用
+ * @param exp 有效期，单位：秒，但返回时会转换成分钟
+ */
+export const emailContentTemplate = ({
+  code,
+  desc,
+  exp,
+  subject,
+}: {
+  code: string;
+  desc: string;
+  exp: number;
+  subject?: string;
+}) => {
+  const subjectTemp = subject || `【自然博客】验证码：${code}`;
+  const content = `【自然博客】验证码：${code}，此验证码用于${desc}，有效期${
+    exp / 60
+  }分钟，请勿告知他人。`;
+  return { subject: subjectTemp, content };
+};

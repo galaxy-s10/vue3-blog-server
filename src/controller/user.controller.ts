@@ -4,7 +4,8 @@ import { ParameterizedContext } from 'koa';
 import emailController from './emailUser.controller';
 import redisController from './redis.controller';
 
-import { authJwt, signJwt } from '@/app/authJwt';
+import { authJwt, signJwt } from '@/app/auth/authJwt';
+import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IEmail, IList, IUser } from '@/interface';
@@ -56,7 +57,7 @@ class UserController {
         await thirdUserService.create({
           user_id: userData.id,
           third_user_id: emailData.id,
-          third_platform: 5,
+          third_platform: THIRD_PLATFORM.email,
         });
         await redisController.del(key);
         const token = signJwt({
@@ -118,6 +119,7 @@ class UserController {
     try {
       const { email, password, exp = 24 } = ctx.request.body;
       const findEmailUserRes: any = await emailService.findThirdUser(email);
+      console.log(findEmailUserRes, 56);
       if (!findEmailUserRes) {
         emitError({
           ctx,
@@ -262,13 +264,14 @@ class UserController {
       if (code === 200) {
         const result = await userService.getUserInfo(userInfo?.id);
         successHandler({ ctx, data: result });
-      } else {
-        emitError({ ctx, code, error: message });
+        await next();
+        return;
       }
+      emitError({ ctx, code, error: message });
+      return;
     } catch (error) {
       emitError({ ctx, code: 401, error, message: error.message });
     }
-    await next();
   }
 
   async update(ctx: ParameterizedContext, next) {

@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import { THIRD_PLATFORM } from '@/app/constant';
 import { IUserList } from '@/controller/user.controller';
 import { IUser } from '@/interface';
 import articleModel from '@/model/article.model';
@@ -118,7 +119,7 @@ class UserService {
             attributes: ['third_platform'],
             where: {
               third_platform: {
-                [Op.or]: [2, 3], // 2,3是qq平台，2是前台，3是后台
+                [Op.or]: [THIRD_PLATFORM.qq_www, THIRD_PLATFORM.qq_admin],
               },
             },
           },
@@ -128,7 +129,7 @@ class UserService {
           through: {
             attributes: ['third_platform'],
             where: {
-              third_platform: 4, // 4是github平台
+              third_platform: THIRD_PLATFORM.github,
             },
           },
         },
@@ -137,7 +138,7 @@ class UserService {
           through: {
             attributes: [],
             where: {
-              third_platform: 5, // 5是邮箱平台
+              third_platform: THIRD_PLATFORM.email,
             },
           },
         },
@@ -197,7 +198,7 @@ class UserService {
     return result;
   }
 
-  /** 是否同名,同名则返回用户的信息,否则返回false */
+  /** 是否同名，区分大小写。同名则返回用户的信息,否则返回false */
   async isSameName(username: string) {
     const result = await userModel.findOne({
       where: {

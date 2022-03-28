@@ -1,7 +1,8 @@
 import { ParameterizedContext } from 'koa';
 import request from 'request';
 
-import { signJwt } from '@/app/authJwt';
+import { signJwt } from '@/app/auth/authJwt';
+import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
@@ -221,7 +222,9 @@ class QqUserController {
           await thirdUserService.create({
             user_id: createUserRes?.id,
             third_user_id: createQqUserRes.id,
-            third_platform: !isAdmin ? 2 : 3,
+            third_platform: !isAdmin
+              ? THIRD_PLATFORM.qq_www
+              : THIRD_PLATFORM.qq_admin,
           });
           const token = signJwt({
             userInfo: {
@@ -248,7 +251,9 @@ class QqUserController {
           // third_user里面找这个用户原本绑定的user表里的用户
           const oldThirdUser: any = await thirdUserService.findUser({
             third_user_id: oldQqUser.id,
-            third_platform: isAdmin ? 2 : 3, // 如果当前是admin接口，则代表这个用户是在www接口绑定过。
+            third_platform: isAdmin
+              ? THIRD_PLATFORM.qq_www
+              : THIRD_PLATFORM.qq_admin, // 如果当前是admin接口，则代表这个用户是在www接口绑定过。
           });
           // 如果在所有应用里面，存在这个qq用户，则代表third_user里面肯定有他的记录
           // 因为当前应用没有该qq用户（只是所有应用里面有它而已），所以先在qq表插入记录
@@ -263,7 +268,9 @@ class QqUserController {
           await thirdUserService.create({
             user_id: oldThirdUser?.user_id,
             third_user_id: createQqUserRes.id,
-            third_platform: !isAdmin ? 2 : 3,
+            third_platform: !isAdmin
+              ? THIRD_PLATFORM.qq_www
+              : THIRD_PLATFORM.qq_admin,
           });
           const userInfo: any = await userService.find(oldThirdUser.user_id);
 

@@ -1,6 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
-import { authJwt } from '@/app/authJwt';
+import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import positionService from '@/service/position.service';

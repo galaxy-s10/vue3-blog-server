@@ -20,7 +20,7 @@ const emailResCode = {
 };
 
 class OtherController {
-  sendEmail = async (email, subject, content) => {
+  sendEmail = async (email: string, subject: string, content: string) => {
     const transporter = await nodemailer.createTransport({
       service: 'qq', // 使用了内置传输发送邮件 查看支持列表：https://nodemailer.com/smtp/well-known/
       port: 465, // SMTP 端口

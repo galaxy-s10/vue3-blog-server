@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import { THIRD_PLATFORM } from '@/app/constant';
 import sequelize from '@/config/db';
 import { IEmail } from '@/interface';
 import commentModel from '@/model/comment.model';
@@ -55,7 +56,7 @@ class EmailService {
           through: {
             attributes: [],
             where: {
-              third_platform: 5, // 5是邮箱
+              third_platform: THIRD_PLATFORM.email,
             },
           },
           attributes: {

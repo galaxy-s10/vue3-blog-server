@@ -37,7 +37,7 @@ class TagService {
     return result;
   }
 
-  /** 查找第三方用户表里的用户 */
+  /** 根据third_platform和third_user_id查找第三方用户表里的记录 */
   async findUser({ third_platform, third_user_id }) {
     const result = await thirdUserModel.findOne({
       where: { third_platform, third_user_id },
@@ -45,10 +45,18 @@ class TagService {
     return result;
   }
 
-  /** 根据third_user_id查找第三方用户表里的用户 */
+  /** 根据third_user_id查找第三方用户表里的记录 */
   async findUserByThirdUserId(third_user_id) {
     const result = await thirdUserModel.findOne({
       where: { third_user_id },
+    });
+    return result;
+  }
+
+  /** 根据user_id查找第三方用户表里的记录 */
+  async findByUserId(user_id) {
+    const result = await thirdUserModel.findAll({
+      where: { user_id },
     });
     return result;
   }

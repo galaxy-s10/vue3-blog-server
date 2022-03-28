@@ -1,6 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
-import { authJwt } from '../authJwt';
+import { authJwt } from '../auth/authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
 
 import logService from '@/service/log.service';
@@ -15,10 +15,17 @@ const errorHandler = (
       `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
     )
   );
+  const env = process.env.REACT_BLOG_SERVER_ENV;
+
   if (!code) {
     console.log(chalkERROR(`系统未知错误(不是通过手动调用emitError触发的)`));
     console.log(err);
-    ctx.body = err;
+    ctx.status = 400;
+    ctx.body = {
+      code: 400,
+      error: err,
+      message: '系统未知错误(不是通过手动调用emitError触发的)',
+    };
   } else {
     // 如果捕获的错误有ctx，代表是接口地址报错
     console.log(chalk.redBright('code:'), code);
@@ -30,7 +37,6 @@ const errorHandler = (
 
     let status;
     let defaultMessage;
-    const env = process.env.REACT_BLOG_SERVER_ENV;
     console.log(env, 333333);
     switch (code) {
       case 400:
@@ -55,7 +61,7 @@ const errorHandler = (
     ctx.body = {
       code: status,
       error,
-      stack: env === 'development' && error?.stack,
+      stack: env === 'development' ? error?.stack : undefined,
       message: message || defaultMessage,
     };
     if (env !== 'development') {

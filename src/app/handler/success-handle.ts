@@ -1,6 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
-import { authJwt } from '../authJwt';
+import { authJwt } from '../auth/authJwt';
 import { chalkSUCCESS } from '../chalkTip';
 
 import logService from '@/service/log.service';

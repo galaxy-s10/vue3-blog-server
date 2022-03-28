@@ -11,12 +11,6 @@ import {
 } from '@/config/secret';
 import { randomString } from '@/utils';
 
-const errCode = {
-  100: '一天只能发5次验证码!',
-  200: '操作频繁，请xxx秒后再发送!',
-  300: '验证码错误或已过期!',
-};
-
 class EmailController {
   from: any;
 
@@ -120,9 +114,9 @@ class EmailController {
       const mailOptions = {
         from: mailOptionsConfig.from, // sender address
         to: email, // list of receivers
-        subject: `《自然博客》验证码:${verificationCode}`, // Subject line
-        text: `《自然博客》验证码:${verificationCode},有效期五分钟`, // plain text body
-        html: `<h1>《自然博客》验证码:${verificationCode},有效期五分钟</h1>`, // html body
+        subject: `【自然博客】验证码:${verificationCode}`, // Subject line
+        text: `【自然博客】验证码:${verificationCode}，有效期五分钟`, // plain text body
+        html: `<h1>【自然博客】验证码:${verificationCode}，有效期五分钟</h1>`, // html body
       };
       // send mail with defined transport object
       const info = await transporter.sendMail(mailOptions);

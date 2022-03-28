@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 
+import { THIRD_PLATFORM } from '@/app/constant';
 import sequelize from '@/config/db';
 import { initTable } from '@/utils';
 
@@ -17,13 +18,13 @@ const thirdUserModel = sequelize.define(
       allowNull: false,
     },
     third_user_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     third_platform: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1, // 1:博客 2:qq前台 3:qq后台 4:github 5:邮箱
+      defaultValue: THIRD_PLATFORM.website,
     },
   },
   {
