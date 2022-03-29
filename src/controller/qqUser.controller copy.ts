@@ -75,10 +75,17 @@ class QqUserController {
     await next();
   }
 
-  async getAccessToken(code) {
+  async getAccessToken(code, isAdmin: boolean) {
     // 注意此code会在10分钟内过期。
     const params: any = {};
     params.code = code;
+    params.client_id = !isAdmin ? WWW_QQ_CLIENT_ID : ADMIN_QQ_CLIENT_ID;
+    params.client_secret = !isAdmin
+      ? WWW_QQ_CLIENT_SECRET
+      : ADMIN_QQ_CLIENT_SECRET;
+    params.redirect_uri = !isAdmin
+      ? WWW_QQ_REDIRECT_URI
+      : ADMIN_QQ_REDIRECT_URI;
     params.grant_type = 'authorization_code';
     params.fmt = 'json';
     // https://wiki.connect.qq.com/%E4%BD%BF%E7%94%A8authorization_code%E8%8E%B7%E5%8F%96access_token
@@ -179,88 +186,18 @@ class QqUserController {
     return OauthInfo;
   }
 
+  /**
+   * qq登录逻辑：
+   * 1，调用getAccessToken(code),拿到access_token
+   * 2，根据access_token，调用getMeOauth()拿到openid和unionid
+   * 3，判断qq_user表里面有没有存在相同的unionid，
+   *  3.1，如果没有存在相同的unionid，即代表是首次登录，在qq_user表里面给他新增一条记录,并
+   * 且默认给他新建并且绑定一个用户。
+   *  3.2，存在相同的unionid代表已经在本站登录注册过了，
+   *    3.2.1，判断有没有openid，qq表里面没用openid的话在qq_user表里面给他新增一条记录，并且绑定再到third_user里面绑定
+   * 原本的用户，最好再更新一下该用户的token即可。
+   */
   login = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
-      const exp = 24; // token过期时间：24小时
-      const accessToken = await this.getAccessToken(code);
-      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      const OauthInfo: any = await this.getMeOauth({
-        access_token: accessToken.access_token,
-        unionid: 1,
-        fmt: 'json',
-      });
-      const qqUserInfo = {
-        ...OauthInfo,
-        client_id: OauthInfo.client_id,
-        unionid: OauthInfo.unionid,
-        openid: OauthInfo.openid,
-      };
-      const isExist = await qqUserService.isExistUnionid(OauthInfo.unionid);
-      if (!isExist) {
-        const qqUser: any = await qqUserService.create(qqUserInfo);
-        const userInfo: any = await userService.create({
-          username: `qq_${OauthInfo.nickname}`,
-          password: randomString(8),
-          avatar: OauthInfo.avatar_url,
-          title: OauthInfo.bio,
-        });
-        await thirdUserModel.create({
-          user_id: userInfo?.id,
-          third_user_id: qqUser.id,
-          third_platform: THIRD_PLATFORM.qq_admin,
-        });
-        const token = signJwt({
-          userInfo: {
-            ...JSON.parse(JSON.stringify(userInfo)),
-            qq_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'qq登录成功!' });
-      } else {
-        console.log('OauthInfo111', OauthInfo);
-        await qqUserService.update(qqUserInfo);
-        const oldQqUser: any = await qqUserService.findByUnionid(
-          OauthInfo.unionid
-        );
-        const thirdUserInfo: any = await thirdUserService.findUser({
-          third_platform: THIRD_PLATFORM.qq_admin,
-          third_user_id: oldQqUser.id,
-        });
-        const userInfo: any = await userService.find(thirdUserInfo.user_id);
-        const token = signJwt({
-          userInfo: {
-            ...userInfo,
-            qq_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'qq登录成功!' });
-      }
-    } catch (error) {
-      emitError({ ctx, code: 400, error, message: error.message });
-      return;
-    }
-    /**
-     * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
-     * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
-     * 因此还是得在这调用一次await next()
-     */
-    await next();
-  };
-
-  login22 = async (ctx: ParameterizedContext, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;

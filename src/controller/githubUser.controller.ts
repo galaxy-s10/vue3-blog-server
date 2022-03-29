@@ -23,7 +23,7 @@ import userService from '@/service/user.service';
 import { randomString } from '@/utils';
 import axios from '@/utils/request';
 
-export interface IQqUserList extends IList {
+export interface IGithubUserList extends IList {
   nickname: string;
   gender: string;
   created_at?: string;
@@ -150,7 +150,7 @@ class GithubUserController {
           client_id: GITHUB_CLIENT_ID,
         });
         const userInfo: any = await userService.create({
-          username: `github_${OauthInfo.name}` || OauthInfo.login,
+          username: `github_${OauthInfo.name || OauthInfo.login}`,
           password: randomString(8),
           avatar: OauthInfo.avatar_url,
           title: OauthInfo.bio,
@@ -176,12 +176,12 @@ class GithubUserController {
       } else {
         console.log('OauthInfo111', OauthInfo);
         await githubUserService.updateByGithubId(OauthInfo);
-        const oldQqUser: any = await githubUserService.findByGithubId(
+        const oldGithubUser: any = await githubUserService.findByGithubId(
           OauthInfo.github_id
         );
         const thirdUserInfo: any = await thirdUserService.findUser({
           third_platform: THIRD_PLATFORM.github,
-          third_user_id: oldQqUser.id,
+          third_user_id: oldGithubUser.id,
         });
         console.log(thirdUserInfo, 777);
         const userInfo: any = await userService.find(thirdUserInfo.user_id);
@@ -221,7 +221,7 @@ class GithubUserController {
         orderName = 'id',
         created_at,
         updated_at,
-      }: IQqUserList = ctx.request.query;
+      }: IGithubUserList = ctx.request.query;
       const result = await githubUserService.getList({
         nowPage,
         pageSize,

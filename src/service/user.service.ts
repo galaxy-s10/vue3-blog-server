@@ -88,7 +88,7 @@ class UserService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 查找用户 */
+  /** 根据id查找用户 */
   async find(id: number) {
     const result = await userModel.findOne({
       include: [
