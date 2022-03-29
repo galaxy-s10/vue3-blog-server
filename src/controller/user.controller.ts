@@ -10,7 +10,7 @@ import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IEmail, IList, IUser } from '@/interface';
 import User from '@/model/user.model';
-import emailService from '@/service/emailUser.service';
+import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { randomNumber, randomString } from '@/utils';
@@ -31,7 +31,7 @@ class UserController {
         emitError({ ctx, code: 400, message: '请输入正确的邮箱!' });
         return;
       }
-      const emailIsExist = await emailService.isExist([email]);
+      const emailIsExist = await emailUserService.isExist([email]);
       if (emailIsExist) {
         emitError({ ctx, code: 401, message: '该邮箱已被他人使用!' });
       } else {
@@ -52,7 +52,7 @@ class UserController {
           password: randomString(8),
         });
         // 邮箱表创建邮箱
-        const emailData: any = await emailService.create({ email });
+        const emailData: any = await emailUserService.create({ email });
         // 第三方用户表绑定用户和邮箱
         await thirdUserService.create({
           user_id: userData.id,
@@ -118,7 +118,8 @@ class UserController {
   login = async (ctx: ParameterizedContext, next) => {
     try {
       const { email, password, exp = 24 } = ctx.request.body;
-      const findEmailUserRes: any = await emailService.findThirdUser(email);
+      console.log(email, password, 4444422);
+      const findEmailUserRes: any = await emailUserService.findThirdUser(email);
       console.log(findEmailUserRes, 56);
       if (!findEmailUserRes) {
         emitError({
@@ -188,7 +189,7 @@ class UserController {
         emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
         return;
       }
-      const findEmailUserRes = await emailService.findThirdUser(email);
+      const findEmailUserRes = await emailUserService.findThirdUser(email);
       const user = findEmailUserRes.get().users[0].get();
       console.log(user);
       const userInfo: any = await User.findOne({

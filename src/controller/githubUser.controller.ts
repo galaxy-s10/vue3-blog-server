@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa';
 import redisController from './redis.controller';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
+import { chalkINFO } from '@/app/chalkTip';
 import {
   REDIS_PREFIX,
   THIRD_PLATFORM,
@@ -52,11 +53,11 @@ class GithubUserController {
     params.client_id = GITHUB_CLIENT_ID;
     params.client_secret = GITHUB_CLIENT_SECRET;
     params.redirect_uri = GITHUB_REDIRECT_URI;
-    const accessToken: any = await axios.post(
+    const accessToken: any = await axios.get(
       'https://github.com/login/oauth/access_token',
       {
         headers: { Accept: 'application/json' },
-        data: { ...params },
+        params: { ...params },
       }
     );
     return accessToken;

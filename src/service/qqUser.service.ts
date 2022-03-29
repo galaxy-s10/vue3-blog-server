@@ -102,7 +102,7 @@ class UserService {
     return result;
   }
 
-  /** 修改qq用户 */
+  /** 根据unionid修改qq用户 */
   async update({
     client_id,
     openid,
@@ -132,8 +132,10 @@ class UserService {
         city,
         province,
         year,
+        openid,
+        client_id,
       },
-      { where: { client_id, openid, unionid } }
+      { where: { unionid } }
     );
     return result;
   }

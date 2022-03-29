@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const service = axios.create({
   // baseURL: process.env.NODE_ENV === 'development' ? undefined : '/admin/',
-  timeout: 100,
+  timeout: 5000,
 });
 
 // 请求拦截
