@@ -3,7 +3,7 @@ import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
-import { mysqlConfig, sshConfig } from '@/config/secret';
+import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import qiniuController from '@/utils/qiniu';
 
 // 备份目录
@@ -22,13 +22,13 @@ fi
 
 // 备份的文件名
 const backupsFileName = () => {
-  const res = mysqlConfig.database + dayjs().format('YYYY_MM_DD_HH_mm_ss');
+  const res = MYSQL_CONFIG.database + dayjs().format('YYYY_MM_DD_HH_mm_ss');
   return res;
 };
 
 // 备份数据库命令
 const backupsCmd = (fileName) => {
-  return `mysqldump -h${mysqlConfig.host} -u${mysqlConfig.username} -p${mysqlConfig.password} --databases ${mysqlConfig.database} > ${backupsDirectory}${fileName}.sql`;
+  return `mysqldump -h${MYSQL_CONFIG.host} -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${MYSQL_CONFIG.database} > ${backupsDirectory}${fileName}.sql`;
 };
 
 const conner = () => {
@@ -90,10 +90,10 @@ const conner = () => {
       // });
     })
     .connect({
-      host: sshConfig.host,
-      port: sshConfig.port,
-      username: sshConfig.username,
-      password: sshConfig.password,
+      host: SSH_CONFIG.host,
+      port: SSH_CONFIG.port,
+      username: SSH_CONFIG.username,
+      password: SSH_CONFIG.password,
     });
 };
 // https://github.com/node-schedule/node-schedule#cron-style-scheduling

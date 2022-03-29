@@ -60,8 +60,8 @@ class UserService {
   }
 
   /** 查找github用户 */
-  async find(openid: number) {
-    const result = await githubUserModel.findOne({ where: { openid } });
+  async findByGithubId(github_id: any) {
+    const result = await githubUserModel.findOne({ where: { github_id } });
     return result;
   }
 

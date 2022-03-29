@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-import { qq_email_user, qq_email_pass } from '@/config/secret';
+import { QQ_EMAIL_USER, QQ_EMAIL_PASS } from '@/config/secret';
 
 class SendEmail {
   from: any;
@@ -29,8 +29,8 @@ class SendEmail {
         port: 465, // SMTP 端口
         secureConnection: true, // 使用了 SSL
         auth: {
-          user: qq_email_user,
-          pass: qq_email_pass, // 这里密码不是qq密码，是你设置的smtp授权码
+          user: QQ_EMAIL_USER,
+          pass: QQ_EMAIL_PASS, // 这里密码不是qq密码，是你设置的smtp授权码
         },
       });
 

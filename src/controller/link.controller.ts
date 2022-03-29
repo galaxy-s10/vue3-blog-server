@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { mailOptionsConfig } from '@/config/secret';
+import { MAIL_OPTIONS_CONFIG } from '@/config/secret';
 import { ILink } from '@/interface';
 import linkService from '@/service/link.service';
 import SendEmailModel from '@/utils/sendEmail';
@@ -83,8 +83,8 @@ class LinkController {
         status: isAdmin ? status : 1,
       });
       const mailOptions = {
-        from: mailOptionsConfig.from, // sender address
-        to: mailOptionsConfig.to, // list of receivers
+        from: MAIL_OPTIONS_CONFIG.from, // sender address
+        to: MAIL_OPTIONS_CONFIG.to, // list of receivers
         subject: `收到${name}的友链申请`, // Subject line
         text: `收到:${name}的友链申请，请及时处理~`, // plain text body
         html: `<h1>收到:${name}的友链申请，请及时处理~</h1>`, // html body

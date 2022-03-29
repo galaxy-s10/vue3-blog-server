@@ -6,12 +6,12 @@ import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
-  www_qq_client_id,
-  www_qq_client_secret,
-  www_qq_redirect_uri,
-  admin_qq_client_id,
-  admin_qq_client_secret,
-  admin_qq_redirect_uri,
+  WWW_QQ_CLIENT_ID,
+  WWW_QQ_CLIENT_SECRET,
+  WWW_QQ_REDIRECT_URI,
+  ADMIN_QQ_CLIENT_ID,
+  ADMIN_QQ_CLIENT_SECRET,
+  ADMIN_QQ_REDIRECT_URI,
 } from '@/config/secret';
 import { IList, IQqUser } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
@@ -79,13 +79,13 @@ class QqUserController {
     // 注意此code会在10分钟内过期。
     const params: any = {};
     params.code = code;
-    params.client_id = !isAdmin ? www_qq_client_id : admin_qq_client_id;
+    params.client_id = !isAdmin ? WWW_QQ_CLIENT_ID : ADMIN_QQ_CLIENT_ID;
     params.client_secret = !isAdmin
-      ? www_qq_client_secret
-      : admin_qq_client_secret;
+      ? WWW_QQ_CLIENT_SECRET
+      : ADMIN_QQ_CLIENT_SECRET;
     params.redirect_uri = !isAdmin
-      ? www_qq_redirect_uri
-      : admin_qq_redirect_uri;
+      ? WWW_QQ_REDIRECT_URI
+      : ADMIN_QQ_REDIRECT_URI;
     params.grant_type = 'authorization_code';
     params.fmt = 'json';
     // https://wiki.connect.qq.com/%E4%BD%BF%E7%94%A8authorization_code%E8%8E%B7%E5%8F%96access_token
@@ -199,7 +199,7 @@ class QqUserController {
       if (qqUserInfo.ret < 0) throw new Error(JSON.stringify(qqUserInfo));
       // 先判断当前的应用是否存在这个qq用户
       const isExist = await qqUserService.isExistClientIdUnionid(
-        isAdmin ? admin_qq_client_id : www_qq_client_id,
+        isAdmin ? ADMIN_QQ_CLIENT_ID : WWW_QQ_CLIENT_ID,
         OauthInfo.unionid
       );
       console.log(isExist, 333);

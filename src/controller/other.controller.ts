@@ -6,9 +6,9 @@ import redisController from './redis.controller';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
-  mailOptionsConfig,
-  qq_email_pass,
-  qq_email_user,
+  MAIL_OPTIONS_CONFIG,
+  QQ_EMAIL_PASS,
+  QQ_EMAIL_USER,
 } from '@/config/secret';
 import { randomString } from '@/utils';
 
@@ -26,12 +26,12 @@ class OtherController {
       port: 465, // SMTP 端口
       secureConnection: true, // 使用了 SSL
       auth: {
-        user: qq_email_user,
-        pass: qq_email_pass, // 这里密码不是qq密码，是你设置的smtp授权码
+        user: QQ_EMAIL_USER,
+        pass: QQ_EMAIL_PASS, // 这里密码不是qq密码，是你设置的smtp授权码
       },
     });
     const mailOptions = {
-      from: mailOptionsConfig.from, // sender address
+      from: MAIL_OPTIONS_CONFIG.from, // sender address
       to: email, // list of receivers
       subject, // Subject line
       text: `${content}`, // plain text body

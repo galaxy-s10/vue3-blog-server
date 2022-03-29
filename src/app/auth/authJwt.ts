@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 import getUserStatus from './getUserStatus';
 
-import { jwtSecret } from '@/config/secret';
+import { JWT_SECRET } from '@/config/secret';
 import { IUser } from '@/interface';
 import userModel from '@/model/user.model';
 
@@ -16,7 +16,7 @@ const authJwt = (
       return;
     }
     const token = req.headers.authorization?.split(' ')[1];
-    jwt.verify(token, jwtSecret, {}, async (err, decode: jwt.JwtPayload) => {
+    jwt.verify(token, JWT_SECRET, {}, async (err, decode: jwt.JwtPayload) => {
       if (err) {
         // 判断非法/过期token
         // eslint-disable-next-line prefer-promise-reject-errors
@@ -59,7 +59,7 @@ const authJwt = (
 const signJwt = (value: { userInfo: any; exp: number }): string => {
   const res = jwt.sign(
     { ...value, exp: Math.floor(Date.now() / 1000) + 60 * 60 * value.exp },
-    jwtSecret
+    JWT_SECRET
   );
   return res;
 };

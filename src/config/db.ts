@@ -1,16 +1,16 @@
 import { Sequelize } from 'sequelize';
 
-import { mysqlConfig } from './secret';
+import { MYSQL_CONFIG } from './secret';
 
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
 
 const sequelize = new Sequelize(
-  mysqlConfig.database,
-  mysqlConfig.username,
-  mysqlConfig.password,
+  MYSQL_CONFIG.database,
+  MYSQL_CONFIG.username,
+  MYSQL_CONFIG.password,
   {
-    host: mysqlConfig.host,
-    port: mysqlConfig.port,
+    host: MYSQL_CONFIG.host,
+    port: MYSQL_CONFIG.port,
     dialect: 'mysql',
     dialectOptions: {
       // 返回正确的时间戳字符串。
@@ -32,14 +32,14 @@ export const connectDb = async () => {
   try {
     console.log(
       chalkINFO(
-        `开始连接${mysqlConfig.host}:${mysqlConfig.port}服务器的${mysqlConfig.database}数据库...`
+        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库...`
       )
     );
     await sequelize.authenticate();
-    const okMsg = `连接${mysqlConfig.host}:${mysqlConfig.port}服务器的${mysqlConfig.database}数据库成功!`;
+    const okMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库成功!`;
     console.log(chalkSUCCESS(okMsg));
   } catch (error) {
-    const errMsg = `连接${mysqlConfig.host}:${mysqlConfig.port}服务器的${mysqlConfig.database}数据库失败!`;
+    const errMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库失败!`;
     console.log(error);
     console.error(chalkERROR(errMsg));
     throw new Error(errMsg);

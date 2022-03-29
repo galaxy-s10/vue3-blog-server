@@ -1,14 +1,20 @@
 import { ParameterizedContext } from 'koa';
 import request from 'request';
 
-import { signJwt } from '@/app/auth/authJwt';
-import { THIRD_PLATFORM } from '@/app/constant';
+import redisController from './redis.controller';
+
+import { authJwt, signJwt } from '@/app/auth/authJwt';
+import {
+  REDIS_PREFIX,
+  THIRD_PLATFORM,
+  VERIFY_EMAIL_RESULT_CODE,
+} from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
-  github_client_id,
-  github_client_secret,
-  github_redirect_uri,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_REDIRECT_URI,
 } from '@/config/secret';
 import { IList, IGithubUser } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
@@ -43,9 +49,9 @@ class GithubUserController {
   async getAccessToken(code) {
     const params: any = {};
     params.code = code;
-    params.client_id = github_client_id;
-    params.client_secret = github_client_secret;
-    params.redirect_uri = github_redirect_uri;
+    params.client_id = GITHUB_CLIENT_ID;
+    params.client_secret = GITHUB_CLIENT_SECRET;
+    params.redirect_uri = GITHUB_REDIRECT_URI;
     const accessToken: any = await new Promise((resolve) => {
       request(
         {
@@ -66,6 +72,7 @@ class GithubUserController {
     return accessToken;
   }
 
+  /** https://docs.github.com/cn/rest/reference/users#get-the-authenticated-user */
   async getMeOauth({ access_token }) {
     const OauthInfo: any = await new Promise((resolve) => {
       request(
@@ -89,9 +96,64 @@ class GithubUserController {
     return OauthInfo;
   }
 
+  userBindGithub = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { email, code } = ctx.request.body;
+      const { userInfo } = await authJwt(ctx.request);
+      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const ownIsBind = result.filter(
+        (v) => v.third_platform === THIRD_PLATFORM.email
+      );
+      if (ownIsBind.length) {
+        emitError({
+          ctx,
+          code: 401,
+          message: '你已经绑定过邮箱，请先解绑原邮箱!',
+        });
+        return;
+      }
+      const otherIsBind = await githubUserService.findByGithubId(email);
+      if (otherIsBind) {
+        emitError({
+          ctx,
+          code: 401,
+          message: '该邮箱已被其他人绑定!',
+        });
+        return;
+      }
+      const key = {
+        prefix: REDIS_PREFIX.userBindEmail,
+        key: email,
+      };
+      const redisData = await redisController.getVal({
+        ...key,
+      });
+      if (redisData !== code || !redisData) {
+        emitError({
+          ctx,
+          code: 401,
+          message: VERIFY_EMAIL_RESULT_CODE.err,
+        });
+        return;
+      }
+      const createEmailRes: any = await githubUserService.create({ email });
+      await thirdUserService.create({
+        user_id: userInfo.id,
+        third_platform: THIRD_PLATFORM.email,
+        third_user_id: createEmailRes.id,
+      });
+      successHandler({ ctx, message: '绑定邮箱成功!' });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
   login = async (ctx: ParameterizedContext, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
+      const exp = 24; // token过期时间：24小时
       const accessToken = await this.getAccessToken(code);
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
       let OauthInfo: any = await this.getMeOauth({
@@ -108,9 +170,9 @@ class GithubUserController {
       delete OauthInfo.created_at;
       delete OauthInfo.updated_at;
       if (!isExist) {
-        await githubUserService.create({
+        const githubUser: any = await githubUserService.create({
           ...OauthInfo,
-          client_id: github_client_id,
+          client_id: GITHUB_CLIENT_ID,
         });
         const userInfo: any = await userService.create({
           username: OauthInfo.name || OauthInfo.login,
@@ -120,7 +182,7 @@ class GithubUserController {
         });
         await thirdUserModel.create({
           user_id: userInfo?.id,
-          third_user_id: OauthInfo.github_id,
+          third_user_id: githubUser.id,
           third_platform: THIRD_PLATFORM.github,
         });
         const token = signJwt({
@@ -128,7 +190,7 @@ class GithubUserController {
             ...JSON.parse(JSON.stringify(userInfo)),
             github_users: undefined,
           },
-          exp: 24,
+          exp,
         });
         await userService.update({
           id: userInfo?.id,
@@ -137,21 +199,18 @@ class GithubUserController {
         ctx.cookies.set('token', token, { httpOnly: false });
         successHandler({ ctx, data: token, message: 'github登录成功!' });
       } else {
-        await githubUserService.update({
-          ...OauthInfo,
-          client_id: OauthInfo.client_id,
-        });
-        const userInfo1: any = await thirdUserService.findUser({
+        await githubUserService.update(OauthInfo);
+        const thirdUserInfo: any = await thirdUserService.findUser({
           third_platform: THIRD_PLATFORM.github,
           third_user_id: OauthInfo.github_id,
         });
-        const userInfo: any = await userService.find(userInfo1.user_id);
+        const userInfo: any = await userService.find(thirdUserInfo.user_id);
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
             github_users: undefined,
           },
-          exp: 24,
+          exp,
         });
         await userService.update({
           id: userInfo?.id,

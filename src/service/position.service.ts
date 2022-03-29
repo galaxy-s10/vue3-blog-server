@@ -1,6 +1,6 @@
 import request from 'request';
 
-import { gaode_web_ip_key, gaode_web_ip_url } from '@/config/secret';
+import { GAODE_WEB_IP_KEY, GAODE_WEB_IP_URL } from '@/config/secret';
 import { IIpdata } from '@/interface';
 
 class PositionService {
@@ -35,10 +35,10 @@ class PositionService {
     const data: IIpdata = await new Promise((resolve) => {
       request(
         {
-          url: gaode_web_ip_url,
+          url: GAODE_WEB_IP_URL,
           method: 'GET',
           qs: {
-            key: gaode_web_ip_key,
+            key: GAODE_WEB_IP_KEY,
             ip,
           },
         },

@@ -1,9 +1,9 @@
 import qiniu from 'qiniu';
 
 import {
-  qiniu_accessKey,
-  qiniu_secretKey,
-  qiniu_backupsDatabase,
+  QINIU_ACCESSKEY,
+  QINIU_SECRETKEY,
+  QINIU_BACKUPS_DATABASE,
 } from '@/config/secret';
 
 const qiniuConfConfig = new qiniu.conf.Config();
@@ -19,7 +19,7 @@ class QiniuModel {
    * @returns
    */
   getQiniuToken(expires = 60) {
-    const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const options = {
       scope: 'hssblog',
       expires, // 过期时间
@@ -41,7 +41,7 @@ class QiniuModel {
     const parseLocalFileUrl = localFileUrl.split('/');
     // fileName是根据localFileUrl生成的。
     const fileName =
-      qiniu_backupsDatabase +
+      QINIU_BACKUPS_DATABASE +
       +new Date() +
       parseLocalFileUrl[parseLocalFileUrl.length - 1];
     return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ class QiniuModel {
 
   // 验证回调是否合法
   authCb(callbackAuth) {
-    const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     return qiniu.util.isQiniuCallback(
       mac,
       'qiniuCallBackUrl',
@@ -78,7 +78,7 @@ class QiniuModel {
 
   // 删除七牛云文件
   delete(filename) {
-    const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const config = new qiniu.conf.Config();
     // config.useHttpsDomain = true;
     // @ts-ignore
@@ -100,7 +100,7 @@ class QiniuModel {
 
   // 获取七牛云文件
   getList(prefix, limit, marker) {
-    const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     const bucket = 'hssblog';
@@ -123,7 +123,7 @@ class QiniuModel {
 
   // 修改七牛云文件
   updateQiniu(srcBucket, srcKey, destBucket, destKey) {
-    const mac = new qiniu.auth.digest.Mac(qiniu_accessKey, qiniu_secretKey);
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 

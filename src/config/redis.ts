@@ -1,15 +1,15 @@
 import { createClient } from 'redis';
 
-import { redisConfig } from './secret';
+import { REDIS_CONFIG } from './secret';
 
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
 
 const redisClient = createClient({
   socket: {
-    port: redisConfig.socket.port,
-    host: redisConfig.socket.host,
+    port: REDIS_CONFIG.socket.port,
+    host: REDIS_CONFIG.socket.host,
   },
-  password: redisConfig.password,
+  password: REDIS_CONFIG.password,
 });
 
 export const connectRedis = async () => {
@@ -21,20 +21,20 @@ export const connectRedis = async () => {
   try {
     console.log(
       chalkINFO(
-        `开始连接${redisConfig.socket.host}:${redisConfig.socket.port}服务器的redis...`
+        `开始连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis...`
       )
     );
     await redisClient.connect();
     console.log(
       chalkSUCCESS(
-        `连接${redisConfig.socket.host}:${redisConfig.socket.port}服务器的redis成功!`
+        `连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis成功!`
       )
     );
   } catch (error) {
     console.log(error);
     console.log(
       chalkERROR(
-        `连接${redisConfig.socket.host}:${redisConfig.socket.port}服务器的redis失败!`
+        `连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis失败!`
       )
     );
   }
