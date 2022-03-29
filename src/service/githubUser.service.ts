@@ -59,26 +59,39 @@ class UserService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 查找github用户 */
+  /** 根据github_id查找github用户 */
   async findByGithubId(github_id: any) {
     const result = await githubUserModel.findOne({ where: { github_id } });
     return result;
   }
 
   /** 修改github用户 */
-  async update(githubProps: IGithubUser) {
+  async update(props: IGithubUser) {
     const result = await githubUserModel.update(
       {
-        ...githubProps,
+        ...props,
+        id: undefined,
       },
-      { where: { id: githubProps.id } }
+      { where: { id: props.id } }
+    );
+    return result;
+  }
+
+  /** 根据github_id修改github用户 */
+  async updateByGithubId(props: IGithubUser) {
+    const result = await githubUserModel.update(
+      {
+        ...props,
+        github_id: undefined,
+      },
+      { where: { github_id: props.github_id } }
     );
     return result;
   }
 
   /** 创建github用户 */
-  async create(githubProps) {
-    const result = await githubUserModel.create(githubProps);
+  async create(props) {
+    const result = await githubUserModel.create(props);
     return result;
   }
 

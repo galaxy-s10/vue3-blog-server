@@ -1,7 +1,6 @@
-import request from 'request';
-
 import { GAODE_WEB_IP_KEY, GAODE_WEB_IP_URL } from '@/config/secret';
 import { IIpdata } from '@/interface';
+import axios from '@/utils/request';
 
 class PositionService {
   /**
@@ -32,21 +31,25 @@ class PositionService {
         ip: '127.0.0.1',
       };
     }
-    const data: IIpdata = await new Promise((resolve) => {
-      request(
-        {
-          url: GAODE_WEB_IP_URL,
-          method: 'GET',
-          qs: {
-            key: GAODE_WEB_IP_KEY,
-            ip,
-          },
-        },
-        (error, response, body) => {
-          resolve({ ...JSON.parse(body), ip });
-        }
-      );
+    const data: IIpdata = await axios.get(GAODE_WEB_IP_URL, {
+      headers: { Accept: 'application/json' },
+      params: { key: GAODE_WEB_IP_KEY, ip },
     });
+    // const data: IIpdata = await new Promise((resolve) => {
+    //   request(
+    //     {
+    //       url: GAODE_WEB_IP_URL,
+    //       method: 'GET',
+    //       qs: {
+    //         key: GAODE_WEB_IP_KEY,
+    //         ip,
+    //       },
+    //     },
+    //     (error, response, body) => {
+    //       resolve({ ...JSON.parse(body), ip });
+    //     }
+    //   );
+    // });
     return data;
   }
 }

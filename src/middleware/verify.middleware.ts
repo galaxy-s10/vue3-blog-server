@@ -19,6 +19,7 @@ const frontendWhiteList = [
 const backendWhiteList = [
   '/admin/user/register', // 后台的这个接口是post的
   '/admin/user/login', // 后台的这个接口是post的
+  '/admin/github_user/login', // github登录
   '/admin/csrf/get', // 后台的这个接口是试探csrf的
   '/admin/email/send', // 后台的这个接口是post的
   '/admin/qq_user/login', // 登录接口

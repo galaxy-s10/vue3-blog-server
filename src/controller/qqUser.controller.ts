@@ -1,5 +1,4 @@
 import { ParameterizedContext } from 'koa';
-import request from 'request';
 
 import { signJwt } from '@/app/auth/authJwt';
 import { THIRD_PLATFORM } from '@/app/constant';
@@ -19,6 +18,7 @@ import qqUserService from '@/service/qqUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { randomString } from '@/utils';
+import axios from '@/utils/request';
 
 export interface IQqUserList extends IList {
   nickname: string;
@@ -89,20 +89,27 @@ class QqUserController {
     params.grant_type = 'authorization_code';
     params.fmt = 'json';
     // https://wiki.connect.qq.com/%E4%BD%BF%E7%94%A8authorization_code%E8%8E%B7%E5%8F%96access_token
-    const accessToken: any = await new Promise((resolve) => {
-      request(
-        {
-          url: `https://graph.qq.com/oauth2.0/token`,
-          method: 'GET',
-          qs: {
-            ...params,
-          },
-        },
-        (error, response, body) => {
-          resolve(JSON.parse(body));
-        }
-      );
-    });
+    const accessToken: any = await axios.get(
+      'https://graph.qq.com/oauth2.0/token',
+      {
+        headers: { Accept: 'application/json' },
+        params: { ...params },
+      }
+    );
+    // const accessToken: any = await new Promise((resolve) => {
+    //   request(
+    //     {
+    //       url: `https://graph.qq.com/oauth2.0/token`,
+    //       method: 'GET',
+    //       qs: {
+    //         ...params,
+    //       },
+    //     },
+    //     (error, response, body) => {
+    //       resolve(JSON.parse(body));
+    //     }
+    //   );
+    // });
     return accessToken;
   }
 
@@ -119,22 +126,29 @@ class QqUserController {
    * gender	性别。 如果获取不到则默认返回"男"
    */
   async getUserInfo({ access_token, oauth_consumer_key, openid }) {
-    const UserInfo: any = await new Promise((resolve) => {
-      request(
-        {
-          url: `https://graph.qq.com/user/get_user_info`,
-          method: 'GET',
-          qs: {
-            access_token,
-            oauth_consumer_key,
-            openid,
-          },
-        },
-        (error, response, body) => {
-          resolve(JSON.parse(body));
-        }
-      );
-    });
+    const UserInfo: any = await axios.get(
+      'https://graph.qq.com/user/get_user_info',
+      {
+        headers: { Accept: 'application/json' },
+        params: { access_token, oauth_consumer_key, openid },
+      }
+    );
+    // const UserInfo: any = await new Promise((resolve) => {
+    //   request(
+    //     {
+    //       url: `https://graph.qq.com/user/get_user_info`,
+    //       method: 'GET',
+    //       qs: {
+    //         access_token,
+    //         oauth_consumer_key,
+    //         openid,
+    //       },
+    //     },
+    //     (error, response, body) => {
+    //       resolve(JSON.parse(body));
+    //     }
+    //   );
+    // });
     return UserInfo;
   }
 
@@ -149,22 +163,26 @@ class QqUserController {
    * https://wiki.connect.qq.com/unionid%e4%bb%8b%e7%bb%8d
    */
   async getMeOauth({ access_token, unionid, fmt }) {
-    const OauthInfo: any = await new Promise((resolve) => {
-      request(
-        {
-          url: `https://graph.qq.com/oauth2.0/me`,
-          method: 'GET',
-          qs: {
-            access_token,
-            unionid,
-            fmt,
-          },
-        },
-        (error, response, body) => {
-          resolve(JSON.parse(body));
-        }
-      );
+    const OauthInfo: any = await axios.get('https://graph.qq.com/oauth2.0/me', {
+      headers: { Accept: 'application/json' },
+      params: { access_token, unionid, fmt },
     });
+    // const OauthInfo: any = await new Promise((resolve) => {
+    //   request(
+    //     {
+    //       url: `https://graph.qq.com/oauth2.0/me`,
+    //       method: 'GET',
+    //       qs: {
+    //         access_token,
+    //         unionid,
+    //         fmt,
+    //       },
+    //     },
+    //     (error, response, body) => {
+    //       resolve(JSON.parse(body));
+    //     }
+    //   );
+    // });
     return OauthInfo;
   }
 

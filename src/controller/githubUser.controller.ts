@@ -1,5 +1,4 @@
 import { ParameterizedContext } from 'koa';
-import request from 'request';
 
 import redisController from './redis.controller';
 
@@ -22,6 +21,7 @@ import githubUserService from '@/service/githubUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { randomString } from '@/utils';
+import axios from '@/utils/request';
 
 export interface IQqUserList extends IList {
   nickname: string;
@@ -52,47 +52,22 @@ class GithubUserController {
     params.client_id = GITHUB_CLIENT_ID;
     params.client_secret = GITHUB_CLIENT_SECRET;
     params.redirect_uri = GITHUB_REDIRECT_URI;
-    const accessToken: any = await new Promise((resolve) => {
-      request(
-        {
-          url: `https://github.com/login/oauth/access_token`,
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-          qs: {
-            ...params,
-          },
-        },
-        (error, response, body) => {
-          resolve(JSON.parse(body));
-        }
-      );
-    });
+    const accessToken: any = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        headers: { Accept: 'application/json' },
+        data: { ...params },
+      }
+    );
     return accessToken;
   }
 
   /** https://docs.github.com/cn/rest/reference/users#get-the-authenticated-user */
   async getMeOauth({ access_token }) {
-    const OauthInfo: any = await new Promise((resolve) => {
-      request(
-        {
-          url: `https://api.github.com/user`,
-          method: 'GET',
-          headers: {
-            'User-Agent': 'PowerShellForGitHub',
-          },
-          auth: {
-            bearer: access_token,
-          },
-        },
-        (error, response, body) => {
-          if (!error) {
-            resolve(JSON.parse(body));
-          }
-        }
-      );
+    const OauthInfo: any = await axios.get('https://api.github.com/user', {
+      headers: { Authorization: `token ${access_token}` },
     });
+    console.log('OauthInfoOauthInfo', access_token, OauthInfo);
     return OauthInfo;
   }
 
@@ -175,7 +150,7 @@ class GithubUserController {
           client_id: GITHUB_CLIENT_ID,
         });
         const userInfo: any = await userService.create({
-          username: OauthInfo.name || OauthInfo.login,
+          username: `github_${OauthInfo.name}` || OauthInfo.login,
           password: randomString(8),
           avatar: OauthInfo.avatar_url,
           title: OauthInfo.bio,
@@ -199,11 +174,16 @@ class GithubUserController {
         ctx.cookies.set('token', token, { httpOnly: false });
         successHandler({ ctx, data: token, message: 'github登录成功!' });
       } else {
-        await githubUserService.update(OauthInfo);
+        console.log('OauthInfo111', OauthInfo);
+        await githubUserService.updateByGithubId(OauthInfo);
+        const oldQqUser: any = await githubUserService.findByGithubId(
+          OauthInfo.github_id
+        );
         const thirdUserInfo: any = await thirdUserService.findUser({
           third_platform: THIRD_PLATFORM.github,
-          third_user_id: OauthInfo.github_id,
+          third_user_id: oldQqUser.id,
         });
+        console.log(thirdUserInfo, 777);
         const userInfo: any = await userService.find(thirdUserInfo.user_id);
         const token = signJwt({
           userInfo: {
@@ -220,7 +200,8 @@ class GithubUserController {
         successHandler({ ctx, data: token, message: 'github登录成功!' });
       }
     } catch (error) {
-      emitError({ ctx, code: 400, error });
+      emitError({ ctx, code: 400, error, message: error.message });
+      return;
     }
     /**
      * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
@@ -270,7 +251,7 @@ class GithubUserController {
   async update(ctx: ParameterizedContext, next) {
     try {
       const githubProps: IGithubUser = ctx.request.body;
-      const result = await githubUserService.update(githubProps);
+      const result = await githubUserService.updateByGithubId(githubProps);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
