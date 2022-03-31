@@ -34,13 +34,6 @@ const successHandler = ({
     default:
       defaultMessage = '操作成功!';
   }
-  if (!ctx.header['session-csrf']) {
-    ctx.cookies.set('csrf-token', ctx.csrf, { httpOnly: false });
-  } else {
-    console.log(ctx.csrf);
-  }
-  console.log(ctx.csrf);
-  console.log(ctx.session);
   ctx.status = status; // 不手动设置状态的话，默认是404，delete方法返回400
   ctx.body = { code: status, data, message: message || defaultMessage };
   console.log(chalkSUCCESS(`↑↑↑↑↑↑↑↑↑↑ success-handle ↑↑↑↑↑↑↑↑↑↑`));

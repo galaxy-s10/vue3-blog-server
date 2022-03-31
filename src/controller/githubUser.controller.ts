@@ -72,60 +72,93 @@ class GithubUserController {
     return OauthInfo;
   }
 
-  userBindGithub = async (ctx: ParameterizedContext, next) => {
+  /**
+   * 绑定github
+   * 1，如果已经绑定过github，则不能绑定，只能先解绑了再绑定
+   * 2，如果要绑定的github已经被别人绑定了，则不能绑定
+   */
+  bindGithub = async (ctx: ParameterizedContext, next) => {
+    const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
     try {
-      const { email, code } = ctx.request.body;
       const { userInfo } = await authJwt(ctx.request);
-      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      console.log('first', userInfo);
+      const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
-        (v) => v.third_platform === THIRD_PLATFORM.email
+        (v) => v.third_platform === THIRD_PLATFORM.github
       );
       if (ownIsBind.length) {
         emitError({
           ctx,
           code: 401,
-          message: '你已经绑定过邮箱，请先解绑原邮箱!',
+          message: '你已经绑定过github，请先解绑原github!',
         });
         return;
       }
-      const otherIsBind = await githubUserService.findByGithubId(email);
-      if (otherIsBind) {
-        emitError({
-          ctx,
-          code: 401,
-          message: '该邮箱已被其他人绑定!',
-        });
-        return;
-      }
-      const key = {
-        prefix: REDIS_PREFIX.userBindEmail,
-        key: email,
-      };
-      const redisData = await redisController.getVal({
-        ...key,
+      const accessToken = await this.getAccessToken(code);
+      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+      const OauthInfo: any = await this.getMeOauth({
+        access_token: accessToken.access_token,
       });
-      if (redisData !== code || !redisData) {
+      const isExist = await githubUserService.isExist([OauthInfo.id]);
+      if (isExist) {
         emitError({
           ctx,
           code: 401,
-          message: VERIFY_EMAIL_RESULT_CODE.err,
+          message: '该github账号已被其他人绑定了!',
         });
         return;
       }
-      const createEmailRes: any = await githubUserService.create({ email });
-      await thirdUserService.create({
+      const githubUser: any = await githubUserService.create({
+        ...OauthInfo,
+        client_id: GITHUB_CLIENT_ID,
+      });
+      await thirdUserModel.create({
         user_id: userInfo.id,
-        third_platform: THIRD_PLATFORM.email,
-        third_user_id: createEmailRes.id,
+        third_user_id: githubUser.id,
+        third_platform: THIRD_PLATFORM.github,
       });
-      successHandler({ ctx, message: '绑定邮箱成功!' });
+      console.log(userInfo, ownIsBind, 3333333);
+      successHandler({ ctx, message: '绑定github成功!' });
     } catch (error) {
+      console.log(error, 333133);
       emitError({ ctx, code: 400, error });
       return;
     }
     await next();
   };
 
+  /**
+   * 取消绑定github
+   */
+  cancelBindGithub = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { userInfo } = await authJwt(ctx.request);
+      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const ownIsBind = result.filter(
+        (v) => v.third_platform === THIRD_PLATFORM.github
+      );
+      if (!ownIsBind.length) {
+        emitError({
+          ctx,
+          code: 400,
+          message: '你没有绑定过github，不能解绑!',
+        });
+        return;
+      }
+      await githubUserService.delete(ownIsBind[0].third_user_id);
+      await thirdUserService.delete(ownIsBind[0].id);
+      successHandler({ ctx, message: '解绑github成功!' });
+    } catch (error) {
+      console.log(error, 333133);
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
+  /**
+   * github登录
+   */
   login = async (ctx: ParameterizedContext, next) => {
     try {
       const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
@@ -175,7 +208,6 @@ class GithubUserController {
         ctx.cookies.set('token', token, { httpOnly: false });
         successHandler({ ctx, data: token, message: 'github登录成功!' });
       } else {
-        console.log('OauthInfo111', OauthInfo);
         await githubUserService.updateByGithubId(OauthInfo);
         const oldGithubUser: any = await githubUserService.findByGithubId(
           OauthInfo.github_id

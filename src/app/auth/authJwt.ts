@@ -12,7 +12,8 @@ const authJwt = (
   return new Promise((resolve, reject) => {
     // 首先判断请求头有没有authorization
     if (req.headers.authorization === undefined) {
-      resolve({ code: 401, message: '未登录!' });
+      // eslint-disable-next-line prefer-promise-reject-errors
+      reject({ code: 401, message: '未登录!' });
       return;
     }
     const token = req.headers.authorization?.split(' ')[1];
@@ -47,7 +48,7 @@ const authJwt = (
       }
       const userStatus = await getUserStatus(userResult.id);
       if (userStatus.code !== 200) {
-        resolve(userStatus);
+        reject(userStatus);
         return;
       }
       resolve({ code: 200, message: '验证token通过!', userInfo: userResult });

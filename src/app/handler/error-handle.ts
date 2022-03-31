@@ -31,13 +31,13 @@ const errorHandler = (
     console.log(chalk.redBright('code:'), code);
     console.log(chalk.redBright('query:'), { ...ctx.request.query });
     console.log(chalk.redBright('body:'), ctx.request.body);
+    console.log(chalk.redBright('token:'), ctx.request.headers.authorization);
     console.log(chalk.redBright('error:'), error);
     console.log(chalk.redBright('stack:'), error?.stack);
     console.log(chalk.redBright('message:'), message);
 
     let status;
     let defaultMessage;
-    console.log(env, 333333);
     switch (code) {
       case 400:
         status = 400;

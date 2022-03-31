@@ -10,38 +10,48 @@ const frontendWhiteList = [
   '/init/auth',
   '/init/roleAuth',
   '/init/dayData',
-  '/visitor_log/create', // 前台的这个接口是post的
-  '/user/create', // 前台的这个接口是post的
-  '/user/login', // 前台的这个接口是post的
-  '/link/create', // 前台的这个接口是post的
-  '/email/send', // 前台的这个接口是post的
+  '/visitor_log/create', // 访客记录，这个接口是post的
+  '/user/login', // 登录，这个接口是post的
+  '/link/create', // 申请友链，这个接口是post的
+  '/email/send', // 发送邮件，这个接口是post的
 ];
 const backendWhiteList = [
   '/admin/user/register', // 后台的这个接口是post的
   '/admin/user/login', // 后台的这个接口是post的
-  '/admin/github_user/login', // github登录
-  '/admin/csrf/get', // 后台的这个接口是试探csrf的
-  '/admin/email/send', // 后台的这个接口是post的
-  '/admin/qq_user/login', // 登录接口
-  '/admin/other/send_email', // 发送邮件
   '/admin/user/code_login', // 验证码登录
+  // '/admin/github_user/login', // github登录
+  '/admin/qq_user/login', // 登录接口
+  '/admin/email/send', // 后台的这个接口是post的
+  '/admin/other/send_email', // 发送邮件
 ];
 
 const verify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
+  const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+
   console.log(
     chalkINFO(
-      `↓↓↓↓↓↓↓↓↓↓ ${new Date().toLocaleString()} 监听 ${
-        ctx.request.method
-      } ${url} 开始 ↓↓↓↓↓↓↓↓↓↓`
+      `↓↓↓↓↓↓↓↓↓↓ ${new Date().toLocaleString()} 监听${
+        isAdmin ? '后' : '前'
+      }台 ${ctx.request.method} ${url} 开始 ↓↓↓↓↓↓↓↓↓↓`
     )
   );
+
+  const end = () => {
+    console.log(
+      chalkINFO(
+        `↑↑↑↑↑↑↑↑↑↑ ${new Date().toLocaleString()} 监听${
+          isAdmin ? '后' : '前'
+        }台 ${ctx.request.method} ${url} 结束 ↑↑↑↑↑↑↑↑↑↑`
+      )
+    );
+  };
+
   try {
-    const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
     if (isAdmin) {
-      console.log(chalkINFO('当前请求的是后台接口'));
       if (backendWhiteList.indexOf(url) !== -1) {
         await next();
+        end();
         return;
       }
       const { code, message } = await authJwt(ctx.req);
@@ -49,9 +59,9 @@ const verify = async (ctx: ParameterizedContext, next) => {
         emitError({
           ctx,
           code,
-          error: message,
           message,
         });
+        end();
         return;
       }
       /**
@@ -60,22 +70,23 @@ const verify = async (ctx: ParameterizedContext, next) => {
        * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
        */
       await next();
+      end();
       return;
     }
-    console.log(chalkINFO('当前请求的是前台接口'));
+    // 前端的get接口都不需要判断token，白名单内的也不需要判断token（如注册登录这些接口是post的）
     if (ctx.request.method === 'GET' || frontendWhiteList.indexOf(url) !== -1) {
       await next();
+      end();
       return;
     }
-    console.log(222);
     const { code, message } = await authJwt(ctx.req);
     if (code !== 200) {
       emitError({
         ctx,
         code,
-        error: message,
         message,
       });
+      end();
       return;
     }
     /**
@@ -85,23 +96,16 @@ const verify = async (ctx: ParameterizedContext, next) => {
      * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
      */
     await next();
+    end();
+    return;
   } catch (error) {
-    // catch错误（不仅仅authJwt的错误，也包括了try里面的所有报错）返回给前端，但try里面的代码错误开发者尽量把握。
     emitError({
       ctx,
       code: error.code,
-      error,
       message: error.message,
     });
-    return;
+    end();
   }
-  console.log(
-    chalkINFO(
-      `↑↑↑↑↑↑↑↑↑↑ ${new Date().toLocaleString()} 监听 ${
-        ctx.request.method
-      } ${url} 结束 ↑↑↑↑↑↑↑↑↑↑`
-    )
-  );
 };
 
 export default verify;

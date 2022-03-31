@@ -25,8 +25,8 @@ userRouter.get('/get_user_info', userController.getUserInfo);
 // 用户注册
 userRouter.post('/register', userController.register);
 
-// 创建用户
-userRouter.post('/create', userController.create);
+// 创建用户（废弃）
+// userRouter.post('/create', userController.create);
 
 // 查找用户
 userRouter.get('/find/:id', userController.find);

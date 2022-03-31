@@ -16,6 +16,16 @@ qqUserRouter.get('/list', qqUserController.list);
 // 用户qq登录
 qqUserRouter.get('/login', verifyProp, qqUserController.login);
 
+// 绑定qq
+qqUserRouter.get('/bind_user', verifyProp, qqUserController.bindQQ);
+
+// 取消绑定qq
+qqUserRouter.get(
+  '/cancel_bind_user',
+  verifyProp,
+  qqUserController.cancelBindQQ
+);
+
 // 查找用户
 qqUserRouter.get('/find/:id', qqUserController.find);
 

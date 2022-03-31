@@ -1,6 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
-import { signJwt } from '@/app/auth/authJwt';
+import { authJwt, signJwt } from '@/app/auth/authJwt';
 import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
@@ -92,20 +92,6 @@ class QqUserController {
         params: { ...params },
       }
     );
-    // const accessToken: any = await new Promise((resolve) => {
-    //   request(
-    //     {
-    //       url: `https://graph.qq.com/oauth2.0/token`,
-    //       method: 'GET',
-    //       qs: {
-    //         ...params,
-    //       },
-    //     },
-    //     (error, response, body) => {
-    //       resolve(JSON.parse(body));
-    //     }
-    //   );
-    // });
     return accessToken;
   }
 
@@ -129,22 +115,6 @@ class QqUserController {
         params: { access_token, oauth_consumer_key, openid },
       }
     );
-    // const UserInfo: any = await new Promise((resolve) => {
-    //   request(
-    //     {
-    //       url: `https://graph.qq.com/user/get_user_info`,
-    //       method: 'GET',
-    //       qs: {
-    //         access_token,
-    //         oauth_consumer_key,
-    //         openid,
-    //       },
-    //     },
-    //     (error, response, body) => {
-    //       resolve(JSON.parse(body));
-    //     }
-    //   );
-    // });
     return UserInfo;
   }
 
@@ -163,22 +133,6 @@ class QqUserController {
       headers: { Accept: 'application/json' },
       params: { access_token, unionid, fmt },
     });
-    // const OauthInfo: any = await new Promise((resolve) => {
-    //   request(
-    //     {
-    //       url: `https://graph.qq.com/oauth2.0/me`,
-    //       method: 'GET',
-    //       qs: {
-    //         access_token,
-    //         unionid,
-    //         fmt,
-    //       },
-    //     },
-    //     (error, response, body) => {
-    //       resolve(JSON.parse(body));
-    //     }
-    //   );
-    // });
     return OauthInfo;
   }
 
@@ -302,6 +256,97 @@ class QqUserController {
     }
     await next();
   }
+
+  /**
+   * 绑定github
+   * 1，如果已经绑定过github，则不能绑定，只能先解绑了再绑定
+   * 2，如果要绑定的github已经被别人绑定了，则不能绑定
+   */
+  bindQQ = async (ctx: ParameterizedContext, next) => {
+    const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
+    try {
+      const { userInfo } = await authJwt(ctx.request);
+      console.log('first', userInfo);
+      const result: any = await thirdUserService.findByUserId(userInfo.id);
+      const ownIsBind = result.filter(
+        (v) => v.third_platform === THIRD_PLATFORM.qq_admin
+      );
+      if (ownIsBind.length) {
+        emitError({
+          ctx,
+          code: 401,
+          message: '你已经绑定过qq，请先解绑原qq!',
+        });
+        return;
+      }
+      const accessToken = await this.getAccessToken(code);
+      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+      const OauthInfo: any = await this.getMeOauth({
+        access_token: accessToken.access_token,
+        unionid: 1,
+        fmt: 'json',
+      });
+      const getUserInfoRes: IQqUser = await this.getUserInfo({
+        access_token: accessToken.access_token,
+        oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
+        openid: OauthInfo.openid,
+      });
+      const qqUserInfo = {
+        ...getUserInfoRes,
+        client_id: OauthInfo.client_id,
+        unionid: OauthInfo.unionid,
+        openid: OauthInfo.openid,
+      };
+      const isExist = await qqUserService.isExist([OauthInfo.id]);
+      if (isExist) {
+        emitError({
+          ctx,
+          code: 401,
+          message: '该qq账号已被其他人绑定了!',
+        });
+        return;
+      }
+      const qqUser: any = await qqUserService.create(qqUserInfo);
+      await thirdUserModel.create({
+        user_id: userInfo?.id,
+        third_user_id: qqUser.id,
+        third_platform: THIRD_PLATFORM.qq_admin,
+      });
+      successHandler({ ctx, message: '绑定qq成功!' });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
+  /**
+   * 取消绑定github
+   */
+  cancelBindQQ = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { userInfo } = await authJwt(ctx.request);
+      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const ownIsBind = result.filter(
+        (v) => v.third_platform === THIRD_PLATFORM.qq_admin
+      );
+      if (!ownIsBind.length) {
+        emitError({
+          ctx,
+          code: 400,
+          message: '你没有绑定过qq，不能解绑!',
+        });
+        return;
+      }
+      await qqUserService.delete(ownIsBind[0].third_user_id);
+      await thirdUserService.delete(ownIsBind[0].id);
+      successHandler({ ctx, message: '解绑qq成功!' });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
 
   async find(ctx: ParameterizedContext, next) {
     try {

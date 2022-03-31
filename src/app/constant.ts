@@ -10,6 +10,7 @@ export const REDIS_PREFIX = {
   login: 'login', // 登录不区分前后台
   register: 'register', // 注册不区分前后台
   userBindEmail: 'userBindEmail',
+  userCancelBindEmail: 'userCancelBindEmail',
 };
 
 export const THIRD_PLATFORM = {

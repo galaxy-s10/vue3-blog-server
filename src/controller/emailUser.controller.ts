@@ -4,6 +4,7 @@ import otherController from './other.controller';
 import redisController from './redis.controller';
 
 import { authJwt } from '@/app/auth/authJwt';
+import { chalkERROR } from '@/app/chalkTip';
 import {
   REDIS_PREFIX,
   THIRD_PLATFORM,
@@ -102,7 +103,7 @@ class EmailUserController {
       });
       return emailResCode.ok;
     } catch (error) {
-      console.log(error);
+      console.log(chalkERROR(error));
       return emailResCode.system;
     }
   };
@@ -136,7 +137,7 @@ class EmailUserController {
   };
 
   /** 发送绑定邮箱验证码 */
-  sendUserBindEmailCode = async (ctx: ParameterizedContext, next) => {
+  sendBindEmailCode = async (ctx: ParameterizedContext, next) => {
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
@@ -144,6 +145,21 @@ class EmailUserController {
         key: email,
       },
       desc: '绑定邮箱',
+    });
+    successHandler({ ctx, message: result });
+    await next();
+  };
+
+  /** 发送取消绑定邮箱验证码 */
+  sendCancelBindEmailCode = async (ctx: ParameterizedContext, next) => {
+    const { email } = ctx.request.body;
+    const key = {
+      prefix: REDIS_PREFIX.userCancelBindEmail,
+      key: email,
+    };
+    const result = await this.sendCode({
+      key,
+      desc: '取消绑定邮箱',
     });
     successHandler({ ctx, message: result });
     await next();
@@ -175,11 +191,19 @@ class EmailUserController {
    * 用户绑定邮箱。
    * 1，先判断third_user表里面自己有没有绑定过邮箱，如果自己绑定过邮箱，就不能再绑定了（只能解绑）。
    * 2，再判断third_user表里面有没有其他人绑定过该邮箱，如果这个邮箱被别人绑定了，就不能绑定了。
-   * 3，符合条件绑定邮箱条件，再验证验证码，最后绑定。
+   * 3，符合绑定邮箱条件，再验证验证码，最后绑定。
    */
-  userBindEmail = async (ctx: ParameterizedContext, next) => {
+  bindEmail = async (ctx: ParameterizedContext, next) => {
     try {
       const { email, code } = ctx.request.body;
+      if (!code) {
+        emitError({
+          ctx,
+          code: 400,
+          message: '验证码不能为空!',
+        });
+        return;
+      }
       const { userInfo } = await authJwt(ctx.request);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
@@ -188,7 +212,7 @@ class EmailUserController {
       if (ownIsBind.length) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '你已经绑定过邮箱，请先解绑原邮箱!',
         });
         return;
@@ -197,7 +221,7 @@ class EmailUserController {
       if (otherIsBind) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '该邮箱已被其他人绑定!',
         });
         return;
@@ -212,7 +236,7 @@ class EmailUserController {
       if (redisData !== code || !redisData) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: VERIFY_EMAIL_RESULT_CODE.err,
         });
         return;
@@ -223,7 +247,67 @@ class EmailUserController {
         third_platform: THIRD_PLATFORM.email,
         third_user_id: createEmailRes.id,
       });
+      await redisController.del(key);
       successHandler({ ctx, message: '绑定邮箱成功!' });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
+  /**
+   * 用户取消绑定邮箱。
+   * 1，先判断third_user表里面自己有没有绑定过邮箱，如果自己没有绑定过邮箱，就不能取消绑定。
+   * 2，符合取消绑定邮箱条件，再验证验证码，最后绑定。
+   */
+  cancelBindEmail = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { code } = ctx.request.body;
+      if (!code) {
+        emitError({
+          ctx,
+          code: 400,
+          message: '验证码不能为空!',
+        });
+        return;
+      }
+      const { userInfo } = await authJwt(ctx.request);
+      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const ownIsBind = result.filter(
+        (v) => v.third_platform === THIRD_PLATFORM.email
+      );
+      if (!ownIsBind.length) {
+        emitError({
+          ctx,
+          code: 400,
+          message: '你没有绑定过邮箱，不能解绑!',
+        });
+        return;
+      }
+      const userEmail: any = await emailUserService.findById(
+        ownIsBind[0].third_user_id
+      );
+      const key = {
+        prefix: REDIS_PREFIX.userCancelBindEmail,
+        key: userEmail.email,
+      };
+      const redisData = await redisController.getVal({
+        ...key,
+      });
+      if (redisData !== code || !redisData) {
+        emitError({
+          ctx,
+          code: 400,
+          message: VERIFY_EMAIL_RESULT_CODE.err,
+        });
+        return;
+      }
+      await emailUserService.delete(ownIsBind[0].third_user_id);
+      await thirdUserService.delete(ownIsBind[0].id);
+      await redisController.del(key);
+
+      successHandler({ ctx, message: '解绑邮箱成功!' });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;
