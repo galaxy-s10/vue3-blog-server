@@ -96,10 +96,20 @@ class GithubUserController {
       }
       const accessToken = await this.getAccessToken(code);
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      const OauthInfo: any = await this.getMeOauth({
+      let OauthInfo: any = await this.getMeOauth({
         access_token: accessToken.access_token,
       });
       const isExist = await githubUserService.isExist([OauthInfo.id]);
+
+      OauthInfo = {
+        ...OauthInfo,
+        github_id: OauthInfo.id,
+        github_created_at: OauthInfo.created_at,
+        github_updated_at: OauthInfo.updated_at,
+      };
+      delete OauthInfo.id;
+      delete OauthInfo.created_at;
+      delete OauthInfo.updated_at;
       if (isExist) {
         emitError({
           ctx,

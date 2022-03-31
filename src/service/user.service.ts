@@ -94,6 +94,30 @@ class UserService {
       include: [
         {
           model: qqUserModel,
+          through: {
+            attributes: ['third_platform'],
+            where: {
+              third_platform: THIRD_PLATFORM.qq_admin,
+            },
+          },
+        },
+        {
+          model: githubUserModel,
+          through: {
+            attributes: ['third_platform'],
+            where: {
+              third_platform: THIRD_PLATFORM.github,
+            },
+          },
+        },
+        {
+          model: emailModel,
+          through: {
+            attributes: [],
+            where: {
+              third_platform: THIRD_PLATFORM.email,
+            },
+          },
         },
       ],
       attributes: {
@@ -118,9 +142,7 @@ class UserService {
           through: {
             attributes: ['third_platform'],
             where: {
-              third_platform: {
-                [Op.or]: [THIRD_PLATFORM.qq_www, THIRD_PLATFORM.qq_admin],
-              },
+              third_platform: THIRD_PLATFORM.qq_admin,
             },
           },
         },

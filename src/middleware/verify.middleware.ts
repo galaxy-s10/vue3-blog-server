@@ -19,7 +19,7 @@ const backendWhiteList = [
   '/admin/user/register', // 后台的这个接口是post的
   '/admin/user/login', // 后台的这个接口是post的
   '/admin/user/code_login', // 验证码登录
-  // '/admin/github_user/login', // github登录
+  '/admin/github_user/login', // github登录
   '/admin/qq_user/login', // 登录接口
   '/admin/email/send', // 后台的这个接口是post的
   '/admin/other/send_email', // 发送邮件

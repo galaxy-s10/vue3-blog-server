@@ -169,11 +169,15 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
-      const { code, userInfo } = await authJwt(ctx.request);
       let from_user_id = -1;
-      if (code === 200) {
-        from_user_id = userInfo.id;
-      }
+
+      try {
+        const { code, userInfo } = await authJwt(ctx.request);
+        if (code === 200) {
+          from_user_id = userInfo.id;
+        }
+      } catch (error) {}
+
       const result = await commentService.getCommentList({
         childrenPageSize,
         nowPage,
