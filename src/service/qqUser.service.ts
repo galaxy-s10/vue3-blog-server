@@ -88,13 +88,13 @@ class UserService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 查找qq用户 */
-  async find(openid: number) {
-    const result = await qqUserModel.findOne({ where: { openid } });
+  /** 根据id查找qq用户 */
+  async find(id: number) {
+    const result = await qqUserModel.findOne({ where: { id } });
     return result;
   }
 
-  /** 根据详细信息查找qq用户 */
+  /** 根据unionid查找qq用户 */
   async findByUnionid(unionid) {
     const result = await qqUserModel.findOne({
       where: { unionid },

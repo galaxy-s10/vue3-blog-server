@@ -17,10 +17,10 @@ qqUserRouter.get('/list', qqUserController.list);
 qqUserRouter.get('/login', verifyProp, qqUserController.login);
 
 // 绑定qq
-qqUserRouter.get('/bind_user', verifyProp, qqUserController.bindQQ);
+qqUserRouter.post('/bind_user', verifyProp, qqUserController.bindQQ);
 
 // 取消绑定qq
-qqUserRouter.get(
+qqUserRouter.post(
   '/cancel_bind_user',
   verifyProp,
   qqUserController.cancelBindQQ

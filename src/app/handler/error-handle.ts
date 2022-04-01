@@ -30,6 +30,7 @@ const errorHandler = (
     // 如果捕获的错误有ctx，代表是接口地址报错
     console.log(chalk.redBright('code:'), code);
     console.log(chalk.redBright('query:'), { ...ctx.request.query });
+    console.log(chalk.redBright('params:'), ctx.params);
     console.log(chalk.redBright('body:'), ctx.request.body);
     console.log(chalk.redBright('token:'), ctx.request.headers.authorization);
     console.log(chalk.redBright('error:'), error);

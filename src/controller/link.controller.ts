@@ -80,7 +80,7 @@ class LinkController {
         avatar,
         desc,
         url,
-        status: isAdmin ? status : 1,
+        status: isAdmin ? status : 2,
       });
       const mailOptions = {
         from: MAIL_OPTIONS_CONFIG.from, // sender address

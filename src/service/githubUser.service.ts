@@ -95,6 +95,12 @@ class UserService {
     return result;
   }
 
+  /** 根据id查找github用户 */
+  async find(id: number) {
+    const result = await githubUserModel.findOne({ where: { id } });
+    return result;
+  }
+
   /** 删除github用户 */
   async delete(id: number) {
     const result = await githubUserModel.destroy({

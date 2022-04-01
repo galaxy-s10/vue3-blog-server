@@ -113,27 +113,25 @@ class EmailUserController {
   /** 邮箱登录（邮箱验证码登录） */
   login = async (ctx: ParameterizedContext, next) => {
     try {
-      const { email, code } = ctx.request.body;
+      const { email, code, exp = 24 } = ctx.request.body;
       const key = {
         prefix: REDIS_PREFIX.emailLogin,
         key: email,
       };
       // 判断redis中的验证码是否正确
       const redisData = await redisController.getVal(key);
-      console.log(redisData, 7777);
       if (redisData !== code || !redisData) {
         emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
         return;
       }
       const findEmailUserRes = await emailUserService.findThirdUser(email);
-      const user = findEmailUserRes.get().users[0].get();
-      console.log(user);
-      const userInfo: any = await userService.login(user, user);
+      const userInfo = findEmailUserRes.get().users[0].get();
       const token = signJwt({
         userInfo,
         exp,
       });
-      await User.update({ token }, { where: { id: userInfo?.id } }); // 每次登录都更新token
+      await userService.update({ id: userInfo?.id, token }); // 每次登录都更新token
+      await redisController.del(key);
       successHandler({ ctx, data: token, message: '登录成功!' });
     } catch (error) {
       emitError({
@@ -188,12 +186,12 @@ class EmailUserController {
           third_user_id: emailData.id,
           third_platform: THIRD_PLATFORM.email,
         });
-        await redisController.del(key);
         const token = signJwt({
           userInfo: createUserRes,
           exp,
         });
         await userService.update({ token, id: createUserRes.id }); // 每次登录都更新token
+        await redisController.del(key);
         successHandler({ ctx, data: token, message: '注册成功!' });
       }
     } catch (error) {

@@ -29,7 +29,7 @@ const linkModel = sequelize.define(
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:审核通过 2:未审核
+      defaultValue: 2, // 1:审核通过 2:未审核
     },
   },
   {

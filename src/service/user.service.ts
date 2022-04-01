@@ -30,6 +30,9 @@ class UserService {
 
   async login(id: number, password: string) {
     const result = await userModel.findOne({
+      attributes: {
+        exclude: ['password', 'token'],
+      },
       where: {
         id,
         password,

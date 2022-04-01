@@ -8,10 +8,10 @@ const githubUserRouter = new Router({ prefix: '/github_user' });
 githubUserRouter.get('/list', githubUserController.list);
 
 // 用户github登录
-githubUserRouter.get('/login', githubUserController.login);
+githubUserRouter.post('/login', githubUserController.login);
 
 // 绑定github
-githubUserRouter.get('/bind_user', githubUserController.bindGithub);
+githubUserRouter.post('/bind_user', githubUserController.bindGithub);
 
 // 取消绑定github
 githubUserRouter.get(

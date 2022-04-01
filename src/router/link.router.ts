@@ -5,19 +5,19 @@ import { verifyProp } from '@/middleware/link.middleware';
 
 const linkRouter = new Router({ prefix: '/link' });
 
-// 标签列表
+// 友链列表
 linkRouter.get('/list', linkController.getList);
 
-// 创建标签
+// 创建友链
 linkRouter.post('/create', verifyProp, linkController.create);
 
-// 查找标签
+// 查找友链
 linkRouter.get('/find/:id', linkController.find);
 
-// 更新标签
+// 更新友链
 linkRouter.put('/update/:id', verifyProp, linkController.update);
 
-// 删除标签
+// 删除友链
 linkRouter.delete('/delete/:id', linkController.delete);
 
 export default linkRouter;
