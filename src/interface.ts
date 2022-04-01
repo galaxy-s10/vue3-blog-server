@@ -42,6 +42,7 @@ export interface IEmail {
   id?: number;
   email: string;
   code?: string;
+  exp?: number;
 }
 
 export interface IQqUser {

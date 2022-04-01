@@ -4,7 +4,7 @@ import { authJwt } from '@/app/auth/authJwt';
 import { chalkINFO } from '@/app/chalkTip';
 import emitError from '@/app/handler/emit-error';
 
-// 白名单内的接口不需要判断token
+// 前台的所有get和白名单内的接口不需要token
 const frontendWhiteList = [
   '/init/role',
   '/init/auth',
@@ -13,16 +13,31 @@ const frontendWhiteList = [
   '/visitor_log/create', // 访客记录，这个接口是post的
   '/user/login', // 登录，这个接口是post的
   '/link/create', // 申请友链，这个接口是post的
-  '/email/send', // 发送邮件，这个接口是post的
+  '/email_user/send', // 发送邮件，这个接口是post的
+  '/email_user/send_login_code', // 发送登录验证码
+  '/email_user/send_register_code', // 发送注册验证码
+  '/email_user/send_bind_code', // 发送绑定邮箱验证码
+  '/email_user/send_cancel_bind_code', // 发送解绑邮箱验证码
+  '/email_user/login', // 登录
+  '/email_user/register', // 注册
 ];
+
+// 后台的所有接口都需要判断token，除了白名单内的不需要token
 const backendWhiteList = [
-  '/admin/user/register', // 后台的这个接口是post的
+  '/admin/email_user/send_login_code', // 发送登录验证码
   '/admin/user/login', // 后台的这个接口是post的
   '/admin/user/code_login', // 验证码登录
   '/admin/github_user/login', // github登录
   '/admin/qq_user/login', // 登录接口
   '/admin/email/send', // 后台的这个接口是post的
   '/admin/other/send_email', // 发送邮件
+  '/email_user/send', // 发送邮件，这个接口是post的
+  '/email_user/send_login_code', // 发送登录验证码
+  '/email_user/send_register_code', // 发送注册验证码
+  '/email_user/send_bind_code', // 发送绑定邮箱验证码
+  '/email_user/send_cancel_bind_code', // 发送解绑邮箱验证码
+  '/email_user/login', // 登录
+  '/email_user/register', // 注册
 ];
 
 const verify = async (ctx: ParameterizedContext, next) => {

@@ -165,7 +165,7 @@ class QqUserController {
         const qqUser: any = await qqUserService.create(qqUserInfo);
         console.log('11');
         const userInfo: any = await userService.create({
-          username: `qq_${qqUserInfo.nickname}`,
+          username: qqUserInfo.nickname,
           password: randomString(8),
           avatar: qqUserInfo.figureurl_2,
         });

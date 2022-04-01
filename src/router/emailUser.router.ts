@@ -8,11 +8,17 @@ const emailRouter = new Router({ prefix: '/email_user' });
 // 查找邮箱
 emailRouter.get('/find', emailController.find);
 
-// 发送登录验证码
+// 发送邮箱登录验证码
 emailRouter.post('/send_login_code', emailController.sendLoginCode);
 
-// 发送注册验证码
+// 邮箱登录
+emailRouter.post('/login', verifyProp, emailController.login);
+
+// 发送邮箱注册验证码
 emailRouter.post('/send_register_code', emailController.sendRegisterCode);
+
+// 邮箱注册
+emailRouter.post('/register', emailController.register);
 
 // 发送绑定邮箱验证码
 emailRouter.post('/send_bind_code', emailController.sendBindEmailCode);

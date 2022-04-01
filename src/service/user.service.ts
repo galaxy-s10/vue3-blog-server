@@ -28,6 +28,16 @@ class UserService {
     return res.length === user_ids.length;
   }
 
+  async login(id: number, password: string) {
+    const result = await userModel.findOne({
+      where: {
+        id,
+        password,
+      },
+    });
+    return result;
+  }
+
   /** 获取用户列表 */
   async getList({
     username,
@@ -68,11 +78,6 @@ class UserService {
       });
     }
     const result = await userModel.findAndCountAll({
-      include: [
-        {
-          model: qqUserModel,
-        },
-      ],
       attributes: {
         exclude: ['password', 'token'],
       },
@@ -230,7 +235,7 @@ class UserService {
     return result || false;
   }
 
-  /** 修改用户 */
+  /** 根据id修改用户 */
   async update({
     id,
     username,
@@ -248,13 +253,9 @@ class UserService {
   }
 
   /** 创建用户 */
-  async create({ username, password, title, avatar }: IUser) {
-    const result: any = await userModel.create({
-      username,
-      password,
-      title,
-      avatar,
-    });
+  async create(props: IUser) {
+    // @ts-ignore
+    const result: any = await userModel.create(props);
     result.setRoles([2]);
     return result;
   }

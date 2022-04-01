@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import otherController from './other.controller';
 import redisController from './redis.controller';
 
-import { authJwt } from '@/app/auth/authJwt';
+import { authJwt, signJwt } from '@/app/auth/authJwt';
 import { chalkERROR } from '@/app/chalkTip';
 import {
   REDIS_PREFIX,
@@ -12,9 +12,11 @@ import {
 } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { IEmail, IUser } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
-import { emailContentTemplate, randomString } from '@/utils';
+import userService from '@/service/user.service';
+import { emailContentTemplate, randomNumber, randomString } from '@/utils';
 
 const emailResCode = {
   ok: '发送成功!',
@@ -108,12 +110,105 @@ class EmailUserController {
     }
   };
 
+  /** 邮箱登录（邮箱验证码登录） */
+  login = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { email, code } = ctx.request.body;
+      const key = {
+        prefix: REDIS_PREFIX.emailLogin,
+        key: email,
+      };
+      // 判断redis中的验证码是否正确
+      const redisData = await redisController.getVal(key);
+      console.log(redisData, 7777);
+      if (redisData !== code || !redisData) {
+        emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+        return;
+      }
+      const findEmailUserRes = await emailUserService.findThirdUser(email);
+      const user = findEmailUserRes.get().users[0].get();
+      console.log(user);
+      const userInfo: any = await userService.login(user, user);
+      const token = signJwt({
+        userInfo,
+        exp,
+      });
+      await User.update({ token }, { where: { id: userInfo?.id } }); // 每次登录都更新token
+      successHandler({ ctx, data: token, message: '登录成功!' });
+    } catch (error) {
+      emitError({
+        ctx,
+        code: 400,
+        error,
+      });
+      return;
+    }
+    /**
+     * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
+     * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
+     * 因此还是得在这调用一次await next()
+     */
+    await next();
+  };
+
+  /** 邮箱注册 */
+  register = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { email, code, exp = 24 }: IEmail = ctx.request.body;
+      const reg =
+        /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+      if (!reg.test(email)) {
+        emitError({ ctx, code: 400, message: '请输入正确的邮箱!' });
+        return;
+      }
+      const emailIsExist = await emailUserService.isExist([email]);
+      if (emailIsExist) {
+        emitError({ ctx, code: 401, message: '该邮箱已被他人使用!' });
+      } else {
+        const key = {
+          prefix: REDIS_PREFIX.emailRegister,
+          key: email,
+        };
+        // 判断redis中的验证码是否正确
+        const redisData = await redisController.getVal(key);
+        if (redisData !== code || !redisData) {
+          emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+          return;
+        }
+        // 用户表创建用户
+        const createUserRes = await userService.create({
+          username: `用户${randomNumber(8)}`,
+          password: randomString(8),
+        });
+        // 邮箱表创建邮箱
+        const emailData: any = await emailUserService.create({ email });
+        // 第三方用户表绑定用户和邮箱
+        await thirdUserService.create({
+          user_id: createUserRes.id,
+          third_user_id: emailData.id,
+          third_platform: THIRD_PLATFORM.email,
+        });
+        await redisController.del(key);
+        const token = signJwt({
+          userInfo: createUserRes,
+          exp,
+        });
+        await userService.update({ token, id: createUserRes.id }); // 每次登录都更新token
+        successHandler({ ctx, data: token, message: '注册成功!' });
+      }
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
   /** 发送登录验证码 */
   sendLoginCode = async (ctx: ParameterizedContext, next) => {
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
-        prefix: REDIS_PREFIX.login,
+        prefix: REDIS_PREFIX.emailLogin,
         key: email,
       },
       desc: '登录博客',
@@ -127,7 +222,7 @@ class EmailUserController {
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
-        prefix: REDIS_PREFIX.register,
+        prefix: REDIS_PREFIX.emailRegister,
         key: email,
       },
       desc: '注册用户',

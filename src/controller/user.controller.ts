@@ -5,12 +5,13 @@ import emailController from './emailUser.controller';
 import redisController from './redis.controller';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import { THIRD_PLATFORM } from '@/app/constant';
+import { REDIS_PREFIX, THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IEmail, IList, IUser } from '@/interface';
 import User from '@/model/user.model';
 import emailUserService from '@/service/emailUser.service';
+import qqUserService from '@/service/qqUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { randomNumber, randomString } from '@/utils';
@@ -36,7 +37,7 @@ class UserController {
         emitError({ ctx, code: 401, message: '该邮箱已被他人使用!' });
       } else {
         const key = {
-          prefix: 'email',
+          prefix: REDIS_PREFIX.emailRegister,
           key: email,
         };
         // 判断redis中的验证码是否正确
@@ -117,6 +118,43 @@ class UserController {
 
   login = async (ctx: ParameterizedContext, next) => {
     try {
+      const { id, password, exp = 24 } = ctx.request.body;
+      const userInfo: any = await User.findOne({
+        attributes: { exclude: ['password', 'token'] },
+        where: { id, password },
+      });
+      if (!userInfo) {
+        emitError({
+          ctx,
+          code: 401,
+          message: '账号或密码错误!',
+        });
+        return;
+      }
+      const token = signJwt({
+        userInfo,
+        exp,
+      });
+      await User.update({ token }, { where: { id: userInfo?.id } }); // 每次登录都更新token
+      successHandler({ ctx, data: token, message: '登录成功!' });
+    } catch (error) {
+      emitError({
+        ctx,
+        code: 400,
+        error,
+      });
+      return;
+    }
+    /**
+     * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
+     * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
+     * 因此还是得在这调用一次await next()
+     */
+    await next();
+  };
+
+  login1 = async (ctx: ParameterizedContext, next) => {
+    try {
       const { email, password, exp = 24 } = ctx.request.body;
       console.log(email, password, 4444422);
       const findEmailUserRes: any = await emailUserService.findThirdUser(email);
@@ -179,7 +217,7 @@ class UserController {
     try {
       const { email, code } = ctx.request.body;
       const key = {
-        prefix: 'email',
+        prefix: REDIS_PREFIX.emailLogin,
         key: email,
       };
       // 判断redis中的验证码是否正确

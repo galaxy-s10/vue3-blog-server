@@ -194,7 +194,7 @@ class GithubUserController {
           client_id: GITHUB_CLIENT_ID,
         });
         const userInfo: any = await userService.create({
-          username: `github_${OauthInfo.name || OauthInfo.login}`,
+          username: OauthInfo.login,
           password: randomString(8),
           avatar: OauthInfo.avatar_url,
           title: OauthInfo.bio,
