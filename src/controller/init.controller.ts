@@ -1,17 +1,20 @@
 import { ParameterizedContext } from 'koa';
 
-import sequelize from '../config/db';
-
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import Auth from '@/model/auth.model';
-import Role from '@/model/role.model';
-import RoleAuth from '@/model/roleAuth.model';
+import sequelize from '@/config/db';
+import AuthModel from '@/model/auth.model';
+import dayDataModel from '@/model/dayData.model';
+import RoleModel from '@/model/role.model';
+import RoleAuthModel from '@/model/roleAuth.model';
+import userModel from '@/model/user.model';
+import userRoleModel from '@/model/userRole.model';
 import {
   bulkCreateAuth,
   bulkCreateRole,
   bulkCreateRoleAuth,
 } from '@/utils/initData';
+import { initDb } from '@/utils/initDb';
 
 const sql1 = `
 DROP PROCEDURE IF EXISTS insert_many_dates;
@@ -40,41 +43,127 @@ END
 const sql3 = `call insert_many_dates(3650)`;
 
 class InitController {
-  async createAuth(ctx: ParameterizedContext, next) {
+  // 初始化角色
+  async initRole(ctx: ParameterizedContext, next) {
     try {
-      await Auth.bulkCreate(bulkCreateAuth);
-      successHandler({ ctx, data: '初始化auth成功!' });
+      const count = await RoleModel.count();
+      if (count === 0) {
+        await RoleModel.bulkCreate(bulkCreateRole);
+        successHandler({ ctx, message: '初始化角色成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过角色，不能再初始化了~',
+        });
+      }
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
 
-  async createRole(ctx: ParameterizedContext, next) {
+  // 初始化权限
+  async initAuth(ctx: ParameterizedContext, next) {
     try {
-      await Role.bulkCreate(bulkCreateRole);
-      successHandler({ ctx, data: '初始化role成功!' });
+      const count = await AuthModel.count();
+      if (count === 0) {
+        console.log(bulkCreateAuth);
+        await AuthModel.bulkCreate(bulkCreateAuth);
+        successHandler({ ctx, message: '初始化权限成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过权限了，不能再初始化了~',
+        });
+      }
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
 
-  async createRoleAuth(ctx: ParameterizedContext) {
+  // 初始化角色权限
+  async initRoleAuth(ctx: ParameterizedContext) {
     try {
-      await RoleAuth.bulkCreate(bulkCreateRoleAuth);
-      successHandler({ ctx, data: '初始化RoleAuth成功!' });
+      const count = await RoleAuthModel.count();
+      if (count === 0) {
+        await RoleAuthModel.bulkCreate(bulkCreateRoleAuth);
+        successHandler({ ctx, message: '初始化角色权限成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过角色权限了，不能再初始化了~',
+        });
+      }
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
   }
 
-  async createDayData(ctx: ParameterizedContext, next) {
+  // 初始化数据库
+  async initDatabase(ctx: ParameterizedContext, next) {
     try {
-      await sequelize.query(sql1);
-      await sequelize.query(sql2);
-      await sequelize.query(sql3);
-      successHandler({ ctx, data: '初始化dayData成功!' });
+      const queryInterface = sequelize.getQueryInterface();
+      const allTables = await queryInterface.showAllTables();
+      if (!allTables.length) {
+        await initDb(1);
+        successHandler({ ctx, data: '初始化数据库成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过数据库了，不能再初始化了~',
+        });
+      }
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  // 初始化时间表
+  async initDayData(ctx: ParameterizedContext, next) {
+    try {
+      const count = await dayDataModel.count();
+      if (count === 0) {
+        await sequelize.query(sql1);
+        await sequelize.query(sql2);
+        await sequelize.query(sql3);
+        successHandler({ ctx, data: '初始化时间表成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过时间表了，不能再初始化了~',
+        });
+      }
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  // 初始化管理员
+  async initAdminUser(ctx: ParameterizedContext, next) {
+    try {
+      const count = await userModel.count();
+      if (count === 0) {
+        const adminUser: any = await userModel.create({
+          username: 'admin',
+          password: '123456',
+        });
+        await userRoleModel.create({ user_id: adminUser.id, role_id: 4 });
+        successHandler({ ctx, data: '初始化管理员成功!' });
+      } else {
+        emitError({
+          ctx,
+          code: 400,
+          message: '已经初始化过管理员了，不能再初始化了~',
+        });
+      }
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

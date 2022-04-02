@@ -34,7 +34,7 @@ class UserController {
       }
       const emailIsExist = await emailUserService.isExist([email]);
       if (emailIsExist) {
-        emitError({ ctx, code: 401, message: '该邮箱已被他人使用!' });
+        emitError({ ctx, code: 400, message: '该邮箱已被他人使用!' });
       } else {
         const key = {
           prefix: REDIS_PREFIX.emailRegister,
@@ -44,7 +44,7 @@ class UserController {
         const redisData = await redisController.getVal(key);
         console.log(redisData, 7777);
         if (redisData !== code || !redisData) {
-          emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+          emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
           return;
         }
         // 用户表创建用户
@@ -162,7 +162,7 @@ class UserController {
       if (!findEmailUserRes) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '该邮箱未注册!',
         });
         return;
@@ -215,7 +215,7 @@ class UserController {
 
   codeLogin = async (ctx: ParameterizedContext, next) => {
     try {
-      const { email, code } = ctx.request.body;
+      const { email, code, exp = 24 } = ctx.request.body;
       const key = {
         prefix: REDIS_PREFIX.emailLogin,
         key: email,
@@ -224,7 +224,7 @@ class UserController {
       const redisData = await redisController.getVal(key);
       console.log(redisData, 7777);
       if (redisData !== code || !redisData) {
-        emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+        emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
         return;
       }
       const findEmailUserRes = await emailUserService.findThirdUser(email);

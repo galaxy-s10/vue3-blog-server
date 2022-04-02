@@ -121,7 +121,7 @@ class EmailUserController {
       // 判断redis中的验证码是否正确
       const redisData = await redisController.getVal(key);
       if (redisData !== code || !redisData) {
-        emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+        emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
         return;
       }
       const findEmailUserRes = await emailUserService.findThirdUser(email);
@@ -161,7 +161,7 @@ class EmailUserController {
       }
       const emailIsExist = await emailUserService.isExist([email]);
       if (emailIsExist) {
-        emitError({ ctx, code: 401, message: '该邮箱已被他人使用!' });
+        emitError({ ctx, code: 400, message: '该邮箱已被他人使用!' });
       } else {
         const key = {
           prefix: REDIS_PREFIX.emailRegister,
@@ -170,7 +170,7 @@ class EmailUserController {
         // 判断redis中的验证码是否正确
         const redisData = await redisController.getVal(key);
         if (redisData !== code || !redisData) {
-          emitError({ ctx, code: 401, message: '验证码错误或已过期!' });
+          emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
           return;
         }
         // 用户表创建用户
@@ -231,10 +231,11 @@ class EmailUserController {
 
   /** 发送绑定邮箱验证码 */
   sendBindEmailCode = async (ctx: ParameterizedContext, next) => {
+    const { userInfo } = await authJwt(ctx.request);
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
-        prefix: REDIS_PREFIX.userBindEmail,
+        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo.id}`,
         key: email,
       },
       desc: '绑定邮箱',
@@ -245,9 +246,10 @@ class EmailUserController {
 
   /** 发送取消绑定邮箱验证码 */
   sendCancelBindEmailCode = async (ctx: ParameterizedContext, next) => {
+    const { userInfo } = await authJwt(ctx.request);
     const { email } = ctx.request.body;
     const key = {
-      prefix: REDIS_PREFIX.userCancelBindEmail,
+      prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
       key: email,
     };
     const result = await this.sendCode({
@@ -320,7 +322,7 @@ class EmailUserController {
         return;
       }
       const key = {
-        prefix: REDIS_PREFIX.userBindEmail,
+        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo.id}`,
         key: email,
       };
       const redisData = await redisController.getVal({
@@ -382,7 +384,7 @@ class EmailUserController {
         ownIsBind[0].third_user_id
       );
       const key = {
-        prefix: REDIS_PREFIX.userCancelBindEmail,
+        prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
         key: userEmail.email,
       };
       const redisData = await redisController.getVal({

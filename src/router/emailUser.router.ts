@@ -33,11 +33,11 @@ emailRouter.post(
 emailRouter.get('/list', emailController.getList);
 
 // 用户绑定邮箱
-emailRouter.post('/bind_user', verifyProp, emailController.bindEmail);
+emailRouter.post('/bind_email', verifyProp, emailController.bindEmail);
 
 // 用户解绑邮箱
 emailRouter.post(
-  '/cancel_bind_user',
+  '/cancel_bind_email',
   verifyProp,
   emailController.cancelBindEmail
 );

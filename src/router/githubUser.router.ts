@@ -11,11 +11,11 @@ githubUserRouter.get('/list', githubUserController.list);
 githubUserRouter.post('/login', githubUserController.login);
 
 // 绑定github
-githubUserRouter.post('/bind_user', githubUserController.bindGithub);
+githubUserRouter.post('/bind_github', githubUserController.bindGithub);
 
 // 取消绑定github
-githubUserRouter.get(
-  '/cancel_bind_user',
+githubUserRouter.post(
+  '/cancel_bind_github',
   githubUserController.cancelBindGithub
 );
 

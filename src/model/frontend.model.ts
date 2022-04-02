@@ -13,28 +13,34 @@ const frontendModel = sequelize.define(
       autoIncrement: true,
     },
     frontend_login: {
+      // 废弃
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭站内登录 1:开启站内登录
+      defaultValue: 1, // 1:关闭站内登录 2:开启站内登录
     },
     frontend_register: {
+      // 废弃
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭站内注册 1:开启站内注册
+      defaultValue: 1, // 1:关闭站内注册 2:开启站内注册
     },
     frontend_qq_login: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭qq登录 1:开启qq登录
+      defaultValue: 1, // 1:关闭qq登录 2:开启qq登录
     },
     frontend_github_login: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭github登录 1:开启github登录
+      defaultValue: 1, // 1:关闭github登录 2:开启github登录
+    },
+    frontend_email_login: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1, // 1:关闭email登录 2:开启email登录
     },
     frontend_comment: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭留言 1:开启留言
+      defaultValue: 1, // 1:关闭留言 2:开启留言
     },
     frontend_link: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:关闭申请友链 1:关闭申请友链
+      defaultValue: 1, // 1:关闭申请友链 2:关闭申请友链
     },
     frontend_about: {
       type: DataTypes.TEXT('long'),

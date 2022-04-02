@@ -14,6 +14,8 @@ const frontendWhiteList = [
   '/visitor_log/create', // 访客记录，这个接口是post的
   '/user/login', // 登录，这个接口是post的
   '/link/create', // 申请友链，这个接口是post的
+  '/qq_user/login', // 登录
+  '/github_user/login', // 登录
   '/email_user/send_login_code', // 发送登录验证码
   '/email_user/send_register_code', // 发送注册验证码
   '/email_user/send_bind_code', // 发送绑定邮箱验证码
@@ -37,10 +39,11 @@ const backendWhiteList = [
   '/admin/email_user/register', // 注册
 ];
 
+const globalWhiteList = ['/init/'];
+
 const verify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
   const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-
   console.log(
     chalkINFO(
       `↓↓↓↓↓↓↓↓↓↓ ${new Date().toLocaleString()} 监听${
@@ -59,6 +62,19 @@ const verify = async (ctx: ParameterizedContext, next) => {
     );
   };
 
+  let allowNext = false;
+  globalWhiteList.forEach((item) => {
+    if (ctx.req.url.indexOf(item) === 0) {
+      allowNext = true;
+    }
+  });
+  if (allowNext) {
+    console.log(chalkINFO('全局白名单，next'));
+    await next();
+    end();
+    return;
+  }
+
   try {
     if (isAdmin) {
       if (backendWhiteList.indexOf(url) !== -1) {
@@ -66,7 +82,6 @@ const verify = async (ctx: ParameterizedContext, next) => {
         end();
         return;
       }
-      console.log(32334);
       const { code, message } = await authJwt(ctx.req);
       if (code !== 200) {
         emitError({

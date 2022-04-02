@@ -14,17 +14,13 @@ const qqUserRouter = new Router({ prefix: '/qq_user' });
 qqUserRouter.get('/list', qqUserController.list);
 
 // 用户qq登录
-qqUserRouter.get('/login', verifyProp, qqUserController.login);
+qqUserRouter.post('/login', verifyProp, qqUserController.login);
 
 // 绑定qq
-qqUserRouter.post('/bind_user', verifyProp, qqUserController.bindQQ);
+qqUserRouter.post('/bind_qq', verifyProp, qqUserController.bindQQ);
 
 // 取消绑定qq
-qqUserRouter.post(
-  '/cancel_bind_user',
-  verifyProp,
-  qqUserController.cancelBindQQ
-);
+qqUserRouter.post('/cancel_bind_qq', verifyProp, qqUserController.cancelBindQQ);
 
 // 查找用户
 qqUserRouter.get('/find/:id', qqUserController.find);

@@ -138,7 +138,7 @@ class QqUserController {
 
   login = async (ctx: ParameterizedContext, next) => {
     try {
-      const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
+      const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
       const exp = 24; // token过期时间：24小时
       const accessToken = await this.getAccessToken(code);
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
@@ -263,14 +263,14 @@ class QqUserController {
    * 2，如果要绑定的github已经被别人绑定了，则不能绑定
    */
   bindQQ = async (ctx: ParameterizedContext, next) => {
-    const { code } = ctx.request.query; // 注意此code会在10分钟内过期。
+    const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     try {
       const { userInfo } = await authJwt(ctx.request);
-      console.log('first', userInfo);
       const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin
       );
+      console.log('lllk0');
       if (ownIsBind.length) {
         emitError({
           ctx,
@@ -297,7 +297,11 @@ class QqUserController {
         unionid: OauthInfo.unionid,
         openid: OauthInfo.openid,
       };
-      const isExist = await qqUserService.isExist([OauthInfo.id]);
+      console.log(OauthInfo, 555);
+      const isExist = await qqUserService.isExistClientIdUnionid(
+        OauthInfo.client_id,
+        OauthInfo.unionid
+      );
       if (isExist) {
         emitError({
           ctx,

@@ -9,6 +9,14 @@ const initAuth = () => {
       auth_description: '评论管理',
     },
     {
+      auth_name: 'STAR_MANAGE',
+      auth_description: '点赞管理',
+    },
+    {
+      auth_name: 'TYPE_MANAGE',
+      auth_description: '分类管理',
+    },
+    {
       auth_name: 'TAG_MANAGE',
       auth_description: '标签管理',
     },
@@ -21,6 +29,10 @@ const initAuth = () => {
       auth_description: '音乐管理',
     },
     {
+      auth_name: 'USER_MANAGE',
+      auth_description: '用户管理',
+    },
+    {
       auth_name: 'ROLE_MANAGE',
       auth_description: '角色管理',
     },
@@ -29,8 +41,20 @@ const initAuth = () => {
       auth_description: '权限管理',
     },
     {
+      auth_name: 'THEME_MANAGE',
+      auth_description: '主题管理',
+    },
+    {
+      auth_name: 'WORK_MANAGE',
+      auth_description: '作品管理',
+    },
+    {
       auth_name: 'SETTING_MANAGE',
       auth_description: '设置管理',
+    },
+    {
+      auth_name: 'VISITOR_MANAGE',
+      auth_description: '访客管理',
     },
     {
       auth_name: 'LOG_MANAGE',
@@ -40,12 +64,18 @@ const initAuth = () => {
       auth_name: 'QINIU_MANAGE',
       auth_description: '七牛云管理',
     },
+    {
+      auth_name: 'TASK_MANAGE',
+      auth_description: '任务管理',
+    },
   ];
-  let id = 1;
+  let id = 0;
   const authResult = [];
-  auth.forEach((v) => {
+  auth.forEach((v: any) => {
     id += 1;
+    // eslint-disable-next-line
     v.p_id = 0;
+    // eslint-disable-next-line
     v.id = id;
     authResult.push(v);
   });
@@ -74,7 +104,7 @@ const initAuth = () => {
     });
     authResult.push({
       id: arr.length + 1,
-      auth_name: `EDIT_${auth_name.split('_')[0]}`,
+      auth_name: `UPDATE_${auth_name.split('_')[0]}`,
       auth_description: `${auth_description} - 修改`,
       p_id: item.id,
     });
@@ -87,6 +117,7 @@ const initAuth = () => {
   // });
   return authResult;
 };
+
 const initRole = () => {
   const role = [
     {
@@ -128,6 +159,7 @@ const initRole = () => {
   ];
   return role;
 };
+
 const initRoleAuth = () => {
   const auth = initAuth();
   const roleAuth = [];
