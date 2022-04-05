@@ -28,7 +28,7 @@ class ScheduleController {
 
   async invokeDbJob(ctx: ParameterizedContext, next) {
     try {
-      const { code, userInfo, message } = await authJwt(ctx.request);
+      const { code, userInfo, message } = await authJwt(ctx);
       if (code !== 200) {
         emitError({ ctx, code: 400, error: message });
         return;

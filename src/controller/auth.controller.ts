@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
@@ -14,23 +15,13 @@ class AuthController {
         orderBy = 'asc',
         orderName = 'id',
       } = ctx.request.query;
-      const { rows, count } = await authService.getList({
+      const result = await authService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
       });
-      successHandler({ ctx, data: { rows, count } });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  }
-
-  async getNestList(ctx: ParameterizedContext, next) {
-    try {
-      const { rows, count } = await authService.getNestList();
-      successHandler({ ctx, data: { rows, count } });
+      successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -39,9 +30,36 @@ class AuthController {
 
   async getUserAuth(ctx: ParameterizedContext, next) {
     try {
-      const id = +ctx.params.userid;
-      const { rows, count } = await authService.getUserAuth(id);
-      successHandler({ ctx, data: { rows, count } });
+      const id = +ctx.params.id;
+      const result: any = await authService.getMyAuth(id);
+      const auths = [];
+      const res = result.get();
+      res.roles.forEach((item) => {
+        auths.push(...item.auths);
+      });
+      res.auths = auths;
+      delete res.roles;
+
+      successHandler({ ctx, data: res });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async getMyAuth(ctx: ParameterizedContext, next) {
+    try {
+      const { userInfo } = await authJwt(ctx);
+      const result: any = await authService.getMyAuth(userInfo.id);
+      const auths = [];
+      const res = result.get();
+      res.roles.forEach((item) => {
+        auths.push(...item.auths);
+      });
+      res.auths = auths;
+      delete res.roles;
+
+      successHandler({ ctx, data: res });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -68,13 +86,13 @@ class AuthController {
         emitError({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
         return;
       }
-      const result = await authService.update({
+      await authService.update({
         id,
         p_id,
         auth_name,
         auth_description,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -101,7 +119,39 @@ class AuthController {
     await next();
   }
 
-  async delete(ctx: ParameterizedContext, next) {
+  /** 获取该权限的所有子权限 */
+  async commonGetAllChildAuth(id) {
+    const result: any = await authService.findAllChildren(id);
+    let queue = [];
+    const allAuth = [];
+    const getCAuth = async (auth) => {
+      if (auth.c_auth.length > 0) {
+        auth.c_auth.forEach((item) => {
+          queue.push(authService.findAllChildren(item.id));
+        });
+      }
+      const c = await Promise.all(queue);
+      allAuth.push(...c);
+      queue = [];
+      for (let i = 0; i < c.length; i += 1) {
+        const item = c[i];
+        if (item.c_auth.length > 0) {
+          queue.push(getCAuth(item));
+        }
+      }
+      await Promise.all(queue);
+    };
+    await getCAuth(result);
+    allAuth.forEach((v) => {
+      // eslint-disable-next-line
+      delete v.c_auth;
+    });
+    result.c_auth = allAuth;
+    return result;
+  }
+
+  /** 获取该权限的所有子权限 */
+  getAllChildAuth = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);
@@ -109,13 +159,31 @@ class AuthController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
         return;
       }
-      const result = await authService.delete(id);
+      const result = await this.commonGetAllChildAuth(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
-  }
+  };
+
+  delete = async (ctx: ParameterizedContext, next) => {
+    try {
+      const id = +ctx.params.id;
+      const isExist = await authService.isExist([id]);
+      if (!isExist) {
+        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
+        return;
+      }
+      const auth = await this.commonGetAllChildAuth(id);
+      const c_auth_ids = auth.c_auth.map((item) => item.id);
+      await authService.delete([...c_auth_ids, id]);
+      successHandler({ ctx });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
 }
 
 export default new AuthController();

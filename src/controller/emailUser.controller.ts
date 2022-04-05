@@ -231,7 +231,7 @@ class EmailUserController {
 
   /** 发送绑定邮箱验证码 */
   sendBindEmailCode = async (ctx: ParameterizedContext, next) => {
-    const { userInfo } = await authJwt(ctx.request);
+    const { userInfo } = await authJwt(ctx);
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
@@ -246,7 +246,7 @@ class EmailUserController {
 
   /** 发送取消绑定邮箱验证码 */
   sendCancelBindEmailCode = async (ctx: ParameterizedContext, next) => {
-    const { userInfo } = await authJwt(ctx.request);
+    const { userInfo } = await authJwt(ctx);
     const { email } = ctx.request.body;
     const key = {
       prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
@@ -299,7 +299,7 @@ class EmailUserController {
         });
         return;
       }
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email
@@ -367,7 +367,7 @@ class EmailUserController {
         });
         return;
       }
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email

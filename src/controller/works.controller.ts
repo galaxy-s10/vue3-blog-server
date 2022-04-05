@@ -5,7 +5,7 @@ import successHandler from '@/app/handler/success-handle';
 import { IWorks } from '@/interface';
 import worksService from '@/service/works.service';
 
-class worksController {
+class WorksController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
@@ -48,10 +48,10 @@ class worksController {
         ctx.request.body;
       const isExist = await worksService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的作品!` });
         return;
       }
-      const result = await worksService.update({
+      await worksService.update({
         id,
         name,
         desc,
@@ -60,7 +60,7 @@ class worksController {
         url,
         status,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -72,7 +72,7 @@ class worksController {
       const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-      const result = await worksService.create({
+      await worksService.create({
         name,
         desc,
         bg_url,
@@ -80,7 +80,7 @@ class worksController {
         url,
         status: isAdmin ? status : 1,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -92,11 +92,11 @@ class worksController {
       const id = +ctx.params.id;
       const isExist = await worksService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的作品!` });
         return;
       }
-      const result = await worksService.delete(id);
-      successHandler({ ctx, data: result });
+      await worksService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -104,4 +104,4 @@ class worksController {
   }
 }
 
-export default new worksController();
+export default new WorksController();

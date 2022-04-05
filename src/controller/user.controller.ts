@@ -299,7 +299,7 @@ class UserController {
 
   async getUserInfo(ctx: ParameterizedContext, next) {
     try {
-      const { code, userInfo, message } = await authJwt(ctx.request);
+      const { code, userInfo, message } = await authJwt(ctx);
       if (code === 200) {
         const result = await userService.getUserInfo(userInfo?.id);
         successHandler({ ctx, data: result });

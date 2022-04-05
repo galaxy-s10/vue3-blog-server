@@ -37,17 +37,23 @@ class MusicService {
   }
 
   /** 修改音乐 */
-  async update({ id, name, img, author, url, status }: IMusic) {
+  async update({ id, name, cover_pic, audio_url, author, status }: IMusic) {
     const result = await musicModel.update(
-      { name, img, author, url, status },
+      { name, cover_pic, audio_url, author, status },
       { where: { id } }
     );
     return result;
   }
 
   /** 创建音乐 */
-  async create({ name, img, author, url, status }: IMusic) {
-    const result = await musicModel.create({ name, img, author, url, status });
+  async create({ name, cover_pic, audio_url, author, status }: IMusic) {
+    const result = await musicModel.create({
+      name,
+      cover_pic,
+      audio_url,
+      author,
+      status,
+    });
     return result;
   }
 

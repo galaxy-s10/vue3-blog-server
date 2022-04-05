@@ -7,16 +7,16 @@ import { IUser } from '@/interface';
 import userModel from '@/model/user.model';
 
 const authJwt = (
-  req
+  ctx
 ): Promise<{ code: number; message: string; userInfo?: IUser }> => {
   return new Promise((resolve, reject) => {
     // 首先判断请求头有没有authorization
-    if (req.headers.authorization === undefined) {
+    if (ctx.req.headers.authorization === undefined) {
       // eslint-disable-next-line prefer-promise-reject-errors
       reject({ code: 401, message: '未登录!' });
       return;
     }
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = ctx.req.headers.authorization?.split(' ')[1];
     jwt.verify(token, JWT_SECRET, {}, async (err, decode: jwt.JwtPayload) => {
       if (err) {
         // 判断非法/过期token

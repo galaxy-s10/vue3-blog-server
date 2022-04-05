@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
@@ -82,7 +81,7 @@ const verify = async (ctx: ParameterizedContext, next) => {
         end();
         return;
       }
-      const { code, message } = await authJwt(ctx.req);
+      const { code, message } = await authJwt(ctx);
       if (code !== 200) {
         emitError({
           ctx,
@@ -107,7 +106,7 @@ const verify = async (ctx: ParameterizedContext, next) => {
       end();
       return;
     }
-    const { code, message } = await authJwt(ctx.req);
+    const { code, message } = await authJwt(ctx);
     if (code !== 200) {
       emitError({
         ctx,
@@ -129,6 +128,7 @@ const verify = async (ctx: ParameterizedContext, next) => {
   } catch (error) {
     emitError({
       ctx,
+      error,
       code: error.code,
       message: error.message,
     });

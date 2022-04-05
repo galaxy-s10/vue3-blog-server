@@ -3,6 +3,8 @@ import Sequelize from 'sequelize';
 import { IAuth } from '@/interface';
 import authModel from '@/model/auth.model';
 import RoleModel from '@/model/role.model';
+import roleModel from '@/model/role.model';
+import userModel from '@/model/user.model';
 import userRoleModel from '@/model/userRole.model';
 import { handlePaging } from '@/utils';
 
@@ -10,14 +12,14 @@ const { Op } = Sequelize;
 class AuthService {
   /** 权限是否存在 */
   async isExist(auth_ids: number[]) {
-    const res = await authModel.findAll({
+    const res = await authModel.count({
       where: {
         id: {
           [Op.or]: auth_ids,
         },
       },
     });
-    return res.length === auth_ids.length;
+    return res === auth_ids.length;
   }
 
   /** 获取权限列表 */
@@ -76,7 +78,7 @@ class AuthService {
     };
   }
 
-  /** 查找权限 */
+  /** findOne查找权限 */
   async find(id: number) {
     const result = await authModel.findOne({
       where: {
@@ -86,9 +88,48 @@ class AuthService {
     return result;
   }
 
+  async findAllChildren(id: number) {
+    const result = await authModel.findOne({
+      include: [{ model: authModel, as: 'c_auth' }],
+      where: {
+        id,
+      },
+    });
+    return result.get();
+  }
+
+  /** 查找我的权限 */
+  async getMyAuth(id: number) {
+    const result = await userModel.findOne({
+      include: [
+        {
+          attributes: ['id'],
+          model: roleModel,
+          through: {
+            attributes: [],
+          },
+          include: [
+            {
+              model: authModel,
+              through: {
+                attributes: [],
+              },
+            },
+          ],
+        },
+      ],
+      attributes: {
+        exclude: ['password', 'token'],
+      },
+      where: {
+        id,
+      },
+    });
+    return result;
+  }
+
   /** 修改权限 */
   async update({ id, p_id, auth_name, auth_description }: IAuth) {
-    console.log(id, p_id, auth_name, auth_description, 3223223);
     if (id === p_id) throw new Error(`id不能等于p_id!`);
     if (p_id === 0) {
       const result = await authModel.update(
@@ -141,12 +182,17 @@ class AuthService {
   }
 
   /** 删除权限 */
-  async delete(id: number) {
+  async delete(ids: number[]) {
+    if (ids.length === 0) {
+      throw new Error(`危险操作-删除所有权限!`);
+    }
     const result = await authModel.destroy({
       where: {
-        id,
+        id: {
+          [Op.or]: ids,
+        },
       },
-      individualHooks: true,
+      // individualHooks: true,
     });
     return result;
   }

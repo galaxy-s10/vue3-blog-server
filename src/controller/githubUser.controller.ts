@@ -80,7 +80,7 @@ class GithubUserController {
   bindGithub = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     try {
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github
@@ -88,7 +88,7 @@ class GithubUserController {
       if (ownIsBind.length) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '你已经绑定过github，请先解绑原github!',
         });
         return;
@@ -112,7 +112,7 @@ class GithubUserController {
       if (isExist) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '该github账号已被其他人绑定了!',
         });
         return;
@@ -121,6 +121,7 @@ class GithubUserController {
         ...OauthInfo,
         client_id: GITHUB_CLIENT_ID,
       });
+      console.log(githubUser, 4334);
       await thirdUserModel.create({
         user_id: userInfo.id,
         third_user_id: githubUser.id,
@@ -141,7 +142,7 @@ class GithubUserController {
    */
   cancelBindGithub = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github

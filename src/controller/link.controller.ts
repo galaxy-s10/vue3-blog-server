@@ -53,7 +53,7 @@ class LinkController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
-      const result = await linkService.update({
+      await linkService.update({
         id,
         email,
         name,
@@ -62,7 +62,7 @@ class LinkController {
         url,
         status,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -74,7 +74,7 @@ class LinkController {
       const { email, name, avatar, desc, url, status }: ILink =
         ctx.request.body;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
-      const result = await linkService.create({
+      await linkService.create({
         email,
         name,
         avatar,
@@ -91,7 +91,7 @@ class LinkController {
       };
       const emailMode = new SendEmailModel(mailOptions);
       await emailMode.send();
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -106,8 +106,8 @@ class LinkController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的友链!` });
         return;
       }
-      const result = await linkService.delete(id);
-      successHandler({ ctx, data: result });
+      await linkService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

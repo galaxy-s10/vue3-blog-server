@@ -3,6 +3,7 @@ import Sequelize from 'sequelize';
 import { IRole } from '@/interface';
 import authModel from '@/model/auth.model';
 import roleModel from '@/model/role.model';
+import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
@@ -24,11 +25,6 @@ class RoleService {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const result = await roleModel.findAndCountAll({
-      include: [
-        {
-          model: authModel,
-        },
-      ],
       order: [[orderName, orderBy]],
       limit,
       offset,
@@ -37,7 +33,7 @@ class RoleService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 查找权限 */
+  /** 查找角色 */
   async find(id: number) {
     const result = await roleModel.findOne({
       where: {
@@ -47,7 +43,28 @@ class RoleService {
     return result;
   }
 
-  /** 修改权限 */
+  /** 获取我的角色 */
+  async getMyRole(id: number) {
+    const result = await userModel.findOne({
+      include: [
+        {
+          model: roleModel,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+      attributes: {
+        exclude: ['password', 'token'],
+      },
+      where: {
+        id,
+      },
+    });
+    return result;
+  }
+
+  /** 修改角色 */
   async update({ id, p_id, role_name, role_description }: IRole) {
     if (id === p_id) throw new Error(`id不能等于p_id!`);
     if (p_id === 0) {
@@ -80,7 +97,17 @@ class RoleService {
     return result;
   }
 
-  /** 创建权限 */
+  async findAllChildren(id: number) {
+    const result = await roleModel.findOne({
+      include: [{ model: roleModel, as: 'c_role' }],
+      where: {
+        id,
+      },
+    });
+    return result.get();
+  }
+
+  /** 创建角色 */
   async create({ p_id, role_name, role_description }: IRole) {
     const result = await roleModel.create({
       p_id,
@@ -90,7 +117,7 @@ class RoleService {
     return result;
   }
 
-  /** 删除权限 */
+  /** 删除角色 */
   async delete(id: number) {
     const result = await roleModel.destroy({
       where: {

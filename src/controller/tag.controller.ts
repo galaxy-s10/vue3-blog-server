@@ -47,8 +47,8 @@ class TagController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
-      const result = await tagService.update({ id, name, color });
-      successHandler({ ctx, data: result });
+      await tagService.update({ id, name, color });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -58,8 +58,8 @@ class TagController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const { name, color }: ITag = ctx.request.body;
-      const result = await tagService.create({ name, color });
-      successHandler({ ctx, data: result });
+      await tagService.create({ name, color });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -90,8 +90,8 @@ class TagController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
         return;
       }
-      const result = await tagService.delete(id);
-      successHandler({ ctx, data: result });
+      await tagService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

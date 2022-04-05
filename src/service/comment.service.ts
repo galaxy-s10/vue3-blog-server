@@ -14,14 +14,14 @@ const { Op, fn, col, literal } = Sequelize;
 class CommentService {
   /** 评论是否存在 */
   async isExist(comment_ids: number[]) {
-    const res = await commentModel.findAll({
+    const res = await commentModel.count({
       where: {
         id: {
           [Op.or]: comment_ids,
         },
       },
     });
-    return res.length === comment_ids.length;
+    return res === comment_ids.length;
   }
 
   /** 获取评论列表 */
@@ -312,7 +312,9 @@ class CommentService {
     result.rows.forEach((item) => {
       const v = item.get();
       v.star_total = v.stars.length;
+      v.is_star_id = v.is_star?.id || null;
       v.is_star = v.is_star !== null;
+
       delete v.stars;
       item.children_comment.forEach((child) => {
         const children = child.get();
@@ -350,13 +352,13 @@ class CommentService {
           model: userModel,
           attributes: { exclude: ['password', 'token'] },
           as: 'from_user',
-          include: [{ model: roleModel }],
+          include: [{ model: roleModel, through: { attributes: [] } }],
         },
         {
           model: userModel,
           attributes: { exclude: ['password', 'token'] },
           as: 'to_user',
-          include: [{ model: roleModel }],
+          include: [{ model: roleModel, through: { attributes: [] } }],
         },
         {
           model: starModel,
@@ -367,15 +369,14 @@ class CommentService {
           },
           required: false,
         },
+        {
+          model: commentModel,
+          as: 'reply_comment',
+          paranoid: false,
+        },
       ],
       where: {
         article_id,
-        parent_comment_id,
-      },
-    });
-    const total = await commentModel.count({
-      where: {
-        article_id: -1,
         parent_comment_id,
       },
     });
@@ -383,10 +384,14 @@ class CommentService {
 
     result.rows.forEach((item) => {
       const v = item.get();
+      v.is_star_id = v.is_star?.id || null;
       v.is_star = v.is_star !== null;
       delete v.stars;
     });
-    return { ...handlePaging(nowPage, pageSize, result), total, sql_duration };
+    return {
+      ...handlePaging(nowPage, pageSize, result),
+      sql_duration,
+    };
   }
 
   /** 查找评论 */
@@ -395,18 +400,19 @@ class CommentService {
     return result;
   }
 
+  /** 查找所有子评论 */
+  async findAllChildren(parent_comment_id: number) {
+    const result = await commentModel.findAndCountAll({
+      where: { parent_comment_id },
+    });
+    return result;
+  }
+
   /** 修改评论 */
-  async update({
-    id,
-    article_id,
-    from_user_id,
-    to_user_id,
-    parent_comment_id,
-    content,
-  }: IComment) {
+  async update(props: IComment) {
     const result = await commentModel.update(
-      { article_id, from_user_id, to_user_id, parent_comment_id, content },
-      { where: { id } }
+      { ...props, id: undefined },
+      { where: { id: props.id } }
     );
     return result;
   }
@@ -449,6 +455,21 @@ class CommentService {
       );
     }
 
+    return result;
+  }
+
+  /** 删除多个评论 */
+  async deleteMany(ids: number[]) {
+    if (ids.length === 0) {
+      throw new Error(`危险操作-删除所有评论!`);
+    }
+    const result = await commentModel.destroy({
+      where: {
+        id: {
+          [Op.or]: ids,
+        },
+      },
+    });
     return result;
   }
 

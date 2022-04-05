@@ -105,9 +105,9 @@ export interface IType {
 export interface IMusic {
   id?: number;
   name: string;
-  img: string;
+  cover_pic: string;
   author: string;
-  url: string;
+  audio_url: string;
   status: number;
 }
 export interface IThirdUser {
@@ -177,9 +177,9 @@ export interface IComment {
   from_user_id: number;
   content: string;
   children_comment_total?: number;
-  ua: string;
-  ip: string;
-  ip_data: string;
+  ua?: string;
+  ip?: string;
+  ip_data?: string;
   parent_comment_id?: number;
   reply_comment_id?: number;
   article_id?: number;

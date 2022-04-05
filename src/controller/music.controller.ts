@@ -41,20 +41,22 @@ class MusicController {
   async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
-      const { name, img, author, url, status }: IMusic = ctx.request.body;
+      const { name, cover_pic, audio_url, author, status }: IMusic =
+        ctx.request.body;
       const isExist = await musicService.isExist([id]);
       if (!isExist) {
         emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
         return;
       }
-      const result = await musicService.update({
+      await musicService.update({
+        id,
         name,
-        img,
+        cover_pic,
+        audio_url,
         author,
-        url,
         status,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -64,14 +66,14 @@ class MusicController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const { name, img, author, url, status }: IMusic = ctx.request.body;
-      const result = await musicService.create({
+      await musicService.create({
         name,
         img,
         author,
         url,
         status,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -86,8 +88,8 @@ class MusicController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
         return;
       }
-      const result = await musicService.delete(id);
-      successHandler({ ctx, data: result });
+      await musicService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

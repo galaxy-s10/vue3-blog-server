@@ -51,6 +51,7 @@ class ArticleService {
       ],
       where: { id },
     });
+    if (!result) return null;
     const starTotalPromise = starModel.count({
       where: {
         article_id: id,

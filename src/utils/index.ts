@@ -17,12 +17,12 @@ export const formateDate = (datetime) => {
 
 /** 处理返回的分页数据 */
 export const handlePaging = (nowPage, pageSize, result) => {
-  const { count } = result;
   const obj: any = {};
   obj.nowPage = +nowPage;
   obj.pageSize = +pageSize;
-  obj.hasMore = obj.nowPage * obj.pageSize - count < 0;
-  return { ...obj, ...result };
+  obj.hasMore = obj.nowPage * obj.pageSize - result.count < 0;
+  obj.total = result.count;
+  return { ...obj, ...result, count: undefined };
 };
 
 /** 删除所有外键 */
@@ -142,7 +142,6 @@ export const randomNumber = (length: number): number => {
 };
 
 /**
- *
  * @param code 验证码
  * @param desc 验证码作用
  * @param exp 有效期，单位：秒，但返回时会转换成分钟
@@ -163,4 +162,9 @@ export const emailContentTemplate = ({
     exp / 60
   }分钟，请勿告知他人。`;
   return { subject: subjectTemp, content };
+};
+
+/** 数组去重 */
+export const arrUnique = (arr: any[]) => {
+  return Array.from(new Set(arr));
 };

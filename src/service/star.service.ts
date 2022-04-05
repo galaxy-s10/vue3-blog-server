@@ -58,6 +58,14 @@ class StarService {
     return result;
   }
 
+  /** 是否曾经点过star */
+  async everStar({ article_id, comment_id, from_user_id, to_user_id }) {
+    const result = await starModel.findOne({
+      where: { article_id, comment_id, from_user_id, to_user_id },
+    });
+    return result;
+  }
+
   /** 修改star */
   async update({
     id,

@@ -93,7 +93,7 @@ class VisitorLogController {
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
       let userInfo = null;
       try {
-        userInfo = await authJwt(ctx.request);
+        userInfo = await authJwt(ctx);
       } catch (error) {}
       const apiNum = await visitorLogService.getOneSecondApiNums(ip);
       // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip

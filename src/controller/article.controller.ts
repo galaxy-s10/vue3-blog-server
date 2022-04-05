@@ -58,14 +58,18 @@ class ArticleController {
   async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
-      const { code, userInfo } = await authJwt(ctx.request);
       let from_user_id = -1;
-      if (code === 200) {
-        from_user_id = userInfo.id;
-      }
+      try {
+        const { code, userInfo } = await authJwt(ctx);
+        if (code === 200) {
+          from_user_id = userInfo.id;
+        }
+        // eslint-disable-next-line no-empty
+      } catch (error) {}
       const result = await articleService.find(id, from_user_id);
       successHandler({ ctx, data: result });
     } catch (error) {
+      console.log('first', error);
       emitError({ ctx, code: 400, error });
     }
     await next();

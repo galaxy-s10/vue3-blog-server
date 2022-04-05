@@ -47,8 +47,8 @@ class TypeController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的分类!` });
         return;
       }
-      const result = await typeService.update({ id, name });
-      successHandler({ ctx, data: result });
+      await typeService.update({ id, name });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -58,8 +58,8 @@ class TypeController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const { name }: IType = ctx.request.body;
-      const result = await typeService.create({ name });
-      successHandler({ ctx, data: result });
+      await typeService.create({ name });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -74,8 +74,8 @@ class TypeController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的分类!` });
         return;
       }
-      const result = await typeService.delete(id);
-      successHandler({ ctx, data: result });
+      await typeService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

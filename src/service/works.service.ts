@@ -50,14 +50,9 @@ class WorksService {
   }
 
   /** 创建作品 */
-  async create({ email, name, avatar, desc, url, status }: IWorks) {
+  async create(props: IWorks) {
     const result = await worksModel.create({
-      email,
-      name,
-      avatar,
-      desc,
-      url,
-      status,
+      ...props,
     });
     return result;
   }

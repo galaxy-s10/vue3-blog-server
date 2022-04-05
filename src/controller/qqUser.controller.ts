@@ -142,7 +142,6 @@ class QqUserController {
       const exp = 24; // token过期时间：24小时
       const accessToken = await this.getAccessToken(code);
       if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      console.log('------', accessToken.error);
       const OauthInfo: any = await this.getMeOauth({
         access_token: accessToken.access_token,
         unionid: 1,
@@ -265,7 +264,7 @@ class QqUserController {
   bindQQ = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     try {
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin
@@ -274,7 +273,7 @@ class QqUserController {
       if (ownIsBind.length) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '你已经绑定过qq，请先解绑原qq!',
         });
         return;
@@ -305,7 +304,7 @@ class QqUserController {
       if (isExist) {
         emitError({
           ctx,
-          code: 401,
+          code: 400,
           message: '该qq账号已被其他人绑定了!',
         });
         return;
@@ -329,7 +328,7 @@ class QqUserController {
    */
   cancelBindQQ = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx.request);
+      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin

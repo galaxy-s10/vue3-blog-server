@@ -4,8 +4,9 @@ import { ParameterizedContext } from 'koa';
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  color: Joi.string().min(3).max(30),
+  id: Joi.number(),
+  name: Joi.string().min(3).max(30).required(),
+  color: Joi.string().min(3).max(30).required(),
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {

@@ -17,8 +17,14 @@ commentRouter.get(
 // 留言板评论列表
 commentRouter.get('/comment', commentController.getCommentList);
 
-// 子级评论列表
+// 子评论列表
 commentRouter.get('/child_comment', commentController.getChildrenCommentList);
+
+// 父评论的所有子评论(不分页)
+commentRouter.get(
+  '/child_comment/:parent_comment_id',
+  commentController.getAllChildrenComment
+);
 
 // 创建评论
 commentRouter.post('/create', verifyProp, commentController.create);

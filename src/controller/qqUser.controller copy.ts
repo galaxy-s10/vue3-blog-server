@@ -259,7 +259,6 @@ class QqUserController {
           ctx.cookies.set('token', token, { httpOnly: false });
           successHandler({ ctx, data: token, message: 'qq登录成功!' });
         } else {
-          console.log('-----');
           // qq_user表里面找这个用户原本绑定的qq用户
           const oldQqUser: any = await qqUserService.findByUnionid(
             OauthInfo.unionid

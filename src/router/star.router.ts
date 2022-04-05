@@ -11,11 +11,11 @@ starRouter.get('/list', starController.getList);
 // 创建star
 starRouter.post('/create', verifyProp, starController.create);
 
-// 查找star
-starRouter.get('/find/:id', starController.find);
-
 // 更新star
 starRouter.put('/update/:id', verifyProp, starController.update);
+
+// 查找star
+starRouter.get('/find/:id', starController.find);
 
 // 删除star
 starRouter.delete('/delete/:id', starController.delete);

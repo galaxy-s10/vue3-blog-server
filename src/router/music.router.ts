@@ -11,11 +11,11 @@ musicRouter.get('/list', musicController.getList);
 // 创建音乐
 musicRouter.post('/create', verifyProp, musicController.create);
 
-// 查找音乐
-musicRouter.get('/find/:id', musicController.find);
-
 // 更新音乐
 musicRouter.put('/update/:id', verifyProp, musicController.update);
+
+// 查找音乐
+musicRouter.get('/find/:id', musicController.find);
 
 // 删除音乐
 musicRouter.delete('/delete/:id', musicController.delete);

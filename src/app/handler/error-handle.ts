@@ -58,12 +58,13 @@ const errorHandler = (
     }
     // 不手动设置状态的话，默认是404（delete方法返回400），因此，即使走到了error-handle，且ctx.body返回了数据
     // 但是没有手动设置status的话，一样返回不了数据，因为status状态码都返回404了。
+    // console.log(error.message, '=++++++');
     ctx.status = status;
     ctx.body = {
       code: status,
-      error,
+      error: error?.message || error,
       stack: env === 'development' ? error?.stack : undefined,
-      message: message || defaultMessage,
+      message: message || error?.message || defaultMessage,
     };
     if (env !== 'development') {
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;

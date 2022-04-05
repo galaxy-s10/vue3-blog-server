@@ -11,13 +11,22 @@ roleRouter.get('/list', roleController.getList);
 // 创建角色
 roleRouter.post('/create', verifyProp, roleController.create);
 
-// 查找角色
-roleRouter.get('/find/:id', roleController.find);
-
 // 更新角色
 roleRouter.put('/update/:id', verifyProp, roleController.update);
 
+// 查找角色
+roleRouter.get('/find/:id', roleController.find);
+
 // 删除角色
 roleRouter.delete('/delete/:id', roleController.delete);
+
+// 获取该权限的所有子权限
+roleRouter.get('/get_all_child_role/:id', roleController.getAllChildRole);
+
+// 获取我的角色
+roleRouter.get('/get_my_role', roleController.getMyRole);
+
+// 获取某个用户的所有角色
+roleRouter.get('/get_user_role/:id', roleController.getUserRole);
 
 export default roleRouter;

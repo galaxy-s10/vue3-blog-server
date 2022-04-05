@@ -231,8 +231,20 @@ Role.belongsTo(Role, {
   constraints: false,
 });
 
+Role.hasMany(Role, {
+  as: 'c_role',
+  foreignKey: 'p_id',
+  constraints: false,
+});
+
 Auth.belongsTo(Auth, {
   as: 'p_auth',
+  foreignKey: 'p_id',
+  constraints: false,
+});
+
+Auth.hasMany(Auth, {
+  as: 'c_auth',
   foreignKey: 'p_id',
   constraints: false,
 });
