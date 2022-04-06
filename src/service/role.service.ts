@@ -20,7 +20,7 @@ class RoleService {
     return res.length === role_ids.length;
   }
 
-  /** 获取角色列表 */
+  /** 获取角色列表(分页) */
   async getList({ nowPage, pageSize, orderBy, orderName }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
@@ -33,6 +33,12 @@ class RoleService {
     return handlePaging(nowPage, pageSize, result);
   }
 
+  /** 获取角色列表(不分页) */
+  async getAllList() {
+    const result = await roleModel.findAndCountAll();
+    return result;
+  }
+
   /** 查找角色 */
   async find(id: number) {
     const result = await roleModel.findOne({
@@ -43,23 +49,32 @@ class RoleService {
     return result;
   }
 
+  /** 根据角色id查找对应的权限 */
+  async getRoleAuth(id: number) {
+    const role: any = await roleModel.findByPk(id);
+    const auths = await role.getAuths();
+    const result = [];
+    auths.forEach((v) => {
+      const obj = v.get();
+      delete obj.role_auth;
+      result.push(obj);
+    });
+    return result;
+  }
+
   /** 获取我的角色 */
   async getMyRole(id: number) {
-    const result = await userModel.findOne({
-      include: [
-        {
-          model: roleModel,
-          through: {
-            attributes: [],
-          },
-        },
-      ],
-      attributes: {
-        exclude: ['password', 'token'],
-      },
-      where: {
-        id,
-      },
+    // const user = await userModel.findOne({ where: { id } });
+    const user: any = await userModel.findByPk(id);
+    if (!user) {
+      throw new Error(`不存在id为${id}的用户!`);
+    }
+    const roles: any[] = await user.getRoles();
+    const result = [];
+    roles.forEach((v) => {
+      const obj = v.get();
+      delete obj.user_role;
+      result.push(obj);
     });
     return result;
   }
@@ -99,7 +114,6 @@ class RoleService {
 
   async findAllChildren(id: number) {
     const result = await roleModel.findOne({
-      include: [{ model: roleModel, as: 'c_role' }],
       where: {
         id,
       },

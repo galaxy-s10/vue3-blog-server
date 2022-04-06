@@ -155,7 +155,7 @@ class InitController {
           username: 'admin',
           password: '123456',
         });
-        await userRoleModel.create({ user_id: adminUser.id, role_id: 4 });
+        adminUser.setRoles([3, 7]);
         successHandler({ ctx, data: '初始化管理员成功!' });
       } else {
         emitError({

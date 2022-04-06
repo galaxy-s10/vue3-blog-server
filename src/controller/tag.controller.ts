@@ -44,8 +44,7 @@ class TagController {
       const { name, color }: ITag = ctx.request.body;
       const isExist = await tagService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
-        return;
+        throw new Error(`不存在id为${id}的标签!`);
       }
       await tagService.update({ id, name, color });
       successHandler({ ctx });
@@ -87,8 +86,7 @@ class TagController {
       const id = +ctx.params.id;
       const isExist = await tagService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
-        return;
+        throw new Error(`不存在id为${id}的标签!`);
       }
       await tagService.delete(id);
       successHandler({ ctx });

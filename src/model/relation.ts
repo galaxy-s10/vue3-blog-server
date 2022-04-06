@@ -68,47 +68,65 @@ console.log(chalkINFO('加载了relation'));
 // });
 
 User.belongsToMany(Article, {
-  through: UserArticle,
   // sourceKey: 'id', // 默认为源表的主键
   // targetKey: 'id', // 默认为目标表的主键
   foreignKey: 'user_id', // 目标表中外键的名称
   otherKey: 'article_id', // 联接表中外键的名称
-  constraints: false, // 不生成物理外键
+  constraints: false, // 不生成外键
+  through: {
+    model: UserArticle,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Article.belongsToMany(User, {
-  through: UserArticle,
   foreignKey: 'article_id',
   otherKey: 'user_id',
   constraints: false,
+  through: {
+    model: UserArticle,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Article.belongsToMany(Type, {
-  through: ArticleType,
   foreignKey: 'article_id',
   otherKey: 'type_id',
   constraints: false,
+  through: {
+    model: ArticleType,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Type.belongsToMany(Article, {
-  through: ArticleType,
   foreignKey: 'type_id',
   otherKey: 'article_id',
   constraints: false,
+  through: {
+    model: ArticleType,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Article.belongsToMany(Tag, {
-  through: ArticleTag,
   foreignKey: 'article_id',
   otherKey: 'tag_id',
   constraints: false,
+  through: {
+    model: ArticleTag,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Tag.belongsToMany(Article, {
-  through: ArticleTag,
   foreignKey: 'tag_id',
   otherKey: 'article_id',
   constraints: false,
+  through: {
+    model: ArticleTag,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Comment.belongsTo(User, {
@@ -198,31 +216,43 @@ Star.belongsTo(User, {
 });
 
 User.belongsToMany(Role, {
-  through: UserRole,
   foreignKey: 'user_id',
   otherKey: 'role_id',
   constraints: false,
+  through: {
+    model: UserRole,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Role.belongsToMany(User, {
-  through: UserRole,
   foreignKey: 'role_id',
   otherKey: 'user_id',
   constraints: false,
+  through: {
+    model: UserRole,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Role.belongsToMany(Auth, {
-  through: RoleAuth,
   foreignKey: 'role_id',
   otherKey: 'auth_id',
   constraints: false,
+  through: {
+    model: RoleAuth,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Auth.belongsToMany(Role, {
-  through: RoleAuth,
   foreignKey: 'auth_id',
   otherKey: 'role_id',
   constraints: false,
+  through: {
+    model: RoleAuth,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 Role.belongsTo(Role, {
@@ -275,33 +305,45 @@ Email.hasOne(ThirdUser, {
 });
  */
 EmailUser.belongsToMany(User, {
-  through: ThirdUser,
   foreignKey: 'third_user_id',
   otherKey: 'user_id',
   sourceKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 User.belongsToMany(EmailUser, {
-  through: ThirdUser,
   foreignKey: 'user_id',
   otherKey: 'third_user_id',
   targetKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 GithubUser.belongsToMany(User, {
-  through: ThirdUser,
   foreignKey: 'third_user_id',
   otherKey: 'user_id',
   sourceKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 User.belongsToMany(GithubUser, {
-  through: ThirdUser,
   foreignKey: 'user_id',
   otherKey: 'third_user_id',
   targetKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 ThirdUser.belongsTo(User, {
@@ -314,18 +356,24 @@ ThirdUser.belongsTo(User, {
 //   as: 'third_user1',
 // });
 QqUser.belongsToMany(User, {
-  through: ThirdUser,
   foreignKey: 'third_user_id',
   otherKey: 'user_id',
   sourceKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 User.belongsToMany(QqUser, {
-  through: ThirdUser,
   foreignKey: 'user_id',
   otherKey: 'third_user_id',
   targetKey: 'id',
   constraints: false,
+  through: {
+    model: ThirdUser,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 // 发出的star
@@ -360,16 +408,22 @@ Comment.belongsTo(User, {
 });
 
 Role.belongsToMany(User, {
-  through: UserRole,
   foreignKey: 'role_id',
   otherKey: 'user_id',
   constraints: false,
+  through: {
+    model: UserRole,
+    unique: false, // 不生成唯一索引
+  },
 });
 User.belongsToMany(Role, {
-  through: UserRole,
   foreignKey: 'user_id',
   otherKey: 'role_id',
   constraints: false,
+  through: {
+    model: UserRole,
+    unique: false, // 不生成唯一索引
+  },
 });
 
 // =================

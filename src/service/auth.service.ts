@@ -2,7 +2,6 @@ import Sequelize from 'sequelize';
 
 import { IAuth } from '@/interface';
 import authModel from '@/model/auth.model';
-import RoleModel from '@/model/role.model';
 import roleModel from '@/model/role.model';
 import userModel from '@/model/user.model';
 import userRoleModel from '@/model/userRole.model';
@@ -22,7 +21,7 @@ class AuthService {
     return res === auth_ids.length;
   }
 
-  /** 获取权限列表 */
+  /** 获取权限列表(分页) */
   async getList({ nowPage, pageSize, orderBy, orderName }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
@@ -34,29 +33,12 @@ class AuthService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 获取嵌套权限列表 */
-  async getNestList() {
-    const { count, rows } = await authModel.findAndCountAll({
-      include: [
-        {
-          model: authModel,
-          as: 'auth_children',
-        },
-      ],
-      distinct: true,
-    });
-    return {
-      count,
-      rows,
-    };
-  }
-
   /** 获取用户权限 */
   async getUserAuth(id: number) {
     const { count, rows } = await userRoleModel.findAndCountAll({
       include: [
         {
-          model: RoleModel,
+          model: roleModel,
           include: [
             {
               model: authModel,
@@ -88,19 +70,45 @@ class AuthService {
     return result;
   }
 
+  /** 根据p_id查找权限 */
+  async findByPid(p_id: number) {
+    const result = await authModel.findAll({
+      where: {
+        p_id,
+      },
+    });
+    return result;
+  }
+
   async findAllChildren(id: number) {
+    const result = await authModel.findAll({
+      where: {
+        p_id: id,
+      },
+    });
+    return result;
+  }
+
+  async findChildAuth(id: number) {
     const result = await authModel.findOne({
       include: [{ model: authModel, as: 'c_auth' }],
+
       where: {
         id,
       },
     });
-    return result.get();
+    return result;
+  }
+
+  /** 获取权限列表(分页) */
+  async getAllList() {
+    const result = await authModel.findAndCountAll();
+    return result;
   }
 
   /** 查找我的权限 */
   async getMyAuth(id: number) {
-    const result = await userModel.findOne({
+    const result = await userModel.findAll({
       include: [
         {
           attributes: ['id'],

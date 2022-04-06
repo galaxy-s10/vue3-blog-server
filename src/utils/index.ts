@@ -168,3 +168,51 @@ export const emailContentTemplate = ({
 export const arrUnique = (arr: any[]) => {
   return Array.from(new Set(arr));
 };
+
+/**
+ * 扁平化数据转树型
+ */
+export const arrayToTree = ({
+  originArr = [],
+  originPid = 0,
+  originIdKey = 'id',
+  originPidKey = 'pid',
+  resChildrenKey = 'children',
+  resIdKey = undefined,
+  resPidKey = undefined,
+}) => {
+  // eslint-disable-next-line no-shadow
+  const handleToTree = (arr: any[], pid: number) => {
+    // 循环，获取该id的children
+    // eslint-disable-next-line no-shadow
+    function loop(pid: number) {
+      // 保存得到的数据
+      const res = [];
+      // 遍历原数组
+      for (let i = 0; i < arr.length; i += 1) {
+        const item = arr[i];
+        if (resIdKey && item[originIdKey] !== undefined) {
+          item[resIdKey] = item[originIdKey];
+          delete item[originIdKey];
+        }
+        if (resPidKey && item[originPidKey] !== undefined) {
+          item[resPidKey] = item[originPidKey];
+
+          delete item[originPidKey];
+        }
+        if (item[originPidKey] === pid || item[resPidKey] === pid) {
+          // 如果遍历到当前item的p_id等于目标pid，在将该item插入到res前，
+          // 先遍历该item的id，找到原数组arr里面该item的所有children后，再将该item连同找到的children一起插入到res
+          item[resChildrenKey] = loop(item[resIdKey] || item[originIdKey]);
+          // 如果当前item的p_id等于目标pid，则将这个item插入res
+          res.push(item);
+        }
+      }
+      return res;
+    }
+
+    return loop(pid);
+  };
+  const data = JSON.parse(JSON.stringify(originArr));
+  return handleToTree(data, originPid);
+};

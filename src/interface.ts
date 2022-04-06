@@ -210,6 +210,7 @@ export interface IRole {
   p_id: number;
   role_name: string;
   role_description: string;
+  role_auths?: number[];
 }
 
 export interface IList {

@@ -5,6 +5,7 @@ import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';
+import { arrayToTree } from '@/utils';
 
 class AuthController {
   async getList(ctx: ParameterizedContext, next) {
@@ -28,6 +29,16 @@ class AuthController {
     await next();
   }
 
+  async getAllList(ctx: ParameterizedContext, next) {
+    try {
+      const result = await authService.getAllList();
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
   async getUserAuth(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
@@ -40,31 +51,36 @@ class AuthController {
       res.auths = auths;
       delete res.roles;
 
-      successHandler({ ctx, data: res });
+      successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
 
-  async getMyAuth(ctx: ParameterizedContext, next) {
+  async commonGetMyAuth(ctx: ParameterizedContext) {
+    const { userInfo } = await authJwt(ctx);
+    const result: any = await authService.getMyAuth(userInfo.id);
+    // const auths = [];
+    // const res = result.get();
+    // res.roles.forEach((item) => {
+    //   auths.push(...item.auths);
+    // });
+    // res.auths = auths;
+    // delete res.roles;
+    return result;
+  }
+
+  // 获取我的所有权限
+  getMyAuth = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx);
-      const result: any = await authService.getMyAuth(userInfo.id);
-      const auths = [];
-      const res = result.get();
-      res.roles.forEach((item) => {
-        auths.push(...item.auths);
-      });
-      res.auths = auths;
-      delete res.roles;
-
-      successHandler({ ctx, data: res });
+      const result = await this.commonGetMyAuth(ctx);
+      successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
-  }
+  };
 
   async find(ctx: ParameterizedContext, next) {
     try {
@@ -81,10 +97,19 @@ class AuthController {
     try {
       const id = +ctx.params.id;
       const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
-      const isExist = p_id === 0 ? true : await authService.isExist([p_id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
-        return;
+      if (id === 1 && p_id !== 0) {
+        throw new Error(`不能修改根权限的p_id哦!`);
+      }
+      if (id !== 1 && p_id === 0) {
+        throw new Error(`不能给其他权限设置为根权限哦!`);
+      }
+      const ids = [p_id, id].filter((v) => v !== 0);
+      if (!ids.length) {
+        throw new Error(`${[p_id, id]}中存在不存在的角色!`);
+      }
+      const isExistAuth = p_id === 0 ? true : await authService.isExist([id]);
+      if (!isExistAuth) {
+        throw new Error(`不存在id为${id}的角色!`);
       }
       await authService.update({
         id,
@@ -119,38 +144,65 @@ class AuthController {
     await next();
   }
 
-  /** 获取该权限的所有子权限 */
+  /** 获取该权限的所有子权限(树型)，一层层的递归找到所有子孙节点 */
   async commonGetAllChildAuth(id) {
-    const result: any = await authService.findAllChildren(id);
+    // const result: any = await authService.findAllChildren(id);
     let queue = [];
     const allAuth = [];
-    const getCAuth = async (auth) => {
-      if (auth.c_auth.length > 0) {
-        auth.c_auth.forEach((item) => {
-          queue.push(authService.findAllChildren(item.id));
-        });
-      }
+    // eslint-disable-next-line no-shadow
+    const getCAuth = async (id: number) => {
+      // if (auth.c_auth.length > 0) {
+      //   auth.c_auth.forEach((item) => {
+      // queue.push(authService.findAllChildren(item.id));
+      //   });
+      // }
+      queue.push(authService.findAllChildren(id));
+
       const c = await Promise.all(queue);
       allAuth.push(...c);
       queue = [];
+      // console.log(c, 111);
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
-        if (item.c_auth.length > 0) {
-          queue.push(getCAuth(item));
+        for (let j = 0; j < item.length; j += 1) {
+          const obj = item[j];
+          console.log(obj.id, 2222);
+          await getCAuth(obj.id);
         }
       }
-      await Promise.all(queue);
+      console.log('222222');
+      // await Promise.all(queue);
     };
-    await getCAuth(result);
-    allAuth.forEach((v) => {
-      // eslint-disable-next-line
-      delete v.c_auth;
-    });
-    result.c_auth = allAuth;
-    return result;
+    await getCAuth(id);
+    // await Promise.all(queue);
+    console.log('=====');
+
+    // allAuth.forEach((v) => {
+    //   // eslint-disable-next-line
+    //   delete v.c_auth;
+    // });
+    // result.c_auth = allAuth;
+    return allAuth;
   }
 
-  /** 获取该权限的所有子权限 */
+  /** 获取该权限的直接子权限（只找一层） */
+  getChildAuth = async (ctx: ParameterizedContext, next) => {
+    try {
+      const id = +ctx.params.id;
+      const isExist = await authService.isExist([id]);
+      if (!isExist) {
+        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
+        return;
+      }
+      const result = await authService.findByPid(id);
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
+
+  /** 获取该权限的直接子权限（递归查找所有） */
   getAllChildAuth = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
@@ -167,17 +219,43 @@ class AuthController {
     await next();
   };
 
+  // 获取树型角色
+  async getTreeList(ctx: ParameterizedContext, next) {
+    try {
+      const { id = 0 } = ctx.request.query;
+      const { rows } = await authService.getAllList();
+      const data = arrayToTree({
+        originArr: rows,
+        originPid: +id,
+        originIdKey: 'id',
+        originPidKey: 'p_id',
+        resChildrenKey: 'children',
+        // resIdKey: 'id',
+        // resPidKey: 'pid',
+      });
+      successHandler({ ctx, data });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  }
+
+  // 递归删除
   delete = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
-      const isExist = await authService.isExist([id]);
-      if (!isExist) {
+      const auth: any = await authService.find(id);
+      if (auth.p_id === 0) {
+        throw new Error(`不能删除根权限哦!`);
+      }
+      if (!auth) {
         emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
         return;
       }
       const auth = await this.commonGetAllChildAuth(id);
       const c_auth_ids = auth.c_auth.map((item) => item.id);
-      await authService.delete([...c_auth_ids, id]);
+      await authService.delete([id]);
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });

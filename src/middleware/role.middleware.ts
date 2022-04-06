@@ -8,6 +8,7 @@ const schema = Joi.object({
   p_id: Joi.number().required(),
   role_name: Joi.string().min(3).max(30).required(),
   role_description: Joi.string().min(3).max(30).required(),
+  role_auths: Joi.array().items(Joi.number()),
 });
 
 const verifyProp = async (ctx: ParameterizedContext, next) => {
