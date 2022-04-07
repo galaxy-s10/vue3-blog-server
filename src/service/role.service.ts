@@ -1,7 +1,6 @@
 import Sequelize from 'sequelize';
 
 import { IRole } from '@/interface';
-import authModel from '@/model/auth.model';
 import roleModel from '@/model/role.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
@@ -44,6 +43,16 @@ class RoleService {
     const result = await roleModel.findOne({
       where: {
         id,
+      },
+    });
+    return result;
+  }
+
+  /** 根据p_id查找权限 */
+  async findByPid(p_id: number) {
+    const result = await roleModel.findAll({
+      where: {
+        p_id,
       },
     });
     return result;
@@ -113,12 +122,12 @@ class RoleService {
   }
 
   async findAllChildren(id: number) {
-    const result = await roleModel.findOne({
+    const result = await roleModel.findAll({
       where: {
-        id,
+        p_id: id,
       },
     });
-    return result.get();
+    return result;
   }
 
   /** 创建角色 */

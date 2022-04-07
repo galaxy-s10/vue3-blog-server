@@ -146,42 +146,28 @@ class AuthController {
 
   /** 获取该权限的所有子权限(树型)，一层层的递归找到所有子孙节点 */
   async commonGetAllChildAuth(id) {
-    // const result: any = await authService.findAllChildren(id);
-    let queue = [];
     const allAuth = [];
     // eslint-disable-next-line no-shadow
-    const getCAuth = async (id: number) => {
-      // if (auth.c_auth.length > 0) {
-      //   auth.c_auth.forEach((item) => {
-      // queue.push(authService.findAllChildren(item.id));
-      //   });
-      // }
-      queue.push(authService.findAllChildren(id));
-
-      const c = await Promise.all(queue);
+    // const getChildAuth = async (id: number) => {
+    //   const c: any = await authService.findAllChildren(id);
+    //   allAuth.push(...c);
+    //   for (let i = 0; i < c.length; i += 1) {
+    //     const item = c[i];
+    //     await getChildAuth(item.id);
+    //   }
+    // };
+    const queue = [];
+    // eslint-disable-next-line no-shadow
+    const getChildAuth = async (id: number) => {
+      const c: any = await authService.findAllChildren(id);
       allAuth.push(...c);
-      queue = [];
-      // console.log(c, 111);
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
-        for (let j = 0; j < item.length; j += 1) {
-          const obj = item[j];
-          console.log(obj.id, 2222);
-          await getCAuth(obj.id);
-        }
+        queue.push(getChildAuth(item.id));
       }
-      console.log('222222');
-      // await Promise.all(queue);
     };
-    await getCAuth(id);
-    // await Promise.all(queue);
-    console.log('=====');
-
-    // allAuth.forEach((v) => {
-    //   // eslint-disable-next-line
-    //   delete v.c_auth;
-    // });
-    // result.c_auth = allAuth;
+    await getChildAuth(id);
+    await Promise.all(queue);
     return allAuth;
   }
 
@@ -253,9 +239,9 @@ class AuthController {
         emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
         return;
       }
-      const auth = await this.commonGetAllChildAuth(id);
-      const c_auth_ids = auth.c_auth.map((item) => item.id);
-      await authService.delete([id]);
+      const all_auth: any = await this.commonGetAllChildAuth(id);
+      const all_auth_ids = all_auth.map((item) => item.id);
+      await authService.delete([id, ...all_auth_ids]);
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });

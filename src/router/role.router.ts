@@ -32,6 +32,12 @@ roleRouter.get('/get_all_child_role/:id', roleController.getAllChildRole);
 // 获取我的角色
 roleRouter.get('/get_my_role', roleController.getMyRole);
 
+// 获取该角色的子角色（只找一层）
+roleRouter.get('/get_child_role/:id', roleController.getChildRole);
+
+// 获取该角色的子角色（递归查找所有）
+roleRouter.get('/get_all_child_role/:id', roleController.getAllChildRole);
+
 // 获取某个用户的所有角色
 roleRouter.get('/get_user_role/:user_id', roleController.getUserRole);
 

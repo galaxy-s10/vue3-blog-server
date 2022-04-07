@@ -96,6 +96,7 @@ class RoleController {
     await next();
   }
 
+  // 获取我的角色
   async getMyRole(ctx: ParameterizedContext, next) {
     try {
       const { userInfo } = await authJwt(ctx);
@@ -107,37 +108,24 @@ class RoleController {
     await next();
   }
 
-  /** 获取该角色的所有子角色 */
   async commonGetAllChildRole(id) {
-    const result: any = await roleService.findAllChildren(id);
-    let queue = [];
     const allRole = [];
-    const getCRole = async (role) => {
-      if (role.c_role.length > 0) {
-        role.c_role.forEach((item) => {
-          queue.push(roleService.findAllChildren(item.id));
-        });
-      }
-      const c = await Promise.all(queue);
+    const queue = [];
+    // eslint-disable-next-line no-shadow
+    const getChildRole = async (id: number) => {
+      const c: any = await roleService.findAllChildren(id);
       allRole.push(...c);
-      queue = [];
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
-        if (item.c_role.length > 0) {
-          queue.push(getCRole(item));
-        }
+        queue.push(getChildRole(item.id));
       }
-      await Promise.all(queue);
     };
-    // await getCRole(result);
-    // allRole.forEach((v) => {
-    //   // eslint-disable-next-line
-    //   delete v.c_role;
-    // });
-    // result.c_role = allRole;
-    return result;
+    await getChildRole(id);
+    await Promise.all(queue);
+    return allRole;
   }
 
+  // 获取该角色的子角色（递归查找所有）
   getAllChildRole = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
@@ -146,6 +134,23 @@ class RoleController {
         throw new Error(`不存在id为${id}的角色!`);
       }
       const result = await this.commonGetAllChildRole(id);
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
+
+  /** 获取该角色的直接子角色（只找一层） */
+  getChildRole = async (ctx: ParameterizedContext, next) => {
+    try {
+      const id = +ctx.params.id;
+      const isExist = await roleService.isExist([id]);
+      if (!isExist) {
+        emitError({ ctx, code: 400, error: `不存在id为${id}的角色!` });
+        return;
+      }
+      const result = await roleService.findByPid(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
