@@ -15,8 +15,14 @@ const roleModel = sequelize.define(
     role_name: {
       type: DataTypes.STRING(50),
     },
-    role_description: {
+    role_value: {
       type: DataTypes.STRING(50),
+    },
+    type: {
+      type: DataTypes.INTEGER, // 1：默认，2：自定义
+    },
+    priority: {
+      type: DataTypes.INTEGER,
     },
     p_id: {
       type: DataTypes.INTEGER,

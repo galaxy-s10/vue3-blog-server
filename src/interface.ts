@@ -208,9 +208,12 @@ export interface IStar {
 export interface IRole {
   id?: number;
   p_id: number;
-  role_name: string;
-  role_description: string;
+  role_name?: string;
+  role_value?: string;
+  type?: number;
+  priority?: number;
   role_auths?: number[];
+  c_roles?: number[];
 }
 
 export interface IList {

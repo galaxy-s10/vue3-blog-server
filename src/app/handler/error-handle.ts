@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '../auth/authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
+import { PROJECT_ENV } from '../constant';
 
 import logService from '@/service/log.service';
 
@@ -15,7 +16,6 @@ const errorHandler = (
       `↓↓↓↓↓↓↓↓↓↓ 开始接收 ${ctx.request.method} ${ctx.request.url} 错误 ↓↓↓↓↓↓↓↓↓↓`
     )
   );
-  const env = process.env.REACT_BLOG_SERVER_ENV;
 
   if (!code) {
     console.log(chalkERROR(`系统未知错误(不是通过手动调用emitError触发的)`));
@@ -63,10 +63,10 @@ const errorHandler = (
       code: status,
       // error, // 这样的话，有可能会返回{}，其实它是有message的。
       error: error?.message || error,
-      stack: env === 'development' ? error?.stack : undefined,
+      stack: PROJECT_ENV === 'development' ? error?.stack : undefined,
       message: message || error?.message || defaultMessage,
     };
-    if (env !== 'development') {
+    if (PROJECT_ENV !== 'development') {
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       authJwt(ctx.request)
         .then((res) => {

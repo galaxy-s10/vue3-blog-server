@@ -98,7 +98,7 @@ export const initTable = async (model: any, method?: 'force' | 'alter') => {
       await model.sync({ alter: true });
       console.log(chalkSUCCESS(`${model.tableName}表刚刚同步成功!`));
     } else {
-      console.log(chalkINFO(`加载数据库${model.tableName}表`));
+      console.log(chalkINFO(`加载数据库表: ${model.tableName}`));
     }
   } catch (err) {
     console.log(chalkERROR(`initTable失败`), err);
@@ -165,7 +165,7 @@ export const emailContentTemplate = ({
 };
 
 /** 数组去重 */
-export const arrUnique = (arr: any[]) => {
+export const arrUnique = (arr: number[]) => {
   return Array.from(new Set(arr));
 };
 
@@ -174,7 +174,7 @@ export const arrUnique = (arr: any[]) => {
  */
 export const arrayToTree = ({
   originArr = [],
-  originPid = 0,
+  originPid = 1,
   originIdKey = 'id',
   originPidKey = 'pid',
   resChildrenKey = 'children',
@@ -203,7 +203,9 @@ export const arrayToTree = ({
         if (item[originPidKey] === pid || item[resPidKey] === pid) {
           // 如果遍历到当前item的p_id等于目标pid，在将该item插入到res前，
           // 先遍历该item的id，找到原数组arr里面该item的所有children后，再将该item连同找到的children一起插入到res
-          item[resChildrenKey] = loop(item[resIdKey] || item[originIdKey]);
+          // item[resChildrenKey] = loop(item[resIdKey] || item[originIdKey]);
+          const children = loop(item[resIdKey] || item[originIdKey]);
+          if (children.length) item[resChildrenKey] = children;
           // 如果当前item的p_id等于目标pid，则将这个item插入res
           res.push(item);
         }

@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '../auth/authJwt';
 import { chalkSUCCESS } from '../chalkTip';
+import { PROJECT_ENV } from '../constant';
 
 import logService from '@/service/log.service';
 
@@ -35,10 +36,12 @@ const successHandler = ({
       defaultMessage = '操作成功!';
   }
   ctx.status = status; // 不手动设置状态的话，默认是404，delete方法返回400
+  // eslint-disable-next-line no-param-reassign
+  if (data && data.sql_duration !== undefined) delete data.sql_duration; // 删除sql执行时间，利于http缓存
   ctx.body = { code: status, data, message: message || defaultMessage };
   console.log(chalkSUCCESS(`↑↑↑↑↑↑↑↑↑↑ success-handle ↑↑↑↑↑↑↑↑↑↑`));
 
-  if (process.env.REACT_BLOG_SERVER_ENV !== 'development') {
+  if (PROJECT_ENV !== 'development') {
     const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
     authJwt(ctx.request).then((res) => {
       logService.create({

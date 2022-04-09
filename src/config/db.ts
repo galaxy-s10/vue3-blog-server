@@ -3,9 +3,14 @@ import { Sequelize } from 'sequelize';
 import { MYSQL_CONFIG } from './secret';
 
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
+import { PROJECT_ENV } from '@/app/constant';
 
+const dbName =
+  PROJECT_ENV !== 'prod'
+    ? `${MYSQL_CONFIG.database}_test`
+    : MYSQL_CONFIG.database;
 const sequelize = new Sequelize(
-  MYSQL_CONFIG.database,
+  dbName,
   MYSQL_CONFIG.username,
   MYSQL_CONFIG.password,
   {
@@ -32,14 +37,14 @@ export const connectDb = async () => {
   try {
     console.log(
       chalkINFO(
-        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库...`
+        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库...`
       )
     );
     await sequelize.authenticate();
-    const okMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库成功!`;
+    const okMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库成功!`;
     console.log(chalkSUCCESS(okMsg));
   } catch (error) {
-    const errMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${MYSQL_CONFIG.database}数据库失败!`;
+    const errMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库失败!`;
     console.log(error);
     console.error(chalkERROR(errMsg));
     throw new Error(errMsg);

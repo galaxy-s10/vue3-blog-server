@@ -18,14 +18,6 @@ import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { emailContentTemplate, randomNumber, randomString } from '@/utils';
 
-const emailResCode = {
-  ok: '发送成功!',
-  more: '一天只能发5次验证码!',
-  later: '一分钟内只能发1次验证码，请稍后再试!',
-  err: '验证码错误或已过期!',
-  system: '系统错误!',
-};
-
 interface IKey {
   prefix: string;
   key: string;
@@ -47,7 +39,7 @@ class EmailUserController {
    * 发送验证码
    * redis没有缓存，新建redis缓存，发送验证码
    * redis有缓存，判断是否在一分钟之内，在一分钟之内就提示过xx秒再发送；只有超过了一分钟才能继续发送验证码。
-   * 返回值：emailResCode
+   * 返回值：VERIFY_EMAIL_RESULT_CODE
    */
   sendCode = async ({
     key,
@@ -80,11 +72,11 @@ class EmailUserController {
           value: verificationCode,
           exp,
         });
-        return emailResCode.ok;
+        return VERIFY_EMAIL_RESULT_CODE.ok;
       }
       const ttl = await redisController.getTTL(key);
       if (ttl > 60 * 4) {
-        return emailResCode.later;
+        return VERIFY_EMAIL_RESULT_CODE.later;
       }
       const verificationCode = randomString(6);
       const content = emailContentTemplate({
@@ -103,10 +95,10 @@ class EmailUserController {
         value: verificationCode,
         exp,
       });
-      return emailResCode.ok;
+      return VERIFY_EMAIL_RESULT_CODE.ok;
     } catch (error) {
       console.log(chalkERROR(error));
-      return emailResCode.system;
+      return VERIFY_EMAIL_RESULT_CODE.system;
     }
   };
 
@@ -125,6 +117,10 @@ class EmailUserController {
         return;
       }
       const findEmailUserRes = await emailUserService.findThirdUser(email);
+      if (!findEmailUserRes) {
+        throw new Error(`${email}还未绑定过用户!`);
+      }
+      console.log(findEmailUserRes, 5555);
       const userInfo = findEmailUserRes.get().users[0].get();
       const token = signJwt({
         userInfo,
@@ -211,6 +207,10 @@ class EmailUserController {
       },
       desc: '登录博客',
     });
+    if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
+      emitError({ ctx, code: 400, message: result });
+      return;
+    }
     successHandler({ ctx, message: result });
     await next();
   };
@@ -225,6 +225,10 @@ class EmailUserController {
       },
       desc: '注册用户',
     });
+    if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
+      emitError({ ctx, code: 400, message: result });
+      return;
+    }
     successHandler({ ctx, message: result });
     await next();
   };
@@ -240,6 +244,10 @@ class EmailUserController {
       },
       desc: '绑定邮箱',
     });
+    if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
+      emitError({ ctx, code: 400, message: result });
+      return;
+    }
     successHandler({ ctx, message: result });
     await next();
   };
@@ -256,6 +264,10 @@ class EmailUserController {
       key,
       desc: '取消绑定邮箱',
     });
+    if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
+      emitError({ ctx, code: 400, message: result });
+      return;
+    }
     successHandler({ ctx, message: result });
     await next();
   };

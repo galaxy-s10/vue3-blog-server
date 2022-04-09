@@ -11,7 +11,8 @@
     "prettier": "prettier --write .",
     "push": "cz && standard-version",
     "release": "standard-version",
-    "start": "cross-env REACT_BLOG_SERVER_ENV=development nodemon ./src/index.ts"
+    "start": "cross-env NODE_APP_RELEASE_PROJECT_NAME=react-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
+    "start:prod": "cross-env NODE_APP_RELEASE_PROJECT_NAME=react-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./src/index.ts"
   },
   "config": {
     "commitizen": {

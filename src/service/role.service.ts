@@ -12,7 +12,7 @@ class RoleService {
     const res = await roleModel.findAll({
       where: {
         id: {
-          [Op.or]: role_ids,
+          [Op.in]: role_ids,
         },
       },
     });
@@ -38,11 +38,36 @@ class RoleService {
     return result;
   }
 
+  /** 获取所有p_id不为null的角色 */
+  async getPidNotNullRole() {
+    const result = await roleModel.findAndCountAll({
+      where: {
+        p_id: {
+          [Op.not]: null, // IS NOT NULL
+          // [Op.not]: true, // IS NOT TRUE
+        },
+      },
+    });
+    return result;
+  }
+
   /** 查找角色 */
   async find(id: number) {
     const result = await roleModel.findOne({
       where: {
         id,
+      },
+    });
+    return result;
+  }
+
+  /** 查找id为[a,b,c....]的权限 */
+  async findAllByInId(ids: number[]) {
+    const result = await roleModel.findAll({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
       },
     });
     return result;
@@ -89,7 +114,43 @@ class RoleService {
   }
 
   /** 修改角色 */
-  async update({ id, p_id, role_name, role_description }: IRole) {
+  async update({ id, p_id, role_name, role_value, type, priority }: IRole) {
+    const result = await roleModel.update(
+      {
+        p_id,
+        role_name,
+        role_value,
+        type,
+        priority,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+    return result;
+  }
+
+  /** 修改角色 */
+  async updateMany(ids: number[], p_id: number) {
+    const result = await roleModel.update(
+      {
+        p_id,
+      },
+      {
+        where: {
+          id: {
+            [Op.in]: ids,
+          },
+        },
+      }
+    );
+    return result;
+  }
+
+  /** 修改角色 */
+  async update1({ id, p_id, role_name, role_description }: IRole) {
     if (id === p_id) throw new Error(`id不能等于p_id!`);
     if (p_id === 0) {
       const result = await roleModel.update(
@@ -131,22 +192,25 @@ class RoleService {
   }
 
   /** 创建角色 */
-  async create({ p_id, role_name, role_description }: IRole) {
+  async create({ p_id, role_name, role_value, type, priority }: IRole) {
     const result = await roleModel.create({
       p_id,
       role_name,
-      role_description,
+      role_value,
+      type,
+      priority,
     });
     return result;
   }
 
   /** 删除角色 */
-  async delete(id: number) {
+  async delete(ids: number[]) {
     const result = await roleModel.destroy({
       where: {
-        id,
+        id: {
+          [Op.in]: ids,
+        },
       },
-      individualHooks: true,
     });
     return result;
   }

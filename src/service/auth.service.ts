@@ -200,7 +200,6 @@ class AuthService {
           [Op.or]: ids,
         },
       },
-      // individualHooks: true,
     });
     return result;
   }

@@ -40,12 +40,15 @@ class RoleController {
     await next();
   }
 
-  // 获取树型角色
-  async getTreeList(ctx: ParameterizedContext, next) {
+  // 获取所有角色（树型）
+  async getTreeRole(ctx: ParameterizedContext, next) {
     try {
-      const { id = 0 } = ctx.request.query;
+      const { id = '0' } = ctx.request.query;
+      if (Number.isNaN(+id)) {
+        throw new Error('id格式不对');
+      }
       const { rows } = await roleService.getAllList();
-      const data = arrayToTree({
+      const result = arrayToTree({
         originArr: rows,
         originPid: +id,
         originIdKey: 'id',
@@ -54,7 +57,30 @@ class RoleController {
         // resIdKey: 'id',
         // resPidKey: 'pid',
       });
-      successHandler({ ctx, data });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  }
+
+  // 获取除了父级以外的所有角色（树型）
+  async getTreeChildRole(ctx: ParameterizedContext, next) {
+    try {
+      // id是指根节点的id，不是根节点的p_id(因为根节点的p_id是null，其他节点的p_id是也可能是null)
+      const { rows } = await roleService.getPidNotNullRole();
+      const result = arrayToTree({
+        originArr: rows,
+        // @ts-ignore
+        originPid: 1,
+        originIdKey: 'id',
+        originPidKey: 'p_id',
+        resChildrenKey: 'children',
+        // resIdKey: 'id',
+        // resPidKey: 'pid',
+      });
+      successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;
@@ -84,7 +110,26 @@ class RoleController {
     await next();
   }
 
-  // 获取某个角色的权限
+  getUserAllRole = async (ctx: ParameterizedContext, next) => {
+    try {
+      const user_id = +ctx.params.user_id;
+      const result = await roleService.getMyRole(user_id);
+      const role = [];
+      result.forEach((v) => {
+        role.push(this.commonGetAllChildRole(v.id));
+      });
+      // 这是个二维数组
+      const roleRes = await Promise.all(role);
+      // 将二维数组拍平
+      const roleResFlat = roleRes.flat();
+      successHandler({ ctx, data: [...result, ...roleResFlat] });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
+
+  // 获取某个角色的权限（只找一层）
   async getRoleAuth(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
@@ -96,11 +141,11 @@ class RoleController {
     await next();
   }
 
-  // 获取我的角色
-  async getMyRole(ctx: ParameterizedContext, next) {
+  // 获取某个角色的权限（递归找所有）
+  async getAllRoleAuth(ctx: ParameterizedContext, next) {
     try {
-      const { userInfo } = await authJwt(ctx);
-      const result = await roleService.getMyRole(userInfo.id);
+      const id = +ctx.params.id;
+      const result = await roleService.getRoleAuth(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -108,13 +153,48 @@ class RoleController {
     await next();
   }
 
+  // 获取我的角色（只找一层）
+  getMyRole = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { userInfo } = await authJwt(ctx);
+      const result = await roleService.getMyRole(userInfo.id);
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
+  // 获取我的角色（递归找所有）
+  getMyAllRole = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { userInfo } = await authJwt(ctx);
+      const result = await roleService.getMyRole(userInfo.id);
+      const role = [];
+      result.forEach((v) => {
+        role.push(this.commonGetAllChildRole(v.id));
+      });
+      // 这是个二维数组
+      const roleRes = await Promise.all(role);
+      // 将二维数组拍平
+      // const roleResFlat = roleRes.reduce((a, b) => a.concat(b), []);
+      const roleResFlat = roleRes.flat();
+      successHandler({ ctx, data: [...result, ...roleResFlat] });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  };
+
   async commonGetAllChildRole(id) {
     const allRole = [];
     const queue = [];
     // eslint-disable-next-line no-shadow
     const getChildRole = async (id: number) => {
       const c: any = await roleService.findAllChildren(id);
-      allRole.push(...c);
+      if (c.length > 0) allRole.push(...c);
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
         queue.push(getChildRole(item.id));
@@ -184,7 +264,54 @@ class RoleController {
   async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
-      const { p_id, role_name, role_description, role_auths }: IRole =
+      const { p_id, role_name, role_value, type, priority }: IRole =
+        ctx.request.body;
+      if (id === 1 && p_id !== 0) {
+        throw new Error(`不能修改根角色的p_id哦!`);
+      }
+      if (id === p_id) {
+        throw new Error(`父角色不能等于子角色!`);
+      }
+      if (id === 1) {
+        await roleService.update({
+          id,
+          p_id,
+          role_name,
+          role_value,
+          type,
+          priority,
+        });
+      } else {
+        const role: any = await roleService.find(id);
+        if (!role) {
+          throw new Error(`不存在id为${id}的角色!`);
+        }
+        const c_role: any = await roleService.find(p_id);
+        if (id !== 1 && c_role.p_id === id) {
+          throw new Error(`不能将自己的子角色作为父角色!`);
+        }
+        await roleService.update({
+          id,
+          p_id,
+          role_name,
+          role_value,
+          type,
+          priority,
+        });
+      }
+
+      successHandler({ ctx });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+      return;
+    }
+    await next();
+  }
+
+  async update1(ctx: ParameterizedContext, next) {
+    try {
+      const id = +ctx.params.id;
+      const { p_id, role_name, role_value, role_auths }: IRole =
         ctx.request.body;
       if (id === 1 && p_id !== 0) {
         throw new Error(`不能修改根角色的p_id哦!`);
@@ -212,7 +339,7 @@ class RoleController {
         id,
         p_id,
         role_name,
-        role_description,
+        role_value,
       });
       const role: any = await roleService.find(id);
       await role.setAuths(role_auths);
@@ -226,21 +353,20 @@ class RoleController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const { p_id, role_name, role_description, role_auths }: IRole =
-        ctx.request.body;
-      if (p_id === 0) {
-        throw new Error(`不能新增根角色哦!`);
-      }
-      const isExist = await roleService.isExist([p_id]);
-      if (!isExist) {
-        throw new Error(`不存在id为${p_id}的角色!`);
-      }
-      const role: any = await roleService.create({
+      const {
         p_id,
         role_name,
-        role_description,
+        role_value,
+        type = 2,
+        priority = 1,
+      }: IRole = ctx.request.body;
+      await roleService.create({
+        p_id,
+        role_name,
+        role_value,
+        type,
+        priority,
       });
-      await role.setAuths(role_auths);
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -248,25 +374,53 @@ class RoleController {
     await next();
   }
 
-  async delete(ctx: ParameterizedContext, next) {
+  async setAddChildRoles(ctx: ParameterizedContext, next) {
     try {
-      const id = +ctx.params.id;
-      const role: any = await roleService.find(id);
-      if (role.p_id === 0) {
-        throw new Error(`不能删除根角色哦!`);
+      const { id, c_roles }: IRole = ctx.request.body;
+      if (c_roles.includes(id)) {
+        throw new Error(`父级角色不能在子角色里面!`);
       }
-      if (!role) {
-        throw new Error(`不存在id为${id}的角色!`);
+      const isExist = await roleService.isExist(c_roles);
+      if (!isExist) {
+        throw new Error(`${c_roles}中存在不在的角色!`);
       }
-      const auths = await role.getAuths();
-      await role.removeAuths(auths);
-      await roleService.delete(id);
+      const result1: any = await roleService.findAllByInId(c_roles);
+      const result2: number[] = result1.map((v) => v.p_id);
+      const isUnique = arrUnique(result2).length === 1;
+      if (!isUnique) {
+        throw new Error(`${c_roles}不是同一个父级角色!`);
+      }
+      await roleService.updateMany(c_roles, id);
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
+
+  delete = async (ctx: ParameterizedContext, next) => {
+    try {
+      const id = +ctx.params.id;
+      if (id === 1) {
+        throw new Error(`不能删除根角色哦!`);
+      }
+      const role: any = await roleService.find(id);
+      if (!role) {
+        throw new Error(`不存在id为${id}的角色!`);
+      }
+      const auths = await role.getAuths();
+      await role.removeAuths(auths);
+      const result = await this.commonGetAllChildRole(id);
+      await roleService.delete([id, ...result.map((v) => v.id)]);
+      successHandler({
+        ctx,
+        message: `删除成功，且删除了${result.length}个关联角色`,
+      });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
 }
 
 export default new RoleController();

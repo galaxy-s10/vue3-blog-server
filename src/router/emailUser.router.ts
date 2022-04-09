@@ -6,22 +6,30 @@ import { verifyProp } from '@/middleware/emailUser.middleware';
 const emailRouter = new Router({ prefix: '/email_user' });
 
 // 查找邮箱
-emailRouter.get('/find', emailController.find);
+emailRouter.get('/find', emailController.find); // verifyProp其实只会对body参数做校验，这里是get请求，因此就不判断了
 
 // 发送邮箱登录验证码
-emailRouter.post('/send_login_code', emailController.sendLoginCode);
+emailRouter.post('/send_login_code', verifyProp, emailController.sendLoginCode);
 
 // 邮箱登录
 emailRouter.post('/login', verifyProp, emailController.login);
 
 // 发送邮箱注册验证码
-emailRouter.post('/send_register_code', emailController.sendRegisterCode);
+emailRouter.post(
+  '/send_register_code',
+  verifyProp,
+  emailController.sendRegisterCode
+);
 
 // 邮箱注册
-emailRouter.post('/register', emailController.register);
+emailRouter.post('/register', verifyProp, emailController.register);
 
 // 发送绑定邮箱验证码
-emailRouter.post('/send_bind_code', emailController.sendBindEmailCode);
+emailRouter.post(
+  '/send_bind_code',
+  verifyProp,
+  emailController.sendBindEmailCode
+);
 
 // 发送取消绑定邮箱验证码
 emailRouter.post(

@@ -7,6 +7,8 @@ import etag from 'koa-etag';
 import staticService from 'koa-static';
 
 import aliasOk from './app/alias';
+import { chalkINFO } from './app/chalkTip';
+import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from './app/constant';
 import errorHandler from './app/handler/error-handle';
 import { connectDb } from './config/db';
 import { connectRedis } from './config/redis';
@@ -20,7 +22,6 @@ const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
 
-const port = 3200;
 app.use(conditional());
 app.use(etag());
 
@@ -58,19 +59,22 @@ app.use(verifyMiddleware); // 注意顺序，需要在所有路由加载前进�
 // @ts-ignore
 app.useRoutes = useRoutes;
 
-connectDb()
-  .then(() => {
-    initDb(3);
-    // @ts-ignore
-    app.useRoutes();
-    console.log(chalkSUCCESS('所有路由加载完成!'));
-  })
-  .catch(() => {});
-
-connectRedis();
-
 app.on('error', errorHandler); // 全局错误处理
 
-app.listen(port, () => {
-  console.log(chalkSUCCESS(`监听${port}端口成功!`));
+const port = +PROJECT_PORT;
+
+app.listen(PROJECT_PORT, () => {
+  console.log(chalkINFO(`当前监听的端口: ${port}`));
+  console.log(chalkINFO(`当前的项目名称: ${PROJECT_NAME}`));
+  console.log(chalkINFO(`当前的项目环境: ${PROJECT_ENV}`));
+  connectDb()
+    .then(() => {
+      initDb(3);
+      // @ts-ignore
+      app.useRoutes();
+      console.log(chalkSUCCESS('所有路由加载完成!'));
+    })
+    .catch(() => {});
+
+  connectRedis();
 });

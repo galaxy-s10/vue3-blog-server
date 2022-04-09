@@ -3,6 +3,7 @@ import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
+import { PROJECT_ENV } from '@/app/constant';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import qiniuController from '@/utils/qiniu';
 
@@ -129,12 +130,12 @@ const rule = new schedule.RecurrenceRule();
 rule.hour = [0, 12];
 rule.minute = 0;
 export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
-  if (process.env.REACT_BLOG_SERVER_ENV === 'development') {
-    console.log(chalkWRAN('本地开发模式，不执行定时任务'));
-  } else {
+  if (PROJECT_ENV === 'prod') {
     console.log(
       chalkINFO(`执行dbJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`)
     );
     conner();
+  } else {
+    console.log(chalkWRAN('非生产环境，不执行定时任务'));
   }
 });
