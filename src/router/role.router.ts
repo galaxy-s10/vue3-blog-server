@@ -20,6 +20,9 @@ roleRouter.get('/get_tree_child_role', roleController.getTreeChildRole);
 // 给某角色设置多一类角色
 roleRouter.put('/set_add_child_role', roleController.setAddChildRoles);
 
+// 批量删除子角色
+roleRouter.delete('/delete_child_roles', roleController.deleteChildRoles);
+
 // 创建角色
 roleRouter.post('/create', verifyProp, roleController.create);
 

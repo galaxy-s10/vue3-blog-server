@@ -8,7 +8,7 @@ import articleService from '@/service/article.service';
 import commentService from '@/service/comment.service';
 import positionService from '@/service/position.service';
 import userService from '@/service/user.service';
-import { arrUnique } from '@/utils';
+import { arrayUnique } from '@/utils';
 
 class CommentController {
   // 评论列表
@@ -133,7 +133,7 @@ class CommentController {
       if (!articleIsExist) {
         throw new Error(`不存在id为${article_id}的文章!`);
       }
-      const commentIdArr = arrUnique(
+      const commentIdArr = arrayUnique(
         [parent_comment_id, reply_comment_id].filter((v) => v !== -1)
       );
       const commentIsExist =

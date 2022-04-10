@@ -16,9 +16,15 @@ const authModel = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    auth_description: {
+    auth_value: {
       type: DataTypes.STRING(50),
       allowNull: false,
+    },
+    type: {
+      type: DataTypes.INTEGER, // 1：默认，2：自定义
+    },
+    priority: {
+      type: DataTypes.INTEGER,
     },
     p_id: {
       type: DataTypes.INTEGER,

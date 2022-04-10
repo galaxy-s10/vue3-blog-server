@@ -6,7 +6,7 @@ import successHandler from '@/app/handler/success-handle';
 import { IRole } from '@/interface';
 import authService from '@/service/auth.service';
 import roleService from '@/service/role.service';
-import { arrUnique, arrayToTree } from '@/utils';
+import { arrayUnique, arrayToTree, arrayGetDifference } from '@/utils';
 
 class RoleController {
   async getAllList(ctx: ParameterizedContext, next) {
@@ -319,7 +319,7 @@ class RoleController {
       if (id !== 1 && p_id === 0) {
         throw new Error(`不能给其他角色设置为根角色哦!`);
       }
-      const uniqueAuths = arrUnique(role_auths);
+      const uniqueAuths = arrayUnique(role_auths);
       const isExistAuth =
         uniqueAuths.length === 0
           ? true
@@ -386,7 +386,7 @@ class RoleController {
       }
       const result1: any = await roleService.findAllByInId(c_roles);
       const result2: number[] = result1.map((v) => v.p_id);
-      const isUnique = arrUnique(result2).length === 1;
+      const isUnique = arrayUnique(result2).length === 1;
       if (!isUnique) {
         throw new Error(`${c_roles}不是同一个父级角色!`);
       }
@@ -397,6 +397,38 @@ class RoleController {
     }
     await next();
   }
+
+  deleteChildRoles = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { id, c_roles }: IRole = ctx.request.body;
+      if (id === 1) {
+        throw new Error(`不能删除根角色哦!`);
+      }
+      const all_child_roles: any = await roleService.findByPid(id);
+      const all_child_roles_id = all_child_roles.map((v) => v.id);
+      const hasDiff = arrayGetDifference(c_roles, all_child_roles_id);
+      if (hasDiff.length) {
+        console.log(hasDiff, 222);
+        throw new Error(`[${c_roles}]中的角色父级id不是${id}!`);
+      }
+      const role = [];
+      all_child_roles.forEach((v) => {
+        role.push(this.commonGetAllChildRole(v.id));
+      });
+      // 这是个二维数组
+      const roleRes = await Promise.all(role);
+      // 将二维数组拍平
+      const roleResFlat = roleRes.flat();
+      await roleService.delete(c_roles);
+      successHandler({
+        ctx,
+        message: `删除成功，删除了${roleResFlat.length}个关联角色`,
+      });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
 
   delete = async (ctx: ParameterizedContext, next) => {
     try {

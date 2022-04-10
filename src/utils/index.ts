@@ -165,8 +165,34 @@ export const emailContentTemplate = ({
 };
 
 /** 数组去重 */
-export const arrUnique = (arr: number[]) => {
+export const arrayUnique = (arr: number[]) => {
   return Array.from(new Set(arr));
+};
+
+/** 求并集 */
+export const arrayGetUnion = (a: any[], b: any[]) => {
+  return a.concat(
+    b.filter((v) => {
+      return a.indexOf(v) === -1;
+    })
+  );
+};
+
+/** 求交集 */
+export const arrayGetIntersection = (a: any[], b: any[]) => {
+  return a.filter((v) => {
+    return b.indexOf(v) > -1;
+  });
+};
+
+/**
+ * 求差集，a:[1,2,3]，b:[2,4,5]，结果：[1,3]
+ * a:[2,4,5]，b:[1,2,3]，结果：[4,5]
+ */
+export const arrayGetDifference = (a: any[], b: any[]) => {
+  return a.filter((v) => {
+    return b.indexOf(v) === -1;
+  });
 };
 
 /**
