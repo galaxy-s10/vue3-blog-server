@@ -7,15 +7,15 @@ import { handlePaging } from '@/utils';
 const { Op } = Sequelize;
 class ThemeService {
   /** 主题是否存在 */
-  async isExist(theme_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await themeModel.findAll({
       where: {
         id: {
-          [Op.or]: theme_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === theme_ids.length;
+    return res.length === ids.length;
   }
 
   /** 主题列表 */

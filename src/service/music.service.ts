@@ -11,7 +11,7 @@ class MusicService {
     const res = await musicModel.findAll({
       where: {
         id: {
-          [Op.or]: ids,
+          [Op.in]: ids,
         },
       },
     });

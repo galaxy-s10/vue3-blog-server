@@ -35,7 +35,7 @@ class UserService {
     const res = await qqUserModel.findAll({
       where: {
         id: {
-          [Op.or]: ids,
+          [Op.in]: ids,
         },
       },
     });

@@ -7,15 +7,15 @@ import { handlePaging } from '@/utils';
 const { Op } = Sequelize;
 class TypeService {
   /** 分类是否存在 */
-  async isExist(type_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await typeModel.findAll({
       where: {
         id: {
-          [Op.or]: type_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === type_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取分类列表 */

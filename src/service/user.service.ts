@@ -17,15 +17,15 @@ const { Op, where, literal } = Sequelize;
 
 class UserService {
   /** 用户是否存在 */
-  async isExist(user_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await userModel.count({
       where: {
         id: {
-          [Op.or]: user_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res === user_ids.length;
+    return res === ids.length;
   }
 
   async login(id: number, password: string) {

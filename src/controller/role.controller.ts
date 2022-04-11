@@ -404,25 +404,39 @@ class RoleController {
       if (id === 1) {
         throw new Error(`不能删除根角色哦!`);
       }
+      if (id === undefined) {
+        throw new Error(`请传入id!`);
+      }
+      if (!c_roles || !c_roles.length) {
+        throw new Error(`请传入要删除的子角色!`);
+      }
+      const isExist = await roleService.isExist([id]);
+      if (!isExist) {
+        throw new Error(`不存在id为${id}的角色!`);
+      }
       const all_child_roles: any = await roleService.findByPid(id);
       const all_child_roles_id = all_child_roles.map((v) => v.id);
       const hasDiff = arrayGetDifference(c_roles, all_child_roles_id);
       if (hasDiff.length) {
-        console.log(hasDiff, 222);
         throw new Error(`[${c_roles}]中的角色父级id不是${id}!`);
       }
-      const role = [];
+      const queue = [];
       all_child_roles.forEach((v) => {
-        role.push(this.commonGetAllChildRole(v.id));
+        queue.push(this.commonGetAllChildRole(v.id));
       });
       // 这是个二维数组
-      const roleRes = await Promise.all(role);
+      const roleRes = await Promise.all(queue);
       // 将二维数组拍平
       const roleResFlat = roleRes.flat();
-      await roleService.delete(c_roles);
+      console.log([...roleResFlat.map((v) => v.id), ...all_child_roles_id]);
+      await roleService.delete([
+        // ...roleResFlat.map((v) => v.id),
+        // ...all_child_roles_id,
+      ]);
       successHandler({
         ctx,
-        message: `删除成功，删除了${roleResFlat.length}个关联角色`,
+        data: { roleRes, all_child_roles },
+        message: `删除成功，删除了${all_child_roles_id.length}个子角色和${roleResFlat.length}个关联角色`,
       });
     } catch (error) {
       emitError({ ctx, code: 400, error });

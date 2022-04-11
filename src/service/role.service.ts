@@ -8,15 +8,15 @@ import { handlePaging } from '@/utils';
 const { Op } = Sequelize;
 class RoleService {
   /** 角色是否存在 */
-  async isExist(role_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await roleModel.findAll({
       where: {
         id: {
-          [Op.in]: role_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === role_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取角色列表(分页) */
@@ -208,7 +208,7 @@ class RoleService {
     const result = await roleModel.destroy({
       where: {
         id: {
-          [Op.in]: ids,
+          [Op.in]: ids, // [Op.in]的话，ids是[]，就一个也不会删。如果是[Op.or]，ids是[]，就会删除所有。
         },
       },
     });

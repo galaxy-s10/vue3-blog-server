@@ -13,15 +13,15 @@ const { fn, Op, col, literal } = Sequelize;
 
 class ArticleService {
   /** 文章是否存在 */
-  async isExist(article_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await articleModel.findAll({
       where: {
         id: {
-          [Op.or]: article_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === article_ids.length;
+    return res.length === ids.length;
   }
 
   /** 查找文章 */

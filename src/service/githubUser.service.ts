@@ -16,7 +16,7 @@ class UserService {
     const res = await githubUserModel.findAll({
       where: {
         github_id: {
-          [Op.or]: github_ids,
+          [Op.in]: github_ids,
         },
       },
     });

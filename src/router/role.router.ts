@@ -21,7 +21,11 @@ roleRouter.get('/get_tree_child_role', roleController.getTreeChildRole);
 roleRouter.put('/set_add_child_role', roleController.setAddChildRoles);
 
 // 批量删除子角色
-roleRouter.delete('/delete_child_roles', roleController.deleteChildRoles);
+roleRouter.delete(
+  '/delete_child_roles',
+  verifyProp,
+  roleController.deleteChildRoles
+);
 
 // 创建角色
 roleRouter.post('/create', verifyProp, roleController.create);

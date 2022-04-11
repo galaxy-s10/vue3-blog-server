@@ -11,15 +11,15 @@ const { Op } = Sequelize;
 
 class StarService {
   /** star是否存在 */
-  async isExist(star_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await starModel.findAll({
       where: {
         id: {
-          [Op.or]: star_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === star_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取star列表 */

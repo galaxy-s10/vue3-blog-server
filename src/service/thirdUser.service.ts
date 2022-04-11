@@ -12,7 +12,7 @@ class TagService {
     const res = await thirdUserModel.findAll({
       where: {
         id: {
-          [Op.or]: ids,
+          [Op.in]: ids,
         },
       },
     });

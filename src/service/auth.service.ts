@@ -10,15 +10,15 @@ import { handlePaging } from '@/utils';
 const { Op } = Sequelize;
 class AuthService {
   /** 权限是否存在 */
-  async isExist(auth_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await authModel.count({
       where: {
         id: {
-          [Op.or]: auth_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res === auth_ids.length;
+    return res === ids.length;
   }
 
   /** 获取权限列表(分页) */
@@ -191,13 +191,10 @@ class AuthService {
 
   /** 删除权限 */
   async delete(ids: number[]) {
-    if (ids.length === 0) {
-      throw new Error(`危险操作-删除所有权限!`);
-    }
     const result = await authModel.destroy({
       where: {
         id: {
-          [Op.or]: ids,
+          [Op.in]: ids, // [Op.in]的话，ids是[]，结果会一个都查不到（即一个也不会删）。如果是[Op.or]，ids是[]，就会查到所有（即会删除所有）。
         },
       },
     });

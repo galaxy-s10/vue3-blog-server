@@ -8,15 +8,15 @@ const { Op } = Sequelize;
 
 class LogService {
   /** 日志是否存在 */
-  async isExist(log_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await logModel.findAll({
       where: {
         id: {
-          [Op.or]: log_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === log_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取日志列表 */

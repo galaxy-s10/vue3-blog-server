@@ -1,11 +1,8 @@
 import Sequelize from 'sequelize';
 
 import { THIRD_PLATFORM } from '@/app/constant';
-import sequelize from '@/config/db';
 import { IEmail } from '@/interface';
-import commentModel from '@/model/comment.model';
 import emailModel from '@/model/emailUser.model';
-import thirdUserModel from '@/model/thirdUser.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
@@ -28,7 +25,7 @@ class EmailService {
     const res = await emailModel.count({
       where: {
         id: {
-          [Op.or]: [...new Set(ids)],
+          [Op.in]: ids,
         },
       },
     });

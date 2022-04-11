@@ -8,15 +8,15 @@ const { Op } = Sequelize;
 
 class LinkService {
   /** 友链是否存在 */
-  async isExist(link_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await linkModel.findAll({
       where: {
         id: {
-          [Op.or]: link_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === link_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取友链列表 */

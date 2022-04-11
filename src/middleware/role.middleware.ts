@@ -5,9 +5,9 @@ import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
   id: Joi.number(),
-  p_id: [Joi.number(), null],
-  role_name: Joi.string().min(2).max(30).required(),
-  role_value: Joi.string().min(3).max(30).required(),
+  p_id: Joi.number(),
+  role_name: Joi.string().min(2).max(30),
+  role_value: Joi.string().min(3).max(30),
   type: Joi.number(),
   priority: Joi.number(),
   role_auths: Joi.array().items(Joi.number()),

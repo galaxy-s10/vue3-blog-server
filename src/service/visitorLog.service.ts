@@ -7,15 +7,15 @@ const { fn, Op, col, literal } = Sequelize;
 
 class VisitorLogService {
   /** 访客日志是否存在 */
-  async isExist(user_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await visitorLogModel.findAll({
       where: {
         id: {
-          [Op.or]: user_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === user_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取当天访客访问数据 */

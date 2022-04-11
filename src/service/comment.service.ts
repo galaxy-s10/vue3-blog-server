@@ -13,15 +13,15 @@ const { Op, fn, col, literal } = Sequelize;
 
 class CommentService {
   /** 评论是否存在 */
-  async isExist(comment_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await commentModel.count({
       where: {
         id: {
-          [Op.or]: comment_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res === comment_ids.length;
+    return res === ids.length;
   }
 
   /** 获取评论列表 */
@@ -461,13 +461,10 @@ class CommentService {
 
   /** 删除多个评论 */
   async deleteMany(ids: number[]) {
-    if (ids.length === 0) {
-      throw new Error(`危险操作-删除所有评论!`);
-    }
     const result = await commentModel.destroy({
       where: {
         id: {
-          [Op.or]: ids,
+          [Op.in]: ids,
         },
       },
     });

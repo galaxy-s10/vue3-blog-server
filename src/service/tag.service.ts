@@ -12,15 +12,15 @@ const { Op, fn, col, literal } = Sequelize;
 
 class TagService {
   /** 标签是否存在 */
-  async isExist(tag_ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await tagModel.findAll({
       where: {
         id: {
-          [Op.or]: tag_ids,
+          [Op.in]: ids,
         },
       },
     });
-    return res.length === tag_ids.length;
+    return res.length === ids.length;
   }
 
   /** 获取标签列表 */
