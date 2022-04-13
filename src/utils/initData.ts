@@ -1,5 +1,7 @@
+import { IAuth } from '@/interface';
+
 const initAuth = () => {
-  const auth = [
+  const deafultAuth: IAuth[] = [
     {
       auth_name: '文章管理',
       auth_value: 'ARTICLE_MANAGE',
@@ -69,24 +71,23 @@ const initAuth = () => {
       auth_value: 'TASK_MANAGE',
     },
   ];
-  let id = 1;
   const authResult = [];
-  auth.forEach((v: any) => {
+
+  let id = 1;
+
+  deafultAuth.forEach((v) => {
+    const obj: IAuth = { ...v };
     id += 1;
-    // eslint-disable-next-line
-    v.id = id;
-    // eslint-disable-next-line
-    v.p_id = 1;
-    // eslint-disable-next-line
-    v.type = 1;
-    // eslint-disable-next-line
-    v.priority = 99;
-    authResult.push(v);
+    obj.id = id;
+    obj.p_id = 1;
+    obj.type = 1;
+    obj.priority = 99;
+    authResult.push(obj);
   });
 
   authResult.unshift({
-    auth_name: 'ALL_AUTH',
-    auth_value: '全部权限',
+    auth_name: '全部权限',
+    auth_value: 'ALL_AUTH',
     id: 1,
     p_id: 0,
     type: 1,

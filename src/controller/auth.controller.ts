@@ -1,13 +1,30 @@
 import { ParameterizedContext } from 'koa';
 
-import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';
-import { arrayToTree } from '@/utils';
+import { arrayGetDifference, arrayToTree, arrayUnique } from '@/utils';
 
 class AuthController {
+  async commonGetAllChildAuth(id) {
+    const allAuth = [];
+    const queue = [];
+    // eslint-disable-next-line no-shadow
+    const getChildAuth = async (id: number) => {
+      const c: any = await authService.findAllChildren(id);
+      if (c.length > 0) allAuth.push(...c);
+      for (let i = 0; i < c.length; i += 1) {
+        const item = c[i];
+        queue.push(getChildAuth(item.id));
+      }
+    };
+    await getChildAuth(id);
+    await Promise.all(queue);
+    return allAuth;
+  }
+
+  // 权限列表（分页）
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
@@ -29,6 +46,7 @@ class AuthController {
     await next();
   }
 
+  // 权限列表（不分页）
   async getAllList(ctx: ParameterizedContext, next) {
     try {
       const result = await authService.getAllList();
@@ -39,49 +57,54 @@ class AuthController {
     await next();
   }
 
-  async getUserAuth(ctx: ParameterizedContext, next) {
+  // 获取所有权限（树型）
+  async getTreeAuth(ctx: ParameterizedContext, next) {
     try {
-      const id = +ctx.params.id;
-      const result: any = await authService.getMyAuth(id);
-      const auths = [];
-      const res = result.get();
-      res.roles.forEach((item) => {
-        auths.push(...item.auths);
+      const { id = '0' } = ctx.request.query;
+      if (Number.isNaN(+id)) {
+        throw new Error('id格式不对');
+      }
+      const { rows } = await authService.getAllList();
+      const result = arrayToTree({
+        originArr: rows,
+        originPid: +id,
+        originIdKey: 'id',
+        originPidKey: 'p_id',
+        resChildrenKey: 'children',
+        // resIdKey: 'id',
+        // resPidKey: 'pid',
       });
-      res.auths = auths;
-      delete res.roles;
-
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
   }
 
-  async commonGetMyAuth(ctx: ParameterizedContext) {
-    const { userInfo } = await authJwt(ctx);
-    const result: any = await authService.getMyAuth(userInfo.id);
-    // const auths = [];
-    // const res = result.get();
-    // res.roles.forEach((item) => {
-    //   auths.push(...item.auths);
-    // });
-    // res.auths = auths;
-    // delete res.roles;
-    return result;
-  }
-
-  // 获取我的所有权限
-  getMyAuth = async (ctx: ParameterizedContext, next) => {
+  // 获取除了父级以外的所有权限（树型）
+  async getTreeChildAuth(ctx: ParameterizedContext, next) {
     try {
-      const result = await this.commonGetMyAuth(ctx);
+      // id是指根节点的id，不是根节点的p_id(因为根节点的p_id是null，其他节点的p_id是也可能是null)
+      const { rows } = await authService.getPidNotNullAuth();
+      const result = arrayToTree({
+        originArr: rows,
+        originPid: 1,
+        originIdKey: 'id',
+        originPidKey: 'p_id',
+        resChildrenKey: 'children',
+        // resIdKey: 'id',
+        // resPidKey: 'pid',
+      });
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
+      return;
     }
     await next();
-  };
+  }
 
+  // 查找权限
   async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
@@ -93,85 +116,7 @@ class AuthController {
     await next();
   }
 
-  async update(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
-      if (id === 1 && p_id !== 0) {
-        throw new Error(`不能修改根权限的p_id哦!`);
-      }
-      if (id !== 1 && p_id === 0) {
-        throw new Error(`不能给其他权限设置为根权限哦!`);
-      }
-      const ids = [p_id, id].filter((v) => v !== 0);
-      if (!ids.length) {
-        throw new Error(`${[p_id, id]}中存在不存在的角色!`);
-      }
-      const isExistAuth = p_id === 0 ? true : await authService.isExist([id]);
-      if (!isExistAuth) {
-        throw new Error(`不存在id为${id}的角色!`);
-      }
-      await authService.update({
-        id,
-        p_id,
-        auth_name,
-        auth_description,
-      });
-      successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  }
-
-  async create(ctx: ParameterizedContext, next) {
-    try {
-      const { p_id, auth_name, auth_description }: IAuth = ctx.request.body;
-      const isExist = p_id === 0 ? true : await authService.isExist([p_id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${p_id}的权限!` });
-        return;
-      }
-      const result = await authService.create({
-        p_id,
-        auth_name,
-        auth_description,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  }
-
-  /** 获取该权限的所有子权限(树型)，一层层的递归找到所有子孙节点 */
-  async commonGetAllChildAuth(id) {
-    const allAuth = [];
-    // eslint-disable-next-line no-shadow
-    // const getChildAuth = async (id: number) => {
-    //   const c: any = await authService.findAllChildren(id);
-    //   allAuth.push(...c);
-    //   for (let i = 0; i < c.length; i += 1) {
-    //     const item = c[i];
-    //     await getChildAuth(item.id);
-    //   }
-    // };
-    const queue = [];
-    // eslint-disable-next-line no-shadow
-    const getChildAuth = async (id: number) => {
-      const c: any = await authService.findAllChildren(id);
-      allAuth.push(...c);
-      for (let i = 0; i < c.length; i += 1) {
-        const item = c[i];
-        queue.push(getChildAuth(item.id));
-      }
-    };
-    await getChildAuth(id);
-    await Promise.all(queue);
-    return allAuth;
-  }
-
-  /** 获取该权限的直接子权限（只找一层） */
+  // 获取该权限的子权限（只找一层）
   getChildAuth = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
@@ -188,14 +133,13 @@ class AuthController {
     await next();
   };
 
-  /** 获取该权限的直接子权限（递归查找所有） */
+  // 获取该权限的子权限（递归查找所有）
   getAllChildAuth = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
-        return;
+        throw new Error(`不存在id为${id}的权限!`);
       }
       const result = await this.commonGetAllChildAuth(id);
       successHandler({ ctx, data: result });
@@ -205,21 +149,75 @@ class AuthController {
     await next();
   };
 
-  // 获取树型角色
-  async getTreeList(ctx: ParameterizedContext, next) {
+  // 创建权限
+  async create(ctx: ParameterizedContext, next) {
     try {
-      const { id = 0 } = ctx.request.query;
-      const { rows } = await authService.getAllList();
-      const data = arrayToTree({
-        originArr: rows,
-        originPid: +id,
-        originIdKey: 'id',
-        originPidKey: 'p_id',
-        resChildrenKey: 'children',
-        // resIdKey: 'id',
-        // resPidKey: 'pid',
+      const {
+        p_id,
+        auth_name,
+        auth_value,
+        type = 2,
+        priority = 1,
+      }: IAuth = ctx.request.body;
+      const isExist = p_id === 0 ? false : await authService.isExist([p_id]);
+      if (!isExist) {
+        throw new Error(`不存在id为${p_id}的权限!`);
+      }
+      await authService.create({
+        p_id,
+        auth_name,
+        auth_value,
+        type,
+        priority,
       });
-      successHandler({ ctx, data });
+      successHandler({ ctx });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  // 更新权限
+  async update(ctx: ParameterizedContext, next) {
+    try {
+      const id = +ctx.params.id;
+      const { p_id, auth_name, auth_value, type, priority }: IAuth =
+        ctx.request.body;
+      if (id === 1 && p_id !== 0) {
+        throw new Error(`不能修改根权限的p_id哦!`);
+      }
+      if (id === p_id) {
+        throw new Error(`父权限不能等于子权限!`);
+      }
+      if (id === 1) {
+        await authService.update({
+          id,
+          p_id,
+          auth_name,
+          auth_value,
+          type,
+          priority,
+        });
+      } else {
+        const isExist = await authService.isExist([id, p_id]);
+        if (!isExist) {
+          throw new Error(`${[id, p_id]}中存在不存在的权限!`);
+        }
+        const c_auth: any = await authService.find(p_id);
+        if (id !== 1 && c_auth.p_id === id) {
+          throw new Error(`不能将自己的子权限作为父权限!`);
+        }
+        await authService.update({
+          id,
+          p_id,
+          auth_name,
+          auth_value,
+          type,
+          priority,
+        });
+      }
+
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;
@@ -227,22 +225,89 @@ class AuthController {
     await next();
   }
 
-  // 递归删除
+  // 删除权限
   delete = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
-      const auth: any = await authService.find(id);
-      if (auth.p_id === 0) {
+      if (id === 1) {
         throw new Error(`不能删除根权限哦!`);
       }
+      const auth: any = await authService.find(id);
       if (!auth) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
-        return;
+        throw new Error(`不存在id为${id}的权限!`);
       }
-      const all_auth: any = await this.commonGetAllChildAuth(id);
-      const all_auth_ids = all_auth.map((item) => item.id);
-      await authService.delete([id, ...all_auth_ids]);
+      const result = await this.commonGetAllChildAuth(id);
+      await authService.delete([id, ...result.map((v) => v.id)]);
+      successHandler({
+        ctx,
+        message: `删除成功，且删除了${result.length}个关联权限`,
+      });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
+
+  // 批量新增子权限
+  batchAddChildAuths = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { id, c_auths }: IAuth = ctx.request.body;
+      if (c_auths.includes(id)) {
+        throw new Error(`父级权限不能在子权限里面!`);
+      }
+      const isExist = await authService.isExist(c_auths);
+      if (!isExist) {
+        throw new Error(`${c_auths}中存在不存在的权限!`);
+      }
+      const result1: any = await authService.findAllByInId(c_auths);
+      const result2: number[] = result1.map((v) => v.p_id);
+      const isUnique = arrayUnique(result2).length === 1;
+      if (!isUnique) {
+        throw new Error(`${c_auths}不是同一个父级权限!`);
+      }
+      await authService.updateMany(c_auths, id);
       successHandler({ ctx });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  };
+
+  // 批量删除子权限
+  batchDeleteChildAuths = async (ctx: ParameterizedContext, next) => {
+    try {
+      const { id, c_auths }: IAuth = ctx.request.body;
+
+      if (id === undefined) {
+        throw new Error(`请传入id!`);
+      }
+      if (!c_auths || !c_auths.length) {
+        throw new Error(`请传入要删除的子权限!`);
+      }
+      const isExist = await authService.isExist([id, ...c_auths]);
+      if (!isExist) {
+        throw new Error(`${[id, ...c_auths]}中存在不存在的权限!`);
+      }
+      const all_child_auths: any = await authService.findByPid(id);
+      const all_child_auths_id = all_child_auths.map((v) => v.id);
+      const hasDiff = arrayGetDifference(c_auths, all_child_auths_id);
+      if (hasDiff.length) {
+        throw new Error(`[${c_auths}]中的权限父级id不是${id}!`);
+      }
+      const queue = [];
+      c_auths.forEach((v) => {
+        queue.push(this.commonGetAllChildAuth(v));
+      });
+      // 这是个二维数组
+      const authRes = await Promise.all(queue);
+      // 将二维数组拍平
+      const authResFlat = authRes.flat();
+      console.log([...authResFlat.map((v) => v.id), ...c_auths]);
+      await authService.delete([...authResFlat.map((v) => v.id), ...c_auths]);
+      successHandler({
+        ctx,
+        message: `删除成功，删除了${c_auths.length}个子权限和${authResFlat.length}个关联权限`,
+      });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

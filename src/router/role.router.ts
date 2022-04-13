@@ -17,14 +17,18 @@ roleRouter.get('/get_tree_role', roleController.getTreeRole);
 // 获取除了父级以外的所有角色（树型）
 roleRouter.get('/get_tree_child_role', roleController.getTreeChildRole);
 
-// 给某角色设置多一类角色
-roleRouter.put('/set_add_child_role', roleController.setAddChildRoles);
-
 // 批量删除子角色
 roleRouter.delete(
-  '/delete_child_roles',
+  '/batch_delete_child_roles',
   verifyProp,
-  roleController.deleteChildRoles
+  roleController.batchDeleteChildRoles
+);
+
+// 批量新增子角色
+roleRouter.put(
+  '/batch_add_child_roles',
+  verifyProp,
+  roleController.batchAddChildRoles
 );
 
 // 创建角色

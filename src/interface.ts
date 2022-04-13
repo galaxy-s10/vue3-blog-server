@@ -191,12 +191,7 @@ export interface IComment {
   from_user?: IUser;
   stars?: any[];
 }
-export interface IAuth {
-  id?: number;
-  p_id: number;
-  auth_name: string;
-  auth_description: string;
-}
+
 export interface IStar {
   id?: number;
   article_id: number;
@@ -205,6 +200,15 @@ export interface IStar {
   from_user_id: number;
 }
 
+export interface IAuth {
+  id?: number;
+  p_id?: number;
+  auth_name?: string;
+  auth_value?: string;
+  type?: number;
+  priority?: number;
+  c_auths?: number[];
+}
 export interface IRole {
   id?: number;
   p_id: number;
