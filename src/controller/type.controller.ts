@@ -13,12 +13,16 @@ class TypeController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const result = await typeService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -58,6 +62,9 @@ class TypeController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const { name }: IType = ctx.request.body;
+      if (!name) {
+        throw new Error('请输入分类名称!');
+      }
       await typeService.create({ name });
       successHandler({ ctx });
     } catch (error) {

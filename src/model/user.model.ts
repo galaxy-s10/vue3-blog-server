@@ -68,7 +68,7 @@ const userModel = sequelize.define(
     avatar: {
       type: DataTypes.STRING(100),
     },
-    title: {
+    desc: {
       type: DataTypes.STRING(50),
       defaultValue: '这个人很懒，什么也没有留下',
     },

@@ -16,14 +16,11 @@ userRouter.get('/list', userController.list);
 // 账号密码登录
 userRouter.post('/login', verifyProp, userController.login);
 
-// 邮箱+验证码登录
-userRouter.post('/code_login', verifyProp, userController.codeLogin);
-
 // 获取用户信息
 userRouter.get('/get_user_info', userController.getUserInfo);
 
 // 用户注册
-userRouter.post('/register', userController.register);
+userRouter.post('/register', verifyProp, userController.register);
 
 // 创建用户（废弃）
 // userRouter.post('/create', userController.create);
@@ -32,7 +29,14 @@ userRouter.post('/register', userController.register);
 userRouter.get('/find/:id', userController.find);
 
 // 更新用户
-userRouter.put('/update/:id', userController.update);
+userRouter.put('/update/:id', verifyProp, userController.update);
+
+// 更新用户角色
+userRouter.put(
+  '/update_user_role/:id',
+  verifyProp,
+  userController.updateUserRole
+);
 
 // 删除用户
 userRouter.delete('/delete/:id', userController.delete);

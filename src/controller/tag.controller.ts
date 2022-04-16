@@ -13,12 +13,16 @@ class TagController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const result = await tagService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

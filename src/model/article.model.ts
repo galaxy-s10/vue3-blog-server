@@ -30,9 +30,12 @@ const articleModel = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:开启评论 2:关闭评论
     },
+    priority: {
+      type: DataTypes.INTEGER, // 权重
+    },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 2, // 1:审核通过 2:未审核
+      defaultValue: 2, // 1:已审核 2:未审核
     },
     head_img: {
       type: DataTypes.STRING(100),

@@ -1,9 +1,11 @@
 import Sequelize from 'sequelize';
 
+import { IVisitor, IList } from '@/interface';
 import visitorLogModel from '@/model/visitorLog.model';
 import { formateDate, handlePaging } from '@/utils';
 
-const { fn, Op, col, literal } = Sequelize;
+const { fn, Op, col } = Sequelize;
+interface ISearch extends IVisitor, IList {}
 
 class VisitorLogService {
   /** 访客日志是否存在 */
@@ -84,13 +86,43 @@ class VisitorLogService {
   }
 
   /** 获取访客日志列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          user_id: {
+            [Op.like]: `%${keyWord}%`,
+          },
+          ip: {
+            [Op.like]: `%${keyWord}%`,
+          },
+          ip_data: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await visitorLogModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
     return handlePaging(nowPage, pageSize, result);
   }

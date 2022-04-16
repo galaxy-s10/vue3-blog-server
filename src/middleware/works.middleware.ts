@@ -4,10 +4,11 @@ import { ParameterizedContext } from 'koa';
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
-  name: Joi.string().min(3).max(50).required(),
-  desc: Joi.string().min(3).max(50).required(),
-  url: Joi.string().min(5).max(80).required(),
-  bg_url: Joi.string().min(5).max(80).required(),
+  id: Joi.number(),
+  name: Joi.string().min(3).max(50),
+  desc: Joi.string().min(3).max(50),
+  url: Joi.string().min(5).max(80),
+  bg_url: Joi.string().min(5).max(80),
   priority: Joi.number(),
   status: [1, 2],
 });

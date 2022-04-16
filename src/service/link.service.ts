@@ -1,10 +1,12 @@
 import Sequelize from 'sequelize';
 
-import { ILink } from '@/interface';
+import { ILink, IList } from '@/interface';
 import linkModel from '@/model/link.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
+
+interface ISearch extends ILink, IList {}
 
 class LinkService {
   /** 友链是否存在 */
@@ -20,15 +22,50 @@ class LinkService {
   }
 
   /** 获取友链列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName, status }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    status,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (status) {
+      allWhere.status = +status;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          url: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          desc: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await linkModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
       where: {
-        status,
+        ...allWhere,
       },
     });
     return handlePaging(nowPage, pageSize, result);

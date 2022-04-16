@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { ITag } from '@/interface';
+import { ITag, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import starModel from '@/model/star.model';
@@ -8,7 +8,8 @@ import tagModel from '@/model/tag.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
-const { Op, fn, col, literal } = Sequelize;
+const { Op } = Sequelize;
+interface ISearch extends ITag, IList {}
 
 class TagService {
   /** 标签是否存在 */
@@ -24,52 +25,52 @@ class TagService {
   }
 
   /** 获取标签列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await tagModel.findAndCountAll({
       order: [[orderName, orderBy]],
-      limit,
-      offset,
       include: [
         {
           model: articleModel,
+          through: {
+            attributes: [],
+          },
           attributes: ['id'],
-          through: { attributes: [] },
         },
       ],
-      attributes: {
-        include: [],
+      limit,
+      offset,
+      where: {
+        ...allWhere,
       },
-      distinct: true,
     });
     result.rows.forEach((item) => {
       const v = item.get();
       v.article_total = v.articles.length;
       delete v.articles;
     });
-    // const count = await tagModel.count();
-    // const result = await tagModel.findAll({
-    //   order: [[orderName, orderBy]],
-    //   limit,
-    //   offset,
-    //   include: [
-    //     { model: articleModel, attributes: [], through: { attributes: [] } },
-    //   ],
-    //   attributes: {
-    //     include: [
-    //       [literal(`(select count(distinct articles.id))`), 'article_total'],
-    //     ],
-    //     // include: [
-    //     //   [
-    //     //     literal(`(select count(*) from article_tag where article_id = id)`),
-    //     //     'article_total',
-    //     //   ],
-    //     // ],
-    //   },
-    //   group: ['id'],
-    //   subQuery: false,
-    // });
     return handlePaging(nowPage, pageSize, result);
   }
 

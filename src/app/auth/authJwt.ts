@@ -24,34 +24,38 @@ const authJwt = (
         reject({ code: 401, message: '登录信息过期!' });
         return;
       }
-
-      // 防止修改密码后，原本的token还能用
-      const userResult: any = await userModel.findOne({
-        attributes: {
-          exclude: ['password'],
-        },
-        where: {
-          id: decode.userInfo.id,
-        },
-      });
-      if (!userResult) {
-        // 防止token是正确的，但是这个用户已经被删除了。
+      try {
+        // 防止修改密码后，原本的token还能用
+        const userResult: any = await userModel.findOne({
+          attributes: {
+            exclude: ['password'],
+          },
+          where: {
+            id: decode.userInfo.id,
+          },
+        });
+        if (!userResult) {
+          // 防止token是正确的，但是这个用户已经被删除了。
+          // eslint-disable-next-line prefer-promise-reject-errors
+          reject({ code: 401, message: '该用户不存在!' });
+          return;
+        }
+        if (userResult.token !== token) {
+          // 单点登录
+          // eslint-disable-next-line prefer-promise-reject-errors
+          reject({ code: 401, message: '登录信息过期!' });
+          return;
+        }
+        const userStatus = await getUserStatus(userResult.id);
+        if (userStatus.code !== 200) {
+          reject(userStatus);
+          return;
+        }
+        resolve({ code: 200, message: '验证token通过!', userInfo: userResult });
+      } catch (error) {
         // eslint-disable-next-line prefer-promise-reject-errors
-        reject({ code: 401, message: '该用户不存在!' });
-        return;
+        reject({ code: 400, error });
       }
-      if (userResult.token !== token) {
-        // 单点登录
-        // eslint-disable-next-line prefer-promise-reject-errors
-        reject({ code: 401, message: '登录信息过期!' });
-        return;
-      }
-      const userStatus = await getUserStatus(userResult.id);
-      if (userStatus.code !== 200) {
-        reject(userStatus);
-        return;
-      }
-      resolve({ code: 200, message: '验证token通过!', userInfo: userResult });
     });
   });
 };

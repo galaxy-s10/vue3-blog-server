@@ -29,7 +29,7 @@ const worksModel = sequelize.define(
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:审核通过 2:未审核
+      defaultValue: 1, // 1:已审核 2:未审核
     },
   },
   {

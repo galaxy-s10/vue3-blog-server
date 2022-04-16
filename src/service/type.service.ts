@@ -1,10 +1,12 @@
 import Sequelize from 'sequelize';
 
-import { IType } from '@/interface';
+import { IType, IList } from '@/interface';
 import typeModel from '@/model/type.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
+interface ISearch extends IType, IList {}
+
 class TypeService {
   /** 分类是否存在 */
   async isExist(ids: number[]) {
@@ -19,13 +21,37 @@ class TypeService {
   }
 
   /** 获取分类列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await typeModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
     return handlePaging(nowPage, pageSize, result);
   }

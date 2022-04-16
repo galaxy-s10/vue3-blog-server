@@ -247,7 +247,9 @@ class QqUserController {
           const token = signJwt({
             userInfo: {
               ...JSON.parse(JSON.stringify(createUserRes)),
+              github_users: undefined,
               qq_users: undefined,
+              email_users: undefined,
               password: undefined,
             },
             exp: 24,
@@ -294,7 +296,9 @@ class QqUserController {
           const token = signJwt({
             userInfo: {
               ...JSON.parse(JSON.stringify(userInfo)),
+              github_users: undefined,
               qq_users: undefined,
+              email_users: undefined,
               password: undefined,
             },
             exp: 24,
@@ -326,7 +330,9 @@ class QqUserController {
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
+            github_users: undefined,
             qq_users: undefined,
+            email_users: undefined,
           },
           exp: 24,
         });

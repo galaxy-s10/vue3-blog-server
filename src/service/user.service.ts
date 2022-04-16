@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { THIRD_PLATFORM } from '@/app/constant';
+import { THIRD_PLATFORM, PROJECT_ENV } from '@/app/constant';
 import { IUserList } from '@/controller/user.controller';
 import { IUser } from '@/interface';
 import articleModel from '@/model/article.model';
@@ -44,7 +44,7 @@ class UserService {
   /** 获取用户列表 */
   async getList({
     username,
-    title,
+    desc,
     nowPage,
     pageSize,
     orderBy,
@@ -73,10 +73,10 @@ class UserService {
         },
       });
     }
-    if (title) {
+    if (desc) {
       where2.push({
-        title: {
-          [Op.like]: `%${title}%`,
+        desc: {
+          [Op.like]: `%${desc}%`,
         },
       });
     }
@@ -228,9 +228,12 @@ class UserService {
     return result;
   }
 
-  /** 是否同名，区分大小写。同名则返回用户的信息,否则返回false */
+  /** 是否同名，区分大小写。同名则返回同名用户的信息,否则返回false */
   async isSameName(username: string) {
     const result = await userModel.findOne({
+      attributes: {
+        exclude: ['password', 'token'],
+      },
       where: {
         username: where(literal(`BINARY username`), username),
       },
@@ -239,17 +242,9 @@ class UserService {
   }
 
   /** 根据id修改用户 */
-  async update({
-    id,
-    username,
-    password,
-    title,
-    status,
-    avatar,
-    token,
-  }: IUser) {
+  async update({ id, username, desc, status, avatar, token }: IUser) {
     const result = await userModel.update(
-      { username, password, title, status, avatar, token },
+      { username, desc, status, avatar, token },
       { where: { id } }
     );
     return result;
@@ -259,7 +254,13 @@ class UserService {
   async create(props: IUser) {
     // @ts-ignore
     const result: any = await userModel.create(props);
-    result.setRoles([2]);
+    if (PROJECT_ENV === 'prod') {
+      // 生产环境注册用户权限就是SVIP用户
+      await result.setRoles([5]);
+    } else {
+      // 非生产环境注册用户权限就是SUPER_ADMIN管理员
+      await result.setRoles([2, 3]);
+    }
     return result;
   }
 

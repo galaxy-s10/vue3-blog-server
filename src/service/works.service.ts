@@ -1,10 +1,11 @@
 import Sequelize from 'sequelize';
 
-import { IWorks } from '@/interface';
+import { IWorks, IList } from '@/interface';
 import worksModel from '@/model/works.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
+interface ISearch extends IWorks, IList {}
 
 class WorksService {
   /** 作品是否存在 */
@@ -20,15 +21,50 @@ class WorksService {
   }
 
   /** 获取作品列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName, status }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    status,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (status) {
+      allWhere.status = +status;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          url: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          desc: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await worksModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
       where: {
-        status,
+        ...allWhere,
       },
     });
     return handlePaging(nowPage, pageSize, result);

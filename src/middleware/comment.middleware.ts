@@ -4,6 +4,7 @@ import { ParameterizedContext } from 'koa';
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
+  id: Joi.number(),
   article_id: Joi.number(),
   parent_comment_id: Joi.number(),
   reply_comment_id: Joi.number(),

@@ -1,9 +1,9 @@
 export interface ITheme {
   id?: number;
-  model: number;
-  key: string;
-  value: string;
-  lang: string;
+  model?: number;
+  key?: string;
+  value?: string;
+  lang?: string;
 }
 export interface IFrontend {
   id?: number;
@@ -35,8 +35,9 @@ export interface IUser {
   email?: string;
   status?: number;
   avatar?: string;
-  title?: string;
+  desc?: string;
   token?: string;
+  user_roles?: number[];
 }
 export interface IEmail {
   id?: number;
@@ -99,16 +100,16 @@ export interface IGithubUser {
 
 export interface IType {
   id?: number;
-  name: string;
+  name?: string;
 }
 
 export interface IMusic {
   id?: number;
-  name: string;
-  cover_pic: string;
-  author: string;
-  audio_url: string;
-  status: number;
+  name?: string;
+  cover_pic?: string;
+  author?: string;
+  audio_url?: string;
+  status?: number;
 }
 export interface IThirdUser {
   id?: number;
@@ -120,62 +121,62 @@ export interface IThirdUser {
 export interface ILink {
   id?: number;
   email?: string;
-  name: string;
-  avatar: string;
-  desc: string;
-  url: string;
+  name?: string;
+  avatar?: string;
+  desc?: string;
+  url?: string;
   status?: number;
 }
 export interface IWorks {
   id?: number;
-  name: string;
-  desc: string;
-  url: string;
-  bg_url: string;
-  priority: string;
-  status: number;
+  name?: string;
+  desc?: string;
+  url?: string;
+  bg_url?: string;
+  priority?: string;
+  status?: number;
 }
 
 export interface ITag {
   id?: number;
-  name: string;
-  color: string;
+  name?: string;
+  color?: string;
 }
 
 export interface ILog {
   id?: number;
-  user_id: number;
-  api_user_agent: string;
+  user_id?: number;
+  api_user_agent?: string;
   api_sql_duration?: number;
-  api_from: number;
-  api_ip: string;
-  api_hostname: string;
-  api_method: string;
-  api_path: string;
-  api_query: string;
-  api_body: string;
+  api_from?: number;
+  api_ip?: string;
+  api_hostname?: string;
+  api_method?: string;
+  api_path?: string;
+  api_query?: string;
+  api_body?: string;
   api_err_msg?: string;
   api_err_stack?: string;
 }
 
 export interface IArticle {
   id?: number;
-  title: string;
+  title?: string;
   desc?: string;
-  content: string;
-  header_img?: string;
+  content?: string;
+  head_img?: string;
   is_comment?: number;
-  status?: string;
-  click?: string;
+  status?: number;
+  click?: number;
   tag_ids?: number[];
   type_ids?: number[];
-  user_ids: number[];
+  user_ids?: number[];
   keyword?: string;
 }
 export interface IComment {
   id?: number;
-  from_user_id: number;
-  content: string;
+  from_user_id?: number;
+  content?: string;
   children_comment_total?: number;
   ua?: string;
   ip?: string;
@@ -192,10 +193,17 @@ export interface IComment {
   stars?: any[];
 }
 
+export interface IVisitor {
+  id?: number;
+  user_id?: number;
+  ip?: string;
+  status?: number;
+  ip_data?: string;
+}
 export interface IStar {
   id?: number;
-  article_id: number;
-  comment_id: number;
+  article_id?: number;
+  comment_id?: number;
   to_user_id?: number;
   from_user_id: number;
 }
@@ -225,6 +233,7 @@ export interface IList {
   pageSize?: string;
   orderBy?: string;
   orderName?: string;
+  keyWord?: string;
 }
 
 export interface IArticleTag {

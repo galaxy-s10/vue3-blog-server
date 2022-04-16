@@ -178,7 +178,9 @@ class QqUserController {
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
+            github_users: undefined,
             qq_users: undefined,
+            email_users: undefined,
           },
           exp,
         });
@@ -189,7 +191,6 @@ class QqUserController {
         ctx.cookies.set('token', token, { httpOnly: false });
         successHandler({ ctx, data: token, message: 'qq登录成功!' });
       } else {
-        console.log('>>>>>');
         await qqUserService.update(qqUserInfo);
         const oldQqUser: any = await qqUserService.findByUnionid(
           OauthInfo.unionid
@@ -202,7 +203,9 @@ class QqUserController {
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
+            github_users: undefined,
             qq_users: undefined,
+            email_users: undefined,
           },
           exp,
         });

@@ -99,42 +99,28 @@ class RoleController {
     await next();
   }
 
+  // 获取某个用户的角色
   async getUserRole(ctx: ParameterizedContext, next) {
     try {
       const user_id = +ctx.params.user_id;
       const result = await roleService.getMyRole(user_id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
 
-  getUserAllRole = async (ctx: ParameterizedContext, next) => {
-    try {
-      const user_id = +ctx.params.user_id;
-      const result = await roleService.getMyRole(user_id);
-      const role = [];
-      result.forEach((v) => {
-        role.push(this.commonGetAllChildRole(v.id));
-      });
-      // 这是个二维数组
-      const roleRes = await Promise.all(role);
-      // 将二维数组拍平
-      const roleResFlat = roleRes.flat();
-      successHandler({ ctx, data: [...result, ...roleResFlat] });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  };
-
-  // 获取某个角色的权限（只找一层）
+  // 获取某个角色的权限
   async getRoleAuth(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
+      const isExist = await roleService.isExist([id]);
+      if (!isExist) {
+        throw new Error(`不存在id为${id}的角色!`);
+      }
       const result = await roleService.getRoleAuth(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -146,19 +132,19 @@ class RoleController {
     try {
       const id = +ctx.params.id;
       const result = await roleService.getRoleAuth(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   }
 
-  // 获取我的角色（只找一层）
+  // 获取我的角色
   getMyRole = async (ctx: ParameterizedContext, next) => {
     try {
       const { userInfo } = await authJwt(ctx);
       const result = await roleService.getMyRole(userInfo.id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;
@@ -214,14 +200,14 @@ class RoleController {
         throw new Error(`不存在id为${id}的角色!`);
       }
       const result = await this.commonGetAllChildRole(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
     await next();
   };
 
-  /** 获取该角色的直接子角色（只找一层） */
+  /** 获取该角色的子角色（只找一层） */
   getChildRole = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
@@ -231,7 +217,7 @@ class RoleController {
         return;
       }
       const result = await roleService.findByPid(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -423,12 +409,18 @@ class RoleController {
   batchAddChildRoles = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_roles }: IRole = ctx.request.body;
+      if (id === undefined) {
+        throw new Error(`请传入id!`);
+      }
+      if (!c_roles || !c_roles.length) {
+        throw new Error(`请传入要新增的子角色!`);
+      }
       if (c_roles.includes(id)) {
         throw new Error(`父级角色不能在子角色里面!`);
       }
-      const isExist = await roleService.isExist(c_roles);
+      const isExist = await roleService.isExist([id, ...c_roles]);
       if (!isExist) {
-        throw new Error(`${c_roles}中存在不存在的角色!`);
+        throw new Error(`${[id, ...c_roles]}中存在不存在的角色!`);
       }
       const result1: any = await roleService.findAllByInId(c_roles);
       const result2: number[] = result1.map((v) => v.p_id);

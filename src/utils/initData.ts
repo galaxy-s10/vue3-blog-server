@@ -97,7 +97,7 @@ const initAuth = () => {
 };
 
 const initRole = () => {
-  const role = [
+  const defaultRole = [
     {
       id: 1,
       role_name: '全部角色',
@@ -211,7 +211,7 @@ const initRole = () => {
       p_id: 12,
     },
   ];
-  return role;
+  return defaultRole;
 };
 
 const initRoleAuth = () => {

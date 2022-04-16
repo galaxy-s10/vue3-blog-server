@@ -126,7 +126,7 @@ class AuthController {
         return;
       }
       const result = await authService.findByPid(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -142,7 +142,7 @@ class AuthController {
         throw new Error(`不存在id为${id}的权限!`);
       }
       const result = await this.commonGetAllChildAuth(id);
-      successHandler({ ctx, data: result });
+      successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -252,12 +252,18 @@ class AuthController {
   batchAddChildAuths = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_auths }: IAuth = ctx.request.body;
+      if (id === undefined) {
+        throw new Error(`请传入id!`);
+      }
+      if (!c_auths || !c_auths.length) {
+        throw new Error(`请传入要新增的子权限!`);
+      }
       if (c_auths.includes(id)) {
         throw new Error(`父级权限不能在子权限里面!`);
       }
-      const isExist = await authService.isExist(c_auths);
+      const isExist = await authService.isExist([id, ...c_auths]);
       if (!isExist) {
-        throw new Error(`${c_auths}中存在不存在的权限!`);
+        throw new Error(`${[id, ...c_auths]}中存在不存在的权限!`);
       }
       const result1: any = await authService.findAllByInId(c_auths);
       const result2: number[] = result1.map((v) => v.p_id);

@@ -13,12 +13,19 @@ class MusicController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        status,
+        keyWord,
+        id,
+      }: any = ctx.request.query;
+      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await musicService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        status: isAdmin ? status : 1,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -65,12 +72,13 @@ class MusicController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const { name, img, author, url, status }: IMusic = ctx.request.body;
+      const { name, cover_pic, audio_url, author, status }: IMusic =
+        ctx.request.body;
       await musicService.create({
         name,
-        img,
+        cover_pic,
+        audio_url,
         author,
-        url,
         status,
       });
       successHandler({ ctx });

@@ -1,10 +1,11 @@
 import Sequelize from 'sequelize';
 
-import { ILog } from '@/interface';
+import { ILog, IList } from '@/interface';
 import logModel from '@/model/log.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
+interface ISearch extends ILog, IList {}
 
 class LogService {
   /** 日志是否存在 */
@@ -20,13 +21,67 @@ class LogService {
   }
 
   /** 获取日志列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          user_id: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_user_agent: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_from: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_ip: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_hostname: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_method: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_path: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await logModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
     return handlePaging(nowPage, pageSize, result);
   }

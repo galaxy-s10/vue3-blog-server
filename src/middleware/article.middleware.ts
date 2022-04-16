@@ -4,12 +4,13 @@ import { ParameterizedContext } from 'koa';
 import emitError from '@/app/handler/emit-error';
 
 const schema = Joi.object({
+  id: Joi.number(),
   title: Joi.string().min(3).max(30).required(),
   desc: Joi.string().min(3).max(100),
   content: Joi.string().required(),
   is_comment: [1, 2],
   status: [1, 2],
-  header_img: Joi.string().min(3).max(50),
+  head_img: Joi.string().min(3).max(50),
   click: Joi.number(),
   tag_ids: Joi.array().items(Joi.number()),
   type_ids: Joi.array().items(Joi.number()),

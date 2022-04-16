@@ -13,8 +13,10 @@ class WorksController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-        status = '1',
-      } = ctx.request.query;
+        status,
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await worksService.getList({
         nowPage,
@@ -22,6 +24,8 @@ class WorksController {
         orderBy,
         orderName,
         status: isAdmin ? status : 1,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

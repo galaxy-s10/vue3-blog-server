@@ -203,6 +203,19 @@ class RoleService {
     return result;
   }
 
+  /** 更新用户角色 */
+  async updateUserRole({
+    user_id,
+    role_ids,
+  }: {
+    user_id: number;
+    role_ids: number[];
+  }) {
+    const user: any = await userModel.findByPk(user_id);
+    const result = await user.setRoles(role_ids);
+    return result;
+  }
+
   /** 删除角色 */
   async delete(ids: number[]) {
     const result = await roleModel.destroy({

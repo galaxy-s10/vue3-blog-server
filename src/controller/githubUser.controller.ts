@@ -1,14 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
-import redisController from './redis.controller';
-
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import { chalkINFO } from '@/app/chalkTip';
-import {
-  REDIS_PREFIX,
-  THIRD_PLATFORM,
-  VERIFY_EMAIL_RESULT_CODE,
-} from '@/app/constant';
+import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
@@ -16,7 +9,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GITHUB_REDIRECT_URI,
 } from '@/config/secret';
-import { IList, IGithubUser } from '@/interface';
+import { IGithubUser, IList } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
 import githubUserService from '@/service/githubUser.service';
 import thirdUserService from '@/service/thirdUser.service';
@@ -197,7 +190,7 @@ class GithubUserController {
           username: OauthInfo.login,
           password: randomString(8),
           avatar: OauthInfo.avatar_url,
-          title: OauthInfo.bio,
+          desc: OauthInfo.bio,
         });
         await thirdUserModel.create({
           user_id: userInfo?.id,
@@ -208,6 +201,8 @@ class GithubUserController {
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
             github_users: undefined,
+            qq_users: undefined,
+            email_users: undefined,
           },
           exp,
         });
@@ -232,6 +227,8 @@ class GithubUserController {
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
             github_users: undefined,
+            qq_users: undefined,
+            email_users: undefined,
           },
           exp,
         });

@@ -86,7 +86,7 @@ class ArticleService {
   async create({
     title,
     desc,
-    header_img,
+    head_img,
     is_comment,
     status,
     content,
@@ -98,7 +98,7 @@ class ArticleService {
     const add_article = await articleModel.create({
       title,
       desc,
-      header_img,
+      head_img,
       is_comment,
       status,
       content,
@@ -126,12 +126,19 @@ class ArticleService {
     orderBy,
     orderName,
     status,
+    keyWord,
   }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     let typeWhere: any = null;
     let tagWhere: any = null;
     let userWhere: any = null;
+    let statusWhere: any = null;
+    const keyWordWhere: any = {};
+    if (status) {
+      statusWhere = {};
+      statusWhere.status = status;
+    }
     if (type_ids.length) {
       typeWhere = {};
       typeWhere.id = type_ids.split(',');
@@ -143,6 +150,25 @@ class ArticleService {
     if (user_ids.length) {
       userWhere = {};
       userWhere.id = user_ids.split(',');
+    }
+    if (keyWord) {
+      keyWordWhere[Op.or] = [
+        {
+          title: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          desc: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          content: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
     }
     const result = await articleModel.findAndCountAll({
       include: [
@@ -203,7 +229,7 @@ class ArticleService {
           // ],
         ],
       },
-      where: { status },
+      where: { ...statusWhere, ...keyWordWhere },
       distinct: true,
       order: [[orderName, orderBy]],
       // group: ['article.id'],
@@ -222,31 +248,31 @@ class ArticleService {
   }
 
   /** 搜索文章 */
-  async getKeywordList({ keyword, nowPage, pageSize, status }) {
+  async getKeywordList({ keyWord, nowPage, pageSize, status }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    let keywordWhere: any = null;
-    if (keyword) {
-      keywordWhere = [
+    let keyWordWhere: any = null;
+    if (keyWord) {
+      keyWordWhere = [
         {
           title: {
-            [Op.like]: `%${keyword}%`,
+            [Op.like]: `%${keyWord}%`,
           },
         },
         {
           desc: {
-            [Op.like]: `%${keyword}%`,
+            [Op.like]: `%${keyWord}%`,
           },
         },
         {
           content: {
-            [Op.like]: `%${keyword}%`,
+            [Op.like]: `%${keyWord}%`,
           },
         },
       ];
     }
     const result = await articleModel.findAndCountAll({
-      where: { [Op.or]: keywordWhere, status },
+      where: { [Op.or]: keyWordWhere, status },
       distinct: true,
       limit,
       offset,

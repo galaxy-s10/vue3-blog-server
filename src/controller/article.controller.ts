@@ -15,7 +15,7 @@ class ArticleController {
       const {
         title,
         desc,
-        header_img,
+        head_img,
         is_comment,
         status,
         content,
@@ -39,7 +39,7 @@ class ArticleController {
       const result = await articleService.create({
         title,
         desc,
-        header_img,
+        head_img,
         is_comment,
         status,
         content,
@@ -86,6 +86,7 @@ class ArticleController {
         orderBy = 'asc',
         orderName = 'id',
         status = '1',
+        keyWord,
       } = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await articleService.getList({
@@ -97,6 +98,7 @@ class ArticleController {
         orderBy,
         orderName,
         status: isAdmin ? status : 1,
+        keyWord,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -108,14 +110,14 @@ class ArticleController {
   async getKeywordList(ctx: ParameterizedContext, next) {
     try {
       const {
-        keyword = '',
+        keyWord,
         nowPage = '1',
         pageSize = '10',
         status = '1',
       } = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await articleService.getKeywordList({
-        keyword,
+        keyWord,
         nowPage,
         pageSize,
         status: isAdmin ? status : 1,

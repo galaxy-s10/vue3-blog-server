@@ -15,8 +15,10 @@ class LinkController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-        status = '1',
-      } = ctx.request.query;
+        status,
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await linkService.getList({
         nowPage,
@@ -24,6 +26,8 @@ class LinkController {
         orderBy,
         orderName,
         status: isAdmin ? status : 1,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
