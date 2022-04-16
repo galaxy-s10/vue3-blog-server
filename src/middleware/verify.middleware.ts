@@ -81,9 +81,7 @@ const verify = async (ctx: ParameterizedContext, next) => {
         end();
         return;
       }
-      console.log('kjjh');
       const { code, message } = await authJwt(ctx);
-      console.log('1111');
       if (code !== 200) {
         emitError({
           ctx,

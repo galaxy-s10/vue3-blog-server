@@ -71,7 +71,6 @@ class OtherController {
         successHandler({ ctx, message: emailResCode.ok });
       } else {
         const ttl = await redisController.getTTL(key);
-        console.log(ttl, 33);
         if (ttl > 60 * 4) {
           emitError({
             ctx,
@@ -91,7 +90,6 @@ class OtherController {
           value: verificationCode,
           exp: redisExpired,
         });
-        console.log(',,,,');
         successHandler({ ctx, message: emailResCode.ok });
       }
     } catch (error) {

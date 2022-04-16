@@ -158,23 +158,19 @@ class QqUserController {
         unionid: OauthInfo.unionid,
         openid: OauthInfo.openid,
       };
-      console.log(qqUserInfo, OauthInfo, 2333222);
       const isExist = await qqUserService.isExistUnionid(OauthInfo.unionid);
       if (!isExist) {
         const qqUser: any = await qqUserService.create(qqUserInfo);
-        console.log('11');
         const userInfo: any = await userService.create({
           username: qqUserInfo.nickname,
           password: randomString(8),
           avatar: qqUserInfo.figureurl_2,
         });
-        console.log(22);
         await thirdUserModel.create({
           user_id: userInfo?.id,
           third_user_id: qqUser.id,
           third_platform: THIRD_PLATFORM.qq_admin,
         });
-        console.log(userInfo, 33333);
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
@@ -272,7 +268,6 @@ class QqUserController {
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin
       );
-      console.log('lllk0');
       if (ownIsBind.length) {
         emitError({
           ctx,
@@ -299,7 +294,6 @@ class QqUserController {
         unionid: OauthInfo.unionid,
         openid: OauthInfo.openid,
       };
-      console.log(OauthInfo, 555);
       const isExist = await qqUserService.isExistClientIdUnionid(
         OauthInfo.client_id,
         OauthInfo.unionid
