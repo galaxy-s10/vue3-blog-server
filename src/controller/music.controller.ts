@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IMusic } from '@/interface';
@@ -47,6 +48,11 @@ class MusicController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { name, cover_pic, audio_url, author, status }: IMusic =
         ctx.request.body;
@@ -72,6 +78,11 @@ class MusicController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const { name, cover_pic, audio_url, author, status }: IMusic =
         ctx.request.body;
       await musicService.create({
@@ -90,6 +101,11 @@ class MusicController {
 
   async delete(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const isExist = await musicService.isExist([id]);
       if (!isExist) {

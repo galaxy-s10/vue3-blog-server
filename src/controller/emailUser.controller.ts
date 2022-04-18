@@ -12,7 +12,7 @@ import {
 } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IEmail, IUser } from '@/interface';
+import { IEmail } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';

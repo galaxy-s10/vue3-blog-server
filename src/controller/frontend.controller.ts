@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IFrontend } from '@/interface';
@@ -27,6 +28,11 @@ class FrontendController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const {
         frontend_about,

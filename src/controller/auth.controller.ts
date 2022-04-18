@@ -1,5 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
+import { PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IAuth } from '@/interface';
@@ -152,6 +154,11 @@ class AuthController {
   // 创建权限
   async create(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const {
         p_id,
         auth_name,
@@ -181,6 +188,18 @@ class AuthController {
   async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await authService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认权限!' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const { p_id, auth_name, auth_value, type, priority }: IAuth =
         ctx.request.body;
       if (id === 1 && p_id !== 0) {
@@ -229,6 +248,18 @@ class AuthController {
   delete = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await authService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认权限!' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === 1) {
         throw new Error(`不能删除根权限哦!`);
       }
@@ -252,6 +283,18 @@ class AuthController {
   batchAddChildAuths = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_auths }: IAuth = ctx.request.body;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await authService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认权限!' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === undefined) {
         throw new Error(`请传入id!`);
       }
@@ -283,7 +326,18 @@ class AuthController {
   batchDeleteChildAuths = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_auths }: IAuth = ctx.request.body;
-
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await authService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认权限!' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === undefined) {
         throw new Error(`请传入id!`);
       }

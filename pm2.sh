@@ -4,7 +4,7 @@
 # Email: 2274751790@qq.com
 # Github: https://github.com/galaxy-s10
 # Date: 2022-01-10 15:25:30
-# LastEditTime: 2022-04-08 12:05:34
+# LastEditTime: 2022-04-17 03:52:24
 # Description:
 ###
 
@@ -27,7 +27,7 @@ fi
 cd $PUBLICDIR/$JOBNAME/$ENV
 
 echo 删除旧的pm2服务:
-pm2 del $JOBNAME-$ENV
+pm2 del $JOBNAME-$ENV-$PORT
 
 echo 使用pm2维护：
 # pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/nodemon

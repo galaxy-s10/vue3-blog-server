@@ -163,15 +163,16 @@ export interface IArticle {
   id?: number;
   title?: string;
   desc?: string;
+  priority?: number;
   content?: string;
   head_img?: string;
   is_comment?: number;
   status?: number;
   click?: number;
-  tag_ids?: number[];
-  type_ids?: number[];
-  user_ids?: number[];
-  keyword?: string;
+  tags?: number[];
+  types?: number[];
+  users?: number[];
+  keyWord?: string;
 }
 export interface IComment {
   id?: number;

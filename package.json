@@ -12,6 +12,7 @@
     "push": "cz && standard-version",
     "release": "standard-version",
     "start": "cross-env NODE_APP_RELEASE_PROJECT_NAME=react-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
+    "start:beta": "cross-env NODE_APP_RELEASE_PROJECT_NAME=react-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
     "start:prod": "cross-env NODE_APP_RELEASE_PROJECT_NAME=react-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./src/index.ts"
   },
   "config": {
@@ -43,8 +44,10 @@
     "qiniu": "^7.4.0",
     "redis": "^4.0.4",
     "sequelize": "^6.12.0-alpha.1",
+    "socket.io": "^4.4.1",
     "ssh2": "^1.7.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",

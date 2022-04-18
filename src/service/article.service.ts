@@ -25,7 +25,7 @@ class ArticleService {
   }
 
   /** 查找文章 */
-  async find(id: number, from_user_id: number) {
+  async find(id: number, from_user_id = -1) {
     await articleModel.update(
       { click: literal('`click` +1') },
       {
@@ -91,11 +91,11 @@ class ArticleService {
     status,
     content,
     click,
-    tag_ids = [],
-    type_ids = [],
-    user_ids = [],
+    tags = [],
+    types = [],
+    users = [],
   }: IArticle) {
-    const add_article = await articleModel.create({
+    const result: any = await articleModel.create({
       title,
       desc,
       head_img,
@@ -103,24 +103,24 @@ class ArticleService {
       status,
       content,
       click,
-      tag_ids,
-      type_ids,
-      user_ids,
+      tags,
+      types,
+      users,
     });
-    // @ts-ignore
-    tag_ids && (await add_article.setTags(tag_ids));
-    // @ts-ignore
-    type_ids && (await add_article.setTypes(type_ids));
-    // @ts-ignore
-    user_ids && (await add_article.setUsers(user_ids));
+    // eslint-disable-next-line
+    tags && (await result.setTags(tags));
+    // eslint-disable-next-line
+    types && (await result.setTypes(types));
+    // eslint-disable-next-line
+    users && (await result.setUsers(users));
     return true;
   }
 
   /** 获取文章列表 */
   async getList({
-    tag_ids,
-    type_ids,
-    user_ids,
+    tags,
+    types,
+    users,
     nowPage,
     pageSize,
     orderBy,
@@ -139,17 +139,17 @@ class ArticleService {
       statusWhere = {};
       statusWhere.status = status;
     }
-    if (type_ids.length) {
+    if (types.length) {
       typeWhere = {};
-      typeWhere.id = type_ids.split(',');
+      typeWhere.id = types.split(',');
     }
-    if (tag_ids.length) {
+    if (tags.length) {
       tagWhere = {};
-      tagWhere.id = tag_ids.split(',');
+      tagWhere.id = tags.split(',');
     }
-    if (user_ids.length) {
+    if (users.length) {
       userWhere = {};
-      userWhere.id = user_ids.split(',');
+      userWhere.id = users.split(',');
     }
     if (keyWord) {
       keyWordWhere[Op.or] = [
@@ -248,7 +248,7 @@ class ArticleService {
   }
 
   /** 搜索文章 */
-  async getKeywordList({ keyWord, nowPage, pageSize, status }) {
+  async getKeyWordList({ keyWord, nowPage, pageSize, status }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     let keyWordWhere: any = null;
@@ -278,6 +278,31 @@ class ArticleService {
       offset,
     });
     return handlePaging(nowPage, pageSize, result);
+  }
+
+  async update({
+    id,
+    title,
+    desc,
+    is_comment,
+    priority,
+    status,
+    head_img,
+    content,
+  }: IArticle) {
+    const result = await articleModel.update(
+      {
+        title,
+        desc,
+        is_comment,
+        priority,
+        status,
+        head_img,
+        content,
+      },
+      { where: { id } }
+    );
+    return result;
   }
 }
 

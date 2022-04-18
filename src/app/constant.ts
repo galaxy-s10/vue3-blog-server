@@ -15,6 +15,7 @@ export const REDIS_PREFIX = {
   emailRegister: `${PROJECT_NAME}-${PROJECT_ENV}-emailRegister`, // 注册不区分前后台
   userBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userBindEmail`,
   userCancelBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userCancelBindEmail`,
+  chatInfo: `${PROJECT_NAME}-${PROJECT_ENV}-chatInfo`,
 };
 
 export const THIRD_PLATFORM = {

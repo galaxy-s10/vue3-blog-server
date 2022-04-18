@@ -1,15 +1,13 @@
 import Sequelize from 'sequelize';
 
-import { authJwt } from '@/app/auth/authJwt';
 import { IComment } from '@/interface';
-import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import roleModel from '@/model/role.model';
 import starModel from '@/model/star.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
-const { Op, fn, col, literal } = Sequelize;
+const { Op } = Sequelize;
 
 class CommentService {
   /** 评论是否存在 */

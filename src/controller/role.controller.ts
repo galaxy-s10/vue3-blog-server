@@ -1,6 +1,8 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
+import { PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IRole } from '@/interface';
@@ -228,6 +230,18 @@ class RoleController {
   async updateRoleAuth(ctx: ParameterizedContext, next) {
     try {
       const { id, auth_ids } = ctx.request.body;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await roleService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认角色' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const isExistRole = await roleService.isExist([id]);
       if (!isExistRole) {
         throw new Error(`不存在id为${id}的角色!`);
@@ -250,6 +264,18 @@ class RoleController {
   async update(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await roleService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认角色' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const { p_id, role_name, role_value, type, priority }: IRole =
         ctx.request.body;
       if (id === 1 && p_id !== 0) {
@@ -294,49 +320,6 @@ class RoleController {
     await next();
   }
 
-  async update1(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const { p_id, role_name, role_value, role_auths }: IRole =
-        ctx.request.body;
-      if (id === 1 && p_id !== 0) {
-        throw new Error(`不能修改根角色的p_id哦!`);
-      }
-      if (id !== 1 && p_id === 0) {
-        throw new Error(`不能给其他角色设置为根角色哦!`);
-      }
-      const uniqueAuths = arrayUnique(role_auths);
-      const isExistAuth =
-        uniqueAuths.length === 0
-          ? true
-          : await authService.isExist(uniqueAuths);
-      if (!isExistAuth) {
-        throw new Error(`${role_auths}中存在不存在的权限!`);
-      }
-      const ids = [p_id, id].filter((v) => v !== 0);
-      if (!ids.length) {
-        throw new Error(`${[p_id, id]}中存在不存在的角色!`);
-      }
-      const isExistRole = p_id === 0 ? true : await roleService.isExist([id]);
-      if (!isExistRole) {
-        throw new Error(`不存在id为${id}的角色!`);
-      }
-      await roleService.update({
-        id,
-        p_id,
-        role_name,
-        role_value,
-      });
-      const role: any = await roleService.find(id);
-      await role.setAuths(role_auths);
-      successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
-    }
-    await next();
-  }
-
   async create(ctx: ParameterizedContext, next) {
     try {
       const {
@@ -346,6 +329,11 @@ class RoleController {
         type = 2,
         priority = 1,
       }: IRole = ctx.request.body;
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const isExist = p_id === 0 ? false : await roleService.isExist([p_id]);
       if (!isExist) {
         throw new Error(`不存在id为${p_id}的角色!`);
@@ -368,7 +356,18 @@ class RoleController {
   batchDeleteChildRoles = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_roles }: IRole = ctx.request.body;
-
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await roleService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认角色' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === undefined) {
         throw new Error(`请传入id!`);
       }
@@ -409,6 +408,18 @@ class RoleController {
   batchAddChildRoles = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_roles }: IRole = ctx.request.body;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await roleService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认角色' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === undefined) {
         throw new Error(`请传入id!`);
       }
@@ -439,6 +450,18 @@ class RoleController {
   delete = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
+      if (PROJECT_ENV === 'beta') {
+        const role: any = await roleService.find(id);
+        if (role.type === 1) {
+          emitError({ ctx, code: 403, message: '测试环境不能操作默认角色' });
+          return;
+        }
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       if (id === 1) {
         throw new Error(`不能删除根角色哦!`);
       }

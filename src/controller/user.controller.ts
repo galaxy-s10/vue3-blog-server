@@ -3,7 +3,8 @@ import { ParameterizedContext } from 'koa';
 import redisController from './redis.controller';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import { REDIS_PREFIX, THIRD_PLATFORM } from '@/app/constant';
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
+import { REDIS_PREFIX, THIRD_PLATFORM, PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IEmail, IList, IUser } from '@/interface';
@@ -142,24 +143,20 @@ class UserController {
     try {
       // @ts-ignore
       const {
-        username,
-        desc,
         nowPage = '1',
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-        created_at,
-        updated_at,
-      }: IUserList = ctx.request.query;
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const result = await userService.getList({
-        username,
-        desc,
         nowPage,
         pageSize,
         orderBy,
         orderName,
-        created_at,
-        updated_at,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -196,6 +193,15 @@ class UserController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      if (PROJECT_ENV === 'beta') {
+        emitError({ ctx, code: 403, message: '测试环境不能操作用户！' });
+        return;
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { username, desc, status, avatar }: IUser = ctx.request.body;
       const isExist = await userService.isExist([id]);
@@ -222,6 +228,15 @@ class UserController {
 
   async updateUserRole(ctx: ParameterizedContext, next) {
     try {
+      if (PROJECT_ENV === 'beta') {
+        emitError({ ctx, code: 403, message: '测试环境不能操作用户!' });
+        return;
+      }
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { user_roles }: IUser = ctx.request.body;
       const isExistUser = await userService.isExist([id]);

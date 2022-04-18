@@ -1,13 +1,9 @@
-import Sequelize from 'sequelize';
-
 import { IFrontend } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import frontendModel from '@/model/frontend.model';
 import qqUserModel from '@/model/qqUser.model';
 import userModel from '@/model/user.model';
-
-const { fn, Op, col, literal } = Sequelize;
 
 class FrontendService {
   /** 查找前端设置 */

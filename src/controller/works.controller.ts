@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IWorks } from '@/interface';
@@ -47,6 +48,11 @@ class WorksController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
@@ -73,6 +79,11 @@ class WorksController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
@@ -93,6 +104,11 @@ class WorksController {
 
   async delete(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const isExist = await worksService.isExist([id]);
       if (!isExist) {

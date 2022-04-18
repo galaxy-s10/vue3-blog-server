@@ -106,9 +106,13 @@ class VisitorLogService {
           user_id: {
             [Op.like]: `%${keyWord}%`,
           },
+        },
+        {
           ip: {
             [Op.like]: `%${keyWord}%`,
           },
+        },
+        {
           ip_data: {
             [Op.like]: `%${keyWord}%`,
           },

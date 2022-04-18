@@ -1,8 +1,7 @@
 import Sequelize from 'sequelize';
 
 import { THIRD_PLATFORM, PROJECT_ENV } from '@/app/constant';
-import { IUserList } from '@/controller/user.controller';
-import { IUser } from '@/interface';
+import { IUser, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import emailModel from '@/model/emailUser.model';
@@ -12,6 +11,8 @@ import roleModel from '@/model/role.model';
 import starModel from '@/model/star.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
+
+interface ISearch extends IUser, IList {}
 
 const { Op, where, literal } = Sequelize;
 
@@ -43,43 +44,35 @@ class UserService {
 
   /** 获取用户列表 */
   async getList({
-    username,
-    desc,
+    id,
+    keyWord,
     nowPage,
     pageSize,
     orderBy,
     orderName,
-    created_at,
-    updated_at,
-  }: IUserList) {
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    const where1: any = {};
-    const where2 = [];
-    if (created_at) {
-      where1.created_at = {
-        [Op.between]: [created_at, `${created_at} 23:59:59`],
-      };
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
     }
-    if (updated_at) {
-      where1.updated_at = {
-        [Op.between]: [updated_at, `${updated_at} 23:59:59`],
-      };
-    }
-    if (username) {
-      where2.push({
-        username: {
-          [Op.like]: `%${username}%`,
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          username: {
+            [Op.like]: `%${keyWord}%`,
+          },
         },
-      });
-    }
-    if (desc) {
-      where2.push({
-        desc: {
-          [Op.like]: `%${desc}%`,
+        {
+          desc: {
+            [Op.like]: `%${keyWord}%`,
+          },
         },
-      });
+      ];
+      allWhere[Op.or] = keyWordWhere;
     }
+
     const result = await userModel.findAndCountAll({
       attributes: {
         exclude: ['password', 'token'],
@@ -88,8 +81,7 @@ class UserService {
       limit,
       offset,
       where: {
-        ...where1,
-        ...where2,
+        ...allWhere,
       },
       distinct: true,
     });

@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { ITag } from '@/interface';
@@ -44,6 +45,11 @@ class TagController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { name, color }: ITag = ctx.request.body;
       const isExist = await tagService.isExist([id]);
@@ -60,6 +66,11 @@ class TagController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const { name, color }: ITag = ctx.request.body;
       await tagService.create({ name, color });
       successHandler({ ctx });
@@ -87,6 +98,11 @@ class TagController {
 
   async delete(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const isExist = await tagService.isExist([id]);
       if (!isExist) {

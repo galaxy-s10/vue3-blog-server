@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { MAIL_OPTIONS_CONFIG } from '@/config/secret';
@@ -49,6 +50,11 @@ class LinkController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const { email, name, avatar, desc, url, status }: ILink =
         ctx.request.body;
@@ -104,6 +110,11 @@ class LinkController {
 
   async delete(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const isExist = await linkService.isExist([id]);
       if (!isExist) {

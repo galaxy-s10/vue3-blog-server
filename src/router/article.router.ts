@@ -9,12 +9,15 @@ const articleRouter = new Router({ prefix: '/article' });
 articleRouter.get('/list', articleController.getList);
 
 // 搜索文章列表
-articleRouter.get('/keyword_list', articleController.getKeywordList);
+articleRouter.get('/keyword_list', articleController.getKeyWordList);
 
 // 查找文章
 articleRouter.get('/find/:id', articleController.find);
 
 // 新增文章
 articleRouter.post('/create', verifyProp, articleController.create);
+
+// 更新文章
+articleRouter.put('/update/:id', verifyProp, articleController.update);
 
 export default articleRouter;

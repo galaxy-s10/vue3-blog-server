@@ -1,3 +1,4 @@
+import { createServer } from 'http';
 import path from 'path';
 
 import Koa from 'koa';
@@ -16,12 +17,15 @@ import verifyMiddleware from './middleware/verify.middleware';
 import useRoutes from './router/index';
 import { initDb } from './utils/initDb';
 
+import { initWs } from '@/websocket';
+
 aliasOk(); // 添加别名路径
 
 const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
-
+const httpServer = createServer(app.callback());
+console.log(httpServer, 22212);
 app.use(conditional());
 app.use(etag());
 
@@ -63,7 +67,9 @@ app.on('error', errorHandler); // 全局错误处理
 
 const port = +PROJECT_PORT;
 
-app.listen(PROJECT_PORT, () => {
+initWs(httpServer);
+
+httpServer.listen(PROJECT_PORT, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));
   console.log(chalkINFO(`当前的项目名称: ${PROJECT_NAME}`));
   console.log(chalkINFO(`当前的项目环境: ${PROJECT_ENV}`));
