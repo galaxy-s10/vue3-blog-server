@@ -14,14 +14,14 @@ const { fn, Op, col, literal } = Sequelize;
 class ArticleService {
   /** 文章是否存在 */
   async isExist(ids: number[]) {
-    const res = await articleModel.findAll({
+    const res = await articleModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 查找文章 */

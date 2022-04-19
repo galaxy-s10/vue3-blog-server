@@ -11,14 +11,14 @@ interface ISearch extends ILink, IList {}
 class LinkService {
   /** 友链是否存在 */
   async isExist(ids: number[]) {
-    const res = await linkModel.findAll({
+    const res = await linkModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取友链列表 */

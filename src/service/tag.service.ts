@@ -14,14 +14,14 @@ interface ISearch extends ITag, IList {}
 class TagService {
   /** 标签是否存在 */
   async isExist(ids: number[]) {
-    const res = await tagModel.findAll({
+    const res = await tagModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取标签列表 */

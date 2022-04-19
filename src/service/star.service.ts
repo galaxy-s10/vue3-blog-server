@@ -12,14 +12,14 @@ const { Op } = Sequelize;
 class StarService {
   /** star是否存在 */
   async isExist(ids: number[]) {
-    const res = await starModel.findAll({
+    const res = await starModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取star列表 */

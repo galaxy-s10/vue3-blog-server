@@ -10,14 +10,14 @@ interface ISearch extends IWorks, IList {}
 class WorksService {
   /** 作品是否存在 */
   async isExist(ids: number[]) {
-    const res = await worksModel.findAll({
+    const res = await worksModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取作品列表 */

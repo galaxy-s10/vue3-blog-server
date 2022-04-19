@@ -13,14 +13,14 @@ export interface IGithubUserList extends IList {
 class UserService {
   /** github用户是否存在 */
   async isExist(github_ids: number[]) {
-    const res = await githubUserModel.findAll({
+    const res = await githubUserModel.count({
       where: {
         github_id: {
           [Op.in]: github_ids,
         },
       },
     });
-    return res.length === github_ids.length;
+    return res === github_ids.length;
   }
 
   /** 获取github用户列表 */

@@ -10,14 +10,14 @@ const { Op } = Sequelize;
 class MusicService {
   /** 音乐是否存在 */
   async isExist(ids: number[]) {
-    const res = await musicModel.findAll({
+    const res = await musicModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取音乐列表 */

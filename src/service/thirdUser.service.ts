@@ -9,14 +9,14 @@ const { Op } = Sequelize;
 class TagService {
   /** 第三方用户记录是否存在 */
   async isExist(ids: number[]) {
-    const res = await thirdUserModel.findAll({
+    const res = await thirdUserModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取第三方用户记录列表 */

@@ -4,6 +4,7 @@ export interface ITheme {
   key?: string;
   value?: string;
   lang?: string;
+  desc?: string;
 }
 export interface IFrontend {
   id?: number;

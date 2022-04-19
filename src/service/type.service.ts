@@ -10,14 +10,14 @@ interface ISearch extends IType, IList {}
 class TypeService {
   /** 分类是否存在 */
   async isExist(ids: number[]) {
-    const res = await typeModel.findAll({
+    const res = await typeModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取分类列表 */

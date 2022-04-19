@@ -20,7 +20,6 @@ const themeModel = sequelize.define(
     },
     model: {
       type: DataTypes.STRING(50),
-      allowNull: false,
       comment: '模块名',
       // unique: true, // 唯一约束,如果尝试插入已存在的model,将抛出 SequelizeUniqueConstraintError.
     },
@@ -39,8 +38,15 @@ const themeModel = sequelize.define(
     },
     lang: {
       type: DataTypes.STRING(50),
-      allowNull: false,
       comment: '语言',
+      // validate: {
+      //   max: 50,
+      // },
+    },
+    desc: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: '简介',
       // validate: {
       //   max: 50,
       // },

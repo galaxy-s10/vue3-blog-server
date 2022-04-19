@@ -9,14 +9,14 @@ const { Op } = Sequelize;
 class RoleService {
   /** 角色是否存在 */
   async isExist(ids: number[]) {
-    const res = await roleModel.findAll({
+    const res = await roleModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取角色列表(分页) */

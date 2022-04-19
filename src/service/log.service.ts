@@ -10,14 +10,14 @@ interface ISearch extends ILog, IList {}
 class LogService {
   /** 日志是否存在 */
   async isExist(ids: number[]) {
-    const res = await logModel.findAll({
+    const res = await logModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取日志列表 */

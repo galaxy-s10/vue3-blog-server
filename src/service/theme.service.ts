@@ -1,31 +1,73 @@
 import Sequelize from 'sequelize';
 
-import { ITheme } from '@/interface';
+import { ITheme, IList } from '@/interface';
 import themeModel from '@/model/theme.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
+
+interface ISearch extends ITheme, IList {}
+
 class ThemeService {
   /** 主题是否存在 */
   async isExist(ids: number[]) {
-    const res = await themeModel.findAll({
+    const res = await themeModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
-  /** 主题列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  /** 获取主题列表 */
+  async getList({
+    nowPage,
+    pageSize,
+    orderBy,
+    orderName,
+    keyWord,
+    id,
+  }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          key: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          value: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          model: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          desc: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
     const result = await themeModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
     return handlePaging(nowPage, pageSize, result);
   }
@@ -37,17 +79,23 @@ class ThemeService {
   }
 
   /** 修改主题 */
-  async update({ id, model, key, value, lang }: ITheme) {
+  async update({ id, key, value, model, lang, desc }: ITheme) {
     const result = await themeModel.update(
-      { model, key, value, lang },
+      { key, value, model, lang, desc },
       { where: { id } }
     );
     return result;
   }
 
   /** 创建主题 */
-  async create({ model, key, value, lang }: ITheme) {
-    const result = await themeModel.create({ model, key, value, lang });
+  async create({ key, value, model, lang, desc }: ITheme) {
+    const result = await themeModel.create({
+      key,
+      value,
+      model,
+      lang,
+      desc,
+    });
     return result;
   }
 

@@ -1,5 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
+import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { ITheme } from '@/interface';
@@ -13,12 +14,16 @@ class ThemeController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        keyWord,
+        id,
+      }: any = ctx.request.query;
       const result = await themeService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
+        keyWord,
+        id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -40,16 +45,27 @@ class ThemeController {
 
   async update(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
-      const { model, key, value, lang }: ITheme = ctx.request.body;
-      const result = await themeService.update({
+      const { key, value, model, lang, desc }: ITheme = ctx.request.body;
+      const isExist = await themeService.isExist([id]);
+      if (!isExist) {
+        emitError({ ctx, code: 400, error: `不存在id为${id}的主题!` });
+        return;
+      }
+      await themeService.update({
         id,
-        model,
         key,
         value,
+        model,
         lang,
+        desc,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -58,14 +74,15 @@ class ThemeController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const { model, key, value, lang }: ITheme = ctx.request.body;
-      const result = await themeService.create({
-        model,
+      const { key, value, model, lang, desc }: ITheme = ctx.request.body;
+      await themeService.create({
         key,
         value,
+        model,
         lang,
+        desc,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }
@@ -74,14 +91,19 @@ class ThemeController {
 
   async delete(ctx: ParameterizedContext, next) {
     try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
       const id = +ctx.params.id;
       const isExist = await themeService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的标签!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的主题!` });
         return;
       }
-      const result = await themeService.delete(id);
-      successHandler({ ctx, data: result });
+      await themeService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

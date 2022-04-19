@@ -36,11 +36,7 @@ export const verifyProp = async (ctx: ParameterizedContext, next) => {
       '这里不仅仅会捕获joi的错误，后面的中间件报的错也会捕获到（因为洋葱路由的关系）',
       error
     );
-    emitError({
-      ctx,
-      code: 400,
-      error,
-    });
+    emitError({ ctx, code: 400, error });
     return;
   }
   await next();

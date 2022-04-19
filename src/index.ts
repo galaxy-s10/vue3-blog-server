@@ -24,8 +24,6 @@ aliasOk(); // 添加别名路径
 const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
-const httpServer = createServer(app.callback());
-console.log(httpServer, 22212);
 app.use(conditional());
 app.use(etag());
 
@@ -66,6 +64,8 @@ app.useRoutes = useRoutes;
 app.on('error', errorHandler); // 全局错误处理
 
 const port = +PROJECT_PORT;
+
+const httpServer = createServer(app.callback());
 
 initWs(httpServer);
 

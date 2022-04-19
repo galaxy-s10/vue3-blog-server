@@ -8,14 +8,14 @@ const { Op } = Sequelize;
 class AuthService {
   /** 权限是否存在 */
   async isExist(ids: number[]) {
-    const res = await authModel.findAll({
+    const res = await authModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取权限列表(分页) */

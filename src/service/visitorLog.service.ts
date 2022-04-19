@@ -10,14 +10,14 @@ interface ISearch extends IVisitor, IList {}
 class VisitorLogService {
   /** 访客日志是否存在 */
   async isExist(ids: number[]) {
-    const res = await visitorLogModel.findAll({
+    const res = await visitorLogModel.count({
       where: {
         id: {
           [Op.in]: ids,
         },
       },
     });
-    return res.length === ids.length;
+    return res === ids.length;
   }
 
   /** 获取当天访客访问数据 */
