@@ -8,20 +8,8 @@ import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 class EmailService {
-  /** 邮箱用户是否存在 */
-  async isExist(emails: string[]) {
-    const res = await emailModel.count({
-      where: {
-        email: {
-          [Op.or]: [...new Set(emails)],
-        },
-      },
-    });
-    return res === emails.length;
-  }
-
   /** 是否存在 */
-  async idIsExist(ids: number[]) {
+  async isExist(ids: number[]) {
     const res = await emailModel.count({
       where: {
         id: {
@@ -30,6 +18,18 @@ class EmailService {
       },
     });
     return res === ids.length;
+  }
+
+  /** 邮箱是否存在 */
+  async emailsIsExist(emails: string[]) {
+    const res = await emailModel.count({
+      where: {
+        email: {
+          [Op.in]: emails,
+        },
+      },
+    });
+    return res === emails.length;
   }
 
   /** 获取邮箱用户列表 */

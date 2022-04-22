@@ -20,4 +20,7 @@ articleRouter.post('/create', verifyProp, articleController.create);
 // 更新文章
 articleRouter.put('/update/:id', verifyProp, articleController.update);
 
+// 删除文章
+articleRouter.delete('/delete/:id', verifyProp, articleController.delete);
+
 export default articleRouter;

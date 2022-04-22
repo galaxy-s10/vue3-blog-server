@@ -5,11 +5,10 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IArticle } from '@/interface';
-import articleModel from '@/model/article.model';
 import articleService from '@/service/article.service';
 import tagService from '@/service/tag.service';
 import typeService from '@/service/type.service';
-import userService from '@/service/user.service';
+import { arrayUnique } from '@/utils';
 
 class ArticleController {
   async create(ctx: ParameterizedContext, next) {
@@ -21,35 +20,33 @@ class ArticleController {
         is_comment,
         status,
         content,
-        click,
-        tags,
+        priority,
         types,
-        users,
+        tags,
       }: IArticle = ctx.request.body;
-      const userIsExist = await userService.isExist(users);
-      if (!userIsExist) {
-        throw new Error(`用户id:${users}中存在不存在的用户!`);
-      }
-      const tagIsExist = await tagService.isExist(tags);
+      const { userInfo } = await authJwt(ctx);
+      const tagIsExist = await tagService.isExist(arrayUnique(tags));
       if (!tagIsExist) {
         throw new Error(`标签id:${tags}中存在不存在的标签!`);
       }
-      const typeIsExist = await typeService.isExist(types);
+      const typeIsExist = await typeService.isExist(arrayUnique(types));
       if (!typeIsExist) {
         throw new Error(`分类id:${types}中存在不存在的分类!`);
       }
-      const result = await articleService.create({
+      const result: any = await articleService.create({
         title,
         desc,
         head_img,
         is_comment,
         status,
         content,
-        click,
-        tags,
-        types,
-        users,
+        priority,
       });
+      // eslint-disable-next-line
+      tags && (await result.setTags(tags));
+      // eslint-disable-next-line
+      types && (await result.setTypes(types));
+      await result.setUsers([userInfo.id]);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -76,15 +73,15 @@ class ArticleController {
         tags = [],
         types = [],
       }: IArticle = ctx.request.body;
-      const isExistArticle = await articleService.isExist([id]);
-      if (!isExistArticle) {
+      const article: any = await articleService.find(id);
+      if (!article) {
         throw new Error(`不存在id为${id}的文章!`);
       }
-      const isExistTag = await tagService.isExist([id]);
+      const isExistTag = await tagService.isExist(tags);
       if (!isExistTag) {
         throw new Error(`不存在id为${id}的标签!`);
       }
-      const isExistType = await typeService.isExist([id]);
+      const isExistType = await typeService.isExist(types);
       if (!isExistType) {
         throw new Error(`不存在id为${id}的分类!`);
       }
@@ -98,8 +95,6 @@ class ArticleController {
         head_img,
         content,
       });
-      const article: any = await articleModel.findByPk(id);
-      console.log(article.id, 23);
       article.setTypes(types);
       article.setTags(tags);
       successHandler({ ctx });
@@ -120,10 +115,9 @@ class ArticleController {
         }
         // eslint-disable-next-line no-empty
       } catch (error) {}
-      const result = await articleService.find(id, from_user_id);
+      const result = await articleService.findArticleDetail(id, from_user_id);
       successHandler({ ctx, data: result });
     } catch (error) {
-      console.log('first', error);
       emitError({ ctx, code: 400, error });
     }
     await next();
@@ -177,6 +171,29 @@ class ArticleController {
         status: isAdmin ? status : 1,
       });
       successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  async delete(ctx: ParameterizedContext, next) {
+    try {
+      const hasAuth = await verifyUserAuth(ctx);
+      if (!hasAuth) {
+        emitError({ ctx, code: 403, error: '权限不足！' });
+        return;
+      }
+      const id = +ctx.params.id;
+      const article: any = await articleService.find(id);
+      if (!article) {
+        emitError({ ctx, code: 400, error: `不存在id为${id}的文章!` });
+        return;
+      }
+      article.setTypes([]);
+      article.setTags([]);
+      await articleService.delete(id);
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

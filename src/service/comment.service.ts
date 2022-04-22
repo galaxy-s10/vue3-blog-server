@@ -208,7 +208,6 @@ class CommentService {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const startTime = +new Date();
-    console.log('留言板评论列表', orderBy, orderName);
     const result: any = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -310,7 +309,6 @@ class CommentService {
     const sql_duration = +new Date() - startTime;
     result.rows.forEach((item) => {
       const v = item.get();
-      // v.star_total = v.stars.length;
       v.is_star_id = v.is_star?.id || null;
       v.is_star = v.is_star !== null;
 

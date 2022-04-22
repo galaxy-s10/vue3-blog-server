@@ -376,6 +376,11 @@ User.belongsToMany(QqUser, {
   },
 });
 
+Star.belongsTo(User, {
+  foreignKey: 'from_user_id',
+  constraints: false,
+});
+
 // 发出的star
 User.hasMany(Star, {
   foreignKey: 'from_user_id',

@@ -116,11 +116,14 @@ class EmailUserController {
         emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
         return;
       }
-      const findEmailUserRes = await emailUserService.findThirdUser(email);
-      if (!findEmailUserRes) {
+      const isExistEmail = await emailUserService.findByEmail(email);
+      if (!isExistEmail) {
         throw new Error(`${email}还未绑定过用户!`);
       }
-      console.log(findEmailUserRes, 5555);
+      const findEmailUserRes = await emailUserService.findThirdUser(email);
+      if (!findEmailUserRes.get().users[0]) {
+        throw new Error(`${email}用户有误，请联系管理员!`);
+      }
       const userInfo = findEmailUserRes.get().users[0].get();
       const token = signJwt({
         userInfo,
@@ -155,7 +158,7 @@ class EmailUserController {
         emitError({ ctx, code: 400, message: '请输入正确的邮箱!' });
         return;
       }
-      const emailIsExist = await emailUserService.isExist([email]);
+      const emailIsExist = await emailUserService.emailsIsExist([email]);
       if (emailIsExist) {
         emitError({ ctx, code: 400, message: '该邮箱已被他人使用!' });
       } else {

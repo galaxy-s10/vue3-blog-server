@@ -133,11 +133,6 @@ class UserService {
     const userInfo: any = await userModel.findOne({
       include: [
         {
-          model: articleModel,
-          attributes: ['id'],
-          through: { attributes: [] },
-        },
-        {
           model: qqUserModel,
           through: {
             attributes: ['third_platform'],
@@ -168,26 +163,6 @@ class UserService {
           model: roleModel,
           through: { attributes: [] },
         },
-        {
-          model: commentModel,
-          attributes: ['id'],
-          as: 'send_comments',
-        },
-        {
-          model: commentModel,
-          attributes: ['id'],
-          as: 'receive_comments',
-        },
-        {
-          model: starModel,
-          as: 'receive_stars',
-          attributes: ['id'],
-        },
-        {
-          model: starModel,
-          as: 'send_stars',
-          attributes: ['id'],
-        },
       ],
       attributes: {
         exclude: ['password', 'token'],
@@ -206,17 +181,45 @@ class UserService {
       },
       where: { id },
     });
+    const userArticlePromise = userModel.count({
+      include: [{ model: articleModel }],
+      where: { id },
+    });
+    const userSendCommentPromise = userModel.count({
+      include: [{ model: commentModel, as: 'send_comments' }],
+      where: { id },
+    });
+    const userReceiveCommentPromise = userModel.count({
+      include: [{ model: commentModel, as: 'receive_comments' }],
+      where: { id },
+    });
+    const userSendStarPromise = userModel.count({
+      include: [{ model: starModel, as: 'send_stars' }],
+      where: { id },
+    });
+    const userReceiveStarPromise = userModel.count({
+      include: [{ model: starModel, as: 'receive_stars' }],
+      where: { id },
+    });
+    const [
+      userSendComment,
+      userReceiveComment,
+      userSendStar,
+      userReceiveStar,
+      userArticle,
+    ] = await Promise.all([
+      userSendCommentPromise,
+      userReceiveCommentPromise,
+      userSendStarPromise,
+      userReceiveStarPromise,
+      userArticlePromise,
+    ]);
     const result = userInfo.get();
-    result.send_comments_total = result.send_comments.length;
-    result.receive_comments_total = result.receive_comments.length;
-    result.send_stars_total = result.send_stars.length;
-    result.receive_stars_total = result.receive_stars.length;
-    result.articles_total = result.articles.length;
-    delete result.send_comments;
-    delete result.receive_comments;
-    delete result.send_stars;
-    delete result.receive_stars;
-    delete result.articles;
+    result.send_comments_total = userSendComment;
+    result.receive_comments_total = userReceiveComment;
+    result.send_stars_total = userSendStar;
+    result.receive_stars_total = userReceiveStar;
+    result.articles_total = userArticle;
     return result;
   }
 

@@ -9,7 +9,7 @@ import typeModel from '@/model/type.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
-const { fn, Op, col, literal } = Sequelize;
+const { Op, literal } = Sequelize;
 
 class ArticleService {
   /** 文章是否存在 */
@@ -25,7 +25,13 @@ class ArticleService {
   }
 
   /** 查找文章 */
-  async find(id: number, from_user_id = -1) {
+  async find(id: number) {
+    const result = await articleModel.findOne({ where: { id } });
+    return result;
+  }
+
+  /** 查找文章详情 */
+  async findArticleDetail(id: number, from_user_id = -1) {
     await articleModel.update(
       { click: literal('`click` +1') },
       {
@@ -37,6 +43,9 @@ class ArticleService {
       include: [
         {
           model: typeModel,
+          through: {
+            attributes: [],
+          },
         },
         {
           attributes: { exclude: ['password', 'token'] },
@@ -47,12 +56,28 @@ class ArticleService {
         },
         {
           model: tagModel,
+          through: {
+            attributes: [],
+          },
         },
       ],
       where: { id },
     });
     if (!result) return null;
-    const starTotalPromise = starModel.count({
+    const starPromise = starModel.findAndCountAll({
+      attributes: [
+        [Sequelize.col('user.id'), 'id'],
+        [Sequelize.col('user.avatar'), 'avatar'],
+        [Sequelize.col('user.username'), 'username'],
+      ],
+      include: [
+        {
+          model: userModel,
+          attributes: [],
+          required: true,
+        },
+      ],
+      limit: 5,
       where: {
         article_id: id,
         comment_id: -1,
@@ -63,21 +88,22 @@ class ArticleService {
         article_id: id,
       },
     });
-    const isStarPromise = starModel.count({
+    const isStarPromise = starModel.findOne({
       where: {
         article_id: id,
         from_user_id,
       },
     });
-    const [star_total, comment_total, is_star] = await Promise.all([
-      starTotalPromise,
+    const [star_info, comment_total, is_star]: any = await Promise.all([
+      starPromise,
       commentTotalPromise,
       isStarPromise,
     ]);
     return {
       ...result.get(),
-      is_star: is_star === 1,
-      star_total,
+      is_star: Boolean(is_star),
+      is_star_id: is_star?.id,
+      star_info,
       comment_total,
     };
   }
@@ -90,30 +116,18 @@ class ArticleService {
     is_comment,
     status,
     content,
-    click,
-    tags = [],
-    types = [],
-    users = [],
+    priority,
   }: IArticle) {
-    const result: any = await articleModel.create({
+    const result = await articleModel.create({
       title,
       desc,
       head_img,
       is_comment,
       status,
       content,
-      click,
-      tags,
-      types,
-      users,
+      priority,
     });
-    // eslint-disable-next-line
-    tags && (await result.setTags(tags));
-    // eslint-disable-next-line
-    types && (await result.setTypes(types));
-    // eslint-disable-next-line
-    users && (await result.setUsers(users));
-    return true;
+    return result;
   }
 
   /** 获取文章列表 */
@@ -302,6 +316,14 @@ class ArticleService {
       },
       { where: { id } }
     );
+    return result;
+  }
+
+  /** 删除文章 */
+  async delete(id: number) {
+    const result = await articleModel.destroy({
+      where: { id },
+    });
     return result;
   }
 }

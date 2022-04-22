@@ -3,8 +3,6 @@ import Sequelize from 'sequelize';
 import { IQqUserList } from '@/controller/qqUser.controller';
 import { IQqUser } from '@/interface';
 import qqUserModel from '@/model/qqUser.model';
-import thirdUserModel from '@/model/thirdUser.model';
-import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
