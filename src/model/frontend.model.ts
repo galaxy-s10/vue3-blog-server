@@ -42,6 +42,14 @@ const frontendModel = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:关闭申请友链 2:关闭申请友链
     },
+    frontend_dialog: {
+      type: DataTypes.INTEGER,
+      defaultValue: 2, // 1:开启首页弹窗 2:关闭首页弹窗
+    },
+    frontend_dialog_content: {
+      // 首页弹窗内容
+      type: DataTypes.TEXT('long'),
+    },
     frontend_about: {
       type: DataTypes.TEXT('long'),
     },

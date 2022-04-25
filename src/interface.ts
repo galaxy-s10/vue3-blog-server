@@ -8,13 +8,13 @@ export interface ITheme {
 }
 export interface IFrontend {
   id?: number;
-  frontend_login: number;
-  frontend_register: number;
-  frontend_qq_login: number;
-  frontend_github_login: number;
-  frontend_comment: number;
-  frontend_link: number;
-  frontend_about: string;
+  frontend_qq_login?: number;
+  frontend_github_login?: number;
+  frontend_comment?: number;
+  frontend_link?: number;
+  frontend_about?: string;
+  frontend_dialog?: number;
+  frontend_dialog_content?: string;
 }
 export interface IIpdata {
   city: string;

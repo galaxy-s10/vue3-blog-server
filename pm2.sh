@@ -4,7 +4,7 @@
 # Email: 2274751790@qq.com
 # Github: https://github.com/galaxy-s10
 # Date: 2022-01-10 15:25:30
-# LastEditTime: 2022-04-17 03:52:24
+# LastEditTime: 2022-04-25 19:53:54
 # Description:
 ###
 
@@ -34,7 +34,7 @@ echo 使用pm2维护：
 # pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/ts-node
 # pm2 start --name $JOBNAME-$ENV ts-node -- -P tsconfig.json ./src/index.ts
 npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start --name $JOBNAME-$ENV-$PORT ts-node -- -P tsconfig.json ./src/index.ts
-# pm2 start npm --name dddd -- run start
+pm2 save
 
 # echo 使用pm2维护：
 # pm2 start $PUBLICDIR/$JOBNAME/app.js --name $JOBNAME
