@@ -99,20 +99,16 @@ class QiniuModel {
   }
 
   // 获取七牛云文件
-  getList(prefix, limit, marker) {
+  getAllList(prefix, limit, marker) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     const bucket = 'hssblog';
-    // var options = {
-    //     prefix,
-    //     limit,
-    //     marker
-    // };
     const options = {};
     return new Promise((resolve, reject) => {
       bucketManager.listPrefix(bucket, options, (err, respBody, respInfo) => {
         if (respInfo.statusCode === 200) {
+          console.log(respInfo, 33333);
           resolve({ respInfo });
         } else {
           reject({ err });

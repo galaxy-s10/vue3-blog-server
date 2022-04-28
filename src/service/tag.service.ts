@@ -65,6 +65,7 @@ class TagService {
       where: {
         ...allWhere,
       },
+      distinct: true,
     });
     result.rows.forEach((item) => {
       const v = item.get();

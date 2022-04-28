@@ -19,6 +19,21 @@ class QiniuController {
     await next();
   }
 
+  // 获取七牛云文件
+  async getAllList(ctx: ParameterizedContext, next) {
+    try {
+      const { prefix, limit, marker } = ctx.request.query;
+      const data: any = await qiniuModel.getAllList(prefix, limit, marker);
+      successHandler({
+        ctx,
+        data: data.respInfo.data.items,
+      });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
   /**
    * 备份数据库
    */

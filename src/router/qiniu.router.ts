@@ -10,4 +10,6 @@ const qiniuRouter = new Router({ prefix: '/qiniu' });
 // upload
 // qiniuRouter.post('/upload', qiniuController.uploadBackupsDb);
 
+qiniuRouter.get('/all_list', qiniuController.getAllList);
+
 export default qiniuRouter;
