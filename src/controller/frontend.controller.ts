@@ -38,22 +38,36 @@ class FrontendController {
         frontend_about,
         frontend_comment,
         frontend_link,
-        frontend_login,
-        frontend_register,
         frontend_qq_login,
         frontend_github_login,
+        frontend_email_login,
+        frontend_dialog,
+        frontend_dialog_content,
       }: IFrontend = ctx.request.body;
-      const result = await frontendService.update({
+      console.log(
         id,
         frontend_about,
         frontend_comment,
         frontend_link,
-        frontend_login,
-        frontend_register,
         frontend_qq_login,
         frontend_github_login,
+        frontend_email_login,
+        frontend_dialog,
+        frontend_dialog_content,
+        1111
+      );
+      await frontendService.update({
+        id,
+        frontend_about,
+        frontend_comment,
+        frontend_link,
+        frontend_qq_login,
+        frontend_github_login,
+        frontend_email_login,
+        frontend_dialog,
+        frontend_dialog_content,
       });
-      successHandler({ ctx, data: result });
+      successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

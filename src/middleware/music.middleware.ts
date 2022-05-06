@@ -8,7 +8,7 @@ const schema = Joi.object({
   name: Joi.string().min(1).max(30),
   cover_pic: Joi.string().min(3).max(80),
   author: Joi.string().min(1).max(30),
-  audio_url: Joi.string().min(3).max(30),
+  audio_url: Joi.string().min(3).max(80),
   status: [1, 2],
 });
 

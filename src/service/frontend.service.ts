@@ -40,6 +40,7 @@ class FrontendService {
     frontend_link,
     frontend_qq_login,
     frontend_github_login,
+    frontend_email_login,
     frontend_dialog,
     frontend_dialog_content,
   }: IFrontend) {
@@ -50,6 +51,7 @@ class FrontendService {
         frontend_link,
         frontend_qq_login,
         frontend_github_login,
+        frontend_email_login,
         frontend_dialog,
         frontend_dialog_content,
       },

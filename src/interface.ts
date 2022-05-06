@@ -10,6 +10,7 @@ export interface IFrontend {
   id?: number;
   frontend_qq_login?: number;
   frontend_github_login?: number;
+  frontend_email_login?: number;
   frontend_comment?: number;
   frontend_link?: number;
   frontend_about?: string;
