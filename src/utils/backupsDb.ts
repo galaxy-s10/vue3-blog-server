@@ -61,10 +61,12 @@ const conner = () => {
                 });
             })
             .on('data', (data) => {
-              console.log(`STDOUT: ${data}`);
+              console.log(`==========STDOUT==========`);
+              console.log(data.toString());
             })
             .stderr.on('data', (data) => {
-              console.log(`STDERR: ${data}`);
+              console.log(`==========STDERR==========`);
+              console.log(data.toString());
             });
         }
       );

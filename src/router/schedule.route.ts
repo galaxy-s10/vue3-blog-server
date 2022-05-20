@@ -8,6 +8,18 @@ const scheduleRouter = new Router({ prefix: '/schedule' });
 scheduleRouter.get('/db_job', scheduleController.getDbJob);
 
 // 立即执行备份任务
-scheduleRouter.get('/invoke_db_job', scheduleController.invokeDbJob);
+scheduleRouter.post('/invoke_db_job', scheduleController.invokeDbJob);
+
+// 查看内存
+scheduleRouter.get(
+  '/invoke_showMemory_job',
+  scheduleController.invokeShowMemoryJob
+);
+
+// 执行清除buff/cache任务
+scheduleRouter.post(
+  '/invoke_clearCache_job',
+  scheduleController.invokeClearCacheJob
+);
 
 export default scheduleRouter;
