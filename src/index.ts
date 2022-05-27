@@ -69,7 +69,7 @@ const httpServer = createServer(app.callback());
 
 initWs(httpServer);
 
-httpServer.listen(PROJECT_PORT, () => {
+httpServer.listen(port, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));
   console.log(chalkINFO(`当前的项目名称: ${PROJECT_NAME}`));
   console.log(chalkINFO(`当前的项目环境: ${PROJECT_ENV}`));

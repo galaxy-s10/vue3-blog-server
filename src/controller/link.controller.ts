@@ -72,6 +72,17 @@ class LinkController {
         url,
         status,
       });
+      if (status === 1 && email) {
+        const mailOptions = {
+          from: MAIL_OPTIONS_CONFIG.from, // sender address
+          to: email, // list of receivers
+          subject: `友链申请审核通过！`, // Subject line
+          text: `你在自然博客申请的友链（${name}）已审核通过！`, // plain text body
+          html: `你在自然博客申请的友链（${name}）已审核通过！`, // html body
+        };
+        const emailMode = new SendEmailModel(mailOptions);
+        await emailMode.send();
+      }
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -81,16 +92,14 @@ class LinkController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const { email, name, avatar, desc, url, status }: ILink =
-        ctx.request.body;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+      const { email, name, avatar, desc, url }: ILink = ctx.request.body;
       await linkService.create({
         email,
         name,
         avatar,
         desc,
         url,
-        status: isAdmin ? status : 2,
+        status: 2,
       });
       const mailOptions = {
         from: MAIL_OPTIONS_CONFIG.from, // sender address
