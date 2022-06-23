@@ -6,7 +6,9 @@ import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { dbJob } from '@/utils/backupsDb';
 import { showMemoryJob, clearCacheJob } from '@/utils/clearCache';
+import { monitNuxtJob } from '@/utils/monitNuxt';
 
+console.log(monitNuxtJob);
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
     try {
