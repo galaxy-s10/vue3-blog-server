@@ -17,7 +17,12 @@ import verifyMiddleware from './middleware/verify.middleware';
 import useRoutes from './router/index';
 import { initDb } from './utils/initDb';
 
+import qiniuModel from '@/controller/qiniu.controller';
 import { initWs } from '@/websocket';
+
+qiniuModel.monitCDN().then((res) => {
+  console.log(res);
+});
 
 aliasOk(); // 添加别名路径
 

@@ -109,8 +109,13 @@ const conner = () => {
  * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
  */
 const rule = new schedule.RecurrenceRule();
-rule.hour = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-rule.minute = 0;
+// rule.hour = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const allMinute = 60;
+const minuteArr = [];
+for (let i = 0; i < allMinute; i += 1) {
+  minuteArr.push(i);
+}
+rule.minute = minuteArr.filter((v) => v % 10 === 0);
 export const monitNuxtJob = schedule.scheduleJob('monitNuxtJob', rule, () => {
   if (PROJECT_ENV === 'prod') {
     console.log(
@@ -120,6 +125,6 @@ export const monitNuxtJob = schedule.scheduleJob('monitNuxtJob', rule, () => {
     );
     conner();
   } else {
-    console.log(chalkWRAN('非生产环境，不执行定时任务'));
+    console.log(chalkWRAN('非生产环境，不执行monitNuxtJob定时任务'));
   }
 });

@@ -8,6 +8,7 @@ import { dbJob } from '@/utils/backupsDb';
 import { showMemoryJob, clearCacheJob } from '@/utils/clearCache';
 import { monitNuxtJob } from '@/utils/monitNuxt';
 
+console.log(dbJob);
 console.log(monitNuxtJob);
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {

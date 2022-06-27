@@ -7,11 +7,21 @@ import {
 } from '@/config/secret';
 
 const qiniuConfConfig = new qiniu.conf.Config();
+
 // @ts-ignore
-qiniuConfConfig.zone = qiniu.zone.Zone_z2;
+qiniuConfConfig.zone = qiniu.zone.Zone_z2; // https://developer.qiniu.com/kodo/1289/nodejs#general-uptoken，qiniu.zone.Zone_z2代表华南
 
 class QiniuModel {
   config = qiniuConfConfig;
+
+  /**
+   * 获取七牛云mac
+   * @returns
+   */
+  getQiniuCdnManager() {
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
+    return new qiniu.cdn.CdnManager(mac);
+  }
 
   /**
    * 获取七牛云凭证

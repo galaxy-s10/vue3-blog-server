@@ -138,6 +138,6 @@ export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
     );
     conner();
   } else {
-    console.log(chalkWRAN('非生产环境，不执行定时任务'));
+    console.log(chalkWRAN('非生产环境，不执行dbJob定时任务'));
   }
 });

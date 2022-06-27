@@ -244,3 +244,13 @@ export const arrayToTree = ({
   const data = JSON.parse(JSON.stringify(originArr));
   return handleToTree(data, originPid);
 };
+
+/**
+ * 获取最近一周
+ */
+export const getLastestWeek = () => {
+  const oneDay = 1000 * 60 * 60 * 24;
+  const endDate = +new Date();
+  const startDate = endDate - oneDay * 7;
+  return { startDate, endDate };
+};
