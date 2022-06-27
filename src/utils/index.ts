@@ -2,7 +2,7 @@ import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/app/chalkTip';
 import sequelize from '@/config/db';
 
 /** 转换时间格式 */
-export const formateDate = (datetime) => {
+export const formatDate = (datetime) => {
   function addDateZero(num) {
     return num < 10 ? `0${num}` : num;
   }
@@ -253,4 +253,27 @@ export const getLastestWeek = () => {
   const endDate = +new Date();
   const startDate = endDate - oneDay * 7;
   return { startDate, endDate };
+};
+
+/**
+ * 格式化大小
+ */
+export const formatMemorySize = (val: number) => {
+  const oneKb = 1024;
+  const oneMb = oneKb * 1024;
+  const oneGb = oneMb * 1024;
+  const oneTb = oneGb * 1024;
+  if (val < oneKb) {
+    return `${val}kb`;
+  }
+  if (val < oneMb) {
+    return `${val / oneKb}kb`;
+  }
+  if (val < oneGb) {
+    return `${val / oneMb}mb`;
+  }
+  if (val < oneTb) {
+    return `${val / oneGb}gb`;
+  }
+  return `${val / oneTb}tb`;
 };

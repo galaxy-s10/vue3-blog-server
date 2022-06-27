@@ -115,16 +115,21 @@ const minuteArr = [];
 for (let i = 0; i < allMinute; i += 1) {
   minuteArr.push(i);
 }
+// 每十分钟监控一次
 rule.minute = minuteArr.filter((v) => v % 10 === 0);
-export const monitNuxtJob = schedule.scheduleJob('monitNuxtJob', rule, () => {
-  if (PROJECT_ENV === 'prod') {
-    console.log(
-      chalkINFO(
-        `执行monitNuxtJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
-      )
-    );
-    conner();
-  } else {
-    console.log(chalkWRAN('非生产环境，不执行monitNuxtJob定时任务'));
-  }
-});
+
+export const monitNuxtJob = () => {
+  console.log(chalkWRAN('监控nuxt任务开始启动！'));
+  schedule.scheduleJob('monitNuxtJob', rule, () => {
+    if (PROJECT_ENV === 'prod') {
+      console.log(
+        chalkINFO(
+          `执行monitNuxtJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+        )
+      );
+      conner();
+    } else {
+      console.log(chalkWRAN('非生产环境，不执行monitNuxtJob定时任务'));
+    }
+  });
+};

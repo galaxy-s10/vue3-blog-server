@@ -17,12 +17,9 @@ import verifyMiddleware from './middleware/verify.middleware';
 import useRoutes from './router/index';
 import { initDb } from './utils/initDb';
 
-import qiniuModel from '@/controller/qiniu.controller';
+import { monitNuxtJob } from '@/utils/monitNuxt';
+import { monitQiniuCDN } from '@/utils/monitQiniuCDN';
 import { initWs } from '@/websocket';
-
-qiniuModel.monitCDN().then((res) => {
-  console.log(res);
-});
 
 aliasOk(); // 添加别名路径
 
@@ -73,6 +70,8 @@ const port = +PROJECT_PORT;
 const httpServer = createServer(app.callback());
 
 initWs(httpServer);
+monitNuxtJob();
+monitQiniuCDN();
 
 httpServer.listen(port, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));

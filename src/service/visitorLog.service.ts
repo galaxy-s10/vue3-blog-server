@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 
 import { IVisitor, IList } from '@/interface';
 import visitorLogModel from '@/model/visitorLog.model';
-import { formateDate, handlePaging } from '@/utils';
+import { formatDate, handlePaging } from '@/utils';
 
 const { fn, Op, col } = Sequelize;
 interface ISearch extends IVisitor, IList {}
@@ -139,7 +139,7 @@ class VisitorLogService {
       where: {
         ip,
         created_at: {
-          [Op.between]: [formateDate(beforeDate), formateDate(nowDate)],
+          [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
         },
       },
     });

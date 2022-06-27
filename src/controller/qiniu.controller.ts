@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
 import { ParameterizedContext } from 'koa';
 
+import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { getLastestWeek } from '@/utils';
+import { formatMemorySize, getLastestWeek } from '@/utils';
 import qiniuModel from '@/utils/qiniu';
 
 class QiniuController {
@@ -54,19 +55,13 @@ class QiniuController {
 
   /**
    * 监控cdn流量
+   * 最近一周内，使用流量超过2g就停掉cdn服务
    */
   async monitCDN() {
     const cdnManager = qiniuModel.getQiniuCdnManager();
     // 域名列表
     const domains = ['img.cdn.hsslive.cn', 'resoure.cdn.hsslive.cn'];
     const { startDate, endDate } = getLastestWeek();
-    console.log(
-      dayjs(startDate).format('YYYY-MM-DD'),
-      dayjs(endDate).format('YYYY-MM-DD')
-    );
-    // 指定日期
-    // const startDate = '2022-06-27 10:00:00';
-    // const endDate = '2022-06-27 12:00:00';
     const granularity = 'day'; // 粒度，取值：5min ／ hour ／day
     return new Promise((resolve, reject) => {
       // 获取域名流量
@@ -75,42 +70,61 @@ class QiniuController {
         dayjs(endDate).format('YYYY-MM-DD'),
         granularity,
         domains,
-        function (err, respBody, respInfo) {
+        // eslint-disable-next-line consistent-return
+        (err, respBody) => {
           if (err) {
-            throw err;
+            reject(err);
+            return;
           }
-          resolve(respBody);
-          console.log(respBody, 11111);
-          console.log('+++++++++++');
-          // return;
-          // 防止因为没数据导致报错(如果没有当天的CDN数据就返回)
-          if (!Object.keys(respBody.data).length) {
-            return false;
-          }
-          console.log(respInfo.data.data, respBody, 22222);
-          if (respInfo.statusCode === 200) {
-            const jsonBody = respBody;
-            const { code } = jsonBody;
-            console.log(code);
-            const tickTime = jsonBody.time;
-            console.log(tickTime);
-            const fluxData = jsonBody.data;
-            console.log(fluxData);
-            console.log('----111');
-            // domains.forEach(function (domain) {
-            //   const fluxDataOfDomain = fluxData[domain];
-            //   console.log('fluxDataOfDomain', fluxDataOfDomain);
-            //   if (fluxDataOfDomain != null) {
-            //     console.log(`flux data for:${domain}`);
-            //     const fluxChina = fluxDataOfDomain.china;
-            //     const fluxOversea = fluxDataOfDomain.oversea;
-            //     console.log(fluxChina);
-            //     console.log(fluxOversea);
-            //   } else {
-            //     console.log(`no flux data for:${domain}`);
-            //   }
-            //   console.log('----------');
-            // });
+          const fluxData = respBody.data;
+          let allDomainNameFlux = 0;
+
+          domains.forEach((domain) => {
+            const fluxDataOfDomain = fluxData[domain];
+            if (fluxDataOfDomain != null) {
+              // console.log(`域名: ${domain} 使用的流量情况:`);
+              const fluxChina = (fluxDataOfDomain.china || []).reduce(
+                (pre, val) => pre + val,
+                0
+              );
+              const fluxOversea = (fluxDataOfDomain.oversea || []).reduce(
+                (pre, val) => pre + val,
+                0
+              );
+              // console.log(`域名: ${domain}使用的国内流量:`, fluxChina);
+              // console.log(`域名: ${domain}使用的海外流量:`, fluxOversea);
+              console.log(
+                chalkWRAN(
+                  `域名:${domain}最近一周使用的总流量:${formatMemorySize(
+                    fluxChina + fluxOversea
+                  )}`
+                )
+              );
+              allDomainNameFlux += fluxChina + fluxOversea;
+            } else {
+              console.log(chalkWRAN(`域名: ${domain}最近一周没有流量数据`));
+            }
+          });
+          console.log(
+            chalkWRAN(
+              `所有域名最近一周使用的总流量: ${formatMemorySize(
+                allDomainNameFlux
+              )}`
+            )
+          );
+          // 2g就报错
+          const oneKb = 1024;
+          const oneMb = oneKb * 1024;
+          const oneGb = oneMb * 1024;
+          const threshold = oneGb * 2;
+          console.log(
+            chalkWRAN(`流量阈值:${formatMemorySize(threshold)}`),
+            threshold
+          );
+          if (allDomainNameFlux > threshold) {
+            resolve(true);
+          } else {
+            resolve(false);
           }
         }
       );
