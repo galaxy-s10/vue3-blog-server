@@ -129,7 +129,13 @@ export const monitNuxtJob = () => {
       );
       conner();
     } else {
-      console.log(chalkWRAN('非生产环境，不执行monitNuxtJob定时任务'));
+      console.log(
+        chalkWRAN(
+          `非生产环境，不执行monitNuxtJob定时任务，${dayjs().format(
+            'YYYY-MM-DD HH:mm:ss'
+          )}`
+        )
+      );
     }
   });
 };

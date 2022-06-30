@@ -55,12 +55,17 @@ class QiniuController {
 
   /**
    * 监控cdn流量
-   * 最近一周内，使用流量超过2g就停掉cdn服务
+   * 最近一周内，使用流量超过2g就邮件提示（TODO）
+   * 最近一周内，使用流量超过5g就停掉cdn服务
    */
   async monitCDN() {
     const cdnManager = qiniuModel.getQiniuCdnManager();
     // 域名列表
-    const domains = ['img.cdn.hsslive.cn', 'resoure.cdn.hsslive.cn'];
+    const domains = [
+      'img.cdn.hsslive.cn',
+      'resoure.cdn.hsslive.cn',
+      'resource.hsslive.cn',
+    ];
     const { startDate, endDate } = getLastestWeek();
     const granularity = 'day'; // 粒度，取值：5min ／ hour ／day
     return new Promise((resolve, reject) => {
@@ -112,15 +117,12 @@ class QiniuController {
               )}`
             )
           );
-          // 2g就报错
+          // 5g就报错
           const oneKb = 1024;
           const oneMb = oneKb * 1024;
           const oneGb = oneMb * 1024;
-          const threshold = oneGb * 2;
-          console.log(
-            chalkWRAN(`流量阈值:${formatMemorySize(threshold)}`),
-            threshold
-          );
+          const threshold = oneGb * 5;
+          console.log(chalkWRAN(`流量阈值:${formatMemorySize(threshold)}`));
           if (allDomainNameFlux > threshold) {
             resolve(true);
           } else {

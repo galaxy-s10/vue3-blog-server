@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 
-import { chalkINFO } from '@/app/chalkTip';
+import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 
 const webSocketMsgType = {
   connect: 'connect', // 用户连接
@@ -14,6 +14,7 @@ const webSocketMsgType = {
 const onlineList = {};
 
 export const initWs = (server) => {
+  console.log(chalkWRAN('初始化websocket'));
   const io = new Server(server);
   io.on('connection', function connection(socket) {
     socket.on(webSocketMsgType.getOnlineUser, async (data) => {
