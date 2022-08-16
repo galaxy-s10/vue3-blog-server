@@ -1,17 +1,19 @@
-import fs from 'fs';
-
 import dayjs from 'dayjs';
+import fs from 'fs-extra';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
+import { formatMemorySize } from '.';
+
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { PROJECT_ENV } from '@/app/constant';
-import { SSH_CONFIG } from '@/config/secret';
+import { QQ_EMAIL_USER, SSH_CONFIG } from '@/config/secret';
+import otherController from '@/controller/other.controller';
 
 // 备份目录文件
-const backupsDirectory = '/node/backups/nuxt/';
+const backupsDirectory = '/node/backups/server/';
 // 备份文件名
-const backupsFileName = 'monitNuxt.txt';
+const backupsFileName = 'monitMemory.txt';
 // 备份目录是否存在
 const backupsDirectoryIsExistCmd = `
 if [ ! -d "${backupsDirectory}" ];then
@@ -25,7 +27,31 @@ fi
 
 // 查看占用内存最多的10个进程
 const backupsCmd = () => {
-  return 'ps -aux | sort -k4nr | head -10';
+  return 'free -b';
+};
+
+/**
+ * @description: 处理free命令返回的内存信息
+ * @param {string} str
+ * @return {*}
+ */
+const handleData = (str: string) => {
+  const arr = str.match(/\S+/g);
+
+  const mem = 'Mem:';
+  const swap = 'Swap:';
+  const res = [];
+  const obj = {};
+
+  res.push(arr.splice(0, 6));
+  res.push(arr.splice(0, 7));
+  res.push(arr.splice(0, arr.length));
+
+  res[0].forEach((key, index) => {
+    res[1][index + 1] && (obj[mem + key] = res[1][index + 1]);
+    res[2][index + 1] && (obj[swap + key] = res[2][index + 1]);
+  });
+  return obj;
 };
 
 const conner = () => {
@@ -46,24 +72,44 @@ const conner = () => {
             })
             .on('data', (data) => {
               console.log(`==========STDOUT==========`);
+              console.log(data.toString());
               try {
                 const dest = backupsDirectory + backupsFileName;
                 const isExit = fs.existsSync(dest);
+
+                const res = handleData(data.toString());
+                const res1 = {};
+                Object.keys(res).forEach((v) => {
+                  const val = res[v];
+                  res1[v] = formatMemorySize(Number(res[v]));
+                });
+                const total = res['Mem:total'];
+                const used = res['Mem:used'];
+                const flag = 80 / 100;
+                let result = '';
+                if (total * flag < used) {
+                  result = `服务器总内存: ${res1['Mem:total']},当前已使用: ${
+                    res1['Mem:used']
+                  },服务器已使用内存大于${`${flag * 100}%`}}`;
+                  otherController.sendEmail(QQ_EMAIL_USER, result, result);
+                } else {
+                  result = `服务器总内存: ${res1['Mem:total']},当前已使用: ${
+                    res1['Mem:used']
+                  },服务器已使用内存小于${`${flag * 100}%`}`;
+                  console.log(result);
+                }
                 if (isExit) {
                   let oldRecord = fs.readFileSync(dest).toString();
                   const template = `
                   ${new Date().toLocaleString()}:\n
                   ${data.toString()}\n
                   `;
-                  fs.writeFileSync(dest, (oldRecord += template));
+                  fs.outputFileSync(dest, (oldRecord += template));
                 } else {
-                  const template = `
-                  ${new Date().toLocaleString()}:\n
-                  ${data.toString()}\n
-                  `;
-                  fs.writeFileSync(dest, template);
+                  console.log('>>>', dest);
+                  fs.outputFileSync(dest, result);
+                  // fs.writeFileSync(dest, result);
                 }
-                console.log(data.toString());
               } catch (err) {
                 console.log(err);
               }
@@ -123,20 +169,20 @@ rule.minute = minuteArr.filter((v) => v % 10 === 0);
 // 每十秒钟监控一次
 // rule.second = minuteArr.filter((v) => v % 10 === 0);
 
-export const monitNuxtJob = () => {
-  console.log(chalkWRAN('监控nuxt任务开始启动！'));
-  schedule.scheduleJob('monitNuxtJob', rule, () => {
-    if (PROJECT_ENV === 'prod') {
+export const monitMemoryJob = () => {
+  console.log(chalkWRAN('监控内存任务开始启动！'));
+  schedule.scheduleJob('monitMemoryJob', rule, () => {
+    if (PROJECT_ENV !== 'prod') {
       console.log(
         chalkINFO(
-          `执行monitNuxtJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+          `执行monitMemoryJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
         )
       );
       conner();
     } else {
       console.log(
         chalkWRAN(
-          `非生产环境，不执行monitNuxtJob定时任务，${dayjs().format(
+          `非生产环境，不执行monitMemoryJob定时任务，${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
           )}`
         )

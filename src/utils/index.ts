@@ -256,15 +256,18 @@ export const getLastestWeek = () => {
 };
 
 /**
- * 格式化大小
+ * @description: 格式化内存大小（要求传入的数字以byte为单位）
+ * @param {number} val
+ * @return {*}
  */
 export const formatMemorySize = (val: number) => {
-  const oneKb = 1024;
+  const oneByte = 1;
+  const oneKb = oneByte * 1024;
   const oneMb = oneKb * 1024;
   const oneGb = oneMb * 1024;
   const oneTb = oneGb * 1024;
   if (val < oneKb) {
-    return `${val}kb`;
+    return `${val / oneByte}byte`;
   }
   if (val < oneMb) {
     return `${val / oneKb}kb`;

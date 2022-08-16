@@ -17,7 +17,9 @@ import verifyMiddleware from './middleware/verify.middleware';
 import useRoutes from './router/index';
 import { initDb } from './utils/initDb';
 
+import { monitMemoryJob } from '@/utils/monitMemory';
 import { monitNuxtJob } from '@/utils/monitNuxt';
+import { monitProcessJob } from '@/utils/monitProcess';
 import { monitQiniuCDN } from '@/utils/monitQiniuCDN';
 import { initWs } from '@/websocket';
 
@@ -70,8 +72,10 @@ const port = +PROJECT_PORT;
 const httpServer = createServer(app.callback());
 
 initWs(httpServer);
-monitNuxtJob();
-monitQiniuCDN();
+monitNuxtJob(); // 监控nuxt进程
+monitMemoryJob(); // 监控服务器内存
+monitProcessJob(); // 监控node进程
+monitQiniuCDN(); // 监控七牛云cdn
 
 httpServer.listen(port, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));
