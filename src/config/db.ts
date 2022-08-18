@@ -3,7 +3,7 @@ import { Sequelize } from 'sequelize';
 import { MYSQL_CONFIG } from './secret';
 
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
-import { PROJECT_ENV } from '@/app/constant';
+import { PROJECT_ENV } from '@/constant';
 
 const dbName =
   PROJECT_ENV !== 'prod'

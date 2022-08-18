@@ -161,6 +161,12 @@ export interface ILog {
   api_err_stack?: string;
 }
 
+export interface IMonit {
+  id?: number;
+  type?: number;
+  info?: string;
+}
+
 export interface IArticle {
   id?: number;
   title?: string;

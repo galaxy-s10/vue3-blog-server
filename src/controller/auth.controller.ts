@@ -1,9 +1,9 @@
 import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
-import { PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { PROJECT_ENV } from '@/constant';
 import { IAuth } from '@/interface';
 import authService from '@/service/auth.service';
 import { arrayGetDifference, arrayToTree, arrayUnique } from '@/utils';

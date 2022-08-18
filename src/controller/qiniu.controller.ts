@@ -55,10 +55,8 @@ class QiniuController {
 
   /**
    * 监控cdn流量
-   * 最近一周内，使用流量超过2g就邮件提示（TODO）
-   * 最近一周内，使用流量超过5g就停掉cdn服务
    */
-  async monitCDN() {
+  monitCDN() {
     const cdnManager = qiniuModel.getQiniuCdnManager();
     // 域名列表
     const domains = [
@@ -69,10 +67,12 @@ class QiniuController {
     const { startDate, endDate } = getLastestWeek();
     const granularity = 'day'; // 粒度，取值：5min ／ hour ／day
     return new Promise((resolve, reject) => {
+      const start = dayjs(startDate).format('YYYY-MM-DD');
+      const end = dayjs(endDate).format('YYYY-MM-DD');
       // 获取域名流量
       cdnManager.getFluxData(
-        dayjs(startDate).format('YYYY-MM-DD'),
-        dayjs(endDate).format('YYYY-MM-DD'),
+        start,
+        end,
         granularity,
         domains,
         // eslint-disable-next-line consistent-return
@@ -117,17 +117,7 @@ class QiniuController {
               )}`
             )
           );
-          // 5g就报错
-          const oneKb = 1024;
-          const oneMb = oneKb * 1024;
-          const oneGb = oneMb * 1024;
-          const threshold = oneGb * 5;
-          console.log(chalkWRAN(`流量阈值:${formatMemorySize(threshold)}`));
-          if (allDomainNameFlux > threshold) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
+          resolve({ allDomainNameFlux, start, end });
         }
       );
     });

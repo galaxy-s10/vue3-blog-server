@@ -5,13 +5,13 @@ import redisController from './redis.controller';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import { chalkERROR } from '@/app/chalkTip';
+import emitError from '@/app/handler/emit-error';
+import successHandler from '@/app/handler/success-handle';
 import {
   REDIS_PREFIX,
   THIRD_PLATFORM,
   VERIFY_EMAIL_RESULT_CODE,
-} from '@/app/constant';
-import emitError from '@/app/handler/emit-error';
-import successHandler from '@/app/handler/success-handle';
+} from '@/constant';
 import { IEmail } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';

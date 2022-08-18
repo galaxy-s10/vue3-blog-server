@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';

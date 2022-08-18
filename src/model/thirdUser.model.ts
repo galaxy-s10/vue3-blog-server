@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 
-import { THIRD_PLATFORM } from '@/app/constant';
 import sequelize from '@/config/db';
+import { THIRD_PLATFORM } from '@/constant';
 import { initTable } from '@/utils';
 
 const thirdUserModel = sequelize.define(

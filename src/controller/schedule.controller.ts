@@ -5,7 +5,7 @@ import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { dbJob } from '@/utils/backupsDb';
-import { showMemoryJob, clearCacheJob } from '@/utils/clearCache';
+import { showMemory, clearCache } from '@/utils/clearCache';
 
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
@@ -77,7 +77,7 @@ class ScheduleController {
         });
         return;
       }
-      clearCacheJob();
+      clearCache();
       successHandler({
         ctx,
         message: '开始执行清除buff/cache任务',
@@ -104,9 +104,7 @@ class ScheduleController {
         });
         return;
       }
-      const res = (await showMemoryJob()) as string;
-      const data = res.split('\n');
-      data[0] = `----—-:${data[0]}`;
+      const data = await showMemory();
       successHandler({
         ctx,
         data,

@@ -2,9 +2,9 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
-import { PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { PROJECT_ENV } from '@/constant';
 import { IRole } from '@/interface';
 import authService from '@/service/auth.service';
 import roleService from '@/service/role.service';
@@ -392,7 +392,6 @@ class RoleController {
       const roleRes = await Promise.all(queue);
       // 将二维数组拍平
       const roleResFlat = roleRes.flat();
-      console.log([...roleResFlat.map((v) => v.id), ...c_roles]);
       await roleService.delete([...roleResFlat.map((v) => v.id), ...c_roles]);
       successHandler({
         ctx,

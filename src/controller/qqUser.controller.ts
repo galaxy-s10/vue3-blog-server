@@ -1,7 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
@@ -12,6 +11,7 @@ import {
   ADMIN_QQ_CLIENT_SECRET,
   ADMIN_QQ_REDIRECT_URI,
 } from '@/config/secret';
+import { THIRD_PLATFORM } from '@/constant';
 import { IList, IQqUser } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
 import qqUserService from '@/service/qqUser.service';

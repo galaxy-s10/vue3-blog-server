@@ -1,10 +1,13 @@
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
-import { formatMemorySize } from '.';
-
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
-import { PROJECT_ENV } from '@/app/constant';
+import {
+  MONIT_TYPE_VUE3_BLOG_SERVER_NODE_PROCESS,
+  PROJECT_ENV,
+} from '@/constant';
+import monitService from '@/service/monit.service';
+import { formatMemorySize } from '@/utils/index';
 
 // https://github.com/node-schedule/node-schedule#cron-style-scheduling
 // 每分钟的第30秒触发： '30 * * * * *'
@@ -35,47 +38,70 @@ import { PROJECT_ENV } from '@/app/constant';
  * 等到了01：00：00时候才不会执行，后面的也是以此类推，因此得加上rule.minute = 0才可以，
  * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
  */
+
 const rule = new schedule.RecurrenceRule();
-// rule.hour = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+const allHour = 24;
 const allMinute = 60;
-const minuteArr = [];
-for (let i = 0; i < allMinute; i += 1) {
-  minuteArr.push(i);
+const allSecond = 60;
+const allHourArr = [];
+const allMinuteArr = [];
+const allSecondArr = [];
+
+for (let i = 0; i < allHour; i += 1) {
+  allHourArr.push(i);
 }
-// 每十分钟监控一次
-rule.minute = minuteArr.filter((v) => v % 10 === 0);
-// 每十秒钟监控一次
-// rule.second = minuteArr.filter((v) => v % 10 === 0);
+for (let i = 0; i < allMinute; i += 1) {
+  allMinuteArr.push(i);
+}
+for (let i = 0; i < allSecond; i += 1) {
+  allSecondArr.push(i);
+}
+
+// 每一小时执行
+rule.hour = allHourArr.filter((v) => v % 1 === 0);
+rule.minute = 0;
+rule.second = 0;
+
+const main = () => {
+  const info = {
+    pid: process.pid,
+    memory: {
+      rss: formatMemorySize(process.memoryUsage().rss),
+      external: formatMemorySize(process.memoryUsage().external),
+      heapTotal: formatMemorySize(process.memoryUsage().heapTotal),
+      heapUsed: formatMemorySize(process.memoryUsage().heapUsed),
+      arrayBuffers: formatMemorySize(process.memoryUsage().arrayBuffers),
+    },
+    cpu: {
+      system: formatMemorySize(process.cpuUsage().system),
+      user: formatMemorySize(process.cpuUsage().user),
+    },
+  };
+  monitService.create({
+    type: MONIT_TYPE_VUE3_BLOG_SERVER_NODE_PROCESS,
+    info: JSON.stringify(info),
+  });
+};
 
 export const monitProcessJob = () => {
-  console.log(chalkWRAN('监控node进程任务开始启动！'));
+  console.log(chalkWRAN('监控node进程定时任务启动！'));
   schedule.scheduleJob('monitProcessJob', rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
-          `执行monitProcessJob定时任务，${dayjs().format(
+          `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}`
+          )}，执行monitProcessJob定时任务`
         )
       );
-      console.log('进程号:', process.pid);
-      console.log('内存信息:', {
-        rss: formatMemorySize(process.memoryUsage().rss),
-        external: formatMemorySize(process.memoryUsage().external),
-        heapTotal: formatMemorySize(process.memoryUsage().heapTotal),
-        heapUsed: formatMemorySize(process.memoryUsage().heapUsed),
-        arrayBuffers: formatMemorySize(process.memoryUsage().arrayBuffers),
-      });
-      console.log('cup信息:', {
-        system: formatMemorySize(process.cpuUsage().system),
-        user: formatMemorySize(process.cpuUsage().user),
-      });
+      main();
     } else {
       console.log(
         chalkWRAN(
-          `非生产环境，不执行monitProcessJob定时任务，${dayjs().format(
+          `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}`
+          )}，非生产环境，不执行monitProcessJob定时任务`
         )
       );
     }

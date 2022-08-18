@@ -1,10 +1,10 @@
-import { ParameterizedContext } from 'koa';
+// import { ParameterizedContext } from 'koa';
 
-import { authJwt } from '@/app/auth/authJwt';
-import { chalkINFO } from '@/app/chalkTip';
-import emitError from '@/app/handler/emit-error';
+// import { authJwt } from '@/app/auth/authJwt';
+// import { chalkINFO } from '@/app/chalkTip';
+// import emitError from '@/app/handler/emit-error';
 
-const csrf = async (ctx: ParameterizedContext, next) => {
+const csrf = async () => {
   /**
    * 1，验证referer
    * 2，验证origin

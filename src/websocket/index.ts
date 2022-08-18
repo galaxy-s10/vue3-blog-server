@@ -17,7 +17,7 @@ export const initWs = (server) => {
   console.log(chalkWRAN('初始化websocket'));
   const io = new Server(server);
   io.on('connection', function connection(socket) {
-    socket.on(webSocketMsgType.getOnlineUser, async (data) => {
+    socket.on(webSocketMsgType.getOnlineUser, (data) => {
       console.log(socket.id, '获取在线用户', data);
       console.log(Object.keys(onlineList), 22222);
       // io.emit(webSocketMsgType.getOnlineUser, { count: res.size });
@@ -40,7 +40,7 @@ export const initWs = (server) => {
         time: new Date().toLocaleString(),
       });
     });
-    socket.on(webSocketMsgType.userOutRoom, async (data) => {
+    socket.on(webSocketMsgType.userOutRoom, (data) => {
       console.log(socket.id, '用户出房间', data);
       io.emit(webSocketMsgType.userOutRoom, {
         nickname: onlineList[socket.id].nickname,

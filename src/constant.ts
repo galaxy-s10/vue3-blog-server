@@ -25,3 +25,10 @@ export const THIRD_PLATFORM = {
   github: 4, // github
   email: 5, // 邮箱
 };
+
+export const MONIT_TYPE_MEMORY_LOG = 1; // 服务器内存日志
+export const MONIT_TYPE_MEMORY_THRESHOLD = 2; // 服务器内存达到阈值
+export const MONIT_TYPE_QINIU_CDN = 3; // 监控七牛云
+export const MONIT_TYPE_VUE3_BLOG_SERVER_NODE_PROCESS = 4; // 监控node进程
+export const MONIT_TYPE_RESTART_PM2 = 5; // 重启pm2
+export const MONIT_TYPE_CLEAR_CACHE = 6; // 清除buff/cache

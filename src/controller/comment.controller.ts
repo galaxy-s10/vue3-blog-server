@@ -188,7 +188,9 @@ class CommentController {
         if (code === 200) {
           from_user_id = userInfo.id;
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
 
       const result = await commentService.getCommentList({
         childrenPageSize,
@@ -224,7 +226,9 @@ class CommentController {
         if (code === 200) {
           from_user_id = userInfo.id;
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
 
       const result = await commentService.getChildrenCommentList({
         nowPage,

@@ -3,8 +3,8 @@ import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
-import { PROJECT_ENV } from '@/app/constant';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
+import { PROJECT_ENV } from '@/constant';
 import qiniuController from '@/utils/qiniu';
 
 // 备份目录
@@ -46,7 +46,7 @@ const conner = () => {
         (error, stream) => {
           if (error) throw error;
           stream
-            .on('close', async () => {
+            .on('close', () => {
               console.log('close');
               qiniuController
                 .uploadBackupsDb(`${backupsDirectory + fileName}.sql`)
@@ -134,15 +134,15 @@ rule.minute = 0;
 export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
   if (PROJECT_ENV === 'prod') {
     console.log(
-      chalkINFO(`执行dbJob定时任务，${dayjs().format('YYYY-MM-DD HH:mm:ss')}`)
+      chalkINFO(`${dayjs().format('YYYY-MM-DD HH:mm:ss')}，执行dbJob定时任务`)
     );
     conner();
   } else {
     console.log(
       chalkWRAN(
-        `非生产环境，不执行dbJob定时任务，${dayjs().format(
+        `${dayjs().format(
           'YYYY-MM-DD HH:mm:ss'
-        )}`
+        )}，非生产环境，不执行dbJob定时任务`
       )
     );
   }

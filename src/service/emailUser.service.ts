@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { THIRD_PLATFORM } from '@/app/constant';
+import { THIRD_PLATFORM } from '@/constant';
 import { IEmail } from '@/interface';
 import emailModel from '@/model/emailUser.model';
 import userModel from '@/model/user.model';

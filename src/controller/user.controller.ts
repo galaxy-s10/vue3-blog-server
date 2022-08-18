@@ -4,9 +4,9 @@ import redisController from './redis.controller';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
-import { REDIS_PREFIX, THIRD_PLATFORM, PROJECT_ENV } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { REDIS_PREFIX, THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
 import { IEmail, IList, IUser } from '@/interface';
 import User from '@/model/user.model';
 import emailUserService from '@/service/emailUser.service';
@@ -30,7 +30,7 @@ class UserController {
       if (!reg.test(email)) {
         throw new Error(`请输入正确的邮箱!`);
       }
-      const emailIsExist = await emailUserService.isExist([email]);
+      const emailIsExist = await emailUserService.emailsIsExist([email]);
       if (emailIsExist) {
         throw new Error(`该邮箱已被他人使用!`);
       } else {

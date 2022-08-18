@@ -1,12 +1,5 @@
 import redisClient from '@/config/redis';
 
-const emailResCode = {
-  ok: '发送成功!',
-  more: '一天只能发5次验证码!',
-  later: '一分钟内只能发1次验证码，请稍后再试!',
-  err: '验证码错误或已过期!',
-};
-
 class EmailController {
   getTTL = async ({ prefix = '', key = '' }) => {
     try {

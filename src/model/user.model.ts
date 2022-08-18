@@ -2,10 +2,10 @@
 import { DataTypes } from 'sequelize';
 
 import sequelize from '@/config/db';
-import userService from '@/service/user.service';
+// import userService from '@/service/user.service';
 import { initTable } from '@/utils';
 
-const MD5 = require('crypto-js/md5');
+// const MD5 = require('crypto-js/md5');
 
 const userModel = sequelize.define(
   'user',

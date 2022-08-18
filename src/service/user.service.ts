@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { THIRD_PLATFORM, PROJECT_ENV } from '@/app/constant';
+import { THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
 import { IUser, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';

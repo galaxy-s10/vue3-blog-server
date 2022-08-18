@@ -98,7 +98,9 @@ class VisitorLogController {
       let userInfo = null;
       try {
         userInfo = await authJwt(ctx);
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
       const apiNum = await visitorLogService.getOneSecondApiNums(ip);
       // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip
       if (apiNum > 5) {

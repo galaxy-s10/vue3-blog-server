@@ -68,7 +68,6 @@ class InitController {
     try {
       const count = await AuthModel.count();
       if (count === 0) {
-        console.log(bulkCreateAuth);
         await AuthModel.bulkCreate(bulkCreateAuth);
         successHandler({ ctx, message: '初始化权限成功!' });
       } else {

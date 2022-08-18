@@ -1,8 +1,8 @@
 import { ParameterizedContext } from 'koa';
 
+import { PROJECT_ENV } from '../../constant';
 import { authJwt } from '../auth/authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
-import { PROJECT_ENV } from '../constant';
 
 import logService from '@/service/log.service';
 

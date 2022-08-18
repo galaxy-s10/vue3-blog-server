@@ -7,20 +7,19 @@ import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
 import staticService from 'koa-static';
 
-import aliasOk from './app/alias';
-import { chalkINFO } from './app/chalkTip';
-import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from './app/constant';
-import errorHandler from './app/handler/error-handle';
-import { connectDb } from './config/db';
-import { connectRedis } from './config/redis';
-import verifyMiddleware from './middleware/verify.middleware';
-import useRoutes from './router/index';
-import { initDb } from './utils/initDb';
+import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
 
-import { monitMemoryJob } from '@/utils/monitMemory';
-import { monitNuxtJob } from '@/utils/monitNuxt';
-import { monitProcessJob } from '@/utils/monitProcess';
-import { monitQiniuCDN } from '@/utils/monitQiniuCDN';
+import { chalkINFO } from '@/app/chalkTip';
+import errorHandler from '@/app/handler/error-handle';
+import { connectDb } from '@/config/db';
+import { connectRedis } from '@/config/redis';
+import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from '@/constant';
+import verifyMiddleware from '@/middleware/verify.middleware';
+import { monitMemoryJob } from '@/monit/monitMemory';
+import { monitProcessJob } from '@/monit/monitProcess';
+import { monitQiniuCDN } from '@/monit/monitQiniuCDN';
+import useRoutes from '@/router/index';
+import { initDb } from '@/utils/initDb';
 import { initWs } from '@/websocket';
 
 aliasOk(); // 添加别名路径
@@ -72,7 +71,6 @@ const port = +PROJECT_PORT;
 const httpServer = createServer(app.callback());
 
 initWs(httpServer);
-monitNuxtJob(); // 监控nuxt进程
 monitMemoryJob(); // 监控服务器内存
 monitProcessJob(); // 监控node进程
 monitQiniuCDN(); // 监控七牛云cdn

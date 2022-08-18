@@ -132,6 +132,7 @@ class ArticleService {
 
   /** 获取文章列表 */
   async getList({
+    id,
     tags,
     types,
     users,
@@ -144,25 +145,25 @@ class ArticleService {
   }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    let typeWhere: any = null;
-    let tagWhere: any = null;
-    let userWhere: any = null;
-    let statusWhere: any = null;
+    const idWhere: any = {};
+    const typeWhere: any = {};
+    const tagWhere: any = {};
+    const userWhere: any = {};
+    const statusWhere: any = {};
     const keyWordWhere: any = {};
     if (status) {
-      statusWhere = {};
       statusWhere.status = status;
     }
+    if (id) {
+      idWhere.id = id;
+    }
     if (types.length) {
-      typeWhere = {};
       typeWhere.id = types.split(',');
     }
     if (tags.length) {
-      tagWhere = {};
       tagWhere.id = tags.split(',');
     }
     if (users.length) {
-      userWhere = {};
       userWhere.id = users.split(',');
     }
     if (keyWord) {
@@ -243,7 +244,7 @@ class ArticleService {
           // ],
         ],
       },
-      where: { ...statusWhere, ...keyWordWhere },
+      where: { ...statusWhere, ...idWhere, ...keyWordWhere },
       distinct: true,
       order: [[orderName, orderBy]],
       // group: ['article.id'],

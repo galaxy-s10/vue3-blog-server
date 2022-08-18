@@ -1,7 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import { THIRD_PLATFORM } from '@/app/constant';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
@@ -9,6 +8,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GITHUB_REDIRECT_URI,
 } from '@/config/secret';
+import { THIRD_PLATFORM } from '@/constant';
 import { IGithubUser, IList } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
 import githubUserService from '@/service/githubUser.service';
@@ -61,7 +61,6 @@ class GithubUserController {
     const OauthInfo: any = await axios.get('https://api.github.com/user', {
       headers: { Authorization: `token ${access_token}` },
     });
-    console.log('OauthInfoOauthInfo', access_token, OauthInfo);
     return OauthInfo;
   }
 
@@ -114,16 +113,14 @@ class GithubUserController {
         ...OauthInfo,
         client_id: GITHUB_CLIENT_ID,
       });
-      console.log(githubUser, 4334);
       await thirdUserModel.create({
         user_id: userInfo.id,
         third_user_id: githubUser.id,
         third_platform: THIRD_PLATFORM.github,
       });
-      console.log(userInfo, ownIsBind, 3333333);
       successHandler({ ctx, message: '绑定github成功!' });
     } catch (error) {
-      console.log(error, 333133);
+      console.log(error);
       emitError({ ctx, code: 400, error });
       return;
     }
@@ -152,7 +149,7 @@ class GithubUserController {
       await thirdUserService.delete(ownIsBind[0].id);
       successHandler({ ctx, message: '解绑github成功!' });
     } catch (error) {
-      console.log(error, 333133);
+      console.log(error);
       emitError({ ctx, code: 400, error });
       return;
     }
@@ -221,7 +218,6 @@ class GithubUserController {
           third_platform: THIRD_PLATFORM.github,
           third_user_id: oldGithubUser.id,
         });
-        console.log(thirdUserInfo, 777);
         const userInfo: any = await userService.find(thirdUserInfo.user_id);
         const token = signJwt({
           userInfo: {

@@ -126,6 +126,7 @@ class ArticleController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
+        id,
         tags = [],
         types = [],
         users = [],
@@ -138,6 +139,7 @@ class ArticleController {
       } = ctx.request.query;
       const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await articleService.getList({
+        id,
         tags,
         types,
         users,

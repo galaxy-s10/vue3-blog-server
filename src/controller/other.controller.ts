@@ -10,14 +10,8 @@ import {
   QQ_EMAIL_PASS,
   QQ_EMAIL_USER,
 } from '@/config/secret';
+import { VERIFY_EMAIL_RESULT_CODE } from '@/constant';
 import { randomString } from '@/utils';
-
-const emailResCode = {
-  ok: '发送成功!',
-  more: '一天只能发5次验证码!',
-  later: '一分钟内只能发1次验证码，请稍后再试!',
-  err: '验证码错误或已过期!',
-};
 
 class OtherController {
   sendEmail = async (email: string, subject: string, content: string) => {
@@ -68,7 +62,7 @@ class OtherController {
           value: verificationCode,
           exp: redisExpired,
         });
-        successHandler({ ctx, message: emailResCode.ok });
+        successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
       } else {
         const ttl = await redisController.getTTL(key);
         if (ttl > 60 * 4) {
@@ -90,7 +84,7 @@ class OtherController {
           value: verificationCode,
           exp: redisExpired,
         });
-        successHandler({ ctx, message: emailResCode.ok });
+        successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
       }
     } catch (error) {
       emitError({ ctx, code: 400, error });
