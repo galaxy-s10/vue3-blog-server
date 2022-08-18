@@ -100,9 +100,8 @@ for (let i = 0; i < allSecond; i += 1) {
   allSecondArr.push(i);
 }
 
-// 每一小时执行
-rule.hour = allHourArr.filter((v) => v % 1 === 0);
-rule.minute = 0;
+// 每10分钟执行
+rule.minute = allMinuteArr.filter((v) => v % 10 === 0);
 rule.second = 0;
 
 export const monitMemoryJob = () => {
