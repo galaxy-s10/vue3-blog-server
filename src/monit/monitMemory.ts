@@ -9,6 +9,7 @@ import {
   MONIT_TYPE_CLEAR_CACHE,
   PROJECT_ENV,
   MONIT_TYPE_MEMORY_LOG,
+  MONIT_MEMORY_JOB,
 } from '@/constant';
 import otherController from '@/controller/other.controller';
 import monitService from '@/service/monit.service';
@@ -19,7 +20,7 @@ const threshold = 85 / 100; // 内存阈值
 const buffCacheThreshold = 20 / 100; // buff/cache阈值
 const restartPm2Threshold = 95 / 100; // 内存达到重启pm2的阈值
 
-const main = async () => {
+export const main = async () => {
   const res: any = await showMemory();
   if (res.error) {
     const result = res.error;
@@ -40,6 +41,8 @@ const main = async () => {
     const restartPm2ThresholdRate = `${(restartPm2Threshold * 100).toFixed(
       2
     )}%`;
+    const currBuffCacheRate = res['Mem:buff/cache'] / res['Mem:total'];
+
     if (total * restartPm2Threshold < used) {
       result = `服务器内存使用率达到重启pm2的阈值（${restartPm2ThresholdRate}）！当前使用率：${rate}，开始重启所有pm2进程`;
       otherController.sendEmail(QQ_EMAIL_USER, result, result);
@@ -57,24 +60,24 @@ const main = async () => {
         type: MONIT_TYPE_MEMORY_THRESHOLD,
         info: result,
       });
-
-      const currBuffCacheRate = res['Mem:buff/cache'] / res['Mem:total'];
-      if (currBuffCacheRate > buffCacheThreshold) {
-        const str = 'buff/cache超过阈值，清除buff/cache';
-        console.log(chalkINFO(str));
-        clearCache();
-        monitService.create({
-          type: MONIT_TYPE_CLEAR_CACHE,
-          info: str,
-        });
-        otherController.sendEmail(QQ_EMAIL_USER, str, str);
-      }
     } else {
       result = `服务器内存使用率阈值：${thresholdRate}，当前使用率：${rate}（总内存：${res1['Mem:total']}，已使用：${res1['Mem:used']}，可用：${res1['Mem:free']}，buff/cache：${res1['Mem:buff/cache']}）`;
       monitService.create({
         type: MONIT_TYPE_MEMORY_LOG,
         info: result,
       });
+    }
+    if (currBuffCacheRate > buffCacheThreshold) {
+      const str = `buff/cache超过阈值，清除buff/cache，当前buff/cache占用：${
+        res1['Mem:buff/cache']
+      }，阈值：${formatMemorySize(res['Mem:total'] * buffCacheThreshold)}`;
+      console.log(chalkINFO(str));
+      clearCache();
+      monitService.create({
+        type: MONIT_TYPE_CLEAR_CACHE,
+        info: str,
+      });
+      otherController.sendEmail(QQ_EMAIL_USER, str, str);
     }
   } catch (err) {
     console.log(err);
@@ -106,11 +109,13 @@ rule.second = 0;
 
 export const monitMemoryJob = () => {
   console.log(chalkWRAN('监控内存定时任务启动！'));
-  schedule.scheduleJob('monitMemoryJob', rule, () => {
+  schedule.scheduleJob(MONIT_MEMORY_JOB, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
-          `${dayjs().format('YYYY-MM-DD HH:mm:ss')}，执行monitMemoryJob定时任务`
+          `${dayjs().format(
+            'YYYY-MM-DD HH:mm:ss'
+          )}，执行${MONIT_MEMORY_JOB}定时任务`
         )
       );
       main();
@@ -119,7 +124,7 @@ export const monitMemoryJob = () => {
         chalkWRAN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，非生产环境，不执行monitMemoryJob定时任务`
+          )}，非生产环境，不执行${MONIT_MEMORY_JOB}定时任务`
         )
       );
     }

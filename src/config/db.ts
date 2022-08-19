@@ -5,10 +5,11 @@ import { MYSQL_CONFIG } from './secret';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
 import { PROJECT_ENV } from '@/constant';
 
-const dbName =
+export const dbName =
   PROJECT_ENV !== 'prod'
     ? `${MYSQL_CONFIG.database}_test`
     : MYSQL_CONFIG.database;
+
 const sequelize = new Sequelize(
   dbName,
   MYSQL_CONFIG.username,

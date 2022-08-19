@@ -145,25 +145,30 @@ class ArticleService {
   }) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
-    const idWhere: any = {};
-    const typeWhere: any = {};
-    const tagWhere: any = {};
-    const userWhere: any = {};
-    const statusWhere: any = {};
-    const keyWordWhere: any = {};
+    let idWhere: any;
+    let typeWhere: any;
+    let tagWhere: any;
+    let userWhere: any;
+    let statusWhere: any;
+    let keyWordWhere: any;
     if (status) {
+      statusWhere = {};
       statusWhere.status = status;
     }
     if (id) {
+      idWhere = {};
       idWhere.id = id;
     }
     if (types.length) {
+      typeWhere = {};
       typeWhere.id = types.split(',');
     }
     if (tags.length) {
+      tagWhere = {};
       tagWhere.id = tags.split(',');
     }
     if (users.length) {
+      userWhere = {};
       userWhere.id = users.split(',');
     }
     if (keyWord) {

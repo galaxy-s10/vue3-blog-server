@@ -127,9 +127,9 @@ class ArticleController {
     try {
       const {
         id,
-        tags = [],
-        types = [],
-        users = [],
+        tags = '',
+        types = '',
+        users = '',
         nowPage = '1',
         pageSize = '10',
         orderBy = 'asc',

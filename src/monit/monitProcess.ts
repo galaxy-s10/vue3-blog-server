@@ -3,6 +3,7 @@ import schedule from 'node-schedule';
 
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import {
+  MONIT_PROCESS_JOB,
   MONIT_TYPE_VUE3_BLOG_SERVER_NODE_PROCESS,
   PROJECT_ENV,
 } from '@/constant';
@@ -63,7 +64,7 @@ rule.hour = allHourArr.filter((v) => v % 1 === 0);
 rule.minute = 0;
 rule.second = 0;
 
-const main = () => {
+export const main = () => {
   const info = {
     pid: process.pid,
     memory: {
@@ -86,13 +87,13 @@ const main = () => {
 
 export const monitProcessJob = () => {
   console.log(chalkWRAN('监控node进程定时任务启动！'));
-  schedule.scheduleJob('monitProcessJob', rule, () => {
+  schedule.scheduleJob(MONIT_PROCESS_JOB, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，执行monitProcessJob定时任务`
+          )}，执行${MONIT_PROCESS_JOB}定时任务`
         )
       );
       main();
@@ -101,7 +102,7 @@ export const monitProcessJob = () => {
         chalkWRAN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，非生产环境，不执行monitProcessJob定时任务`
+          )}，非生产环境，不执行${MONIT_PROCESS_JOB}定时任务`
         )
       );
     }

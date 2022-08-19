@@ -8,6 +8,7 @@ import etag from 'koa-etag';
 import staticService from 'koa-static';
 
 import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
+import { monit } from './monit';
 
 import { chalkINFO } from '@/app/chalkTip';
 import errorHandler from '@/app/handler/error-handle';
@@ -15,15 +16,11 @@ import { connectDb } from '@/config/db';
 import { connectRedis } from '@/config/redis';
 import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from '@/constant';
 import verifyMiddleware from '@/middleware/verify.middleware';
-import { monitMemoryJob } from '@/monit/monitMemory';
-import { monitProcessJob } from '@/monit/monitProcess';
-import { monitQiniuCDN } from '@/monit/monitQiniuCDN';
 import useRoutes from '@/router/index';
 import { initDb } from '@/utils/initDb';
 import { initWs } from '@/websocket';
 
 aliasOk(); // 添加别名路径
-
 const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const app = new Koa();
@@ -71,9 +68,7 @@ const port = +PROJECT_PORT;
 const httpServer = createServer(app.callback());
 
 initWs(httpServer);
-monitMemoryJob(); // 监控服务器内存
-monitProcessJob(); // 监控node进程
-monitQiniuCDN(); // 监控七牛云cdn
+monit();
 
 httpServer.listen(port, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));

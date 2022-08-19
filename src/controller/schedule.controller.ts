@@ -4,13 +4,15 @@ import schedule from 'node-schedule';
 import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { dbJob } from '@/utils/backupsDb';
+import { MONIT_BACKUPSDB_JOB } from '@/constant';
+import { main } from '@/monit/monitBackupsDb';
 import { showMemory, clearCache } from '@/utils/clearCache';
 
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
     try {
-      if (schedule.scheduledJobs.dbJob && dbJob) {
+      const dbJob = schedule.scheduledJobs[MONIT_BACKUPSDB_JOB];
+      if (dbJob) {
         successHandler({
           ctx,
           data: { status: 1, nextInvocation: dbJob.nextInvocation().getTime() },
@@ -43,18 +45,11 @@ class ScheduleController {
         });
         return;
       }
-      if (schedule.scheduledJobs.dbJob && dbJob) {
-        dbJob.invoke();
-        successHandler({
-          ctx,
-          data: '开始执行备份任务，大约5分钟执行完成',
-        });
-      } else {
-        successHandler({
-          ctx,
-          data: { status: 2, message: '任务异常' },
-        });
-      }
+      main();
+      successHandler({
+        ctx,
+        data: '开始执行备份任务，大约5分钟执行完成',
+      });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

@@ -3,36 +3,44 @@ import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
+import { dbName } from '@/config/db';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
-import { PROJECT_ENV } from '@/constant';
+import {
+  MONIT_BACKUPSDB_JOB,
+  MONIT_TYPE_BACKUPS_DB,
+  PROJECT_ENV,
+} from '@/constant';
+import monitService from '@/service/monit.service';
 import qiniuController from '@/utils/qiniu';
 
 // 备份目录
-const backupsDirectory = '/node/backups/';
+const backupsDirectory = '/node/backups/mysql/';
+
+// 备份的文件名
+const backupsFileName = () => {
+  const res = `${MYSQL_CONFIG.database}__${dayjs().format(
+    'YYYY_MM_DD_HH_mm_ss'
+  )}`;
+  return res;
+};
 
 // 备份目录是否存在
 const backupsDirectoryIsExistCmd = `
 if [ ! -d "${backupsDirectory}" ];then
 echo "备份目录不存在，先创建备份目录${backupsDirectory}"
-mkdir ${backupsDirectory}
+mkdir -p ${backupsDirectory}
 echo "创建备份目录完成，开始备份"
 else
 echo "备份目录已存在，开始备份"
 fi
 `;
 
-// 备份的文件名
-const backupsFileName = () => {
-  const res = MYSQL_CONFIG.database + dayjs().format('YYYY_MM_DD_HH_mm_ss');
-  return res;
-};
-
 // 备份数据库命令
 const backupsCmd = (fileName) => {
   return `mysqldump -h${MYSQL_CONFIG.host} -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${MYSQL_CONFIG.database} > ${backupsDirectory}${fileName}.sql`;
 };
 
-const conner = () => {
+export const main = () => {
   const conn = new Client();
 
   conn
@@ -51,10 +59,20 @@ const conner = () => {
               qiniuController
                 .uploadBackupsDb(`${backupsDirectory + fileName}.sql`)
                 .then(() => {
-                  console.log('备份成功!');
+                  const info = `备份${dbName}数据库成功！`;
+                  console.log(info);
+                  monitService.create({
+                    type: MONIT_TYPE_BACKUPS_DB,
+                    info,
+                  });
                 })
                 .catch((err) => {
-                  console.log('备份失败!', err);
+                  const info = `备份${dbName}数据库失败！`;
+                  console.log(info, err);
+                  monitService.create({
+                    type: MONIT_TYPE_BACKUPS_DB,
+                    info,
+                  });
                 })
                 .finally(() => {
                   conn.end();
@@ -70,27 +88,6 @@ const conner = () => {
             });
         }
       );
-      // conn.shell((err, stream) => {
-      //   if (err) {
-      //     throw err;
-      //   }
-      //   stream
-      //     .on('close', () => {
-      //       console.log('关闭。');
-      //       // qiniuController.uploadBackupsDb();
-      //       conn.end();
-      //     })
-      //     .on('data', (data) => {
-      //       console.log(chalkINFO('OUTPUT:'));
-      //       console.log(chalkINFO(data));
-      //     })
-      //     .end(
-      //       `
-      //           ${backupsDirectoryIsExistCmd}
-      //           ${backupsCmd(backupsFileName())}
-      //       `
-      //     );
-      // });
     })
     .connect({
       host: SSH_CONFIG.host,
@@ -131,19 +128,27 @@ const conner = () => {
 const rule = new schedule.RecurrenceRule();
 rule.hour = [0, 12];
 rule.minute = 0;
-export const dbJob = schedule.scheduleJob('dbJob', rule, () => {
-  if (PROJECT_ENV === 'prod') {
-    console.log(
-      chalkINFO(`${dayjs().format('YYYY-MM-DD HH:mm:ss')}，执行dbJob定时任务`)
-    );
-    conner();
-  } else {
-    console.log(
-      chalkWRAN(
-        `${dayjs().format(
-          'YYYY-MM-DD HH:mm:ss'
-        )}，非生产环境，不执行dbJob定时任务`
-      )
-    );
-  }
-});
+
+export const monitBackupsDbJob = () => {
+  console.log(chalkWRAN('监控备份数据库定时任务启动！'));
+  schedule.scheduleJob(MONIT_BACKUPSDB_JOB, rule, () => {
+    if (PROJECT_ENV === 'prod') {
+      console.log(
+        chalkINFO(
+          `${dayjs().format(
+            'YYYY-MM-DD HH:mm:ss'
+          )}，执行${MONIT_BACKUPSDB_JOB}定时任务`
+        )
+      );
+      main();
+    } else {
+      console.log(
+        chalkWRAN(
+          `${dayjs().format(
+            'YYYY-MM-DD HH:mm:ss'
+          )}，非生产环境，不执行${MONIT_BACKUPSDB_JOB}定时任务`
+        )
+      );
+    }
+  });
+};

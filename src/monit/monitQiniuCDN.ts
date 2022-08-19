@@ -3,7 +3,11 @@ import schedule from 'node-schedule';
 
 import { chalkERROR, chalkINFO, chalkSUCCESS, chalkWRAN } from '@/app/chalkTip';
 import { QQ_EMAIL_USER } from '@/config/secret';
-import { MONIT_TYPE_QINIU_CDN, PROJECT_ENV } from '@/constant';
+import {
+  MONIT_QINIUCDN_JOB,
+  MONIT_TYPE_QINIU_CDN,
+  PROJECT_ENV,
+} from '@/constant';
 import otherController from '@/controller/other.controller';
 import qiniuController from '@/controller/qiniu.controller';
 import monitService from '@/service/monit.service';
@@ -17,7 +21,7 @@ const oneMb = oneKb * 1024;
 const oneGb = oneMb * 1024;
 const threshold = oneGb * 5; // 七牛云阈值，达到5gb就报错
 
-const main = () => {
+export const main = () => {
   qiniuController
     .monitCDN()
     .then(async ({ allDomainNameFlux, start, end }: any) => {
@@ -83,13 +87,15 @@ rule.minute = allMinuteArr.filter((v) => v % 30 === 0);
 rule.second = 0;
 
 // 监控七牛云cdn流量，最近一周内，使用流量超过2g就邮件提示（TODO）/使用流量超过5g就停掉cdn服务
-export const monitQiniuCDN = () => {
+export const monitQiniuCDNJob = () => {
   console.log(chalkWRAN('监控七牛云cdn定时任务启动！'));
-  schedule.scheduleJob('monitQiniuCDN', rule, () => {
+  schedule.scheduleJob(MONIT_QINIUCDN_JOB, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
-          `${dayjs().format('YYYY-MM-DD HH:mm:ss')}，执行monitQiniuCDN定时任务`
+          `${dayjs().format(
+            'YYYY-MM-DD HH:mm:ss'
+          )}，执行${MONIT_QINIUCDN_JOB}定时任务`
         )
       );
       main();
@@ -98,7 +104,7 @@ export const monitQiniuCDN = () => {
         chalkWRAN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，非生产环境，不执行monitQiniuCDN定时任务`
+          )}，非生产环境，不执行${MONIT_QINIUCDN_JOB}定时任务`
         )
       );
     }
