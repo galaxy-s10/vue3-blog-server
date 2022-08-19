@@ -38,3 +38,5 @@ export const MONIT_TYPE_VUE3_BLOG_SERVER_NODE_PROCESS = 4; // 监控node进程
 export const MONIT_TYPE_RESTART_PM2 = 5; // 重启pm2
 export const MONIT_TYPE_CLEAR_CACHE = 6; // 清除buff/cache
 export const MONIT_TYPE_BACKUPS_DB = 7; // 备份数据库
+
+export const QINIU_BUCKET = 'hssblog'; // 七牛云bucket

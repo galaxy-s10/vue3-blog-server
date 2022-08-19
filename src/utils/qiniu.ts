@@ -5,6 +5,7 @@ import {
   QINIU_SECRETKEY,
   QINIU_BACKUPS_DATABASE,
 } from '@/config/secret';
+import { QINIU_BUCKET } from '@/constant';
 
 const qiniuConfConfig = new qiniu.conf.Config();
 
@@ -44,7 +45,7 @@ class QiniuModel {
   getQiniuToken(expires = 60) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const options = {
-      scope: 'hssblog',
+      scope: QINIU_BUCKET,
       expires, // 过期时间
       // callbackUrl: qiniuCallBackUrl,
       callbackBody:
@@ -108,7 +109,7 @@ class QiniuModel {
     config.zone = qiniu.zone.Zone_z0;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 
-    const bucket = 'hssblog';
+    const bucket = QINIU_BUCKET;
     const key = filename;
     return new Promise((resolve, reject) => {
       bucketManager.delete(bucket, key, (err, respBody, respInfo) => {
@@ -122,19 +123,25 @@ class QiniuModel {
   }
 
   // 获取七牛云文件
-  getAllList(prefix, limit, marker) {
+  getAllList(prop: qiniu.rs.ListPrefixOptions) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const { config } = this;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
-    const bucket = 'hssblog';
-    const options = {};
+    const bucket = QINIU_BUCKET;
+    const options = {
+      prefix: prop.prefix, // 列举的文件前缀
+      marker: prop.marker, // 上一次列举返回的位置标记，作为本次列举的起点信息
+      limit: prop.limit, // 每次返回的最大列举文件数量，最大值1000
+      delimiter: prop.delimiter, // 指定目录分隔符
+    };
     return new Promise((resolve, reject) => {
       bucketManager.listPrefix(bucket, options, (err, respBody, respInfo) => {
         if (respInfo.statusCode === 200) {
-          console.log(respInfo, 33333);
-          resolve({ respInfo });
+          resolve({ respInfo, respBody });
         } else {
-          reject({ err });
+          console.log('respInfo', respInfo);
+          console.log('err', err);
+          reject(new Error(JSON.stringify(respInfo)));
         }
       });
     });

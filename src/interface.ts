@@ -113,6 +113,19 @@ export interface IMusic {
   audio_url?: string;
   status?: number;
 }
+export interface IQiniuData {
+  id?: number;
+  user_id?: number;
+  qiniu_bucket?: string;
+  qiniu_key?: string;
+  qiniu_hash?: string;
+  qiniu_fsize?: number;
+  qiniu_mimeType?: string;
+  qiniu_putTime?: number;
+  qiniu_type?: number;
+  qiniu_status?: number;
+  qiniu_md5?: string;
+}
 export interface IThirdUser {
   id?: number;
   user_id: number;

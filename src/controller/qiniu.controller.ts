@@ -4,6 +4,9 @@ import { ParameterizedContext } from 'koa';
 import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { QINIU_BUCKET } from '@/constant';
+import qiniuDataModel from '@/model/qiniuData.model';
+import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getLastestWeek } from '@/utils';
 import qiniuModel from '@/utils/qiniu';
 
@@ -23,13 +26,122 @@ class QiniuController {
   }
 
   // 获取七牛云文件
-  async getAllList(ctx: ParameterizedContext, next) {
+  async initSyncQiniuData(ctx: ParameterizedContext, next) {
     try {
-      const { prefix, limit, marker } = ctx.request.query;
-      const data: any = await qiniuModel.getAllList(prefix, limit, marker);
+      const count = await qiniuDataModel.count();
+      // if (count) {
+      //   successHandler({ ctx, message: '已经同步过七牛云数据了！' });
+      //   return;
+      // }
+      const list = [];
+      const limit = 1000;
+      const { respInfo, respBody }: any = await qiniuModel.getAllList({
+        limit,
+      });
+      let { marker } = respBody;
+      const { items } = respInfo.data;
+      list.push(...items);
+      while (marker) {
+        // eslint-disable-next-line no-await-in-loop
+        const res: any = await qiniuModel.getAllList({
+          marker,
+          limit,
+        });
+        list.push(...res.respInfo.data.items);
+        marker = res.respBody.marker;
+      }
+      list.forEach((v) => {
+        const obj = { ...v };
+        Object.keys(obj).forEach((key) => {
+          obj[`qiniu_${key}`] = `${obj[key]}`;
+          delete obj[key];
+        });
+        qiniuDataService.create({
+          ...obj,
+          qiniu_bucket: QINIU_BUCKET,
+          user_id: -1,
+        });
+      });
+
       successHandler({
         ctx,
-        data: data.respInfo.data.items,
+        data: '同步七牛云数据成功！',
+      });
+    } catch (error) {
+      console.log(111, error, 111);
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  // 获取所有七牛云文件
+  async getList(ctx: ParameterizedContext, next) {
+    try {
+      const {
+        nowPage = '1',
+        pageSize = '10',
+        orderBy = 'asc',
+        orderName = 'id',
+        qiniu_bucket,
+        qiniu_fsize,
+        qiniu_hash,
+        qiniu_key,
+        qiniu_md5,
+        qiniu_mimeType,
+        qiniu_putTime,
+        qiniu_status,
+        qiniu_type,
+        keyWord,
+        id,
+      }: any = ctx.request.query;
+      const result = await qiniuDataService.getList({
+        nowPage,
+        pageSize,
+        orderBy,
+        orderName,
+        qiniu_bucket,
+        qiniu_fsize,
+        qiniu_hash,
+        qiniu_key,
+        qiniu_md5,
+        qiniu_mimeType,
+        qiniu_putTime,
+        qiniu_status,
+        qiniu_type,
+        keyWord,
+        id,
+      });
+      successHandler({ ctx, data: result });
+    } catch (error) {
+      emitError({ ctx, code: 400, error });
+    }
+    await next();
+  }
+
+  // 获取所有七牛云文件
+  async getAllList(ctx: ParameterizedContext, next) {
+    try {
+      // const { prefix, limit, marker } = ctx.request.query;
+      const list = [];
+      const limit = 1000;
+      const { respInfo, respBody }: any = await qiniuModel.getAllList({
+        limit,
+      });
+      let { marker } = respBody;
+      const { items } = respInfo.data;
+      list.push(...items);
+      while (marker) {
+        // eslint-disable-next-line no-await-in-loop
+        const res: any = await qiniuModel.getAllList({
+          marker,
+          limit,
+        });
+        list.push(...res.respInfo.data.items);
+        marker = res.respBody.marker;
+      }
+      successHandler({
+        ctx,
+        data: { list },
       });
     } catch (error) {
       emitError({ ctx, code: 400, error });
