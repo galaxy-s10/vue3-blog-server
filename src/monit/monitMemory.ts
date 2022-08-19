@@ -46,11 +46,11 @@ export const main = async () => {
     if (total * restartPm2Threshold < used) {
       result = `服务器内存使用率达到重启pm2的阈值（${restartPm2ThresholdRate}）！当前使用率：${rate}，开始重启所有pm2进程`;
       otherController.sendEmail(QQ_EMAIL_USER, result, result);
-      restartPm2();
-      monitService.create({
+      await monitService.create({
         type: MONIT_TYPE_RESTART_PM2,
         info: result,
       });
+      restartPm2();
       return;
     }
     if (total * threshold < used) {
@@ -72,11 +72,11 @@ export const main = async () => {
         res1['Mem:buff/cache']
       }，阈值：${formatMemorySize(res['Mem:total'] * buffCacheThreshold)}`;
       console.log(chalkINFO(str));
-      clearCache();
-      monitService.create({
+      await monitService.create({
         type: MONIT_TYPE_CLEAR_CACHE,
         info: str,
       });
+      clearCache();
       otherController.sendEmail(QQ_EMAIL_USER, str, str);
     }
   } catch (err) {
@@ -103,8 +103,8 @@ for (let i = 0; i < allSecond; i += 1) {
   allSecondArr.push(i);
 }
 
-// 每10分钟执行
-rule.minute = allMinuteArr.filter((v) => v % 10 === 0);
+// 每30分钟执行
+rule.minute = allMinuteArr.filter((v) => v % 30 === 0);
 rule.second = 0;
 
 export const monitMemoryJob = () => {

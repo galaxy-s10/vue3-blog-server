@@ -125,8 +125,28 @@ export const main = () => {
  * 等到了01：00：00时候才不会执行，后面的也是以此类推，因此得加上rule.minute = 0才可以，
  * 这样就代表了00：00：00，03：00：00，06：00：00，09：00：00等时间才执行一次
  */
+
 const rule = new schedule.RecurrenceRule();
-rule.hour = [0, 12];
+
+const allHour = 24;
+const allMinute = 60;
+const allSecond = 60;
+const allHourArr = [];
+const allMinuteArr = [];
+const allSecondArr = [];
+
+for (let i = 0; i < allHour; i += 1) {
+  allHourArr.push(i);
+}
+for (let i = 0; i < allMinute; i += 1) {
+  allMinuteArr.push(i);
+}
+for (let i = 0; i < allSecond; i += 1) {
+  allSecondArr.push(i);
+}
+
+// 每12小时执行
+rule.hour = allHourArr.filter((v) => v % 12 === 0);
 rule.minute = 0;
 
 export const monitBackupsDbJob = () => {
