@@ -11,7 +11,7 @@ import {
   QQ_EMAIL_USER,
 } from '@/config/secret';
 import { VERIFY_EMAIL_RESULT_CODE } from '@/constant';
-import { randomString } from '@/utils';
+import { getRandomString } from '@/utils';
 
 class OtherController {
   sendEmail = async (email: string, subject: string, content: string) => {
@@ -51,7 +51,7 @@ class OtherController {
       const oldIpdata = await redisController.getVal(key);
       const redisExpired = 60 * 5; // redis缓存的有效期（五分钟），单位秒
       if (!oldIpdata) {
-        const verificationCode = randomString(6);
+        const verificationCode = getRandomString(6);
         await this.sendEmail(
           email,
           `《自然博客》验证码：${verificationCode}`,
@@ -73,7 +73,7 @@ class OtherController {
           });
           return;
         }
-        const verificationCode = randomString(6);
+        const verificationCode = getRandomString(6);
         await this.sendEmail(
           email,
           `《自然博客》验证码：${verificationCode}`,

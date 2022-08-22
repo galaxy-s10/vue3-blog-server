@@ -14,7 +14,7 @@ import thirdUserModel from '@/model/thirdUser.model';
 import githubUserService from '@/service/githubUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
-import { randomString } from '@/utils';
+import { getRandomString } from '@/utils';
 import axios from '@/utils/request';
 
 export interface IGithubUserList extends IList {
@@ -185,7 +185,7 @@ class GithubUserController {
         });
         const userInfo: any = await userService.create({
           username: OauthInfo.login,
-          password: randomString(8),
+          password: getRandomString(8),
           avatar: OauthInfo.avatar_url,
           desc: OauthInfo.bio,
         });

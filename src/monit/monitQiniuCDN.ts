@@ -43,10 +43,10 @@ export const main = () => {
               },
             }
           );
-          const info = '下线域名成功！（达到阈值，停掉cdn）';
+          const str = '下线域名成功！（达到阈值，停掉cdn）';
           console.log(chalkSUCCESS(info));
-          monitService.create({ type: MONIT_TYPE_QINIU_CDN, info });
-          otherController.sendEmail(QQ_EMAIL_USER, info, info);
+          monitService.create({ type: MONIT_TYPE_QINIU_CDN, info: str });
+          otherController.sendEmail(QQ_EMAIL_USER, str, str);
         } catch (error) {
           const err = '下线域名报错！（达到阈值，停掉cdn）';
           console.log(chalkERROR(err));

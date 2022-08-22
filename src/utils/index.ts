@@ -121,12 +121,27 @@ export const getUrl = (url: string) => {
 export const getRandomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-/** 获取随机字符串 */
-export const randomString = (length: number): string => {
+/**
+ * @description 获取[min,max]之间的随机整数。
+ * @example getRangeRandom([-10,100]) ===> -8
+ * @param {number} min
+ * @param {number} max
+ * @return {*}
+ */
+export const getRangeRandom = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+/**
+ * @description 获取随机字符串(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789)
+ * @example getRandomString(4) ===> abd3
+ * @param {number} length
+ * @return {*}
+ */
+export const getRandomString = (length: number): string => {
   const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let res = '';
   for (let i = 0; i < length; i += 1) {
-    res += str.charAt(getRandomInt(0, str.length - 1));
+    res += str.charAt(getRangeRandom(0, str.length - 1));
   }
   return res;
 };

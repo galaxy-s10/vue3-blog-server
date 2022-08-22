@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import path from 'path';
 
 import Koa from 'koa';
+import koaBody from 'koa-body';
 import bodyParser from 'koa-bodyparser';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
@@ -22,6 +23,8 @@ import { initWs } from '@/websocket';
 
 aliasOk(); // 添加别名路径
 const { chalkSUCCESS } = require('@/app/chalkTip');
+
+const uploadDir = path.join(__dirname, './upload');
 
 const app = new Koa();
 app.use(conditional());
@@ -45,16 +48,27 @@ app.use(async (ctx, next) => {
   }
 });
 
-// 这个bodyParser有个问题，如果前端传的数据有误，经过这个中间件解析的时候，解析到错误了，还是会继续next()。
 app.use(
-  bodyParser({
-    onerror: (error, ctx) => {
-      console.log('bodyParser解析错误', error);
-      ctx.status = 400;
-      ctx.res.end('bodyParser解析错误');
+  koaBody({
+    multipart: true,
+    formidable: {
+      // 上传目录
+      uploadDir, // 默认os.tmpdir()
+      // 保留文件扩展名
+      keepExtensions: true,
     },
   })
-); // 注意顺序，需要在所有路由加载前解析
+);
+// 这个bodyParser有个问题，如果前端传的数据有误，经过这个中间件解析的时候，解析到错误了，还是会继续next()。
+// app.use(
+//   bodyParser({
+//     onerror: (error, ctx) => {
+//       console.log('bodyParser解析错误', error);
+//       ctx.status = 400;
+//       ctx.res.end('bodyParser解析错误');
+//     },
+//   })
+// ); // 注意顺序，需要在所有路由加载前解析
 
 app.use(verifyMiddleware); // 注意顺序，需要在所有路由加载前进行接口验证
 

@@ -17,7 +17,7 @@ import thirdUserModel from '@/model/thirdUser.model';
 import qqUserService from '@/service/qqUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
-import { randomString } from '@/utils';
+import { getRandomString } from '@/utils';
 import axios from '@/utils/request';
 
 export interface IQqUserList extends IList {
@@ -163,7 +163,7 @@ class QqUserController {
         const qqUser: any = await qqUserService.create(qqUserInfo);
         const userInfo: any = await userService.create({
           username: qqUserInfo.nickname,
-          password: randomString(8),
+          password: getRandomString(8),
           avatar: qqUserInfo.figureurl_2,
         });
         await thirdUserModel.create({

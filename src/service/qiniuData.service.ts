@@ -6,7 +6,7 @@ import { handlePaging } from '@/utils';
 
 interface ISearch extends IQiniuData, IList {}
 
-const { Op } = Sequelize;
+const { Op, cast, col } = Sequelize;
 class QiniuDataService {
   /** 文件是否存在 */
   async isExist(ids: number[]) {
@@ -26,41 +26,40 @@ class QiniuDataService {
     pageSize,
     orderBy,
     orderName,
-    qiniu_bucket,
-    qiniu_fsize,
-    qiniu_hash,
-    qiniu_key,
-    qiniu_md5,
-    qiniu_mimeType,
-    qiniu_putTime,
-    qiniu_status,
-    qiniu_type,
-    user_id,
     keyWord,
+    id,
+    user_id,
+    prefix,
   }: ISearch) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};
+    if (id) {
+      allWhere.id = id;
+    }
     if (user_id) {
       allWhere.user_id = user_id;
+    }
+    if (prefix) {
+      allWhere.prefix = prefix;
     }
     if (keyWord) {
       const keyWordWhere = [
         {
-          name: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
-        {
-          author: {
+          qiniu_key: {
             [Op.like]: `%${keyWord}%`,
           },
         },
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    let orderNameRes = orderName;
+    if (orderNameRes === 'qiniu_fsize') {
+      // @ts-ignore
+      orderNameRes = cast(col(orderNameRes), 'SIGNED');
+    }
     const result = await qiniuDataModel.findAndCountAll({
-      order: [[orderName, orderBy]],
+      order: [[orderNameRes, orderBy]],
       limit,
       offset,
       where: {
@@ -79,7 +78,9 @@ class QiniuDataService {
   /** 修改文件 */
   async update({
     id,
-    qiniu_bucket,
+    user_id,
+    prefix,
+    bucket,
     qiniu_fsize,
     qiniu_hash,
     qiniu_key,
@@ -88,11 +89,12 @@ class QiniuDataService {
     qiniu_putTime,
     qiniu_status,
     qiniu_type,
-    user_id,
   }: IQiniuData) {
     const result = await qiniuDataModel.update(
       {
-        qiniu_bucket,
+        user_id,
+        prefix,
+        bucket,
         qiniu_fsize,
         qiniu_hash,
         qiniu_key,
@@ -101,7 +103,6 @@ class QiniuDataService {
         qiniu_putTime,
         qiniu_status,
         qiniu_type,
-        user_id,
       },
       { where: { id } }
     );
@@ -110,7 +111,9 @@ class QiniuDataService {
 
   /** 创建文件 */
   async create({
-    qiniu_bucket,
+    user_id,
+    prefix,
+    bucket,
     qiniu_fsize,
     qiniu_hash,
     qiniu_key,
@@ -119,25 +122,21 @@ class QiniuDataService {
     qiniu_putTime,
     qiniu_status,
     qiniu_type,
-    user_id,
   }: IQiniuData) {
-    try {
-      const result = await qiniuDataModel.create({
-        qiniu_bucket,
-        qiniu_fsize,
-        qiniu_hash,
-        qiniu_key,
-        qiniu_md5,
-        qiniu_mimeType,
-        qiniu_putTime,
-        qiniu_status,
-        qiniu_type,
-        user_id,
-      });
-      return result;
-    } catch (error) {
-      console.log(error);
-    }
+    const result = await qiniuDataModel.create({
+      user_id,
+      prefix,
+      bucket,
+      qiniu_fsize,
+      qiniu_hash,
+      qiniu_key,
+      qiniu_md5,
+      qiniu_mimeType,
+      qiniu_putTime,
+      qiniu_status,
+      qiniu_type,
+    });
+    return result;
   }
 
   /** 删除文件 */

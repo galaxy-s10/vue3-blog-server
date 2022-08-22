@@ -13,7 +13,7 @@ import emailUserService from '@/service/emailUser.service';
 import roleService from '@/service/role.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
-import { arrayUnique, randomNumber, randomString } from '@/utils';
+import { arrayUnique, randomNumber, getRandomString } from '@/utils';
 
 export interface IUserList extends IList {
   username: string;
@@ -46,7 +46,7 @@ class UserController {
         // 用户表创建用户
         const userData = await this.handleCreate({
           username: `用户${randomNumber(8)}`,
-          password: randomString(8),
+          password: getRandomString(8),
         });
         // 邮箱表创建邮箱
         const emailData: any = await emailUserService.create({ email });

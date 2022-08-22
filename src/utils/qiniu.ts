@@ -1,11 +1,14 @@
 import qiniu from 'qiniu';
 
+import { getRandomString } from '.';
+
 import {
   QINIU_ACCESSKEY,
   QINIU_SECRETKEY,
   QINIU_BACKUPS_DATABASE,
 } from '@/config/secret';
-import { QINIU_BUCKET } from '@/constant';
+import { QINIU_BUCKET, QINIU_CDN_URL } from '@/constant';
+import { IQiniuData } from '@/interface';
 
 const qiniuConfConfig = new qiniu.conf.Config();
 
@@ -44,13 +47,15 @@ class QiniuModel {
    */
   getQiniuToken(expires = 60) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
-    const options = {
+    const options: qiniu.rs.PutPolicyOptions = {
       scope: QINIU_BUCKET,
       expires, // 过期时间
-      // callbackUrl: qiniuCallBackUrl,
-      callbackBody:
-        '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","mimeType":"$(mimeType)","user_id":$(x:user_id)}',
-      callbackBodyType: 'application/json',
+      // callbackUrl: '',
+      returnBody:
+        '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","mimeType":"$(mimeType)"}',
+      // callbackBody:
+      //   '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","mimeType":"$(mimeType)","user_id":$(x:user_id)}',
+      // callbackBodyType: 'application/json',
     };
     const putPolicy = new qiniu.rs.PutPolicy(options);
     const uploadToken = putPolicy.uploadToken(mac);
@@ -89,6 +94,47 @@ class QiniuModel {
     });
   }
 
+  upload(file: { prefix: string; filepath: string; originalFilename: string }) {
+    const uploadToken = this.getQiniuToken();
+    const { config } = this;
+    const formUploader = new qiniu.form_up.FormUploader(config);
+    const putExtra = new qiniu.form_up.PutExtra();
+    // const fileName = 'a.jpg';
+    const fileName = `${file.prefix}${+new Date()}__${getRandomString(4)}__${
+      file.originalFilename
+    }`;
+    return new Promise((resolve) => {
+      formUploader.putFile(
+        uploadToken,
+        fileName,
+        file.filepath,
+        putExtra,
+        (respErr, respBody, respInfo) => {
+          const obj = {
+            respErr,
+            respBody,
+            respInfo,
+            originalFilename: file.originalFilename,
+            resultFilename: QINIU_CDN_URL + fileName,
+          };
+          if (respErr) {
+            console.log('respErr');
+            resolve({ flag: false, ...obj });
+            return;
+          }
+          if (respInfo.statusCode === 200) {
+            console.log('上传成功', obj);
+            resolve({ flag: true, ...obj });
+          } else {
+            console.log('上传失败', obj);
+            console.log({ respErr, respBody, respInfo });
+            resolve({ flag: false, ...obj });
+          }
+        }
+      );
+    });
+  }
+
   // 验证回调是否合法
   authCb(callbackAuth) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
@@ -101,7 +147,7 @@ class QiniuModel {
   }
 
   // 删除七牛云文件
-  delete(filename) {
+  delete(filename: IQiniuData['qiniu_key'], bucket: IQiniuData['bucket']) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const config = new qiniu.conf.Config();
     // config.useHttpsDomain = true;
@@ -109,14 +155,59 @@ class QiniuModel {
     config.zone = qiniu.zone.Zone_z0;
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 
-    const bucket = QINIU_BUCKET;
     const key = filename;
     return new Promise((resolve, reject) => {
       bucketManager.delete(bucket, key, (err, respBody, respInfo) => {
         if (respInfo.statusCode === 200) {
-          resolve({ respInfo });
+          resolve({ respInfo, respBody });
         } else {
-          reject({ err });
+          reject(new Error(JSON.stringify(respInfo)));
+        }
+      });
+    });
+  }
+
+  batchGetFileInfo(fileList: any[]) {
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
+    const config = new qiniu.conf.Config();
+    // @ts-ignore
+    config.zone = qiniu.zone.Zone_z0;
+    const bucketManager = new qiniu.rs.BucketManager(mac, config);
+    // 每个operations的数量不可以超过1000个，如果总数量超过1000，需要分批发送
+    const statOperations = fileList.map((item) => {
+      return qiniu.rs.statOp(item.srcBucket, item.key);
+    });
+    return new Promise((resolve) => {
+      bucketManager.batch(statOperations, (respErr, respBody, respInfo) => {
+        const obj = {
+          respErr,
+          respBody,
+          respInfo,
+        };
+        console.log(
+          parseInt(`${respInfo.statusCode / 100}`, 2),
+          parseInt(`200.32`, 10),
+          respInfo.statusCode / 100,
+          1111
+        );
+        if (obj.respErr) {
+          console.log(obj.respErr);
+          resolve({ flag: false, ...obj });
+        } else if (parseInt(`${respInfo.statusCode / 100}`, 10) === 2) {
+          // 200 is success, 298 is part success
+          respBody.forEach((item) => {
+            if (item.code === 200) {
+              console.log(
+                `${item.data.fsize}\t${item.data.hash}\t${item.data.mimeType}\t${item.data.putTime}\t${item.data.type}`
+              );
+            } else {
+              console.log(`${item.code}\t${item.data.error}`);
+            }
+          });
+          resolve({ flag: true, ...obj });
+        } else {
+          console.log(respInfo, respBody);
+          resolve({ flag: false, ...obj });
         }
       });
     });

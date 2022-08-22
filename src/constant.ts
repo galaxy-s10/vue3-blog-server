@@ -39,4 +39,11 @@ export const MONIT_TYPE_RESTART_PM2 = 5; // 重启pm2
 export const MONIT_TYPE_CLEAR_CACHE = 6; // 清除buff/cache
 export const MONIT_TYPE_BACKUPS_DB = 7; // 备份数据库
 
+export const QINIU_CDN_URL = 'https://resource.hsslive.cn/';
 export const QINIU_BUCKET = 'hssblog'; // 七牛云bucket
+export const QINIU_PREFIX = {
+  'image/': 'image/',
+  'backupsDatabase/': 'backupsDatabase/',
+  'media/': 'media/',
+  'nuxt-blog-client/': 'nuxt-blog-client/',
+};

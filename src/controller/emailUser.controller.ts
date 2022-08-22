@@ -16,7 +16,7 @@ import { IEmail } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
-import { emailContentTemplate, randomNumber, randomString } from '@/utils';
+import { emailContentTemplate, randomNumber, getRandomString } from '@/utils';
 
 interface IKey {
   prefix: string;
@@ -55,7 +55,7 @@ class EmailUserController {
     try {
       const oldIpdata = await redisController.getVal(key);
       if (!oldIpdata) {
-        const verificationCode = randomString(6);
+        const verificationCode = getRandomString(6);
         const content = emailContentTemplate({
           code: verificationCode,
           desc,
@@ -78,7 +78,7 @@ class EmailUserController {
       if (ttl > 60 * 4) {
         return VERIFY_EMAIL_RESULT_CODE.later;
       }
-      const verificationCode = randomString(6);
+      const verificationCode = getRandomString(6);
       const content = emailContentTemplate({
         code: verificationCode,
         desc,
@@ -175,7 +175,7 @@ class EmailUserController {
         // 用户表创建用户
         const createUserRes = await userService.create({
           username: `用户${randomNumber(8)}`,
-          password: randomString(8),
+          password: getRandomString(8),
         });
         // 邮箱表创建邮箱
         const emailData: any = await emailUserService.create({ email });

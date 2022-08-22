@@ -3,10 +3,10 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { MAIL_OPTIONS_CONFIG } from '@/config/secret';
+import { QQ_EMAIL_USER } from '@/config/secret';
+import otherController from '@/controller/other.controller';
 import { ILink } from '@/interface';
 import linkService from '@/service/link.service';
-import SendEmailModel from '@/utils/sendEmail';
 
 class LinkController {
   async getList(ctx: ParameterizedContext, next) {
@@ -73,15 +73,11 @@ class LinkController {
         status,
       });
       if (status === 1 && email) {
-        const mailOptions = {
-          from: MAIL_OPTIONS_CONFIG.from, // sender address
-          to: email, // list of receivers
-          subject: `友链申请审核通过！`, // Subject line
-          text: `你在自然博客申请的友链（${name}）已审核通过！`, // plain text body
-          html: `你在自然博客申请的友链（${name}）已审核通过！`, // html body
-        };
-        const emailMode = new SendEmailModel(mailOptions);
-        await emailMode.send();
+        await otherController.sendEmail(
+          QQ_EMAIL_USER,
+          `友链申请审核通过！`,
+          `你在自然博客申请的友链（${name}）已审核通过！`
+        );
       }
       successHandler({ ctx });
     } catch (error) {
@@ -101,15 +97,11 @@ class LinkController {
         url,
         status: 2,
       });
-      const mailOptions = {
-        from: MAIL_OPTIONS_CONFIG.from, // sender address
-        to: MAIL_OPTIONS_CONFIG.to, // list of receivers
-        subject: `收到${name}的友链申请`, // Subject line
-        text: `收到:${name}的友链申请，请及时处理~`, // plain text body
-        html: `<h1>收到:${name}的友链申请，请及时处理~</h1>`, // html body
-      };
-      const emailMode = new SendEmailModel(mailOptions);
-      await emailMode.send();
+      await otherController.sendEmail(
+        QQ_EMAIL_USER,
+        `收到${name}的友链申请`,
+        `收到:${name}的友链申请，请及时处理~`
+      );
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });

@@ -15,7 +15,10 @@ const qiniuDataModel = sequelize.define(
     user_id: {
       type: DataTypes.INTEGER,
     },
-    qiniu_bucket: {
+    prefix: {
+      type: DataTypes.STRING(50),
+    },
+    bucket: {
       type: DataTypes.STRING(50),
     },
     qiniu_key: {
