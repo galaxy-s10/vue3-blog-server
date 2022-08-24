@@ -1,7 +1,7 @@
 import Router from 'koa-router';
 
-import qiniuController from '@/controller/qiniu.controller';
-import { verifyEnv } from '@/middleware/qiniu.middleware';
+import qiniuController from '@/controller/qiniuData.controller';
+import { verifyEnv } from '@/middleware/qiniuData.middleware';
 
 const qiniuRouter = new Router({ prefix: '/qiniu_data' });
 

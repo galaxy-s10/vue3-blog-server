@@ -112,11 +112,8 @@ class ArticleController {
     try {
       const id = +ctx.params.id;
       let from_user_id = -1;
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
+      // 这个接口的userInfo也不是必须的
+      const { userInfo } = await authJwt(ctx);
       from_user_id = userInfo.id;
       const result = await articleService.findArticleDetail(id, from_user_id);
       successHandler({ ctx, data: result });

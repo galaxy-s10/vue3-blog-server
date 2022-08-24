@@ -43,11 +43,8 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'id',
       } = ctx.request.query;
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
+      // 这个接口的userInfo也不是必须的
+      const { code, userInfo } = await authJwt(ctx);
       let from_user_id = -1;
       if (code === 200) {
         from_user_id = userInfo.id;
@@ -194,12 +191,11 @@ class CommentController {
         orderName = 'created_at',
       }: any = ctx.request.query;
       let from_user_id = -1;
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
+      // 这个接口的userInfo也不是必须的
+      const { code, userInfo } = await authJwt(ctx);
+      if (code === 200) {
+        from_user_id = userInfo.id;
       }
-      from_user_id = userInfo.id;
       const result = await commentService.getCommentList({
         childrenPageSize,
         nowPage,
@@ -228,12 +224,11 @@ class CommentController {
         orderName = 'created_at',
       }: any = ctx.request.query;
       let from_user_id = -1;
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
+      // 这个接口的userInfo也不是必须的
+      const { code, userInfo } = await authJwt(ctx);
+      if (code === 200) {
+        from_user_id = userInfo.id;
       }
-      from_user_id = userInfo.id;
       const result = await commentService.getChildrenCommentList({
         nowPage,
         pageSize,

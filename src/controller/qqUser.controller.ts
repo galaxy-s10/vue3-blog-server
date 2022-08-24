@@ -263,7 +263,11 @@ class QqUserController {
   bindQQ = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code: authCode, userInfo, message } = await authJwt(ctx);
+      if (authCode !== 200) {
+        emitError({ ctx, code: authCode, error: message });
+        return;
+      }
       const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin

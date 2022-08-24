@@ -10,7 +10,7 @@ import {
   QINIU_CDN_DOMAIN,
 } from '@/constant';
 import otherController from '@/controller/other.controller';
-import qiniuController from '@/controller/qiniu.controller';
+import qiniuController from '@/controller/qiniuData.controller';
 import monitService from '@/service/monit.service';
 import { formatMemorySize } from '@/utils';
 import qiniuModel from '@/utils/qiniu';
