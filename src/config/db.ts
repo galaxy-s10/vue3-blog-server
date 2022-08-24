@@ -47,7 +47,7 @@ export const connectDb = async () => {
   } catch (error) {
     const errMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库失败!`;
     console.log(error);
-    console.error(chalkERROR(errMsg));
+    console.log(chalkERROR(errMsg));
     throw new Error(errMsg);
   }
 };

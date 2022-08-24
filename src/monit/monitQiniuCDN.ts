@@ -7,6 +7,7 @@ import {
   MONIT_QINIUCDN_JOB,
   MONIT_TYPE_QINIU_CDN,
   PROJECT_ENV,
+  QINIU_CDN_DOMAIN,
 } from '@/constant';
 import otherController from '@/controller/other.controller';
 import qiniuController from '@/controller/qiniu.controller';
@@ -30,7 +31,7 @@ export const main = () => {
       )}，阈值：${formatMemorySize(threshold)}`;
       if (allDomainNameFlux > threshold) {
         console.log(chalkWRAN('七牛云cdn流量达到阈值，停掉cdn'));
-        const domain = 'resource.hsslive.cn';
+        const domain = QINIU_CDN_DOMAIN;
         try {
           const token = await qiniuModel.getOfflineToken(domain);
           await axios.post(

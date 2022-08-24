@@ -1,6 +1,7 @@
 import { createServer } from 'http';
 import path from 'path';
 
+import fs from 'fs-extra';
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import bodyParser from 'koa-bodyparser';
@@ -25,6 +26,7 @@ aliasOk(); // 添加别名路径
 const { chalkSUCCESS } = require('@/app/chalkTip');
 
 const uploadDir = path.join(__dirname, './upload');
+fs.ensureDirSync(uploadDir);
 
 const app = new Koa();
 app.use(conditional());

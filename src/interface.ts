@@ -122,7 +122,7 @@ export interface IQiniuData {
   qiniu_hash?: string;
   qiniu_fsize?: number;
   qiniu_mimeType?: string;
-  qiniu_putTime?: number;
+  qiniu_putTime?: string;
   qiniu_type?: number;
   qiniu_status?: number;
   qiniu_md5?: string;

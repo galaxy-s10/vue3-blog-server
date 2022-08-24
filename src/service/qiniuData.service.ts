@@ -20,6 +20,15 @@ class QiniuDataService {
     return res === ids.length;
   }
 
+  async getPrefixList(prefix) {
+    const result = await qiniuDataModel.findAndCountAll({
+      where: {
+        prefix,
+      },
+    });
+    return result;
+  }
+
   /** 获取文件列表 */
   async getList({
     nowPage,
@@ -135,6 +144,15 @@ class QiniuDataService {
       qiniu_putTime,
       qiniu_status,
       qiniu_type,
+    });
+    return result;
+  }
+
+  /** 删除文件 */
+  async batchDelete(prefix: IQiniuData['prefix']) {
+    const result = await qiniuDataModel.destroy({
+      where: { prefix },
+      individualHooks: true,
     });
     return result;
   }
