@@ -43,9 +43,9 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'id',
       } = ctx.request.query;
-      // 这个接口的userInfo也不是必须的
-      const { code, userInfo } = await authJwt(ctx);
       let from_user_id = -1;
+      // 这个接口的userInfo不是必须的
+      const { code, userInfo } = await authJwt(ctx);
       if (code === 200) {
         from_user_id = userInfo.id;
       }
@@ -191,7 +191,7 @@ class CommentController {
         orderName = 'created_at',
       }: any = ctx.request.query;
       let from_user_id = -1;
-      // 这个接口的userInfo也不是必须的
+      // 这个接口的userInfo不是必须的
       const { code, userInfo } = await authJwt(ctx);
       if (code === 200) {
         from_user_id = userInfo.id;
@@ -224,7 +224,7 @@ class CommentController {
         orderName = 'created_at',
       }: any = ctx.request.query;
       let from_user_id = -1;
-      // 这个接口的userInfo也不是必须的
+      // 这个接口的userInfo不是必须的
       const { code, userInfo } = await authJwt(ctx);
       if (code === 200) {
         from_user_id = userInfo.id;
