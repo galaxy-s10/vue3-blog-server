@@ -32,6 +32,7 @@ const articleModel = sequelize.define(
     },
     priority: {
       type: DataTypes.INTEGER, // 权重
+      allowNull: true,
     },
     status: {
       type: DataTypes.INTEGER,

@@ -70,7 +70,11 @@ class StarController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const { article_id, to_user_id, comment_id }: IStar = ctx.request.body;
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const isEverStar = await starService.everStar({
         article_id,
         comment_id,
@@ -111,7 +115,11 @@ class StarController {
   async starForArticle(ctx: ParameterizedContext, next) {
     try {
       const { article_id, to_user_id, comment_id }: IStar = ctx.request.body;
-      const { code, userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       let from_user_id = -1;
       if (code === 200) {
         from_user_id = userInfo.id;
@@ -150,7 +158,11 @@ class StarController {
         to_user_id = -1,
         comment_id = -1,
       }: IStar = ctx.request.body;
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const from_user_id = userInfo.id;
       const articleIsExist =
         article_id === -1 ? true : await articleService.isExist([article_id]);
@@ -189,79 +201,17 @@ class StarController {
       if (!isExist) {
         throw new Error(`不存在id为${id}的star!`);
       }
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const isMeStar: any = await starService.find(id);
       if (isMeStar.from_user_id !== userInfo.id) {
         throw new Error(`不能删除别人的star哦!`);
       }
       await starService.delete(id);
       successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  }
-
-  // 废弃。
-  async deleteOtherStar(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const { userInfo } = await authJwt(ctx);
-      const isMe: any = await starService.find(id);
-      if (isMe.from_user_id !== userInfo.id) {
-        throw new Error(`不能删除别人的star哦!`);
-      }
-      const result = await starService.delete(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
-    await next();
-  }
-
-  async deleteOtherStar111(ctx: ParameterizedContext, next) {
-    try {
-      const { article_id = -1, comment_id = -1 }: IStar = ctx.request.body;
-      const articleIsExist =
-        article_id === -1 ? true : await articleService.isExist([article_id]);
-      if (!articleIsExist) {
-        emitError({
-          ctx,
-          code: 400,
-          error: `不存在id为${article_id}的文章!`,
-        });
-        return;
-      }
-      const commentIsExist =
-        comment_id === -1 ? true : await commentService.isExist([comment_id]);
-      if (!commentIsExist) {
-        emitError({
-          ctx,
-          code: 400,
-          error: `不存在id为${comment_id}的评论!`,
-        });
-        return;
-      }
-      const { code, userInfo } = await authJwt(ctx);
-      let from_user_id = -1;
-      if (code === 200) {
-        from_user_id = userInfo.id;
-      }
-      const isMeStar: any = await starService.isMeStar({
-        article_id,
-        comment_id,
-        from_user_id: userInfo.id,
-      });
-      if (!isMeStar) {
-        emitError({ ctx, code: 401, error: `你不能删除其他人的点赞哦!` });
-        return;
-      }
-      const result = await starService.deleteOtherStar({
-        article_id,
-        comment_id,
-        from_user_id,
-      });
-      successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
     }

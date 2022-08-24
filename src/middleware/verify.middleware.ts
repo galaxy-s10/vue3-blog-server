@@ -40,7 +40,7 @@ const backendWhiteList = [
 
 const globalWhiteList = ['/init/'];
 
-const verify = async (ctx: ParameterizedContext, next) => {
+export const gobalVerify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
   const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
   console.log(
@@ -135,5 +135,3 @@ const verify = async (ctx: ParameterizedContext, next) => {
     end();
   }
 };
-
-export default verify;

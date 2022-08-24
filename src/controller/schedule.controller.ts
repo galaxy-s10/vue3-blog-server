@@ -4,14 +4,14 @@ import schedule from 'node-schedule';
 import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { MONIT_BACKUPSDB_JOB } from '@/constant';
+import { MONIT_JOB } from '@/constant';
 import { main } from '@/monit/monitBackupsDb';
 import { showMemory, clearCache } from '@/utils/clearCache';
 
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
     try {
-      const dbJob = schedule.scheduledJobs[MONIT_BACKUPSDB_JOB];
+      const dbJob = schedule.scheduledJobs[MONIT_JOB.BACKUPSDB];
       if (dbJob) {
         successHandler({
           ctx,
@@ -33,7 +33,7 @@ class ScheduleController {
     try {
       const { code, userInfo, message } = await authJwt(ctx);
       if (code !== 200) {
-        emitError({ ctx, code: 400, error: message });
+        emitError({ ctx, code, error: message });
         return;
       }
       if (userInfo.id !== 1) {
@@ -45,7 +45,7 @@ class ScheduleController {
         });
         return;
       }
-      main();
+      main(userInfo.id);
       successHandler({
         ctx,
         data: '开始执行备份任务，大约5分钟执行完成',
@@ -60,7 +60,7 @@ class ScheduleController {
     try {
       const { code, userInfo, message } = await authJwt(ctx);
       if (code !== 200) {
-        emitError({ ctx, code: 400, error: message });
+        emitError({ ctx, code, error: message });
         return;
       }
       if (userInfo.id !== 1) {
@@ -87,7 +87,7 @@ class ScheduleController {
     try {
       const { code, userInfo, message } = await authJwt(ctx);
       if (code !== 200) {
-        emitError({ ctx, code: 400, error: message });
+        emitError({ ctx, code, error: message });
         return;
       }
       if (userInfo.id !== 1) {

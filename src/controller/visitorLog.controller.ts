@@ -95,11 +95,10 @@ class VisitorLogController {
   async create(ctx: ParameterizedContext, next) {
     try {
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
-      let userInfo = null;
-      try {
-        userInfo = await authJwt(ctx);
-      } catch (error) {
-        console.log(error);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
       }
       const apiNum = await visitorLogService.getOneSecondApiNums(ip);
       // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip
@@ -107,7 +106,7 @@ class VisitorLogController {
         await visitorLogService.update({
           status: -1,
           ip,
-          user_id: userInfo?.id || -1,
+          user_id: userInfo.id || -1,
         });
         emitError({
           ctx,

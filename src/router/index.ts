@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const router = new Router();
 
-function useRoutes() {
+export function useRoutes() {
   fs.readdirSync(__dirname).forEach((file) => {
     try {
       if (file === 'index.ts') return;
@@ -25,5 +25,3 @@ function useRoutes() {
     }
   });
 }
-
-export default useRoutes;

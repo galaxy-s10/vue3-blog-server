@@ -72,7 +72,11 @@ class GithubUserController {
   bindGithub = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code: authCode, userInfo, message } = await authJwt(ctx);
+      if (authCode !== 200) {
+        emitError({ ctx, code: authCode, error: message });
+        return;
+      }
       const result: any = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github
@@ -132,7 +136,11 @@ class GithubUserController {
    */
   cancelBindGithub = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github

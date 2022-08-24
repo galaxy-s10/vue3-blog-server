@@ -43,7 +43,11 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'id',
       } = ctx.request.query;
-      const { code, userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       let from_user_id = -1;
       if (code === 200) {
         from_user_id = userInfo.id;
@@ -86,7 +90,11 @@ class CommentController {
         reply_comment_id,
         content,
       }: IComment = ctx.request.body;
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const comment: any = await commentService.find(id);
       if (userInfo.id !== comment.from_user_id) {
         throw new Error(`你不能修改其他人的评论哦!`);
@@ -128,6 +136,11 @@ class CommentController {
       if (parent_comment_id === -1 && reply_comment_id !== -1) {
         throw new Error(`不能在父评论里回复其他评论哦!`);
       }
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const articleIsExist =
         article_id === -1 ? true : await articleService.isExist([article_id]);
       if (!articleIsExist) {
@@ -151,7 +164,6 @@ class CommentController {
       const ua = ctx.request.headers['user-agent'];
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
       const ip_data = await positionService.get(ip);
-      const { userInfo } = await authJwt(ctx);
       await commentService.create({
         article_id,
         from_user_id: userInfo.id,
@@ -181,17 +193,13 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
-
       let from_user_id = -1;
-      try {
-        const { code, userInfo } = await authJwt(ctx);
-        if (code === 200) {
-          from_user_id = userInfo.id;
-        }
-      } catch (error) {
-        console.log(error);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
       }
-
+      from_user_id = userInfo.id;
       const result = await commentService.getCommentList({
         childrenPageSize,
         nowPage,
@@ -219,17 +227,13 @@ class CommentController {
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
-
       let from_user_id = -1;
-      try {
-        const { code, userInfo } = await authJwt(ctx);
-        if (code === 200) {
-          from_user_id = userInfo.id;
-        }
-      } catch (error) {
-        console.log(error);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
       }
-
+      from_user_id = userInfo.id;
       const result = await commentService.getChildrenCommentList({
         nowPage,
         pageSize,
@@ -273,11 +277,15 @@ class CommentController {
   delete = async (ctx: ParameterizedContext, next) => {
     try {
       const id = +ctx.params.id;
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
         throw new Error(`不存在id为${id}的评论!`);
       }
-      const { userInfo } = await authJwt(ctx);
       const comment: any = await commentService.find(id);
       if (userInfo.id !== comment.from_user_id) {
         throw new Error(`你不能删除其他人的评论哦!`);

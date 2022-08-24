@@ -1,8 +1,8 @@
+import path from 'path';
+
+import moduleAlias from 'module-alias';
+
 import { chalkSUCCESS } from './chalkTip';
-
-const path = require('path');
-
-const moduleAlias = require('module-alias');
 
 moduleAlias.addAlias('@', path.join(process.cwd(), '/src'));
 

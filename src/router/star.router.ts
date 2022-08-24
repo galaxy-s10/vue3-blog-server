@@ -20,7 +20,4 @@ starRouter.get('/find/:id', starController.find);
 // 删除star
 starRouter.delete('/delete/:id', starController.delete);
 
-// 删除评论/文章star
-starRouter.delete('/delete/other', starController.deleteOtherStar);
-
 export default starRouter;

@@ -238,7 +238,11 @@ class EmailUserController {
 
   /** 发送绑定邮箱验证码 */
   sendBindEmailCode = async (ctx: ParameterizedContext, next) => {
-    const { userInfo } = await authJwt(ctx);
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      emitError({ ctx, code, error: message });
+      return;
+    }
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
@@ -257,7 +261,11 @@ class EmailUserController {
 
   /** 发送取消绑定邮箱验证码 */
   sendCancelBindEmailCode = async (ctx: ParameterizedContext, next) => {
-    const { userInfo } = await authJwt(ctx);
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      emitError({ ctx, code, error: message });
+      return;
+    }
     const { email } = ctx.request.body;
     const key = {
       prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
@@ -305,6 +313,11 @@ class EmailUserController {
    */
   bindEmail = async (ctx: ParameterizedContext, next) => {
     try {
+      const { code: authCode, userInfo, message } = await authJwt(ctx);
+      if (authCode !== 200) {
+        emitError({ ctx, code: authCode, error: message });
+        return;
+      }
       const { email, code } = ctx.request.body;
       if (!code) {
         emitError({
@@ -314,7 +327,6 @@ class EmailUserController {
         });
         return;
       }
-      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email
@@ -373,6 +385,11 @@ class EmailUserController {
    */
   cancelBindEmail = async (ctx: ParameterizedContext, next) => {
     try {
+      const { code: authCode, userInfo, message } = await authJwt(ctx);
+      if (authCode !== 200) {
+        emitError({ ctx, code: authCode, error: message });
+        return;
+      }
       const { code } = ctx.request.body;
       if (!code) {
         emitError({
@@ -382,7 +399,6 @@ class EmailUserController {
         });
         return;
       }
-      const { userInfo } = await authJwt(ctx);
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email

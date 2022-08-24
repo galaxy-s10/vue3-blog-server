@@ -325,7 +325,11 @@ class QqUserController {
    */
   cancelBindQQ = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const result: any[] = await thirdUserService.findByUserId(userInfo.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.qq_admin

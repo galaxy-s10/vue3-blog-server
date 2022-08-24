@@ -144,7 +144,11 @@ class RoleController {
   // 获取我的角色
   getMyRole = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const result = await roleService.getMyRole(userInfo.id);
       successHandler({ ctx, data: { total: result.length, result } });
     } catch (error) {
@@ -157,7 +161,11 @@ class RoleController {
   // 获取我的角色（递归找所有）
   getMyAllRole = async (ctx: ParameterizedContext, next) => {
     try {
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const result = await roleService.getMyRole(userInfo.id);
       const role = [];
       result.forEach((v) => {

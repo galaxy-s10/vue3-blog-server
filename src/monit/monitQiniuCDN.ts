@@ -4,8 +4,8 @@ import schedule from 'node-schedule';
 import { chalkERROR, chalkINFO, chalkSUCCESS, chalkWRAN } from '@/app/chalkTip';
 import { QQ_EMAIL_USER } from '@/config/secret';
 import {
-  MONIT_QINIUCDN_JOB,
-  MONIT_TYPE_QINIU_CDN,
+  MONIT_JOB,
+  MONIT_TYPE,
   PROJECT_ENV,
   QINIU_CDN_DOMAIN,
 } from '@/constant';
@@ -46,17 +46,17 @@ export const main = () => {
           );
           const str = '下线域名成功！（达到阈值，停掉cdn）';
           console.log(chalkSUCCESS(info));
-          monitService.create({ type: MONIT_TYPE_QINIU_CDN, info: str });
+          monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: str });
           otherController.sendEmail(QQ_EMAIL_USER, str, str);
         } catch (error) {
           const err = '下线域名报错！（达到阈值，停掉cdn）';
           console.log(chalkERROR(err));
           console.log(error);
-          monitService.create({ type: MONIT_TYPE_QINIU_CDN, info: err });
+          monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: err });
           otherController.sendEmail(QQ_EMAIL_USER, err, err);
         }
       } else {
-        monitService.create({ type: MONIT_TYPE_QINIU_CDN, info });
+        monitService.create({ type: MONIT_TYPE.QINIU_CDN, info });
       }
     })
     .catch((err) => {
@@ -90,13 +90,14 @@ rule.second = 0;
 // 监控七牛云cdn流量，最近一周内，使用流量超过2g就邮件提示（TODO）/使用流量超过5g就停掉cdn服务
 export const monitQiniuCDNJob = () => {
   console.log(chalkWRAN('监控七牛云cdn定时任务启动！'));
-  schedule.scheduleJob(MONIT_QINIUCDN_JOB, rule, () => {
+  const monitJobName = MONIT_JOB.QINIUCDN;
+  schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，执行${MONIT_QINIUCDN_JOB}定时任务`
+          )}，执行${monitJobName}定时任务`
         )
       );
       main();
@@ -105,7 +106,7 @@ export const monitQiniuCDNJob = () => {
         chalkWRAN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，非生产环境，不执行${MONIT_QINIUCDN_JOB}定时任务`
+          )}，当前非生产环境，不执行${monitJobName}定时任务`
         )
       );
     }

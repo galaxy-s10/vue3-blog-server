@@ -2,12 +2,8 @@ import qiniu from 'qiniu';
 
 import { getRandomString } from '.';
 
-import {
-  QINIU_ACCESSKEY,
-  QINIU_SECRETKEY,
-  QINIU_BACKUPS_DATABASE,
-} from '@/config/secret';
-import { QINIU_BUCKET, QINIU_CDN_URL } from '@/constant';
+import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/config/secret';
+import { QINIU_BUCKET } from '@/constant';
 import { IQiniuData } from '@/interface';
 
 const qiniuConfConfig = new qiniu.conf.Config();
@@ -62,37 +58,37 @@ class QiniuModel {
     return uploadToken;
   }
 
-  uploadBackupsDb(localFileUrl = '') {
-    const uploadToken = this.getQiniuToken();
-    const { config } = this;
-    const formUploader = new qiniu.form_up.FormUploader(config);
-    const putExtra = new qiniu.form_up.PutExtra();
-    const parseLocalFileUrl = localFileUrl.split('/');
-    // fileName是根据localFileUrl生成的。
-    const fileName =
-      QINIU_BACKUPS_DATABASE +
-      +new Date() +
-      parseLocalFileUrl[parseLocalFileUrl.length - 1];
-    return new Promise((resolve, reject) => {
-      formUploader.putFile(
-        uploadToken,
-        fileName,
-        localFileUrl,
-        putExtra,
-        (respErr, respBody, respInfo) => {
-          if (respErr) {
-            reject(respErr);
-            throw respErr;
-          }
-          if (respInfo.statusCode === 200) {
-            resolve({ ...respBody, fileName });
-          } else {
-            reject({ statusCode: respInfo.statusCode, respBody });
-          }
-        }
-      );
-    });
-  }
+  // uploadBackupsDb(localFileUrl = '') {
+  //   const uploadToken = this.getQiniuToken();
+  //   const { config } = this;
+  //   const formUploader = new qiniu.form_up.FormUploader(config);
+  //   const putExtra = new qiniu.form_up.PutExtra();
+  //   const parseLocalFileUrl = localFileUrl.split('/');
+  //   // fileName是根据localFileUrl生成的。
+  //   const fileName =
+  //     QINIU_PREFIX['backupsDatabase/'] +
+  //     +new Date() +
+  //     parseLocalFileUrl[parseLocalFileUrl.length - 1];
+  //   return new Promise((resolve, reject) => {
+  //     formUploader.putFile(
+  //       uploadToken,
+  //       fileName,
+  //       localFileUrl,
+  //       putExtra,
+  //       (respErr, respBody, respInfo) => {
+  //         if (respErr) {
+  //           reject(respErr);
+  //           throw respErr;
+  //         }
+  //         if (respInfo.statusCode === 200) {
+  //           resolve({ ...respBody, fileName });
+  //         } else {
+  //           reject({ statusCode: respInfo.statusCode, respBody });
+  //         }
+  //       }
+  //     );
+  //   });
+  // }
 
   upload(file: { prefix: string; filepath: string; originalFilename: string }) {
     const uploadToken = this.getQiniuToken();
@@ -112,6 +108,7 @@ class QiniuModel {
         filename: string;
         key: string;
         prefix: string;
+        putTime: string;
       };
     }>((resolve) => {
       formUploader.putFile(

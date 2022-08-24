@@ -6,11 +6,14 @@ import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { dbName } from '@/config/db';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import {
-  MONIT_BACKUPSDB_JOB,
-  MONIT_TYPE_BACKUPS_DB,
+  MONIT_JOB,
+  MONIT_TYPE,
   PROJECT_ENV,
+  QINIU_BUCKET,
+  QINIU_PREFIX,
 } from '@/constant';
 import monitService from '@/service/monit.service';
+import qiniuDataService from '@/service/qiniuData.service';
 import qiniuController from '@/utils/qiniu';
 
 // 备份目录
@@ -18,9 +21,7 @@ const backupsDirectory = '/node/backups/mysql/';
 
 // 备份的文件名
 const backupsFileName = () => {
-  const res = `${MYSQL_CONFIG.database}__${dayjs().format(
-    'YYYY_MM_DD_HH_mm_ss'
-  )}`;
+  const res = `${MYSQL_CONFIG.database}__${dayjs().format('YYYYMMDDHHmmss')}`;
   return res;
 };
 
@@ -40,7 +41,7 @@ const backupsCmd = (fileName) => {
   return `mysqldump -h${MYSQL_CONFIG.host} -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${MYSQL_CONFIG.database} > ${backupsDirectory}${fileName}.sql`;
 };
 
-export const main = () => {
+export const main = (user_id?: number) => {
   const conn = new Client();
 
   conn
@@ -57,21 +58,44 @@ export const main = () => {
             .on('close', () => {
               console.log('close');
               qiniuController
-                .uploadBackupsDb(`${backupsDirectory + fileName}.sql`)
-                .then(() => {
-                  const info = `备份${dbName}数据库成功！`;
-                  console.log(info);
-                  monitService.create({
-                    type: MONIT_TYPE_BACKUPS_DB,
-                    info,
-                  });
+                .upload({
+                  prefix: QINIU_PREFIX['backupsDatabase/'],
+                  filepath: `${backupsDirectory + fileName}.sql`,
+                  originalFilename: `${fileName}.sql`,
+                })
+                .then(({ flag, respBody, respErr, respInfo, original }) => {
+                  if (flag) {
+                    const info = `备份${dbName}数据库成功！`;
+                    console.log(info);
+                    monitService.create({
+                      type: MONIT_TYPE.BACKUPS_DB_OK,
+                      info,
+                    });
+                    qiniuDataService.create({
+                      user_id,
+                      prefix: QINIU_PREFIX['backupsDatabase/'],
+                      bucket: QINIU_BUCKET,
+                      qiniu_key: respBody.key,
+                      qiniu_fsize: respBody.fsize,
+                      qiniu_hash: respBody.hash,
+                      qiniu_mimeType: respBody.mimeType,
+                      qiniu_putTime: original.putTime,
+                    });
+                  } else {
+                    const info = `备份${dbName}数据库失败！`;
+                    console.log(info);
+                    monitService.create({
+                      type: MONIT_TYPE.BACKUPS_DB_ERR,
+                      info: JSON.stringify({ respBody, respErr, respInfo }),
+                    });
+                  }
                 })
                 .catch((err) => {
                   const info = `备份${dbName}数据库失败！`;
                   console.log(info, err);
                   monitService.create({
-                    type: MONIT_TYPE_BACKUPS_DB,
-                    info,
+                    type: MONIT_TYPE.BACKUPS_DB_ERR,
+                    info: JSON.stringify(err),
                   });
                 })
                 .finally(() => {
@@ -151,13 +175,14 @@ rule.minute = 0;
 
 export const monitBackupsDbJob = () => {
   console.log(chalkWRAN('监控备份数据库定时任务启动！'));
-  schedule.scheduleJob(MONIT_BACKUPSDB_JOB, rule, () => {
+  const monitJobName = MONIT_JOB.BACKUPSDB;
+  schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
         chalkINFO(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，执行${MONIT_BACKUPSDB_JOB}定时任务`
+          )}，执行${monitJobName}定时任务`
         )
       );
       main();
@@ -166,7 +191,7 @@ export const monitBackupsDbJob = () => {
         chalkWRAN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
-          )}，非生产环境，不执行${MONIT_BACKUPSDB_JOB}定时任务`
+          )}，当前非生产环境，不执行${monitJobName}定时任务`
         )
       );
     }

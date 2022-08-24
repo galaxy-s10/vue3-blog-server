@@ -9,11 +9,11 @@ import userModel from '@/model/user.model';
 const authJwt = (
   ctx
 ): Promise<{ code: number; message: string; userInfo?: IUser }> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (ctx.req.headers.authorization === undefined) {
       // eslint-disable-next-line prefer-promise-reject-errors
-      reject({ code: 401, message: '未登录!' });
+      resolve({ code: 401, message: '未登录!' });
       return;
     }
     const token = ctx.req.headers.authorization?.split(' ')[1];
@@ -21,7 +21,7 @@ const authJwt = (
       if (err) {
         // 判断非法/过期token
         // eslint-disable-next-line prefer-promise-reject-errors
-        reject({ code: 401, message: '登录信息过期!' });
+        resolve({ code: 401, message: '登录信息过期!' });
         return;
       }
       try {
@@ -37,24 +37,24 @@ const authJwt = (
         if (!userResult) {
           // 防止token是正确的，但是这个用户已经被删除了。
           // eslint-disable-next-line prefer-promise-reject-errors
-          reject({ code: 401, message: '该用户不存在!' });
+          resolve({ code: 401, message: '该用户不存在!' });
           return;
         }
         if (userResult.token !== token) {
           // 单点登录
           // eslint-disable-next-line prefer-promise-reject-errors
-          reject({ code: 401, message: '登录信息过期!' });
+          resolve({ code: 401, message: '登录信息过期!' });
           return;
         }
         const userStatus = await getUserStatus(userResult.id);
         if (userStatus.code !== 200) {
-          reject(userStatus);
+          resolve(userStatus);
           return;
         }
         resolve({ code: 200, message: '验证token通过!', userInfo: userResult });
       } catch (error) {
         // eslint-disable-next-line prefer-promise-reject-errors
-        reject({ code: 400, error });
+        resolve({ code: 400, error });
       }
     });
   });

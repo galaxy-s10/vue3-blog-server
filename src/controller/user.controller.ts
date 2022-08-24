@@ -185,7 +185,7 @@ class UserController {
         await next();
         return;
       }
-      throw new Error(message);
+      emitError({ ctx, code, error: message });
     } catch (error) {
       emitError({ ctx, code: 401, error, message: error.message });
     }

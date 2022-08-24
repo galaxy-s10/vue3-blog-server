@@ -150,7 +150,7 @@ class ArticleService {
     let tagWhere: any;
     let userWhere: any;
     let statusWhere: any;
-    let keyWordWhere: any;
+    const keyWordWhere: any = {};
     if (status) {
       statusWhere = {};
       statusWhere.status = status;
@@ -251,7 +251,10 @@ class ArticleService {
       },
       where: { ...statusWhere, ...idWhere, ...keyWordWhere },
       distinct: true,
-      order: [[orderName, orderBy]],
+      order: [
+        ['priority', 'desc'],
+        [orderName, orderBy],
+      ],
       // group: ['article.id'],
       limit,
       offset,

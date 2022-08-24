@@ -24,7 +24,11 @@ class ArticleController {
         types,
         tags,
       }: IArticle = ctx.request.body;
-      const { userInfo } = await authJwt(ctx);
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
       const tagIsExist = await tagService.isExist(arrayUnique(tags));
       if (!tagIsExist) {
         throw new Error(`标签id:${tags}中存在不存在的标签!`);
@@ -108,13 +112,12 @@ class ArticleController {
     try {
       const id = +ctx.params.id;
       let from_user_id = -1;
-      try {
-        const { code, userInfo } = await authJwt(ctx);
-        if (code === 200) {
-          from_user_id = userInfo.id;
-        }
-        // eslint-disable-next-line no-empty
-      } catch (error) {}
+      const { code, userInfo, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({ ctx, code, error: message });
+        return;
+      }
+      from_user_id = userInfo.id;
       const result = await articleService.findArticleDetail(id, from_user_id);
       successHandler({ ctx, data: result });
     } catch (error) {
