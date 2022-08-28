@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IType } from '@/interface';
 import { initTable } from '@/utils';
 
-const typeModel = sequelize.define(
+interface TypeModel
+  extends Model<InferAttributes<TypeModel>, InferCreationAttributes<TypeModel>>,
+    IType {}
+
+const model = sequelize.define<TypeModel>(
   'type',
   {
     id: {
@@ -25,5 +35,5 @@ const typeModel = sequelize.define(
   }
 );
 
-initTable(typeModel);
-export default typeModel;
+initTable(model);
+export default model;

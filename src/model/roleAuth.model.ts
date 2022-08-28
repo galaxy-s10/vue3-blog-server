@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IRoleAuth } from '@/interface';
 import { initTable } from '@/utils';
 
-const roleAuthModel = sequelize.define(
+interface RoleAuthModel
+  extends Model<
+      InferAttributes<RoleAuthModel>,
+      InferCreationAttributes<RoleAuthModel>
+    >,
+    IRoleAuth {}
+
+const model = sequelize.define<RoleAuthModel>(
   'role_auth',
   {
     id: {
@@ -38,5 +51,5 @@ const roleAuthModel = sequelize.define(
   }
 );
 
-initTable(roleAuthModel);
-export default roleAuthModel;
+initTable(model);
+export default model;

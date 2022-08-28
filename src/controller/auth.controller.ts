@@ -220,7 +220,7 @@ class AuthController {
       } else {
         const isExist = await authService.isExist([id, p_id]);
         if (!isExist) {
-          throw new Error(`${[id, p_id]}中存在不存在的权限!`);
+          throw new Error(`${[id, p_id].toString()}中存在不存在的权限!`);
         }
         const c_auth: any = await authService.find(p_id);
         if (id !== 1 && c_auth.p_id === id) {
@@ -306,13 +306,13 @@ class AuthController {
       }
       const isExist = await authService.isExist([id, ...c_auths]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_auths]}中存在不存在的权限!`);
+        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限!`);
       }
       const result1: any = await authService.findAllByInId(c_auths);
       const result2: number[] = result1.map((v) => v.p_id);
       const isUnique = arrayUnique(result2).length === 1;
       if (!isUnique) {
-        throw new Error(`${c_auths}不是同一个父级权限!`);
+        throw new Error(`${c_auths.toString()}不是同一个父级权限!`);
       }
       await authService.updateMany(c_auths, id);
       successHandler({ ctx });
@@ -346,13 +346,13 @@ class AuthController {
       }
       const isExist = await authService.isExist([id, ...c_auths]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_auths]}中存在不存在的权限!`);
+        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限!`);
       }
       const all_child_auths: any = await authService.findByPid(id);
       const all_child_auths_id = all_child_auths.map((v) => v.id);
       const hasDiff = arrayGetDifference(c_auths, all_child_auths_id);
       if (hasDiff.length) {
-        throw new Error(`[${c_auths}]中的权限父级id不是${id}!`);
+        throw new Error(`${c_auths.toString()}中的权限父级id不是${id}!`);
       }
       const queue = [];
       c_auths.forEach((v) => {

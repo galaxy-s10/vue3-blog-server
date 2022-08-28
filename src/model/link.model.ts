@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { ILink } from '@/interface';
 import { initTable } from '@/utils';
 
-const linkModel = sequelize.define(
+interface LinkModel
+  extends Model<InferAttributes<LinkModel>, InferCreationAttributes<LinkModel>>,
+    ILink {}
+
+const model = sequelize.define<LinkModel>(
   'link',
   {
     id: {
@@ -41,5 +51,5 @@ const linkModel = sequelize.define(
   }
 );
 
-initTable(linkModel);
-export default linkModel;
+initTable(model);
+export default model;

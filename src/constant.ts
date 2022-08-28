@@ -2,6 +2,12 @@ export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME;
 export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV;
 export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT;
 
+export const COMMON_ERR_MSG = {
+  banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',
+  jwtExpired: '登录信息过期！',
+  invalidToken: '非法token！',
+  disableUser: '你的账号已被禁用，请联系管理员处理！',
+};
 // 发送邮件结果类型
 export const VERIFY_EMAIL_RESULT_CODE = {
   ok: '发送成功!',

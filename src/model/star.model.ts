@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IStar } from '@/interface';
 import { initTable } from '@/utils';
 
-const starModel = sequelize.define(
+interface StarModel
+  extends Model<InferAttributes<StarModel>, InferCreationAttributes<StarModel>>,
+    IStar {}
+
+const model = sequelize.define<StarModel>(
   'star',
   {
     id: {
@@ -55,5 +65,5 @@ const starModel = sequelize.define(
   }
 );
 
-initTable(starModel);
-export default starModel;
+initTable(model);
+export default model;

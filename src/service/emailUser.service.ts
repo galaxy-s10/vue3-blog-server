@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 
 import { THIRD_PLATFORM } from '@/constant';
-import { IEmail } from '@/interface';
+import { IEmail, IList } from '@/interface';
 import emailModel from '@/model/emailUser.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
@@ -33,7 +33,7 @@ class EmailService {
   }
 
   /** 获取邮箱用户列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
+  async getList({ nowPage, pageSize, orderBy, orderName }: IList<IEmail>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const result = await emailModel.findAndCountAll({

@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import { chalkINFO } from '@/app/chalkTip';
 import emitError from '@/app/handler/emit-error';
+import { isAdmin } from '@/utils';
 
 // 前台的所有get和白名单内的接口不需要token
 const frontendWhiteList = [
@@ -42,21 +43,22 @@ const globalWhiteList = ['/init/'];
 
 export const gobalVerify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
-  const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+  const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+  const admin = isAdmin(ctx);
   console.log(
     chalkINFO(
-      `↓↓↓↓↓↓↓↓↓↓ ${new Date().toLocaleString()} 监听${
-        isAdmin ? '后' : '前'
-      }台 ${ctx.request.method} ${url} 开始 ↓↓↓↓↓↓↓↓↓↓`
+      `日期：${new Date().toLocaleString()}，ip：${ip}，请求${
+        admin ? '后' : '前'
+      }台接口 ${ctx.request.method} ${url}`
     )
   );
 
-  const end = () => {
+  const consoleEnd = () => {
     console.log(
       chalkINFO(
-        `↑↑↑↑↑↑↑↑↑↑ ${new Date().toLocaleString()} 监听${
-          isAdmin ? '后' : '前'
-        }台 ${ctx.request.method} ${url} 结束 ↑↑↑↑↑↑↑↑↑↑`
+        `日期：${new Date().toLocaleString()}，ip：${ip}，响应${
+          admin ? '后' : '前'
+        }台接口 ${ctx.request.method} ${url}`
       )
     );
   };
@@ -67,18 +69,19 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
       allowNext = true;
     }
   });
+
   if (allowNext) {
     console.log(chalkINFO('全局白名单，next'));
     await next();
-    end();
+    consoleEnd();
     return;
   }
 
   try {
-    if (isAdmin) {
+    if (admin) {
       if (backendWhiteList.indexOf(url) !== -1) {
         await next();
-        end();
+        consoleEnd();
         return;
       }
       const { code, message } = await authJwt(ctx);
@@ -88,7 +91,7 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
           code,
           message,
         });
-        end();
+        consoleEnd();
         return;
       }
       /**
@@ -97,34 +100,37 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
        * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
        */
       await next();
-      end();
-      return;
-    }
-    // 前端的get接口都不需要判断token，白名单内的也不需要判断token（如注册登录这些接口是post的）
-    if (ctx.request.method === 'GET' || frontendWhiteList.indexOf(url) !== -1) {
+      consoleEnd();
+    } else {
+      // 前端的get接口都不需要判断token，白名单内的也不需要判断token（如注册登录这些接口是post的）
+      if (
+        ctx.request.method === 'GET' ||
+        frontendWhiteList.indexOf(url) !== -1
+      ) {
+        await next();
+        consoleEnd();
+        return;
+      }
+      const { code, message } = await authJwt(ctx);
+      if (code !== 200) {
+        emitError({
+          ctx,
+          code,
+          message,
+        });
+        consoleEnd();
+        return;
+      }
+      /**
+       * 因为这个verify.middleware是最先执行的中间件路由，
+       * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
+       * 必须使用await next()，如果这里使用next()，就会返回数据了（404），也就是不会
+       * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
+       */
       await next();
-      end();
+      consoleEnd();
       return;
     }
-    const { code, message } = await authJwt(ctx);
-    if (code !== 200) {
-      emitError({
-        ctx,
-        code,
-        message,
-      });
-      end();
-      return;
-    }
-    /**
-     * 因为这个verify.middleware是最先执行的中间件路由，
-     * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
-     * 必须使用await next()，如果这里使用next()，就会返回数据了（404），也就是不会
-     * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
-     */
-    await next();
-    end();
-    return;
   } catch (error) {
     emitError({
       ctx,
@@ -132,6 +138,6 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
       code: error.code,
       message: error.message,
     });
-    end();
+    consoleEnd();
   }
 };

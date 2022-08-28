@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IMusic } from '@/interface';
 import { initTable } from '@/utils';
 
-const musicModel = sequelize.define(
+interface MusicModel
+  extends Model<
+      InferAttributes<MusicModel>,
+      InferCreationAttributes<MusicModel>
+    >,
+    IMusic {}
+
+const model = sequelize.define<MusicModel>(
   'music',
   {
     id: {
@@ -38,5 +51,5 @@ const musicModel = sequelize.define(
   }
 );
 
-initTable(musicModel);
-export default musicModel;
+initTable(model);
+export default model;

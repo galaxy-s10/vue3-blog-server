@@ -1,10 +1,23 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
 import { THIRD_PLATFORM } from '@/constant';
+import { IThirdUser } from '@/interface';
 import { initTable } from '@/utils';
 
-const thirdUserModel = sequelize.define(
+interface ThirdUserModel
+  extends Model<
+      InferAttributes<ThirdUserModel>,
+      InferCreationAttributes<ThirdUserModel>
+    >,
+    IThirdUser {}
+
+const model = sequelize.define<ThirdUserModel>(
   'third_user',
   {
     id: {
@@ -46,5 +59,5 @@ const thirdUserModel = sequelize.define(
   }
 );
 
-initTable(thirdUserModel);
-export default thirdUserModel;
+initTable(model);
+export default model;

@@ -7,6 +7,7 @@
     "commit": "cz",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint:fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
+    "typecheck":"tsc -p ./tsconfig.json --noEmit",
     "prepare": "husky install",
     "prettier": "prettier --write .",
     "push": "cz && standard-version",

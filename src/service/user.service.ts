@@ -12,8 +12,6 @@ import starModel from '@/model/star.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
-interface ISearch extends IUser, IList {}
-
 const { Op, where, literal } = Sequelize;
 
 class UserService {
@@ -50,7 +48,7 @@ class UserService {
     pageSize,
     orderBy,
     orderName,
-  }: ISearch) {
+  }: IList<IUser>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};
@@ -88,8 +86,30 @@ class UserService {
     return handlePaging(nowPage, pageSize, result);
   }
 
-  /** 根据id查找用户 */
+  /** 根据id查找用户（不返回password，但返回token） */
+  async findAndToken(id: number) {
+    const result = await userModel.findOne({
+      attributes: {
+        exclude: ['password'],
+      },
+      where: { id },
+    });
+    return result;
+  }
+
+  /** 根据id查找用户（password和token都不返回） */
   async find(id: number) {
+    const result = await userModel.findOne({
+      attributes: {
+        exclude: ['password', 'token'],
+      },
+      where: { id },
+    });
+    return result;
+  }
+
+  /** 根据id查找用户（包括其他账号信息） */
+  async findAccount(id: number) {
     const result = await userModel.findOne({
       include: [
         {
@@ -229,6 +249,7 @@ class UserService {
       attributes: {
         exclude: ['password', 'token'],
       },
+      // @ts-ignore
       where: {
         username: where(literal(`BINARY username`), username),
       },

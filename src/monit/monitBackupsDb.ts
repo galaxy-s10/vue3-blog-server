@@ -37,7 +37,7 @@ fi
 `;
 
 // 备份数据库命令
-const backupsCmd = (fileName) => {
+const backupsCmd = (fileName: string) => {
   return `mysqldump -h${MYSQL_CONFIG.host} -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${MYSQL_CONFIG.database} > ${backupsDirectory}${fileName}.sql`;
 };
 

@@ -4,8 +4,6 @@ import { IMusic, IList } from '@/interface';
 import musicModel from '@/model/music.model';
 import { handlePaging } from '@/utils';
 
-interface ISearch extends IMusic, IList {}
-
 const { Op } = Sequelize;
 class MusicService {
   /** 音乐是否存在 */
@@ -29,7 +27,7 @@ class MusicService {
     status,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<IMusic>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};

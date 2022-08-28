@@ -12,7 +12,7 @@ import {
   THIRD_PLATFORM,
   VERIFY_EMAIL_RESULT_CODE,
 } from '@/constant';
-import { IEmail } from '@/interface';
+import { IEmail, IList } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
@@ -105,7 +105,7 @@ class EmailUserController {
   /** 邮箱登录（邮箱验证码登录） */
   login = async (ctx: ParameterizedContext, next) => {
     try {
-      const { email, code, exp = 24 } = ctx.request.body;
+      const { email, code, exp = 24 }: IEmail = ctx.request.body;
       const key = {
         prefix: REDIS_PREFIX.emailLogin,
         key: email,
@@ -118,13 +118,20 @@ class EmailUserController {
       }
       const isExistEmail = await emailUserService.findByEmail(email);
       if (!isExistEmail) {
-        throw new Error(`${email}还未绑定过用户!`);
+        emitError({ ctx, code: 400, message: `${email}还未绑定过用户!` });
+        return;
       }
       const findEmailUserRes = await emailUserService.findThirdUser(email);
-      if (!findEmailUserRes.get().users[0]) {
-        throw new Error(`${email}用户有误，请联系管理员!`);
+      // @ts-ignore
+      const userInfo = findEmailUserRes.users[0];
+      if (!userInfo) {
+        emitError({
+          ctx,
+          code: 400,
+          message: `${email}用户有误，请联系管理员!`,
+        });
+        return;
       }
-      const userInfo = findEmailUserRes.get().users[0].get();
       const token = signJwt({
         userInfo,
         exp,
@@ -291,7 +298,7 @@ class EmailUserController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+      }: IList<IEmail> = ctx.request.query;
       const result = await emailUserService.getList({
         nowPage,
         pageSize,

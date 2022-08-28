@@ -1,15 +1,11 @@
 import Sequelize from 'sequelize';
 
-import { IList, IGithubUser } from '@/interface';
+import { IGithubUser, IList } from '@/interface';
 import githubUserModel from '@/model/githubUser.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-export interface IGithubUserList extends IList {
-  created_at?: string;
-  updated_at?: string;
-}
 class UserService {
   /** github用户是否存在 */
   async isExist(github_ids: number[]) {
@@ -31,7 +27,7 @@ class UserService {
     orderName,
     created_at,
     updated_at,
-  }: IGithubUserList) {
+  }: IList<IGithubUser>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const where1: any = {};

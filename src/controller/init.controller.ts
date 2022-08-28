@@ -8,7 +8,6 @@ import dayDataModel from '@/model/dayData.model';
 import RoleModel from '@/model/role.model';
 import RoleAuthModel from '@/model/roleAuth.model';
 import userModel from '@/model/user.model';
-import userRoleModel from '@/model/userRole.model';
 import {
   bulkCreateAuth,
   bulkCreateRole,

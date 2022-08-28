@@ -8,7 +8,7 @@ const schema = Joi.object({
   title: Joi.string().min(3).max(30),
   desc: [Joi.string().min(2).max(80), null],
   content: Joi.string(),
-  priority: Joi.number(),
+  priority: [Joi.number(), null],
   is_comment: [1, 2],
   status: [1, 2],
   head_img: [Joi.string().min(3).max(80), null],

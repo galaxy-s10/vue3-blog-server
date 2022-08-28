@@ -4,11 +4,11 @@ import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IArticle } from '@/interface';
+import { IArticle, IList } from '@/interface';
 import articleService from '@/service/article.service';
 import tagService from '@/service/tag.service';
 import typeService from '@/service/type.service';
-import { arrayUnique } from '@/utils';
+import { arrayUnique, isAdmin } from '@/utils';
 
 class ArticleController {
   async create(ctx: ParameterizedContext, next) {
@@ -31,13 +31,13 @@ class ArticleController {
       }
       const tagIsExist = await tagService.isExist(arrayUnique(tags));
       if (!tagIsExist) {
-        throw new Error(`标签id:${tags}中存在不存在的标签!`);
+        throw new Error(`标签id:${tags.toString()}中存在不存在的标签!`);
       }
       const typeIsExist = await typeService.isExist(arrayUnique(types));
       if (!typeIsExist) {
-        throw new Error(`分类id:${types}中存在不存在的分类!`);
+        throw new Error(`分类id:${types.toString()}中存在不存在的分类!`);
       }
-      const result: any = await articleService.create({
+      const result = await articleService.create({
         title,
         desc,
         head_img,
@@ -46,10 +46,11 @@ class ArticleController {
         content,
         priority,
       });
-      // eslint-disable-next-line
-      tags && (await result.setTags(tags));
-      // eslint-disable-next-line
-      types && (await result.setTypes(types));
+      // @ts-ignore
+      await result.setTags(tags);
+      // @ts-ignore
+      await result.setTypes(types);
+      // @ts-ignore
       await result.setUsers([userInfo.id]);
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -129,17 +130,16 @@ class ArticleController {
     try {
       const {
         id,
-        tags = '',
-        types = '',
-        users = '',
+        tags = [],
+        types = [],
+        users = [],
         nowPage = '1',
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-        status = '1',
+        status,
         keyWord,
-      } = ctx.request.query;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+      }: IList<IArticle> = ctx.request.query;
       const result = await articleService.getList({
         id,
         tags,
@@ -149,7 +149,7 @@ class ArticleController {
         pageSize,
         orderBy,
         orderName,
-        status: isAdmin ? status : 1,
+        status: isAdmin(ctx) ? status : 1,
         keyWord,
       });
       successHandler({ ctx, data: result });
@@ -165,14 +165,13 @@ class ArticleController {
         keyWord,
         nowPage = '1',
         pageSize = '10',
-        status = '1',
-      } = ctx.request.query;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
+        status,
+      }: IList<IArticle> = ctx.request.query;
       const result = await articleService.getKeyWordList({
         keyWord,
         nowPage,
         pageSize,
-        status: isAdmin ? status : 1,
+        status: isAdmin(ctx) ? status : 1,
       });
       successHandler({ ctx, data: result });
     } catch (error) {

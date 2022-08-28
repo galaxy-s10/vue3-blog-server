@@ -1,14 +1,28 @@
 // import Sequelize from 'sequelize';//这种写法没有提示。
 // import * as Sequelize from 'sequelize'; // 这种写法有提示。
 // import Sequelize = require('sequelize'); // 这种写法有提示。
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IArticle } from '@/interface';
 import { initTable } from '@/utils';
 
 // const Sequelize = require('sequelize');
 
-const articleModel = sequelize.define(
+interface ArticleModel
+  extends Model<
+      InferAttributes<ArticleModel>,
+      InferCreationAttributes<ArticleModel>
+    >,
+    IArticle {}
+
+// https://sequelize.org/docs/v6/other-topics/typescript/#usage-of-sequelizedefine
+const model = sequelize.define<ArticleModel>(
   // 这将控制自动生成的foreignKey和关联命名的名称
   'article', // 模型名称
   {
@@ -60,5 +74,5 @@ const articleModel = sequelize.define(
   }
 );
 
-initTable(articleModel);
-export default articleModel;
+initTable(model);
+export default model;

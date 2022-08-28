@@ -9,7 +9,6 @@ import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
-interface ISearch extends ITag, IList {}
 
 class TagService {
   /** 标签是否存在 */
@@ -32,7 +31,7 @@ class TagService {
     orderName,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<ITag>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};
@@ -68,7 +67,7 @@ class TagService {
       distinct: true,
     });
     result.rows.forEach((item) => {
-      const v = item.get();
+      const v: any = item.get();
       v.article_total = v.articles.length;
       delete v.articles;
     });

@@ -17,12 +17,6 @@ import userService from '@/service/user.service';
 import { getRandomString } from '@/utils';
 import axios from '@/utils/request';
 
-export interface IGithubUserList extends IList {
-  nickname: string;
-  gender: string;
-  created_at?: string;
-  updated_at?: string;
-}
 class GithubUserController {
   async create(ctx: ParameterizedContext, next) {
     try {
@@ -57,7 +51,7 @@ class GithubUserController {
   }
 
   /** https://docs.github.com/cn/rest/reference/users#get-the-authenticated-user */
-  async getMeOauth({ access_token }) {
+  async getMeOauth({ access_token }: { access_token: string }) {
     const OauthInfo: any = await axios.get('https://api.github.com/user', {
       headers: { Authorization: `token ${access_token}` },
     });
@@ -226,7 +220,9 @@ class GithubUserController {
           third_platform: THIRD_PLATFORM.github,
           third_user_id: oldGithubUser.id,
         });
-        const userInfo: any = await userService.find(thirdUserInfo.user_id);
+        const userInfo: any = await userService.findAccount(
+          thirdUserInfo.user_id
+        );
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
@@ -265,7 +261,7 @@ class GithubUserController {
         orderName = 'id',
         created_at,
         updated_at,
-      }: IGithubUserList = ctx.request.query;
+      }: IList<IGithubUser> = ctx.request.query;
       const result = await githubUserService.getList({
         nowPage,
         pageSize,

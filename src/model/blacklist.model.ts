@@ -6,15 +6,18 @@ import {
 } from 'sequelize';
 
 import sequelize from '@/config/db';
-import { ITag } from '@/interface';
+import { IBlacklist } from '@/interface';
 import { initTable } from '@/utils';
 
-interface TagModel
-  extends Model<InferAttributes<TagModel>, InferCreationAttributes<TagModel>>,
-    ITag {}
+interface BlacklistModel
+  extends Model<
+      InferAttributes<BlacklistModel>,
+      InferCreationAttributes<BlacklistModel>
+    >,
+    IBlacklist {}
 
-const model = sequelize.define<TagModel>(
-  'tag',
+const model = sequelize.define<BlacklistModel>(
+  'blacklist',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -22,11 +25,14 @@ const model = sequelize.define<TagModel>(
       allowNull: false,
       autoIncrement: true,
     },
-    name: {
-      type: DataTypes.STRING(50),
+    ip: {
+      type: DataTypes.STRING(100),
     },
-    color: {
-      type: DataTypes.STRING(50),
+    user_id: {
+      type: DataTypes.INTEGER,
+    },
+    msg: {
+      type: DataTypes.STRING(100),
     },
   },
   {

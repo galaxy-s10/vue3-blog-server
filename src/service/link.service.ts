@@ -6,8 +6,6 @@ import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-interface ISearch extends ILink, IList {}
-
 class LinkService {
   /** 友链是否存在 */
   async isExist(ids: number[]) {
@@ -30,7 +28,7 @@ class LinkService {
     status,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<ILink>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};

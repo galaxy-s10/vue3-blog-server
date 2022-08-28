@@ -178,7 +178,7 @@ class StarController {
         ...new Set([to_user_id].filter((v) => v !== -1)),
       ]);
       if (!userIsExist) {
-        throw new Error(`不存在id为${[to_user_id]}的用户!`);
+        throw new Error(`不存在id为${to_user_id}的用户!`);
       }
       const result = await starService.create({
         article_id,

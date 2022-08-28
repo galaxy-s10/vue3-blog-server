@@ -35,7 +35,7 @@ const handleData = (str: string) => {
   res.push(arr.splice(0, 7));
   res.push(arr.splice(0, arr.length));
 
-  res[0].forEach((key, index) => {
+  res[0].forEach((key: string, index: number) => {
     res[1][index + 1] && (obj[mem + key] = res[1][index + 1]);
     res[2][index + 1] && (obj[swap + key] = res[2][index + 1]);
   });
@@ -57,10 +57,10 @@ export const restartPm2 = () => {
             .on('close', () => {
               console.log('close');
             })
-            .on('data', (data) => {
+            .on('data', (data: string) => {
               console.log(`STDOUT: ${data}`);
             })
-            .stderr.on('data', (data) => {
+            .stderr.on('data', (data: string) => {
               console.log(`STDERR: ${data}`);
             });
         }
@@ -89,10 +89,10 @@ export const clearCache = () => {
             .on('close', () => {
               console.log('close');
             })
-            .on('data', (data) => {
+            .on('data', (data: string) => {
               console.log(`STDOUT: ${data}`);
             })
-            .stderr.on('data', (data) => {
+            .stderr.on('data', (data: string) => {
               console.log(`STDERR: ${data}`);
             });
         }

@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IArticleTag } from '@/interface';
 import { initTable } from '@/utils';
 
-const articleTagModel = sequelize.define(
+interface ArticleTagModel
+  extends Model<
+      InferAttributes<ArticleTagModel>,
+      InferCreationAttributes<ArticleTagModel>
+    >,
+    IArticleTag {}
+
+const model = sequelize.define<ArticleTagModel>(
   'article_tag',
   {
     id: {
@@ -40,5 +53,5 @@ const articleTagModel = sequelize.define(
   }
 );
 
-initTable(articleTagModel);
-export default articleTagModel;
+initTable(model);
+export default model;

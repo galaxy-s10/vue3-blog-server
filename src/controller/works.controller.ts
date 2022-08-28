@@ -5,6 +5,7 @@ import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IWorks } from '@/interface';
 import worksService from '@/service/works.service';
+import { isAdmin } from '@/utils';
 
 class WorksController {
   async getList(ctx: ParameterizedContext, next) {
@@ -18,13 +19,12 @@ class WorksController {
         keyWord,
         id,
       }: any = ctx.request.query;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await worksService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
-        status: isAdmin ? status : 1,
+        status: isAdmin(ctx) ? status : 1,
         keyWord,
         id,
       });
@@ -86,14 +86,13 @@ class WorksController {
       }
       const { name, desc, bg_url, priority, url, status }: IWorks =
         ctx.request.body;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       await worksService.create({
         name,
         desc,
         bg_url,
         priority,
         url,
-        status: isAdmin ? status : 1,
+        status,
       });
       successHandler({ ctx });
     } catch (error) {

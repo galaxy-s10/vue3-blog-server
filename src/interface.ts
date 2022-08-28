@@ -5,7 +5,20 @@ export interface ITheme {
   value?: string;
   lang?: string;
   desc?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
+export interface IBlacklist {
+  id?: number;
+  ip?: string;
+  user_id?: number;
+  msg?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+
 export interface IFrontend {
   id?: number;
   frontend_qq_login?: number;
@@ -16,6 +29,9 @@ export interface IFrontend {
   frontend_about?: string;
   frontend_dialog?: number;
   frontend_dialog_content?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IIpdata {
   city: string;
@@ -40,31 +56,44 @@ export interface IUser {
   desc?: string;
   token?: string;
   user_roles?: number[];
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IEmailUser {
+  id?: number;
+  email?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IEmail {
   id?: number;
-  email: string;
+  email?: string;
   code?: string;
   exp?: number;
 }
 
 export interface IQqUser {
   id?: number;
-  client_id: number;
-  openid: string;
-  unionid: string;
-  nickname: string;
-  figureurl: string;
-  figureurl_1: string;
-  figureurl_2: string;
-  figureurl_qq_1: string;
-  figureurl_qq_2: string;
-  constellation: string;
-  gender: string;
-  city: string;
-  province: string;
-  year: string;
+  client_id?: number;
+  openid?: string;
+  unionid?: string;
+  nickname?: string;
+  figureurl?: string;
+  figureurl_1?: string;
+  figureurl_2?: string;
+  figureurl_qq_1?: string;
+  figureurl_qq_2?: string;
+  constellation?: string;
+  gender?: string;
+  city?: string;
+  province?: string;
+  year?: string;
   ret?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IGithubUser {
   id?: unknown;
@@ -98,11 +127,17 @@ export interface IGithubUser {
   disk_usage?: unknown;
   collaborators?: unknown;
   two_factor_authentication?: unknown;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface IType {
   id?: number;
   name?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface IMusic {
@@ -112,6 +147,9 @@ export interface IMusic {
   author?: string;
   audio_url?: string;
   status?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IQiniuData {
   id?: number;
@@ -126,12 +164,35 @@ export interface IQiniuData {
   qiniu_type?: number;
   qiniu_status?: number;
   qiniu_md5?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IThirdUser {
   id?: number;
   user_id: number;
   third_user_id: number;
   third_platform: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IUploadRes {
+  error: string[];
+  success: {
+    bucket: string;
+    key: string;
+    hash: string;
+    fsize: number;
+    mimeType: string;
+    original: {
+      filename: string;
+      key: string;
+      prefix: string;
+      putTime: string;
+    };
+    resultFilename: string;
+  }[];
 }
 
 export interface ILink {
@@ -142,6 +203,9 @@ export interface ILink {
   desc?: string;
   url?: string;
   status?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IWorks {
   id?: number;
@@ -151,16 +215,23 @@ export interface IWorks {
   bg_url?: string;
   priority?: string;
   status?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface ITag {
   id?: number;
   name?: string;
   color?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface ILog {
   id?: number;
+  status?: number;
   user_id?: number;
   api_user_agent?: string;
   api_sql_duration?: number;
@@ -173,12 +244,18 @@ export interface ILog {
   api_body?: string;
   api_err_msg?: string;
   api_err_stack?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface IMonit {
   id?: number;
   type?: number;
   info?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface IArticle {
@@ -195,6 +272,9 @@ export interface IArticle {
   types?: number[];
   users?: number[];
   keyWord?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IComment {
   id?: number;
@@ -209,19 +289,25 @@ export interface IComment {
   article_id?: number;
   to_user_id?: number;
   p_comment?: any[];
-  created_at?: string;
-  updated_at?: string;
   to_user?: IUser;
   from_user?: IUser;
   stars?: any[];
+  star_total?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
-export interface IVisitor {
+export interface IVisitorLog {
   id?: number;
   user_id?: number;
   ip?: string;
   status?: number;
   ip_data?: string;
+  total?: number; // 获取当天访客访问数据的时候添加了一个total字段
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IStar {
   id?: number;
@@ -229,6 +315,9 @@ export interface IStar {
   comment_id?: number;
   to_user_id?: number;
   from_user_id: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
 export interface IAuth {
@@ -239,6 +328,9 @@ export interface IAuth {
   type?: number;
   priority?: number;
   c_auths?: number[];
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 export interface IRole {
   id?: number;
@@ -249,18 +341,63 @@ export interface IRole {
   priority?: number;
   role_auths?: number[];
   c_roles?: number[];
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IRoleAuth {
+  id?: number;
+  role_id?: number;
+  auth_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }
 
-export interface IList {
+export type IList<T> = {
   nowPage?: string;
   pageSize?: string;
   orderBy?: string;
   orderName?: string;
   keyWord?: string;
-}
+} & T;
 
 export interface IArticleTag {
   id?: number;
+  article_id?: number;
+  tag_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IArticleType {
+  id?: number;
+  article_id?: number;
+  type_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IUserArticle {
+  id?: number;
+  user_id: number;
   article_id: number;
-  tag_id: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IUserRole {
+  id?: number;
+  user_id: number;
+  role_id: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IDayData {
+  id?: number;
+  today: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }

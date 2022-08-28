@@ -4,9 +4,6 @@ import { authJwt, signJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
-  WWW_QQ_CLIENT_ID,
-  WWW_QQ_CLIENT_SECRET,
-  WWW_QQ_REDIRECT_URI,
   ADMIN_QQ_CLIENT_ID,
   ADMIN_QQ_CLIENT_SECRET,
   ADMIN_QQ_REDIRECT_URI,
@@ -19,13 +16,6 @@ import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { getRandomString } from '@/utils';
 import axios from '@/utils/request';
-
-export interface IQqUserList extends IList {
-  nickname: string;
-  gender: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 class QqUserController {
   async create(ctx: ParameterizedContext, next) {
@@ -195,7 +185,9 @@ class QqUserController {
           third_platform: THIRD_PLATFORM.qq_admin,
           third_user_id: oldQqUser.id,
         });
-        const userInfo: any = await userService.find(thirdUserInfo.user_id);
+        const userInfo: any = await userService.findAccount(
+          thirdUserInfo.user_id
+        );
         const token = signJwt({
           userInfo: {
             ...JSON.parse(JSON.stringify(userInfo)),
@@ -236,7 +228,7 @@ class QqUserController {
         orderName = 'id',
         created_at,
         updated_at,
-      }: IQqUserList = ctx.request.query;
+      }: IList<IQqUser> = ctx.request.query;
       const result = await qqUserService.getList({
         nickname,
         gender,

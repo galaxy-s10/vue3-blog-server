@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IEmailUser } from '@/interface';
 import { initTable } from '@/utils';
 
-const emailModel = sequelize.define(
+interface EmailUserModel
+  extends Model<
+      InferAttributes<EmailUserModel>,
+      InferCreationAttributes<EmailUserModel>
+    >,
+    IEmailUser {}
+
+const model = sequelize.define<EmailUserModel>(
   'email_user',
   {
     id: {
@@ -25,5 +38,5 @@ const emailModel = sequelize.define(
   }
 );
 
-initTable(emailModel);
-export default emailModel;
+initTable(model);
+export default model;

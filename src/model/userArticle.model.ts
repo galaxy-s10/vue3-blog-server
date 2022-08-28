@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IUserArticle } from '@/interface';
 import { initTable } from '@/utils';
 
-const userArticleModel = sequelize.define(
+interface UserArticleModel
+  extends Model<
+      InferAttributes<UserArticleModel>,
+      InferCreationAttributes<UserArticleModel>
+    >,
+    IUserArticle {}
+
+const model = sequelize.define<UserArticleModel>(
   'user_article',
   {
     id: {
@@ -14,6 +27,7 @@ const userArticleModel = sequelize.define(
     },
     user_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       // references: {
       //   model: userModel,
       //   key: 'id',
@@ -21,6 +35,7 @@ const userArticleModel = sequelize.define(
     },
     article_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       // references: {
       //   model: articleModel,
       //   key: 'id',
@@ -46,5 +61,5 @@ const userArticleModel = sequelize.define(
   }
 );
 
-initTable(userArticleModel);
-export default userArticleModel;
+initTable(model);
+export default model;

@@ -4,8 +4,6 @@ import { IQiniuData, IList } from '@/interface';
 import qiniuDataModel from '@/model/qiniuData.model';
 import { handlePaging } from '@/utils';
 
-interface ISearch extends IQiniuData, IList {}
-
 const { Op, cast, col } = Sequelize;
 class QiniuDataService {
   /** 文件是否存在 */
@@ -39,7 +37,7 @@ class QiniuDataService {
     id,
     user_id,
     prefix,
-  }: ISearch) {
+  }: IList<IQiniuData>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};
@@ -81,6 +79,12 @@ class QiniuDataService {
   /** 查找文件 */
   async find(id: number) {
     const result = await qiniuDataModel.findOne({ where: { id } });
+    return result;
+  }
+
+  /** 查找文件 */
+  async findByQiniuKey(qiniu_key: string) {
+    const result = await qiniuDataModel.findOne({ where: { qiniu_key } });
     return result;
   }
 

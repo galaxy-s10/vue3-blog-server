@@ -380,7 +380,7 @@ class CommentService {
     const sql_duration = +new Date() - startTime;
 
     result.rows.forEach((item) => {
-      const v = item.get();
+      const v: any = item.get();
       v.is_star_id = v.is_star?.id || null;
       v.is_star = v.is_star !== null;
       delete v.stars;

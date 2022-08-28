@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IArticle } from '@/interface';
+import { IArticle, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import starModel from '@/model/star.model';
@@ -142,7 +142,7 @@ class ArticleService {
     orderName,
     status,
     keyWord,
-  }) {
+  }: IList<IArticle>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     let idWhere: any;
@@ -161,15 +161,15 @@ class ArticleService {
     }
     if (types.length) {
       typeWhere = {};
-      typeWhere.id = types.split(',');
+      typeWhere.id = types;
     }
     if (tags.length) {
       tagWhere = {};
-      tagWhere.id = tags.split(',');
+      tagWhere.id = tags;
     }
     if (users.length) {
       userWhere = {};
-      userWhere.id = users.split(',');
+      userWhere.id = users;
     }
     if (keyWord) {
       keyWordWhere[Op.or] = [
@@ -261,7 +261,7 @@ class ArticleService {
       // subQuery: false, // 非常关键！！！
     });
     result.rows.forEach((item) => {
-      const v = item.get();
+      const v: any = item.get();
       v.star_total = v.stars.length;
       v.comment_total = v.comments.length;
       delete v.stars;
@@ -271,7 +271,12 @@ class ArticleService {
   }
 
   /** 搜索文章 */
-  async getKeyWordList({ keyWord, nowPage, pageSize, status }) {
+  async getKeyWordList({
+    keyWord,
+    nowPage,
+    pageSize,
+    status,
+  }: IList<IArticle>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     let keyWordWhere: any = null;

@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IAuth } from '@/interface';
 import { initTable } from '@/utils';
 
-const authModel = sequelize.define(
+interface AuthModel
+  extends Model<InferAttributes<AuthModel>, InferCreationAttributes<AuthModel>>,
+    IAuth {}
+
+const model = sequelize.define<AuthModel>(
   'auth',
   {
     id: {
@@ -71,5 +81,6 @@ const authModel = sequelize.define(
     deletedAt: 'deleted_at',
   }
 );
-initTable(authModel);
-export default authModel;
+
+initTable(model);
+export default model;

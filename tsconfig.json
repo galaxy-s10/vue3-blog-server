@@ -12,10 +12,11 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    // "noEmitOnError": true,
   },
   "ts-node": {
-    "transpileOnly": true //只编译，报警告或者错误一样运行
+    "transpileOnly": true ,//只编译，报警告或者错误一样运行
   }
   // "include": ["src/a.ts"]
 }

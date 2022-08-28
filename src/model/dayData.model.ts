@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IDayData } from '@/interface';
 import { initTable } from '@/utils';
 
-const dayDataModel = sequelize.define(
+interface DayDataModel
+  extends Model<
+      InferAttributes<DayDataModel>,
+      InferCreationAttributes<DayDataModel>
+    >,
+    IDayData {}
+
+const model = sequelize.define<DayDataModel>(
   'day_data',
   {
     id: {
@@ -31,5 +44,5 @@ const dayDataModel = sequelize.define(
   }
 );
 
-initTable(dayDataModel);
-export default dayDataModel;
+initTable(model);
+export default model;

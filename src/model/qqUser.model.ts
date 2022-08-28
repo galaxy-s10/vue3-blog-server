@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IQqUser } from '@/interface';
 import { initTable } from '@/utils';
 
-const qqUserModel = sequelize.define(
+interface QqUserModel
+  extends Model<
+      InferAttributes<QqUserModel>,
+      InferCreationAttributes<QqUserModel>
+    >,
+    IQqUser {}
+
+const model = sequelize.define<QqUserModel>(
   'qq_user',
   {
     id: {
@@ -96,5 +109,5 @@ const qqUserModel = sequelize.define(
   }
 );
 
-initTable(qqUserModel);
-export default qqUserModel;
+initTable(model);
+export default model;

@@ -13,7 +13,6 @@ import RoleAuth from './roleAuth.model';
 import Star from './star.model';
 import Tag from './tag.model';
 import ThirdUser from './thirdUser.model';
-import thirdUserModel from './thirdUser.model';
 import Type from './type.model';
 import User from './user.model';
 import UserArticle from './userArticle.model';
@@ -350,7 +349,6 @@ ThirdUser.belongsTo(User, {
   foreignKey: 'third_user_id',
   constraints: false,
 });
-// thirdUserModel.belongsTo(QqUser, {
 //   foreignKey: 'third_user_id',
 //   constraints: false,
 //   as: 'third_user1',

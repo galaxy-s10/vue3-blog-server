@@ -1,9 +1,15 @@
+import { ParameterizedContext } from 'koa';
+import { Model, ModelStatic } from 'sequelize/types';
+
 import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/app/chalkTip';
 import sequelize from '@/config/db';
 
+export const isAdmin = (ctx: ParameterizedContext) =>
+  ctx.req.url.indexOf('/admin/') !== -1;
+
 /** 转换时间格式 */
 export const formatDate = (datetime) => {
-  function addDateZero(num) {
+  function addDateZero(num: number) {
     return num < 10 ? `0${num}` : num;
   }
   const d = new Date(datetime);
@@ -29,8 +35,8 @@ export const handlePaging = (nowPage, pageSize, result) => {
 export const deleteAllForeignKeys = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();
-    const allTables = await queryInterface.showAllTables();
-    console.log(chalkINFO(`所有表:${allTables}`));
+    const allTables: string[] = await queryInterface.showAllTables();
+    console.log(chalkINFO(`所有表:${allTables.toString()}`));
     const allConstraint = [];
     allTables.forEach((v) => {
       allConstraint.push(queryInterface.getForeignKeysForTables([v]));
@@ -39,11 +45,13 @@ export const deleteAllForeignKeys = async () => {
     const allConstraint1 = [];
     res1.forEach((v) => {
       const tableName = Object.keys(v)[0];
-      const constraint = v[tableName];
+      const constraint: string[] = v[tableName];
       constraint.forEach((item) => {
         allConstraint1.push(queryInterface.removeConstraint(tableName, item));
       });
-      console.log(chalkINFO(`当前${tableName}表的外键: ${constraint}`));
+      console.log(
+        chalkINFO(`当前${tableName}表的外键: ${constraint.toString()}`)
+      );
     });
     await Promise.all(allConstraint1);
     console.log(chalkSUCCESS('删除所有外键成功!'));
@@ -57,7 +65,7 @@ export const deleteAllIndexs = async () => {
   try {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
-    console.log(chalkINFO(`所有表:${allTables}`));
+    console.log(chalkINFO(`所有表:${allTables.toString()}`));
     const allIndexs = [];
     allTables.forEach((v) => {
       allIndexs.push(queryInterface.showIndex(v));
@@ -65,15 +73,17 @@ export const deleteAllIndexs = async () => {
     const res1 = await Promise.all(allIndexs);
     const allIndexs1 = [];
     res1.forEach((v: any[]) => {
-      const { tableName } = v[0];
-      const indexStrArr = [];
+      const { tableName }: { tableName: string } = v[0];
+      const indexStrArr: string[] = [];
       v.forEach((x) => {
         indexStrArr.push(x.name);
         if (x.name !== 'PRIMARY') {
           allIndexs1.push(queryInterface.removeIndex(tableName, x.name));
         }
       });
-      console.log(chalkINFO(`当前${tableName}表的索引: ${indexStrArr}`));
+      console.log(
+        chalkINFO(`当前${tableName}表的索引: ${indexStrArr.toString()}`)
+      );
     });
     await Promise.all(allIndexs1);
     console.log(chalkSUCCESS('删除所有索引成功!'));
@@ -87,22 +97,30 @@ export const deleteAllIndexs = async () => {
  * @param model
  * @param method
  */
-export const initTable = async (model: any, method?: 'force' | 'alter') => {
-  try {
-    if (method === 'force') {
+export const initTable = (
+  model: ModelStatic<Model>,
+  method?: 'force' | 'alter'
+) => {
+  async function main(
+    modelArg: ModelStatic<Model>,
+    methodArg: 'force' | 'alter'
+  ) {
+    if (methodArg === 'force') {
       await deleteAllForeignKeys();
-      await model.sync({ force: true });
-      console.log(chalkSUCCESS(`${model.tableName}表刚刚(重新)创建!`));
-    } else if (method === 'alter') {
+      await modelArg.sync({ force: true });
+      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建!`));
+    } else if (methodArg === 'alter') {
       await deleteAllForeignKeys();
-      await model.sync({ alter: true });
-      console.log(chalkSUCCESS(`${model.tableName}表刚刚同步成功!`));
+      await modelArg.sync({ alter: true });
+      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚同步成功!`));
     } else {
-      console.log(chalkINFO(`加载数据库表: ${model.tableName}`));
+      console.log(chalkINFO(`加载数据库表: ${modelArg.tableName}`));
     }
-  } catch (err) {
-    console.log(chalkERROR(`initTable失败`), err);
   }
+  main(model, method).catch((err) => {
+    console.log(chalkERROR(`initTable失败`), err.message);
+    console.log(err);
+  });
 };
 
 /**

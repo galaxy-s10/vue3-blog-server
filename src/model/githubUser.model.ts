@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IGithubUser } from '@/interface';
 import { initTable } from '@/utils';
 
-const githubUserModel = sequelize.define(
+interface GithubUserModel
+  extends Model<
+      InferAttributes<GithubUserModel>,
+      InferCreationAttributes<GithubUserModel>
+    >,
+    IGithubUser {}
+
+const model = sequelize.define<GithubUserModel>(
   'github_user',
   {
     id: {
@@ -121,5 +134,5 @@ const githubUserModel = sequelize.define(
   }
 );
 
-initTable(githubUserModel);
-export default githubUserModel;
+initTable(model);
+export default model;

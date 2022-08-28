@@ -237,7 +237,10 @@ class RoleController {
   // 修改某个角色的权限
   async updateRoleAuth(ctx: ParameterizedContext, next) {
     try {
-      const { id, auth_ids } = ctx.request.body;
+      const { id, auth_ids } = ctx.request.body as {
+        id: number;
+        auth_ids: number[];
+      };
       if (PROJECT_ENV === 'beta') {
         const role: any = await roleService.find(id);
         if (role.type === 1) {
@@ -257,7 +260,7 @@ class RoleController {
       const isExistAuth =
         auth_ids.length === 0 ? true : await authService.isExist(auth_ids);
       if (!isExistAuth) {
-        throw new Error(`${auth_ids}中存在不存在的权限!`);
+        throw new Error(`${auth_ids.toString()}中存在不存在的权限!`);
       }
       const role: any = await roleService.find(id);
       role.setAuths(auth_ids);
@@ -304,7 +307,7 @@ class RoleController {
       } else {
         const isExist = await roleService.isExist([id, p_id]);
         if (!isExist) {
-          throw new Error(`${[id, p_id]}中存在不存在的角色!`);
+          throw new Error(`${[id, p_id].toString()}中存在不存在的角色!`);
         }
         const c_role: any = await roleService.find(p_id);
         if (id !== 1 && c_role.p_id === id) {
@@ -384,13 +387,13 @@ class RoleController {
       }
       const isExist = await roleService.isExist([id, ...c_roles]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_roles]}中存在不存在的角色!`);
+        throw new Error(`${[id, ...c_roles].toString()}中存在不存在的角色!`);
       }
       const all_child_roles: any = await roleService.findByPid(id);
       const all_child_roles_id = all_child_roles.map((v) => v.id);
       const hasDiff = arrayGetDifference(c_roles, all_child_roles_id);
       if (hasDiff.length) {
-        throw new Error(`[${c_roles}]中的角色父级id不是${id}!`);
+        throw new Error(`${c_roles.toString()}中的角色父级id不是${id}!`);
       }
       const queue = [];
       c_roles.forEach((v) => {
@@ -438,13 +441,13 @@ class RoleController {
       }
       const isExist = await roleService.isExist([id, ...c_roles]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_roles]}中存在不存在的角色!`);
+        throw new Error(`${[id, ...c_roles].toString()}中存在不存在的角色!`);
       }
       const result1: any = await roleService.findAllByInId(c_roles);
       const result2: number[] = result1.map((v) => v.p_id);
       const isUnique = arrayUnique(result2).length === 1;
       if (!isUnique) {
-        throw new Error(`${c_roles}不是同一个父级角色!`);
+        throw new Error(`${c_roles.toString()}不是同一个父级角色!`);
       }
       await roleService.updateMany(c_roles, id);
       successHandler({ ctx });

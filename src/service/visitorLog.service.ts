@@ -1,11 +1,10 @@
 import Sequelize from 'sequelize';
 
-import { IVisitor, IList } from '@/interface';
+import { IVisitorLog, IList } from '@/interface';
 import visitorLogModel from '@/model/visitorLog.model';
 import { formatDate, handlePaging } from '@/utils';
 
 const { fn, Op, col } = Sequelize;
-interface ISearch extends IVisitor, IList {}
 
 class VisitorLogService {
   /** 访客日志是否存在 */
@@ -93,7 +92,7 @@ class VisitorLogService {
     orderName,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<IVisitorLog>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};

@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IQiniuData } from '@/interface';
 import { initTable } from '@/utils';
 
-const qiniuDataModel = sequelize.define(
+interface QiniuDataModel
+  extends Model<
+      InferAttributes<QiniuDataModel>,
+      InferCreationAttributes<QiniuDataModel>
+    >,
+    IQiniuData {}
+
+const model = sequelize.define<QiniuDataModel>(
   'qiniu_data',
   {
     id: {
@@ -56,5 +69,5 @@ const qiniuDataModel = sequelize.define(
   }
 );
 
-initTable(qiniuDataModel);
-export default qiniuDataModel;
+initTable(model);
+export default model;

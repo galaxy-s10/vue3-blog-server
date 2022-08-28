@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IComment } from '@/interface';
 import { initTable } from '@/utils';
 
-const commentModel = sequelize.define(
+interface CommentModel
+  extends Model<
+      InferAttributes<CommentModel>,
+      InferCreationAttributes<CommentModel>
+    >,
+    IComment {}
+
+const model = sequelize.define<CommentModel>(
   'comment',
   {
     id: {
@@ -84,5 +97,5 @@ const commentModel = sequelize.define(
   }
 );
 
-initTable(commentModel);
-export default commentModel;
+initTable(model);
+export default model;

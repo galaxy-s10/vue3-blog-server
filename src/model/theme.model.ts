@@ -1,14 +1,26 @@
 // import Sequelize from 'sequelize';//这种写法没有提示。
 // import * as Sequelize from 'sequelize'; // 这种写法有提示。
 // import Sequelize = require('sequelize'); // 这种写法有提示。
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { ITheme } from '@/interface';
 import { initTable } from '@/utils';
 
 // const Sequelize = require('sequelize');
+interface ThemeModel
+  extends Model<
+      InferAttributes<ThemeModel>,
+      InferCreationAttributes<ThemeModel>
+    >,
+    ITheme {}
 
-const themeModel = sequelize.define(
+const model = sequelize.define<ThemeModel>(
   // 这将控制自动生成的foreignKey和关联命名的名称
   'theme',
   {
@@ -61,5 +73,5 @@ const themeModel = sequelize.define(
   }
 );
 
-initTable(themeModel);
-export default themeModel;
+initTable(model);
+export default model;

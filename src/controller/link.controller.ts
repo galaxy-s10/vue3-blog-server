@@ -7,6 +7,7 @@ import { QQ_EMAIL_USER } from '@/config/secret';
 import otherController from '@/controller/other.controller';
 import { ILink } from '@/interface';
 import linkService from '@/service/link.service';
+import { isAdmin } from '@/utils';
 
 class LinkController {
   async getList(ctx: ParameterizedContext, next) {
@@ -20,13 +21,12 @@ class LinkController {
         keyWord,
         id,
       }: any = ctx.request.query;
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       const result = await linkService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
-        status: isAdmin ? status : 1,
+        status: isAdmin(ctx) ? status : 1,
         keyWord,
         id,
       });
@@ -88,14 +88,15 @@ class LinkController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const { email, name, avatar, desc, url }: ILink = ctx.request.body;
+      const { email, name, avatar, desc, url, status }: ILink =
+        ctx.request.body;
       await linkService.create({
         email,
         name,
         avatar,
         desc,
         url,
-        status: 2,
+        status: isAdmin(ctx) ? status : 2,
       });
       await otherController.sendEmail(
         QQ_EMAIL_USER,

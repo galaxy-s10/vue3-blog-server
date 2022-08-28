@@ -18,7 +18,7 @@ class QiniuModel {
    * 获取七牛云mac
    * @returns
    */
-  getOfflineToken(domain) {
+  getOfflineToken(domain: string) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const offlineToken = qiniu.util.generateAccessToken(
       mac,

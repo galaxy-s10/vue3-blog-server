@@ -151,12 +151,12 @@ class CommentController {
           ? true
           : await commentService.isExist(commentIdArr);
       if (!commentIsExist) {
-        throw new Error(`不存在id为${commentIdArr}的评论!`);
+        throw new Error(`不存在id为${commentIdArr.toString()}的评论!`);
       }
       const userIsExist =
         to_user_id === -1 ? true : await userService.isExist([to_user_id]);
       if (!userIsExist) {
-        throw new Error(`不存在id为${[to_user_id]}的用户!`);
+        throw new Error(`不存在id为${to_user_id}的用户!`);
       }
       const ua = ctx.request.headers['user-agent'];
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';

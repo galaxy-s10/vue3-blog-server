@@ -5,7 +5,6 @@ import monitModel from '@/model/monit.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
-interface ISearch extends IMonit, IList {}
 
 class MonitService {
   /** 监控是否存在 */
@@ -29,7 +28,7 @@ class MonitService {
     keyWord,
     type,
     id,
-  }: ISearch) {
+  }: IList<IMonit>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};

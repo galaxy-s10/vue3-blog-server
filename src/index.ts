@@ -60,6 +60,7 @@ app.use(
       // 保留文件扩展名
       keepExtensions: true,
     },
+    strict: true, // 如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
   })
 );
 
@@ -99,7 +100,9 @@ httpServer.listen(port, () => {
       app.useRoutes();
       console.log(chalkSUCCESS('所有路由加载完成!'));
     })
-    .catch(() => {});
+    .catch((err) => {
+      console.log(err);
+    });
 
   connectRedis();
 });

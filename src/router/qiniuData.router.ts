@@ -18,6 +18,12 @@ qiniuRouter.get('/list', qiniuController.getList);
 
 qiniuRouter.delete('/delete/:id', verifyEnv, qiniuController.delete);
 
+qiniuRouter.delete(
+  '/delete_by_qiniukey',
+  verifyEnv,
+  qiniuController.deleteByQiniuKey
+);
+
 qiniuRouter.put('/update/:id', verifyEnv, qiniuController.update);
 
 qiniuRouter.post('/sync_qiniu_data', verifyEnv, qiniuController.syncQiniuData);

@@ -1,13 +1,22 @@
 // https://github.com/demopark/sequelize-docs-Zh-CN/blob/master/core-concepts/model-basics.md#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
 // import userService from '@/service/user.service';
+import { IUser } from '@/interface';
 import { initTable } from '@/utils';
-
 // const MD5 = require('crypto-js/md5');
 
-const userModel = sequelize.define(
+interface UserModel
+  extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>>,
+    IUser {}
+
+const model = sequelize.define<UserModel>(
   'user',
   {
     id: {
@@ -63,7 +72,7 @@ const userModel = sequelize.define(
     },
     status: {
       type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:正常 2:禁用 3:非法
+      defaultValue: 1, // 1:正常 2:禁用
     },
     avatar: {
       type: DataTypes.STRING(100),
@@ -99,5 +108,5 @@ const userModel = sequelize.define(
   }
 );
 
-initTable(userModel);
-export default userModel;
+initTable(model);
+export default model;

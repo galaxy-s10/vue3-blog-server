@@ -1,8 +1,8 @@
+import fs from 'fs';
+
 import { chalkERROR, chalkSUCCESS } from '@/app/chalkTip';
 import sequelize from '@/config/db';
 import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
-
-const fs = require('fs');
 
 /** 加载所有model */
 export const loadAllModel = () => {

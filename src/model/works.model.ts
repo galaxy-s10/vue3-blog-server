@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IWorks } from '@/interface';
 import { initTable } from '@/utils';
 
-const worksModel = sequelize.define(
+interface WorksModel
+  extends Model<
+      InferAttributes<WorksModel>,
+      InferCreationAttributes<WorksModel>
+    >,
+    IWorks {}
+
+const model = sequelize.define<WorksModel>(
   'works',
   {
     id: {
@@ -41,5 +54,5 @@ const worksModel = sequelize.define(
   }
 );
 
-initTable(worksModel);
-export default worksModel;
+initTable(model);
+export default model;

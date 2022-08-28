@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IFrontend } from '@/interface';
 import { initTable } from '@/utils';
 
-const frontendModel = sequelize.define(
+interface FrontendModel
+  extends Model<
+      InferAttributes<FrontendModel>,
+      InferCreationAttributes<FrontendModel>
+    >,
+    IFrontend {}
+
+const model = sequelize.define<FrontendModel>(
   'frontend',
   {
     id: {
@@ -12,16 +25,16 @@ const frontendModel = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
-    frontend_login: {
-      // 废弃
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭站内登录 2:开启站内登录
-    },
-    frontend_register: {
-      // 废弃
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭站内注册 2:开启站内注册
-    },
+    // 废弃
+    // frontend_login: {
+    //   type: DataTypes.INTEGER,
+    //   defaultValue: 1, // 1:关闭站内登录 2:开启站内登录
+    // },
+    // 废弃
+    // frontend_register: {
+    //   type: DataTypes.INTEGER,
+    //   defaultValue: 1, // 1:关闭站内注册 2:开启站内注册
+    // },
     frontend_qq_login: {
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:关闭qq登录 2:开启qq登录
@@ -63,5 +76,5 @@ const frontendModel = sequelize.define(
   }
 );
 
-initTable(frontendModel);
-export default frontendModel;
+initTable(model);
+export default model;

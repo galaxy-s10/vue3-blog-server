@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IRole } from '@/interface';
 import { initTable } from '@/utils';
 
-const roleModel = sequelize.define(
+interface RoleModel
+  extends Model<InferAttributes<RoleModel>, InferCreationAttributes<RoleModel>>,
+    IRole {}
+
+const model = sequelize.define<RoleModel>(
   'role',
   {
     id: {
@@ -44,5 +54,5 @@ const roleModel = sequelize.define(
   }
 );
 
-initTable(roleModel);
-export default roleModel;
+initTable(model);
+export default model;

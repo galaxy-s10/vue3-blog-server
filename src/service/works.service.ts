@@ -5,11 +5,10 @@ import worksModel from '@/model/works.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
-interface ISearch extends IWorks, IList {}
 
 class WorksService {
   /** 作品是否存在 */
-  async isExist(ids: number[]) {
+  async isExist(ids: IWorks['id'][]) {
     const res = await worksModel.count({
       where: {
         id: {
@@ -29,9 +28,10 @@ class WorksService {
     status,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<IWorks>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
+
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
@@ -47,12 +47,12 @@ class WorksService {
           },
         },
         {
-          url: {
+          desc: {
             [Op.like]: `%${keyWord}%`,
           },
         },
         {
-          desc: {
+          url: {
             [Op.like]: `%${keyWord}%`,
           },
         },
@@ -71,30 +71,35 @@ class WorksService {
   }
 
   /** 查找作品 */
-  async find(id: number) {
+  async find(id: IWorks['id']) {
     const result = await worksModel.findOne({ where: { id } });
     return result;
   }
 
   /** 修改作品 */
-  async update({ id, email, name, avatar, desc, url, status }: IWorks) {
+  async update({ id, name, desc, url, bg_url, priority, status }: IWorks) {
     const result = await worksModel.update(
-      { email, name, avatar, desc, url, status },
+      { name, desc, url, bg_url, priority, status },
       { where: { id } }
     );
     return result;
   }
 
   /** 创建作品 */
-  async create(props: IWorks) {
+  async create({ name, desc, url, bg_url, priority, status }: IWorks) {
     const result = await worksModel.create({
-      ...props,
+      name,
+      desc,
+      url,
+      bg_url,
+      priority,
+      status,
     });
     return result;
   }
 
   /** 删除作品 */
-  async delete(id: number) {
+  async delete(id: IWorks['id']) {
     const result = await worksModel.destroy({
       where: { id },
       individualHooks: true,

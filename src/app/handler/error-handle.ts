@@ -5,6 +5,7 @@ import { authJwt } from '../auth/authJwt';
 import { chalkERROR, chalk } from '../chalkTip';
 
 import logService from '@/service/log.service';
+import { isAdmin } from '@/utils';
 
 const errorHandler = (
   err: { code: number; error?: any; message?: string },
@@ -67,13 +68,12 @@ const errorHandler = (
       message: message || error?.message || defaultMessage,
     };
     if (PROJECT_ENV !== 'development') {
-      const isAdmin = ctx.req.url.indexOf('/admin/') !== -1;
       authJwt(ctx.request)
         .then((res) => {
           logService.create({
             user_id: res.userInfo?.id || -1,
             api_user_agent: ctx.request.headers['user-agent'],
-            api_from: isAdmin ? 2 : 1,
+            api_from: isAdmin(ctx) ? 2 : 1,
             api_body: JSON.stringify(ctx.request.body || {}),
             api_query: JSON.stringify(ctx.query),
             api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',

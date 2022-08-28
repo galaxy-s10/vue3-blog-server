@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IArticleType } from '@/interface';
 import { initTable } from '@/utils';
 
-const articleTypeModel = sequelize.define(
+interface ArticleTypeModel
+  extends Model<
+      InferAttributes<ArticleTypeModel>,
+      InferCreationAttributes<ArticleTypeModel>
+    >,
+    IArticleType {}
+
+const model = sequelize.define<ArticleTypeModel>(
   'article_type',
   {
     id: {
@@ -14,9 +27,11 @@ const articleTypeModel = sequelize.define(
     },
     article_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
     type_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
   },
   {
@@ -37,5 +52,6 @@ const articleTypeModel = sequelize.define(
     deletedAt: 'deleted_at',
   }
 );
-initTable(articleTypeModel);
-export default articleTypeModel;
+
+initTable(model);
+export default model;

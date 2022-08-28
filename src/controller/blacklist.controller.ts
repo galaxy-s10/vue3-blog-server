@@ -3,11 +3,10 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IMusic } from '@/interface';
-import musicService from '@/service/music.service';
-import { isAdmin } from '@/utils';
+import { IBlacklist } from '@/interface';
+import blacklistService from '@/service/blacklist.service';
 
-class MusicController {
+class BlacklistController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
@@ -15,16 +14,14 @@ class MusicController {
         pageSize = '10',
         orderBy = 'asc',
         orderName = 'id',
-        status,
         keyWord,
         id,
       }: any = ctx.request.query;
-      const result = await musicService.getList({
+      const result = await blacklistService.getList({
         nowPage,
         pageSize,
         orderBy,
         orderName,
-        status: isAdmin(ctx) ? status : 1,
         keyWord,
         id,
       });
@@ -38,7 +35,7 @@ class MusicController {
   async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
-      const result = await musicService.find(id);
+      const result = await blacklistService.find(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -54,20 +51,17 @@ class MusicController {
         return;
       }
       const id = +ctx.params.id;
-      const { name, cover_pic, audio_url, author, status }: IMusic =
-        ctx.request.body;
-      const isExist = await musicService.isExist([id]);
+      const { user_id, ip, msg }: IBlacklist = ctx.request.body;
+      const isExist = await blacklistService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的黑名单!` });
         return;
       }
-      await musicService.update({
+      await blacklistService.update({
         id,
-        name,
-        cover_pic,
-        audio_url,
-        author,
-        status,
+        user_id,
+        ip,
+        msg,
       });
       successHandler({ ctx });
     } catch (error) {
@@ -78,19 +72,11 @@ class MusicController {
 
   async create(ctx: ParameterizedContext, next) {
     try {
-      const hasAuth = await verifyUserAuth(ctx);
-      if (!hasAuth) {
-        emitError({ ctx, code: 403, error: '权限不足！' });
-        return;
-      }
-      const { name, cover_pic, audio_url, author, status }: IMusic =
-        ctx.request.body;
-      await musicService.create({
-        name,
-        cover_pic,
-        audio_url,
-        author,
-        status,
+      const { user_id, ip, msg }: IBlacklist = ctx.request.body;
+      await blacklistService.create({
+        user_id,
+        ip,
+        msg,
       });
       successHandler({ ctx });
     } catch (error) {
@@ -107,12 +93,12 @@ class MusicController {
         return;
       }
       const id = +ctx.params.id;
-      const isExist = await musicService.isExist([id]);
+      const isExist = await blacklistService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的音乐!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的黑名单!` });
         return;
       }
-      await musicService.delete(id);
+      await blacklistService.delete(id);
       successHandler({ ctx });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -121,4 +107,4 @@ class MusicController {
   }
 }
 
-export default new MusicController();
+export default new BlacklistController();

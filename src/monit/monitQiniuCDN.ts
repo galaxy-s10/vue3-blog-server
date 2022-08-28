@@ -25,40 +25,50 @@ const threshold = oneGb * 5; // 七牛云阈值，达到5gb就报错
 export const main = () => {
   qiniuController
     .monitCDN()
-    .then(async ({ allDomainNameFlux, start, end }: any) => {
-      const info = `${start}至${end}期间使用的七牛云cdn流量：${formatMemorySize(
-        allDomainNameFlux
-      )}，阈值：${formatMemorySize(threshold)}`;
-      if (allDomainNameFlux > threshold) {
-        console.log(chalkWRAN('七牛云cdn流量达到阈值，停掉cdn'));
-        const domain = QINIU_CDN_DOMAIN;
-        try {
-          const token = await qiniuModel.getOfflineToken(domain);
-          await axios.post(
-            `https://api.qiniu.com/domain/${domain}/offline`,
-            {},
-            {
-              headers: {
-                Accept: 'application/json',
-                Authorization: `${token}`,
-              },
-            }
-          );
-          const str = '下线域名成功！（达到阈值，停掉cdn）';
-          console.log(chalkSUCCESS(info));
-          monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: str });
-          otherController.sendEmail(QQ_EMAIL_USER, str, str);
-        } catch (error) {
-          const err = '下线域名报错！（达到阈值，停掉cdn）';
-          console.log(chalkERROR(err));
-          console.log(error);
-          monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: err });
-          otherController.sendEmail(QQ_EMAIL_USER, err, err);
+    .then(
+      async ({
+        allDomainNameFlux,
+        start,
+        end,
+      }: {
+        allDomainNameFlux: number;
+        start: string;
+        end: string;
+      }) => {
+        const info = `${start}至${end}期间使用的七牛云cdn流量：${formatMemorySize(
+          allDomainNameFlux
+        )}，阈值：${formatMemorySize(threshold)}`;
+        if (allDomainNameFlux > threshold) {
+          console.log(chalkWRAN('七牛云cdn流量达到阈值，停掉cdn'));
+          const domain = QINIU_CDN_DOMAIN;
+          try {
+            const token = qiniuModel.getOfflineToken(domain);
+            await axios.post(
+              `https://api.qiniu.com/domain/${domain}/offline`,
+              {},
+              {
+                headers: {
+                  Accept: 'application/json',
+                  Authorization: `${token}`,
+                },
+              }
+            );
+            const str = '下线域名成功！（达到阈值，停掉cdn）';
+            console.log(chalkSUCCESS(info));
+            monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: str });
+            otherController.sendEmail(QQ_EMAIL_USER, str, str);
+          } catch (error) {
+            const err = '下线域名报错！（达到阈值，停掉cdn）';
+            console.log(chalkERROR(err));
+            console.log(error);
+            monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: err });
+            otherController.sendEmail(QQ_EMAIL_USER, err, err);
+          }
+        } else {
+          monitService.create({ type: MONIT_TYPE.QINIU_CDN, info });
         }
-      } else {
-        monitService.create({ type: MONIT_TYPE.QINIU_CDN, info });
       }
-    })
+    )
     .catch((err) => {
       console.log(err);
     });

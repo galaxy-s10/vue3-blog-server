@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IVisitorLog } from '@/interface';
 import { initTable } from '@/utils';
 
-const visitorLogModel = sequelize.define(
+interface VisitorLogModel
+  extends Model<
+      InferAttributes<VisitorLogModel>,
+      InferCreationAttributes<VisitorLogModel>
+    >,
+    IVisitorLog {}
+
+const model = sequelize.define<VisitorLogModel>(
   'visitor_log',
   {
     id: {
@@ -18,10 +31,6 @@ const visitorLogModel = sequelize.define(
     },
     ip: {
       type: DataTypes.STRING(50),
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // -1:非法 1:正常
     },
     ip_data: {
       type: DataTypes.STRING,
@@ -42,5 +51,5 @@ const visitorLogModel = sequelize.define(
   }
 );
 
-initTable(visitorLogModel);
-export default visitorLogModel;
+initTable(model);
+export default model;

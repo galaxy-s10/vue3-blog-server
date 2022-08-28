@@ -2,10 +2,9 @@ import Sequelize from 'sequelize';
 
 import { ILog, IList } from '@/interface';
 import logModel from '@/model/log.model';
-import { handlePaging } from '@/utils';
+import { formatDate, handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
-interface ISearch extends ILog, IList {}
 
 class LogService {
   /** 日志是否存在 */
@@ -28,7 +27,7 @@ class LogService {
     orderName,
     keyWord,
     id,
-  }: ISearch) {
+  }: IList<ILog>) {
     const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
     const limit = parseInt(pageSize, 10);
     const allWhere: any = {};
@@ -84,6 +83,21 @@ class LogService {
       },
     });
     return handlePaging(nowPage, pageSize, result);
+  }
+
+  /** 获取一秒内ip的访问次数 */
+  async getOneSecondApiNums(api_ip: ILog['api_ip']) {
+    const nowDate = new Date().getTime();
+    const beforeDate = nowDate - 1000;
+    const apiNum = await logModel.count({
+      where: {
+        api_ip,
+        created_at: {
+          [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
+        },
+      },
+    });
+    return apiNum;
   }
 
   /** 查找日志 */

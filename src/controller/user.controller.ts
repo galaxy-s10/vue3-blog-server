@@ -7,7 +7,7 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { REDIS_PREFIX, THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
-import { IEmail, IList, IUser } from '@/interface';
+import { IEmail, IUser } from '@/interface';
 import User from '@/model/user.model';
 import emailUserService from '@/service/emailUser.service';
 import roleService from '@/service/role.service';
@@ -15,12 +15,6 @@ import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
 import { arrayUnique, randomNumber, getRandomString } from '@/utils';
 
-export interface IUserList extends IList {
-  username: string;
-  desc: string;
-  created_at: string;
-  updated_at: string;
-}
 class UserController {
   register = async (ctx: ParameterizedContext, next) => {
     try {
@@ -168,7 +162,7 @@ class UserController {
   async find(ctx: ParameterizedContext, next) {
     try {
       const id = +ctx.params.id;
-      const result = await userService.find(id);
+      const result = await userService.findAccount(id);
       successHandler({ ctx, data: result });
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -177,8 +171,11 @@ class UserController {
   }
 
   async getUserInfo(ctx: ParameterizedContext, next) {
+    console.log('>>>11');
     try {
+      console.log('>>>>');
       const { code, userInfo, message } = await authJwt(ctx);
+      console.log(code, userInfo, message, 222);
       if (code === 200) {
         const result = await userService.getUserInfo(userInfo?.id);
         successHandler({ ctx, data: result });
@@ -246,7 +243,7 @@ class UserController {
       const ids = arrayUnique(user_roles);
       const isExistRole = await roleService.isExist(ids);
       if (!isExistRole) {
-        throw new Error(`${ids}中存在不存在的角色!`);
+        throw new Error(`${ids.toString()}中存在不存在的角色!`);
       }
       const result = await roleService.updateUserRole({
         user_id: id,
@@ -260,7 +257,7 @@ class UserController {
     await next();
   }
 
-  async delete(ctx: ParameterizedContext, next) {
+  delete(ctx: ParameterizedContext, next) {
     successHandler({ ctx, message: '敬请期待' });
     next();
   }

@@ -1,9 +1,22 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { IMonit } from '@/interface';
 import { initTable } from '@/utils';
 
-const monitModel = sequelize.define(
+interface MonitModel
+  extends Model<
+      InferAttributes<MonitModel>,
+      InferCreationAttributes<MonitModel>
+    >,
+    IMonit {}
+
+const model = sequelize.define<MonitModel>(
   'monit',
   {
     id: {
@@ -28,5 +41,5 @@ const monitModel = sequelize.define(
   }
 );
 
-initTable(monitModel);
-export default monitModel;
+initTable(model);
+export default model;

@@ -1,9 +1,19 @@
-import { DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 
 import sequelize from '@/config/db';
+import { ILog } from '@/interface';
 import { initTable } from '@/utils';
 
-const logModel = sequelize.define(
+interface LogModel
+  extends Model<InferAttributes<LogModel>, InferCreationAttributes<LogModel>>,
+    ILog {}
+
+const model = sequelize.define<LogModel>(
   'log',
   {
     id: {
@@ -11,6 +21,10 @@ const logModel = sequelize.define(
       primaryKey: true,
       allowNull: false,
       autoIncrement: true,
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1, // 1:正常 2:非法
     },
     user_id: {
       type: DataTypes.INTEGER,
@@ -65,5 +79,5 @@ const logModel = sequelize.define(
   }
 );
 
-initTable(logModel);
-export default logModel;
+initTable(model);
+export default model;

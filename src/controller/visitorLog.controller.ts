@@ -101,9 +101,9 @@ class VisitorLogController {
       // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip
       if (apiNum > 5) {
         await visitorLogService.update({
-          status: -1,
+          status: 2,
           ip,
-          user_id: userInfo?.id || -1,
+          user_id: userInfo?.id || 2,
         });
         emitError({
           ctx,
