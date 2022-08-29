@@ -133,18 +133,22 @@ class ArticleService {
   /** 获取文章列表 */
   async getList({
     id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
     tags,
     types,
     users,
-    nowPage,
-    pageSize,
-    orderBy,
-    orderName,
     status,
-    keyWord,
   }: IList<IArticle>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     let idWhere: any;
     let typeWhere: any;
     let tagWhere: any;
@@ -159,15 +163,15 @@ class ArticleService {
       idWhere = {};
       idWhere.id = id;
     }
-    if (types.length) {
+    if (types?.length) {
       typeWhere = {};
       typeWhere.id = types;
     }
-    if (tags.length) {
+    if (tags?.length) {
       tagWhere = {};
       tagWhere.id = tags;
     }
-    if (users.length) {
+    if (users?.length) {
       userWhere = {};
       userWhere.id = users;
     }
@@ -190,6 +194,7 @@ class ArticleService {
         },
       ];
     }
+    // @ts-ignore
     const result = await articleModel.findAndCountAll({
       include: [
         {
@@ -267,7 +272,7 @@ class ArticleService {
       delete v.stars;
       delete v.comments;
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 搜索文章 */
@@ -277,8 +282,12 @@ class ArticleService {
     pageSize,
     status,
   }: IList<IArticle>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     let keyWordWhere: any = null;
     if (keyWord) {
       keyWordWhere = [
@@ -305,7 +314,7 @@ class ArticleService {
       limit,
       offset,
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   async update({

@@ -8,7 +8,7 @@ const { Op } = Sequelize;
 
 class WorksService {
   /** 作品是否存在 */
-  async isExist(ids: IWorks['id'][]) {
+  async isExist(ids: number[]) {
     const res = await worksModel.count({
       where: {
         id: {
@@ -21,16 +21,20 @@ class WorksService {
 
   /** 获取作品列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
-    status,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
+    status,
   }: IList<IWorks>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
 
     const allWhere: any = {};
     if (id) {
@@ -59,6 +63,7 @@ class WorksService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await worksModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -67,7 +72,7 @@ class WorksService {
         ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 查找作品 */

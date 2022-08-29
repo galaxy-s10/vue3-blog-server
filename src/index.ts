@@ -77,8 +77,7 @@ app.use(
 
 app.use(gobalVerify); // 注意顺序，需要在所有路由加载前进行接口验证
 
-// @ts-ignore
-app.useRoutes = useRoutes;
+useRoutes(app);
 
 app.on('error', errorHandler); // 全局错误处理
 
@@ -87,7 +86,7 @@ const port = +PROJECT_PORT; // 端口
 const httpServer = createServer(app.callback());
 
 initWs(httpServer); // websocket
-monit(); // 监控
+// monit(); // 监控
 
 httpServer.listen(port, () => {
   console.log(chalkINFO(`当前监听的端口: ${port}`));
@@ -96,8 +95,6 @@ httpServer.listen(port, () => {
   connectDb()
     .then(() => {
       initDb(3);
-      // @ts-ignore
-      app.useRoutes();
       console.log(chalkSUCCESS('所有路由加载完成!'));
     })
     .catch((err) => {

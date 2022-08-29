@@ -1,6 +1,6 @@
-export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME;
-export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV;
-export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT;
+export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
+export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV as string;
+export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
 
 export const COMMON_ERR_MSG = {
   banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',

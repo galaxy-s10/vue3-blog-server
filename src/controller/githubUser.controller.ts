@@ -71,7 +71,7 @@ class GithubUserController {
         emitError({ ctx, code: authCode, error: message });
         return;
       }
-      const result: any = await thirdUserService.findByUserId(userInfo.id);
+      const result: any = await thirdUserService.findByUserId(userInfo!.id!);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github
       );
@@ -112,7 +112,7 @@ class GithubUserController {
         client_id: GITHUB_CLIENT_ID,
       });
       await thirdUserModel.create({
-        user_id: userInfo.id,
+        user_id: userInfo!.id,
         third_user_id: githubUser.id,
         third_platform: THIRD_PLATFORM.github,
       });
@@ -135,7 +135,7 @@ class GithubUserController {
         emitError({ ctx, code, error: message });
         return;
       }
-      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.github
       );
@@ -240,7 +240,7 @@ class GithubUserController {
         successHandler({ ctx, data: token, message: 'github登录成功!' });
       }
     } catch (error) {
-      emitError({ ctx, code: 400, error, message: error.message });
+      emitError({ ctx, code: 400, error });
       return;
     }
     /**
@@ -255,18 +255,22 @@ class GithubUserController {
     try {
       // @ts-ignore
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
+        keyWord,
         created_at,
         updated_at,
       }: IList<IGithubUser> = ctx.request.query;
       const result = await githubUserService.getList({
-        nowPage,
-        pageSize,
+        id,
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
+        keyWord,
         created_at,
         updated_at,
       });

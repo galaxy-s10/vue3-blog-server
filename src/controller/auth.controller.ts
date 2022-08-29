@@ -4,14 +4,14 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { PROJECT_ENV } from '@/constant';
-import { IAuth } from '@/interface';
+import { IAuth, IList } from '@/interface';
 import authService from '@/service/auth.service';
 import { arrayGetDifference, arrayToTree, arrayUnique } from '@/utils';
 
 class AuthController {
   async commonGetAllChildAuth(id) {
-    const allAuth = [];
-    const queue = [];
+    const allAuth: any = [];
+    const queue: any = [];
     // eslint-disable-next-line no-shadow
     const getChildAuth = async (id: number) => {
       const c: any = await authService.findAllChildren(id);
@@ -30,16 +30,20 @@ class AuthController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
-      const result = await authService.getList({
         nowPage,
         pageSize,
+        keyWord,
+      }: IList<IAuth> = ctx.request.query;
+      const result = await authService.getList({
+        id,
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
+        keyWord,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -68,7 +72,7 @@ class AuthController {
       }
       const { rows } = await authService.getAllList();
       const result = arrayToTree({
-        originArr: rows,
+        originArr: rows as any,
         originPid: +id,
         originIdKey: 'id',
         originPidKey: 'p_id',
@@ -124,7 +128,7 @@ class AuthController {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的权限!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的权限！` });
         return;
       }
       const result = await authService.findByPid(id);
@@ -141,7 +145,7 @@ class AuthController {
       const id = +ctx.params.id;
       const isExist = await authService.isExist([id]);
       if (!isExist) {
-        throw new Error(`不存在id为${id}的权限!`);
+        throw new Error(`不存在id为${id}的权限！`);
       }
       const result = await this.commonGetAllChildAuth(id);
       successHandler({ ctx, data: { total: result.length, result } });
@@ -166,9 +170,14 @@ class AuthController {
         type = 2,
         priority = 1,
       }: IAuth = ctx.request.body;
+      if (!p_id) {
+        emitError({ ctx, code: 400, message: 'p_id不能为空！' });
+        return;
+      }
       const isExist = p_id === 0 ? false : await authService.isExist([p_id]);
       if (!isExist) {
-        throw new Error(`不存在id为${p_id}的权限!`);
+        emitError({ ctx, code: 400, message: `不存在id为${p_id}的权限！` });
+        return;
       }
       await authService.create({
         p_id,
@@ -200,13 +209,20 @@ class AuthController {
         emitError({ ctx, code: 403, error: '权限不足！' });
         return;
       }
+
       const { p_id, auth_name, auth_value, type, priority }: IAuth =
         ctx.request.body;
+      if (!p_id) {
+        emitError({ ctx, code: 400, message: 'p_id不能为空！' });
+        return;
+      }
       if (id === 1 && p_id !== 0) {
-        throw new Error(`不能修改根权限的p_id哦!`);
+        emitError({ ctx, code: 400, message: `不能修改根权限的p_id哦！` });
+        return;
       }
       if (id === p_id) {
-        throw new Error(`父权限不能等于子权限!`);
+        emitError({ ctx, code: 400, message: `父权限不能等于子权限！` });
+        return;
       }
       if (id === 1) {
         await authService.update({
@@ -220,11 +236,11 @@ class AuthController {
       } else {
         const isExist = await authService.isExist([id, p_id]);
         if (!isExist) {
-          throw new Error(`${[id, p_id].toString()}中存在不存在的权限!`);
+          throw new Error(`${[id, p_id].toString()}中存在不存在的权限！`);
         }
         const c_auth: any = await authService.find(p_id);
         if (id !== 1 && c_auth.p_id === id) {
-          throw new Error(`不能将自己的子权限作为父权限!`);
+          throw new Error(`不能将自己的子权限作为父权限！`);
         }
         await authService.update({
           id,
@@ -261,13 +277,13 @@ class AuthController {
         return;
       }
       if (id === 1) {
-        throw new Error(`不能删除根权限哦!`);
+        throw new Error(`不能删除根权限哦！`);
       }
       const auth: any = await authService.find(id);
       if (!auth) {
-        throw new Error(`不存在id为${id}的权限!`);
+        throw new Error(`不存在id为${id}的权限！`);
       }
-      const result = await this.commonGetAllChildAuth(id);
+      const result: any[] = await this.commonGetAllChildAuth(id);
       await authService.delete([id, ...result.map((v) => v.id)]);
       successHandler({
         ctx,
@@ -283,6 +299,10 @@ class AuthController {
   batchAddChildAuths = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_auths }: IAuth = ctx.request.body;
+      if (!id) {
+        emitError({ ctx, code: 400, message: `id不能为空！` });
+        return;
+      }
       if (PROJECT_ENV === 'beta') {
         const role: any = await authService.find(id);
         if (role.type === 1) {
@@ -296,23 +316,23 @@ class AuthController {
         return;
       }
       if (id === undefined) {
-        throw new Error(`请传入id!`);
+        throw new Error(`请传入id！`);
       }
       if (!c_auths || !c_auths.length) {
-        throw new Error(`请传入要新增的子权限!`);
+        throw new Error(`请传入要新增的子权限！`);
       }
       if (c_auths.includes(id)) {
-        throw new Error(`父级权限不能在子权限里面!`);
+        throw new Error(`父级权限不能在子权限里面！`);
       }
       const isExist = await authService.isExist([id, ...c_auths]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限!`);
+        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限！`);
       }
       const result1: any = await authService.findAllByInId(c_auths);
       const result2: number[] = result1.map((v) => v.p_id);
       const isUnique = arrayUnique(result2).length === 1;
       if (!isUnique) {
-        throw new Error(`${c_auths.toString()}不是同一个父级权限!`);
+        throw new Error(`${c_auths.toString()}不是同一个父级权限！`);
       }
       await authService.updateMany(c_auths, id);
       successHandler({ ctx });
@@ -326,6 +346,10 @@ class AuthController {
   batchDeleteChildAuths = async (ctx: ParameterizedContext, next) => {
     try {
       const { id, c_auths }: IAuth = ctx.request.body;
+      if (!id) {
+        emitError({ ctx, code: 400, message: `id不能为空！` });
+        return;
+      }
       if (PROJECT_ENV === 'beta') {
         const role: any = await authService.find(id);
         if (role.type === 1) {
@@ -339,22 +363,22 @@ class AuthController {
         return;
       }
       if (id === undefined) {
-        throw new Error(`请传入id!`);
+        throw new Error(`请传入id！`);
       }
       if (!c_auths || !c_auths.length) {
-        throw new Error(`请传入要删除的子权限!`);
+        throw new Error(`请传入要删除的子权限！`);
       }
       const isExist = await authService.isExist([id, ...c_auths]);
       if (!isExist) {
-        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限!`);
+        throw new Error(`${[id, ...c_auths].toString()}中存在不存在的权限！`);
       }
       const all_child_auths: any = await authService.findByPid(id);
       const all_child_auths_id = all_child_auths.map((v) => v.id);
       const hasDiff = arrayGetDifference(c_auths, all_child_auths_id);
       if (hasDiff.length) {
-        throw new Error(`${c_auths.toString()}中的权限父级id不是${id}!`);
+        throw new Error(`${c_auths.toString()}中的权限父级id不是${id}！`);
       }
-      const queue = [];
+      const queue: any = [];
       c_auths.forEach((v) => {
         queue.push(this.commonGetAllChildAuth(v));
       });

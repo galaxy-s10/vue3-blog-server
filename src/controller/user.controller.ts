@@ -7,7 +7,7 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { REDIS_PREFIX, THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
-import { IEmail, IUser } from '@/interface';
+import { IEmail, IList, IUser } from '@/interface';
 import User from '@/model/user.model';
 import emailUserService from '@/service/emailUser.service';
 import roleService from '@/service/role.service';
@@ -22,11 +22,11 @@ class UserController {
       const reg =
         /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
       if (!reg.test(email)) {
-        throw new Error(`请输入正确的邮箱!`);
+        throw new Error(`请输入正确的邮箱！`);
       }
       const emailIsExist = await emailUserService.emailsIsExist([email]);
       if (emailIsExist) {
-        throw new Error(`该邮箱已被他人使用!`);
+        throw new Error(`该邮箱已被他人使用！`);
       } else {
         const key = {
           prefix: REDIS_PREFIX.emailRegister,
@@ -35,7 +35,7 @@ class UserController {
         // 判断redis中的验证码是否正确
         const redisData = await redisController.getVal(key);
         if (redisData !== code || !redisData) {
-          throw new Error(`验证码错误或已过期!`);
+          throw new Error(`验证码错误或已过期！`);
         }
         // 用户表创建用户
         const userData = await this.handleCreate({
@@ -56,7 +56,7 @@ class UserController {
           exp: 24,
         });
         await User.update({ token }, { where: { id: userData?.id } }); // 每次登录都更新token
-        successHandler({ ctx, data: token, message: '注册成功!' });
+        successHandler({ ctx, data: token, message: '注册成功！' });
       }
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -80,7 +80,7 @@ class UserController {
       const { username, password, desc, avatar }: IUser = ctx.request.body;
       const isExistSameName = await userService.isSameName(username);
       if (isExistSameName) {
-        throw new Error(`已存在用户名为${username}的用户!`);
+        throw new Error(`已存在用户名为${username}的用户！`);
       }
       const result = await this.handleCreate({
         username,
@@ -109,14 +109,14 @@ class UserController {
         where: { id, password },
       });
       if (!userInfo) {
-        throw new Error(`账号或密码错误!`);
+        throw new Error(`账号或密码错误！`);
       }
       const token = signJwt({
         userInfo,
         exp,
       });
       await User.update({ token }, { where: { id: userInfo?.id } }); // 每次登录都更新token
-      successHandler({ ctx, data: token, message: '登录成功!' });
+      successHandler({ ctx, data: token, message: '登录成功！' });
     } catch (error) {
       emitError({
         ctx,
@@ -137,13 +137,13 @@ class UserController {
     try {
       // @ts-ignore
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+      }: IList<IUser> = ctx.request.query;
       const result = await userService.getList({
         nowPage,
         pageSize,
@@ -203,11 +203,11 @@ class UserController {
       const { username, desc, status, avatar }: IUser = ctx.request.body;
       const isExist = await userService.isExist([id]);
       if (!isExist) {
-        throw new Error(`不存在id为${id}的用户!`);
+        throw new Error(`不存在id为${id}的用户！`);
       }
       const isExistSameName: any = await userService.isSameName(username);
       if (isExistSameName && isExistSameName.id !== id) {
-        throw new Error(`已存在用户名为${username}的用户!`);
+        throw new Error(`已存在用户名为${username}的用户！`);
       }
       await userService.update({
         id,
@@ -226,7 +226,7 @@ class UserController {
   async updateUserRole(ctx: ParameterizedContext, next) {
     try {
       if (PROJECT_ENV === 'beta') {
-        emitError({ ctx, code: 403, message: '测试环境不能操作用户!' });
+        emitError({ ctx, code: 403, message: '测试环境不能操作用户！' });
         return;
       }
       const hasAuth = await verifyUserAuth(ctx);
@@ -234,19 +234,31 @@ class UserController {
         emitError({ ctx, code: 403, error: '权限不足！' });
         return;
       }
-      const id = +ctx.params.id;
+      const user_id = +ctx.params.id;
       const { user_roles }: IUser = ctx.request.body;
-      const isExistUser = await userService.isExist([id]);
+
+      if (!user_roles || !user_roles.length) {
+        emitError({ ctx, code: 400, message: 'user_roles要求number[]！' });
+        return;
+      }
+
+      const isExistUser = await userService.isExist([user_id]);
       if (!isExistUser) {
-        throw new Error(`不存在id为${id}的用户!`);
+        emitError({ ctx, code: 400, message: `不存在id为${user_id}的用户！` });
+        return;
       }
       const ids = arrayUnique(user_roles);
       const isExistRole = await roleService.isExist(ids);
       if (!isExistRole) {
-        throw new Error(`${ids.toString()}中存在不存在的角色!`);
+        emitError({
+          ctx,
+          code: 400,
+          message: `${ids.toString()}中存在不存在的角色！`,
+        });
+        return;
       }
       const result = await roleService.updateUserRole({
-        user_id: id,
+        user_id,
         role_ids: user_roles,
       });
       successHandler({ ctx, data: result });

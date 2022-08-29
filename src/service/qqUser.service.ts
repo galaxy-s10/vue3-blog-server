@@ -1,7 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IQqUserList } from '@/controller/qqUser.controller';
-import { IQqUser } from '@/interface';
+import { IList, IQqUser } from '@/interface';
 import qqUserModel from '@/model/qqUser.model';
 import { handlePaging } from '@/utils';
 
@@ -42,35 +41,46 @@ class UserService {
 
   /** 获取qq用户列表 */
   async getList({
-    nickname,
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
+    keyWord,
     created_at,
     updated_at,
-  }: IQqUserList) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
-    const where1: any = {};
-    const where2 = [];
+  }: IList<IQqUser>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
     if (created_at) {
-      where1.created_at = {
+      allWhere.created_at = {
         [Op.between]: [created_at, `${created_at} 23:59:59`],
       };
     }
     if (updated_at) {
-      where1.updated_at = {
+      allWhere.updated_at = {
         [Op.between]: [updated_at, `${updated_at} 23:59:59`],
       };
     }
-    if (nickname) {
-      where2.push({
-        nickname: {
-          [Op.like]: `%${nickname}%`,
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          nickname: {
+            [Op.like]: `%${keyWord}%`,
+          },
         },
-      });
+      ];
+      allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await qqUserModel.findAndCountAll({
       attributes: {
         exclude: ['password', 'token'],
@@ -79,11 +89,10 @@ class UserService {
       limit,
       offset,
       where: {
-        ...where1,
-        ...where2,
+        ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 根据id查找qq用户 */

@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IAuth } from '@/interface';
+import { IAuth, IList } from '@/interface';
 import authModel from '@/model/auth.model';
 import { handlePaging } from '@/utils';
 
@@ -19,16 +19,50 @@ class AuthService {
   }
 
   /** 获取权限列表(分页) */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IAuth>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          auth_name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          auth_value: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await authModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
       distinct: true,
+      where: {
+        ...allWhere,
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取权限列表(不分页) */
@@ -40,6 +74,7 @@ class AuthService {
   /** 获取所有p_id不为null的权限 */
   async getPidNotNullAuth() {
     const result = await authModel.findAndCountAll({
+      // @ts-ignore
       where: {
         p_id: {
           [Op.not]: null, // IS NOT NULL

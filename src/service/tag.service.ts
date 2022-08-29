@@ -25,15 +25,19 @@ class TagService {
 
   /** 获取标签列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
   }: IList<ITag>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
@@ -44,10 +48,14 @@ class TagService {
           name: {
             [Op.like]: `%${keyWord}%`,
           },
+          color: {
+            [Op.like]: `%${keyWord}%`,
+          },
         },
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await tagModel.findAndCountAll({
       order: [[orderName, orderBy]],
       include: [
@@ -71,13 +79,13 @@ class TagService {
       v.article_total = v.articles.length;
       delete v.articles;
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取标签文章列表 */
   async getArticleList({ tag_id, nowPage, pageSize }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    const offset = (nowPage - 1) * pageSize;
+    const limit = pageSize;
     const inst = await tagModel.findOne({ where: { id: tag_id } });
     // @ts-ignore
     const count = await inst.countArticles();
@@ -116,7 +124,7 @@ class TagService {
       delete v.stars;
       delete v.comments;
     });
-    return handlePaging(nowPage, pageSize, { rows: result, count });
+    return handlePaging({ rows: result, count }, nowPage, pageSize);
   }
 
   /** 查找标签 */

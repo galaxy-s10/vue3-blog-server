@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
+import { IList, IVisitorLog } from '@/interface';
 import positionService from '@/service/position.service';
 import visitorLogService from '@/service/visitorLog.service';
 
@@ -45,8 +46,8 @@ class VisitorLogController {
   async getIpVisitTotal(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        nowPage,
+        pageSize,
         orderBy = 'asc',
         orderName = 'ip',
         startTime,
@@ -70,13 +71,13 @@ class VisitorLogController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+      }: IList<IVisitorLog> = ctx.request.query;
       const result = await visitorLogService.getList({
         nowPage,
         pageSize,

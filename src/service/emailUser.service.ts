@@ -33,15 +33,44 @@ class EmailService {
   }
 
   /** 获取邮箱用户列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }: IList<IEmail>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IEmail>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          email: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await emailModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 根据email在第三方用户里面找到对应的用户 */

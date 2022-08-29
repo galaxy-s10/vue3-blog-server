@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IStar } from '@/interface';
+import { IList, IStar } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import starModel from '@/model/star.model';
@@ -23,9 +23,40 @@ class StarService {
   }
 
   /** 获取star列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IStar>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          role_name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          role_value: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await starModel.findAndCountAll({
       include: [
         {
@@ -48,8 +79,11 @@ class StarService {
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 查找star */

@@ -20,16 +20,20 @@ class MusicService {
 
   /** 获取音乐列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
-    status,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
+    status,
   }: IList<IMusic>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
@@ -52,6 +56,7 @@ class MusicService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await musicModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -60,7 +65,7 @@ class MusicService {
         ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 查找音乐 */

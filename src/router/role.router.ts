@@ -18,7 +18,7 @@ roleRouter.get('/get_tree_role', roleController.getTreeRole);
 roleRouter.get('/get_tree_child_role', roleController.getTreeChildRole);
 
 // DONE 批量删除子角色
-roleRouter.delete(
+roleRouter.post(
   '/batch_delete_child_roles',
   verifyProp,
   roleController.batchDeleteChildRoles

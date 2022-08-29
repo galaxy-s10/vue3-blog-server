@@ -3,20 +3,20 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { ITheme } from '@/interface';
+import { IList, ITheme } from '@/interface';
 import themeService from '@/service/theme.service';
 
 class ThemeController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+      }: IList<ITheme> = ctx.request.query;
       const result = await themeService.getList({
         nowPage,
         pageSize,

@@ -2,18 +2,20 @@ import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IThirdUser } from '@/interface';
+import { IList, IThirdUser } from '@/interface';
 import thirdUserService from '@/service/thirdUser.service';
 
 class ThirdUserController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        nowPage,
+        pageSize,
+        keyWord,
+      }: IList<IThirdUser> = ctx.request.query;
       const result = await thirdUserService.getList({
         nowPage,
         pageSize,

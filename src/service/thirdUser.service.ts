@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IThirdUser } from '@/interface';
+import { IList, IThirdUser } from '@/interface';
 import thirdUserModel from '@/model/thirdUser.model';
 import { handlePaging } from '@/utils';
 
@@ -20,15 +20,38 @@ class TagService {
   }
 
   /** 获取第三方用户记录列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IThirdUser>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await thirdUserModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
+      where: {
+        ...allWhere,
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 查找第三方用户记录 */
@@ -54,7 +77,7 @@ class TagService {
   }
 
   /** 根据user_id查找第三方用户表里的记录 */
-  async findByUserId(user_id) {
+  async findByUserId(user_id: number) {
     const result = await thirdUserModel.findAll({
       where: { user_id },
     });

@@ -5,7 +5,7 @@ import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { QQ_EMAIL_USER } from '@/config/secret';
 import otherController from '@/controller/other.controller';
-import { ILink } from '@/interface';
+import { ILink, IList } from '@/interface';
 import linkService from '@/service/link.service';
 import { isAdmin } from '@/utils';
 
@@ -13,14 +13,14 @@ class LinkController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-        status,
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+        status,
+      }: IList<ILink> = ctx.request.query;
       const result = await linkService.getList({
         nowPage,
         pageSize,
@@ -76,7 +76,7 @@ class LinkController {
         await otherController.sendEmail(
           QQ_EMAIL_USER,
           `友链申请审核通过！`,
-          `你在自然博客申请的友链（${name}）已审核通过！`
+          `你在自然博客申请的友链（${name!}）已审核通过！`
         );
       }
       successHandler({ ctx });
@@ -100,8 +100,8 @@ class LinkController {
       });
       await otherController.sendEmail(
         QQ_EMAIL_USER,
-        `收到${name}的友链申请`,
-        `收到:${name}的友链申请，请及时处理~`
+        `收到${name!}的友链申请`,
+        `收到:${name!}的友链申请，请及时处理~`
       );
       successHandler({ ctx });
     } catch (error) {

@@ -43,14 +43,18 @@ class UserService {
   /** 获取用户列表 */
   async getList({
     id,
-    keyWord,
-    nowPage,
-    pageSize,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
+    keyWord,
   }: IList<IUser>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
@@ -70,7 +74,7 @@ class UserService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
-
+    // @ts-ignore
     const result = await userModel.findAndCountAll({
       attributes: {
         exclude: ['password', 'token'],
@@ -83,7 +87,7 @@ class UserService {
       },
       distinct: true,
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 根据id查找用户（不返回password，但返回token） */

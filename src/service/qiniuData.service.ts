@@ -29,17 +29,21 @@ class QiniuDataService {
 
   /** 获取文件列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
     user_id,
     prefix,
   }: IList<IQiniuData>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = id;
@@ -65,6 +69,7 @@ class QiniuDataService {
       // @ts-ignore
       orderNameRes = cast(col(orderNameRes), 'SIGNED');
     }
+    // @ts-ignore
     const result = await qiniuDataModel.findAndCountAll({
       order: [[orderNameRes, orderBy]],
       limit,
@@ -73,7 +78,7 @@ class QiniuDataService {
         ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 查找文件 */

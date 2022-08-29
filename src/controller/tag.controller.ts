@@ -3,20 +3,20 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { ITag } from '@/interface';
+import { IList, ITag } from '@/interface';
 import tagService from '@/service/tag.service';
 
 class TagController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+      }: IList<ITag> = ctx.request.query;
       const result = await tagService.getList({
         nowPage,
         pageSize,
@@ -83,7 +83,7 @@ class TagController {
   async getArticleList(ctx: ParameterizedContext, next) {
     try {
       const tag_id = +ctx.params.tag_id;
-      const { nowPage = '1', pageSize = '10' }: any = ctx.request.query;
+      const { nowPage, pageSize = '10' }: any = ctx.request.query;
       const result = await tagService.getArticleList({
         tag_id,
         nowPage,

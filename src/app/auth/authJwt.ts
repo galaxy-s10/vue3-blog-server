@@ -17,7 +17,7 @@ const authJwt = (
 
     const token = ctx.req.headers.authorization?.split(' ')[1];
 
-    jwt.verify(token, JWT_SECRET, {}, (err, decode: jwt.JwtPayload) => {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
       // 判断非法/过期token
       if (err) {
         let { message } = err;
@@ -32,7 +32,9 @@ const authJwt = (
       }
       async function main() {
         try {
-          const userResult = await userService.findAndToken(decode.userInfo.id);
+          const userResult = await userService.findAndToken(
+            decoded.userInfo.id
+          );
           if (!userResult) {
             // 这个用户已经被删除了
             resolve({ code: 401, message: '该用户不存在!' });
@@ -53,7 +55,7 @@ const authJwt = (
             message: '验证token通过!',
             userInfo: userResult,
           });
-        } catch (error) {
+        } catch (error: any) {
           resolve({ code: 400, message: error });
         }
       }

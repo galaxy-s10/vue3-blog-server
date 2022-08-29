@@ -4,7 +4,7 @@ import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { COMMON_ERR_MSG } from '@/constant';
-import { ILog } from '@/interface';
+import { IList, ILog } from '@/interface';
 import blacklistService from '@/service/blacklist.service';
 import logService from '@/service/log.service';
 
@@ -12,13 +12,13 @@ class LogController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+      }: IList<ILog> = ctx.request.query;
       const result = await logService.getList({
         nowPage,
         pageSize,

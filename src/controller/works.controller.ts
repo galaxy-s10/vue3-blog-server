@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IWorks } from '@/interface';
+import { IList, IWorks } from '@/interface';
 import worksService from '@/service/works.service';
 import { isAdmin } from '@/utils';
 
@@ -11,14 +11,14 @@ class WorksController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-        status,
+        nowPage,
+        pageSize,
         keyWord,
-        id,
-      }: any = ctx.request.query;
+        status,
+      }: IList<IWorks> = ctx.request.query;
       const result = await worksService.getList({
         nowPage,
         pageSize,

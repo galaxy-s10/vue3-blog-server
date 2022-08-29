@@ -12,7 +12,7 @@ import {
   QINIU_CDN_URL,
   QINIU_PREFIX,
 } from '@/constant';
-import { IQiniuData } from '@/interface';
+import { IList, IQiniuData } from '@/interface';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getLastestWeek } from '@/utils';
@@ -188,12 +188,12 @@ class QiniuController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        id,
         user_id,
         prefix,
         bucket,
@@ -205,7 +205,7 @@ class QiniuController {
         qiniu_putTime,
         qiniu_status,
         qiniu_type,
-      }: any = ctx.request.query;
+      }: IList<IQiniuData> = ctx.request.query;
       const result = await qiniuDataService.getList({
         nowPage,
         pageSize,

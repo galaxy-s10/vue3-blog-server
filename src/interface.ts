@@ -170,9 +170,9 @@ export interface IQiniuData {
 }
 export interface IThirdUser {
   id?: number;
-  user_id: number;
-  third_user_id: number;
-  third_platform: number;
+  user_id?: number;
+  third_user_id?: number;
+  third_platform?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -334,7 +334,7 @@ export interface IAuth {
 }
 export interface IRole {
   id?: number;
-  p_id: number;
+  p_id?: number;
   role_name?: string;
   role_value?: string;
   type?: number;

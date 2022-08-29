@@ -22,13 +22,25 @@ export const formatDate = (datetime) => {
 };
 
 /** 处理返回的分页数据 */
-export const handlePaging = (nowPage, pageSize, result) => {
-  const obj: any = {};
-  obj.nowPage = +nowPage;
-  obj.pageSize = +pageSize;
+export const handlePaging = (
+  result: any,
+  nowPage?: string,
+  pageSize?: string
+) => {
+  // @ts-ignore
+  const obj: {
+    nowPage: number;
+    pageSize: number;
+    hasMore: boolean;
+    total: number;
+    rows: any[];
+  } = {};
+  obj.nowPage = nowPage ? +nowPage : 1;
+  obj.pageSize = pageSize ? +pageSize : result.count;
   obj.hasMore = obj.nowPage * obj.pageSize - result.count < 0;
   obj.total = result.count;
-  return { ...obj, ...result, count: undefined };
+  obj.rows = result.rows;
+  return obj;
 };
 
 /** 删除所有外键 */

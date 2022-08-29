@@ -29,13 +29,13 @@ class ArticleController {
         emitError({ ctx, code, error: message });
         return;
       }
-      const tagIsExist = await tagService.isExist(arrayUnique(tags));
+      const tagIsExist = await tagService.isExist(arrayUnique(tags!));
       if (!tagIsExist) {
-        throw new Error(`标签id:${tags.toString()}中存在不存在的标签!`);
+        throw new Error(`标签id:${tags!.toString()}中存在不存在的标签!`);
       }
-      const typeIsExist = await typeService.isExist(arrayUnique(types));
+      const typeIsExist = await typeService.isExist(arrayUnique(types!));
       if (!typeIsExist) {
-        throw new Error(`分类id:${types.toString()}中存在不存在的分类!`);
+        throw new Error(`分类id:${types!.toString()}中存在不存在的分类!`);
       }
       const result = await articleService.create({
         title,
@@ -116,7 +116,7 @@ class ArticleController {
       // 这个接口的userInfo不是必须的
       const { code, userInfo } = await authJwt(ctx);
       if (code === 200) {
-        from_user_id = userInfo.id;
+        from_user_id = userInfo!.id!;
       }
       const result = await articleService.findArticleDetail(id, from_user_id);
       successHandler({ ctx, data: result });
@@ -130,27 +130,27 @@ class ArticleController {
     try {
       const {
         id,
+        orderBy = 'asc',
+        orderName = 'id',
+        nowPage,
+        pageSize,
+        keyWord,
+        status,
         tags = [],
         types = [],
         users = [],
-        nowPage = '1',
-        pageSize = '10',
-        orderBy = 'asc',
-        orderName = 'id',
-        status,
-        keyWord,
       }: IList<IArticle> = ctx.request.query;
       const result = await articleService.getList({
         id,
+        orderBy,
+        orderName,
+        nowPage,
+        pageSize,
+        keyWord,
+        status: isAdmin(ctx) ? status : 1,
         tags,
         types,
         users,
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        status: isAdmin(ctx) ? status : 1,
-        keyWord,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -162,12 +162,18 @@ class ArticleController {
   async getKeyWordList(ctx: ParameterizedContext, next) {
     try {
       const {
+        id,
+        orderBy = 'asc',
+        orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
-        nowPage = '1',
-        pageSize = '10',
         status,
       }: IList<IArticle> = ctx.request.query;
       const result = await articleService.getKeyWordList({
+        id,
+        orderBy,
+        orderName,
         keyWord,
         nowPage,
         pageSize,

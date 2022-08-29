@@ -12,7 +12,7 @@ import {
   THIRD_PLATFORM,
   VERIFY_EMAIL_RESULT_CODE,
 } from '@/constant';
-import { IEmail, IList } from '@/interface';
+import { IEmail, IEmailUser, IList } from '@/interface';
 import emailUserService from '@/service/emailUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
@@ -74,7 +74,7 @@ class EmailUserController {
         });
         return VERIFY_EMAIL_RESULT_CODE.ok;
       }
-      const ttl = await redisController.getTTL(key);
+      const ttl: any = await redisController.getTTL(key);
       if (ttl > 60 * 4) {
         return VERIFY_EMAIL_RESULT_CODE.later;
       }
@@ -106,6 +106,10 @@ class EmailUserController {
   login = async (ctx: ParameterizedContext, next) => {
     try {
       const { email, code, exp = 24 }: IEmail = ctx.request.body;
+      if (!email) {
+        emitError({ ctx, code: 400, message: 'email不能为空！' });
+        return;
+      }
       const key = {
         prefix: REDIS_PREFIX.emailLogin,
         key: email,
@@ -113,7 +117,7 @@ class EmailUserController {
       // 判断redis中的验证码是否正确
       const redisData = await redisController.getVal(key);
       if (redisData !== code || !redisData) {
-        emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
+        emitError({ ctx, code: 400, message: '验证码错误或已过期！' });
         return;
       }
       const isExistEmail = await emailUserService.findByEmail(email);
@@ -138,7 +142,7 @@ class EmailUserController {
       });
       await userService.update({ id: userInfo?.id, token }); // 每次登录都更新token
       await redisController.del(key);
-      successHandler({ ctx, data: token, message: '登录成功!' });
+      successHandler({ ctx, data: token, message: '登录成功！' });
     } catch (error) {
       emitError({
         ctx,
@@ -159,15 +163,19 @@ class EmailUserController {
   register = async (ctx: ParameterizedContext, next) => {
     try {
       const { email, code, exp = 24 }: IEmail = ctx.request.body;
+      if (!email) {
+        emitError({ ctx, code: 400, message: 'email不能为空！' });
+        return;
+      }
       const reg =
         /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
       if (!reg.test(email)) {
-        emitError({ ctx, code: 400, message: '请输入正确的邮箱!' });
+        emitError({ ctx, code: 400, message: '请输入正确的邮箱！' });
         return;
       }
       const emailIsExist = await emailUserService.emailsIsExist([email]);
       if (emailIsExist) {
-        emitError({ ctx, code: 400, message: '该邮箱已被他人使用!' });
+        emitError({ ctx, code: 400, message: '该邮箱已被他人使用！' });
       } else {
         const key = {
           prefix: REDIS_PREFIX.emailRegister,
@@ -176,7 +184,7 @@ class EmailUserController {
         // 判断redis中的验证码是否正确
         const redisData = await redisController.getVal(key);
         if (redisData !== code || !redisData) {
-          emitError({ ctx, code: 400, message: '验证码错误或已过期!' });
+          emitError({ ctx, code: 400, message: '验证码错误或已过期！' });
           return;
         }
         // 用户表创建用户
@@ -198,7 +206,7 @@ class EmailUserController {
         });
         await userService.update({ token, id: createUserRes.id }); // 每次登录都更新token
         await redisController.del(key);
-        successHandler({ ctx, data: token, message: '注册成功!' });
+        successHandler({ ctx, data: token, message: '注册成功！' });
       }
     } catch (error) {
       emitError({ ctx, code: 400, error });
@@ -253,7 +261,7 @@ class EmailUserController {
     const { email } = ctx.request.body;
     const result = await this.sendCode({
       key: {
-        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo.id}`,
+        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo!.id!}`,
         key: email,
       },
       desc: '绑定邮箱',
@@ -275,7 +283,7 @@ class EmailUserController {
     }
     const { email } = ctx.request.body;
     const key = {
-      prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
+      prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo!.id!}`,
       key: email,
     };
     const result = await this.sendCode({
@@ -294,16 +302,20 @@ class EmailUserController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      }: IList<IEmail> = ctx.request.query;
-      const result = await emailUserService.getList({
         nowPage,
         pageSize,
+        keyWord,
+      }: IList<IEmailUser> = ctx.request.query;
+      const result = await emailUserService.getList({
+        id,
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
+        keyWord,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -330,11 +342,11 @@ class EmailUserController {
         emitError({
           ctx,
           code: 400,
-          message: '验证码不能为空!',
+          message: '验证码不能为空！',
         });
         return;
       }
-      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email
       );
@@ -342,7 +354,7 @@ class EmailUserController {
         emitError({
           ctx,
           code: 400,
-          message: '你已经绑定过邮箱，请先解绑原邮箱!',
+          message: '你已经绑定过邮箱，请先解绑原邮箱！',
         });
         return;
       }
@@ -351,12 +363,12 @@ class EmailUserController {
         emitError({
           ctx,
           code: 400,
-          message: '该邮箱已被其他人绑定!',
+          message: '该邮箱已被其他人绑定！',
         });
         return;
       }
       const key = {
-        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo.id}`,
+        prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo!.id!}`,
         key: email,
       };
       const redisData = await redisController.getVal({
@@ -372,12 +384,12 @@ class EmailUserController {
       }
       const createEmailRes: any = await emailUserService.create({ email });
       await thirdUserService.create({
-        user_id: userInfo.id,
+        user_id: userInfo!.id,
         third_platform: THIRD_PLATFORM.email,
         third_user_id: createEmailRes.id,
       });
       await redisController.del(key);
-      successHandler({ ctx, message: '绑定邮箱成功!' });
+      successHandler({ ctx, message: '绑定邮箱成功！' });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;
@@ -402,11 +414,11 @@ class EmailUserController {
         emitError({
           ctx,
           code: 400,
-          message: '验证码不能为空!',
+          message: '验证码不能为空！',
         });
         return;
       }
-      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
+      const result: any[] = await thirdUserService.findByUserId(userInfo!.id);
       const ownIsBind = result.filter(
         (v) => v.third_platform === THIRD_PLATFORM.email
       );
@@ -414,7 +426,7 @@ class EmailUserController {
         emitError({
           ctx,
           code: 400,
-          message: '你没有绑定过邮箱，不能解绑!',
+          message: '你没有绑定过邮箱，不能解绑！',
         });
         return;
       }
@@ -422,7 +434,7 @@ class EmailUserController {
         ownIsBind[0].third_user_id
       );
       const key = {
-        prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id}`,
+        prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo!.id!}`,
         key: userEmail.email,
       };
       const redisData = await redisController.getVal({
@@ -440,7 +452,7 @@ class EmailUserController {
       await thirdUserService.delete(ownIsBind[0].id);
       await redisController.del(key);
 
-      successHandler({ ctx, message: '解绑邮箱成功!' });
+      successHandler({ ctx, message: '解绑邮箱成功！' });
     } catch (error) {
       emitError({ ctx, code: 400, error });
       return;

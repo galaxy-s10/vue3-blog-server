@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IComment } from '@/interface';
+import { IComment, IList } from '@/interface';
 import commentModel from '@/model/comment.model';
 import roleModel from '@/model/role.model';
 import starModel from '@/model/star.model';
@@ -23,9 +23,35 @@ class CommentService {
   }
 
   /** 获取评论列表 */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IComment>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          content: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
       include: [
@@ -42,21 +68,46 @@ class CommentService {
       ],
       limit,
       offset,
+      where: { ...allWhere },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 文章评论列表 */
   async getArticleCommentList({
-    article_id,
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
+    keyWord,
     from_user_id,
-  }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    article_id,
+  }: IList<IComment>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (article_id) {
+      allWhere.article_id = +article_id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          content: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -118,6 +169,7 @@ class CommentService {
       distinct: true,
       where: {
         article_id,
+        ...allWhere,
       },
       // attributes: {
       //   include: [
@@ -141,11 +193,10 @@ class CommentService {
         article_id,
       },
     });
-    const promiseTotalRes = [];
+    const promiseTotalRes: any = [];
     result.rows.forEach((v) => {
       promiseTotalRes.push(
         new Promise((resolve) => {
-          // @ts-ignore
           starModel
             .count({
               where: {
@@ -155,7 +206,6 @@ class CommentService {
               },
             })
             .then((res) => {
-              // @ts-ignore
               resolve({ res, comment_id: v.id });
             });
         }),
@@ -177,9 +227,9 @@ class CommentService {
       );
     });
     const totalRes = await Promise.all(promiseTotalRes);
-    const lastRes = [];
+    const lastRes: any = [];
     result.rows.forEach((v) => {
-      const obj = {
+      const obj: any = {
         ...v.get(),
         // @ts-ignore
         star_total: totalRes.find((x) => !x.judgeStar && x.comment_id === v.id)
@@ -190,7 +240,7 @@ class CommentService {
       lastRes.push(obj);
     });
     return {
-      ...handlePaging(nowPage, pageSize, { ...result, rows: lastRes }),
+      ...handlePaging({ ...result, rows: lastRes }, nowPage, pageSize),
       total,
     };
   }
@@ -205,8 +255,8 @@ class CommentService {
     orderName,
     from_user_id,
   }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    const offset = (nowPage - 1) * pageSize;
+    const limit = pageSize;
     const startTime = +new Date();
     const result: any = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
@@ -320,7 +370,7 @@ class CommentService {
       });
     });
     return {
-      ...handlePaging(nowPage, pageSize, { ...result }),
+      ...handlePaging(result, nowPage, pageSize),
       total,
       childrenPageSize: parseInt(childrenPageSize, 10),
       sql_duration,
@@ -337,8 +387,8 @@ class CommentService {
     parent_comment_id,
     article_id,
   }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    const offset = (nowPage - 1) * pageSize;
+    const limit = pageSize;
     const startTime = +new Date();
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
@@ -386,7 +436,7 @@ class CommentService {
       delete v.stars;
     });
     return {
-      ...handlePaging(nowPage, pageSize, result),
+      ...handlePaging(result, nowPage, pageSize),
       sql_duration,
     };
   }

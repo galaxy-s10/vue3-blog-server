@@ -21,26 +21,25 @@ class LogService {
 
   /** 获取日志列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
   }: IList<ILog>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
     }
     if (keyWord) {
       const keyWordWhere = [
-        {
-          user_id: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
         {
           api_user_agent: {
             [Op.like]: `%${keyWord}%`,
@@ -62,11 +61,6 @@ class LogService {
           },
         },
         {
-          api_method: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
-        {
           api_path: {
             [Op.like]: `%${keyWord}%`,
           },
@@ -74,6 +68,7 @@ class LogService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await logModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -82,7 +77,7 @@ class LogService {
         ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取一秒内ip的访问次数 */

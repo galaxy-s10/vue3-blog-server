@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IRole } from '@/interface';
+import { IList, IRole } from '@/interface';
 import roleModel from '@/model/role.model';
 import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
@@ -20,27 +20,96 @@ class RoleService {
   }
 
   /** 获取角色列表(分页) */
-  async getList({ nowPage, pageSize, orderBy, orderName }) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+  async getList({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+    type,
+  }: IList<IRole>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = id;
+    }
+    if (type) {
+      allWhere.type = type;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          role_name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          role_value: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+
+    // @ts-ignore
     const result = await roleModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
       distinct: true,
+      where: {
+        ...allWhere,
+      },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取角色列表(不分页) */
-  async getAllList() {
-    const result = await roleModel.findAndCountAll();
+  async getAllList({ orderBy, orderName, id, type, keyWord }: IList<IRole>) {
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = id;
+    }
+    if (type) {
+      allWhere.type = type;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          role_name: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          role_value: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
+    const result = await roleModel.findAndCountAll({
+      order: [[orderName, orderBy]],
+      distinct: true,
+      where: {
+        ...allWhere,
+      },
+    });
     return result;
   }
 
   /** 获取所有p_id不为null的角色 */
   async getPidNotNullRole() {
     const result = await roleModel.findAndCountAll({
+      // @ts-ignore
       where: {
         p_id: {
           [Op.not]: null, // IS NOT NULL
@@ -87,7 +156,7 @@ class RoleService {
   async getRoleAuth(id: number) {
     const role: any = await roleModel.findByPk(id);
     const auths = await role.getAuths();
-    const result = [];
+    const result: any = [];
     auths.forEach((v) => {
       const obj = v.get();
       delete obj.role_auth;
@@ -104,7 +173,7 @@ class RoleService {
       throw new Error(`不存在id为${id}的用户!`);
     }
     const roles: any[] = await user.getRoles();
-    const result = [];
+    const result: any = [];
     roles.forEach((v) => {
       const obj = v.get();
       delete obj.user_role;

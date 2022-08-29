@@ -2,21 +2,21 @@ import { ParameterizedContext } from 'koa';
 
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IMonit } from '@/interface';
+import { IList, IMonit } from '@/interface';
 import monitService from '@/service/monit.service';
 
 class MonitController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
         keyWord,
         type,
-        id,
-      }: any = ctx.request.query;
+      }: IList<IMonit> = ctx.request.query;
       const result = await monitService.getList({
         nowPage,
         pageSize,

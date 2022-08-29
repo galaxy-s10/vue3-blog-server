@@ -220,12 +220,14 @@ class QqUserController {
     try {
       // @ts-ignore
       const {
-        nickname,
-        gender,
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
+        nowPage,
+        pageSize,
+        keyWord,
+        nickname,
+        gender,
         created_at,
         updated_at,
       }: IList<IQqUser> = ctx.request.query;

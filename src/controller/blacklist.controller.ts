@@ -3,25 +3,25 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IBlacklist } from '@/interface';
+import { IBlacklist, IList } from '@/interface';
 import blacklistService from '@/service/blacklist.service';
 
 class BlacklistController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-        keyWord,
-        id,
-      }: any = ctx.request.query;
-      const result = await blacklistService.getList({
         nowPage,
         pageSize,
+        keyWord,
+      }: IList<IBlacklist> = ctx.request.query;
+      const result = await blacklistService.getList({
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
         keyWord,
         id,
       });

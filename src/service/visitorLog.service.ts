@@ -36,7 +36,7 @@ class VisitorLogService {
     return {
       visitor_total: result.length,
       visit_total: result.reduce((pre, cur) => {
-        return cur.get().total + pre;
+        return cur.get().total! + pre;
       }, 0),
     };
   }
@@ -51,7 +51,7 @@ class VisitorLogService {
     return {
       visitor_total: result.length,
       visit_total: result.reduce((pre, cur) => {
-        return cur.get().total + pre;
+        return cur.get().total! + pre;
       }, 0),
     };
   }
@@ -71,8 +71,8 @@ class VisitorLogService {
         [Op.between]: [startTime, endTime],
       };
     }
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    const offset = (nowPage - 1) * pageSize;
+    const limit = pageSize;
     const result = await visitorLogModel.findAll({
       attributes: ['ip', [fn('count', col('id')), 'total']],
       group: 'ip',
@@ -81,20 +81,24 @@ class VisitorLogService {
       offset,
       where: { created_at: timeWhere },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取访客日志列表 */
   async getList({
-    nowPage,
-    pageSize,
+    id,
     orderBy,
     orderName,
+    nowPage,
+    pageSize,
     keyWord,
-    id,
   }: IList<IVisitorLog>) {
-    const offset = (parseInt(nowPage, 10) - 1) * parseInt(pageSize, 10);
-    const limit = parseInt(pageSize, 10);
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const allWhere: any = {};
     if (id) {
       allWhere.id = +id;
@@ -119,6 +123,7 @@ class VisitorLogService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+    // @ts-ignore
     const result = await visitorLogModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -127,7 +132,7 @@ class VisitorLogService {
         ...allWhere,
       },
     });
-    return handlePaging(nowPage, pageSize, result);
+    return handlePaging(result, nowPage, pageSize);
   }
 
   /** 获取一秒内ip的访问次数 */

@@ -41,7 +41,7 @@ export const connectDb = async () => {
         `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库...`
       )
     );
-    await sequelize.authenticate();
+    await sequelize.authenticate({ logging: false });
     const okMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库成功!`;
     console.log(chalkSUCCESS(okMsg));
   } catch (error) {

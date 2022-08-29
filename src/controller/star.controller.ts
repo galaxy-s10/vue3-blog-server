@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IStar } from '@/interface';
+import { IList, IStar } from '@/interface';
 import articleService from '@/service/article.service';
 import commentService from '@/service/comment.service';
 import starService from '@/service/star.service';
@@ -13,11 +13,13 @@ class StarController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        nowPage,
+        pageSize,
+        keyWord,
+      }: IList<IStar> = ctx.request.query;
       const result = await starService.getList({
         nowPage,
         pageSize,

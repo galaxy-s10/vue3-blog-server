@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
-import { IComment } from '@/interface';
+import { IComment, IList } from '@/interface';
 import articleService from '@/service/article.service';
 import commentService from '@/service/comment.service';
 import positionService from '@/service/position.service';
@@ -15,16 +15,20 @@ class CommentController {
   async getList(ctx: ParameterizedContext, next) {
     try {
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
-      const result = await commentService.getList({
         nowPage,
         pageSize,
+        keyWord,
+      }: IList<IComment> = ctx.request.query;
+      const result = await commentService.getList({
+        id,
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
+        keyWord,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -38,24 +42,28 @@ class CommentController {
     try {
       const article_id = +ctx.params.article_id;
       const {
-        nowPage = '1',
-        pageSize = '10',
+        id,
         orderBy = 'asc',
         orderName = 'id',
-      } = ctx.request.query;
+        nowPage,
+        pageSize,
+        keyWord,
+      }: IList<IComment> = ctx.request.query;
       let from_user_id = -1;
       // 这个接口的userInfo不是必须的
       const { code, userInfo } = await authJwt(ctx);
       if (code === 200) {
-        from_user_id = userInfo.id;
+        from_user_id = userInfo!.id!;
       }
       const result = await commentService.getArticleCommentList({
-        article_id,
-        nowPage,
-        pageSize,
+        id,
         orderBy,
         orderName,
+        nowPage,
+        pageSize,
+        keyWord,
         from_user_id,
+        article_id,
       });
       successHandler({ ctx, data: result });
     } catch (error) {
@@ -93,18 +101,18 @@ class CommentController {
         return;
       }
       const comment: any = await commentService.find(id);
-      if (userInfo.id !== comment.from_user_id) {
-        throw new Error(`你不能修改其他人的评论哦!`);
+      if (userInfo!.id !== comment.from_user_id) {
+        throw new Error(`你不能修改其他人的评论哦！`);
       }
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的评论!` });
+        emitError({ ctx, code: 400, error: `不存在id为${id}的评论！` });
         return;
       }
       const result = await commentService.update({
         id,
         article_id,
-        from_user_id: userInfo.id,
+        from_user_id: userInfo!.id,
         to_user_id,
         parent_comment_id,
         reply_comment_id,
@@ -127,11 +135,14 @@ class CommentController {
         reply_comment_id,
         content,
       }: IComment = ctx.request.body;
+      if (!article_id) {
+        throw new Error(`article_id不能为空！`);
+      }
       if (parent_comment_id === -1 && to_user_id !== -1) {
-        throw new Error(`不能在父评论里回复其他用户哦!`);
+        throw new Error(`不能在父评论里回复其他用户哦！`);
       }
       if (parent_comment_id === -1 && reply_comment_id !== -1) {
-        throw new Error(`不能在父评论里回复其他评论哦!`);
+        throw new Error(`不能在父评论里回复其他评论哦！`);
       }
       const { code, userInfo, message } = await authJwt(ctx);
       if (code !== 200) {
@@ -141,9 +152,9 @@ class CommentController {
       const articleIsExist =
         article_id === -1 ? true : await articleService.isExist([article_id]);
       if (!articleIsExist) {
-        throw new Error(`不存在id为${article_id}的文章!`);
+        throw new Error(`不存在id为${article_id}的文章！`);
       }
-      const commentIdArr = arrayUnique(
+      const commentIdArr: any = arrayUnique(
         [parent_comment_id, reply_comment_id].filter((v) => v !== -1)
       );
       const commentIsExist =
@@ -151,12 +162,12 @@ class CommentController {
           ? true
           : await commentService.isExist(commentIdArr);
       if (!commentIsExist) {
-        throw new Error(`不存在id为${commentIdArr.toString()}的评论!`);
+        throw new Error(`不存在id为${commentIdArr.toString()}的评论！`);
       }
       const userIsExist =
         to_user_id === -1 ? true : await userService.isExist([to_user_id]);
       if (!userIsExist) {
-        throw new Error(`不存在id为${to_user_id}的用户!`);
+        throw new Error(`不存在id为${to_user_id}的用户！`);
       }
       const ua = ctx.request.headers['user-agent'];
       const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
@@ -185,8 +196,8 @@ class CommentController {
       const {
         article_id = '-1',
         childrenPageSize = '3',
-        nowPage = '1',
-        pageSize = '10',
+        nowPage,
+        pageSize,
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
@@ -218,8 +229,8 @@ class CommentController {
       const {
         article_id,
         parent_comment_id,
-        nowPage = '1',
-        pageSize = '10',
+        nowPage,
+        pageSize,
         orderBy = 'asc',
         orderName = 'created_at',
       }: any = ctx.request.query;
@@ -257,7 +268,7 @@ class CommentController {
       const id = +ctx.params.parent_comment_id;
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
-        throw new Error(`不存在id为${id}的评论!`);
+        throw new Error(`不存在id为${id}的评论！`);
       }
       const result: any = await this.commonGetAllChildrenComment(id);
       successHandler({ ctx, data: result });
@@ -279,11 +290,11 @@ class CommentController {
       }
       const isExist = await commentService.isExist([id]);
       if (!isExist) {
-        throw new Error(`不存在id为${id}的评论!`);
+        throw new Error(`不存在id为${id}的评论！`);
       }
       const comment: any = await commentService.find(id);
       if (userInfo.id !== comment.from_user_id) {
-        throw new Error(`你不能删除其他人的评论哦!`);
+        throw new Error(`你不能删除其他人的评论哦！`);
       }
       let effect = 0;
       // 如果删的是父评论,
@@ -304,7 +315,7 @@ class CommentController {
       successHandler({
         ctx,
         message:
-          effect === 0 ? '删除成功!' : `删除成功，一共删除${effect}条子评论!`,
+          effect === 0 ? '删除成功!' : `删除成功，一共删除${effect}条子评论！`,
       });
     } catch (error) {
       emitError({ ctx, code: 400, error });
