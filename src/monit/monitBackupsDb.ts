@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
-import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { dbName } from '@/config/db';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import {
@@ -14,6 +13,7 @@ import {
 } from '@/constant';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
+import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 import qiniuController from '@/utils/qiniu';
 
 // 备份目录
@@ -155,9 +155,9 @@ const rule = new schedule.RecurrenceRule();
 const allHour = 24;
 const allMinute = 60;
 const allSecond = 60;
-const allHourArr = [];
-const allMinuteArr = [];
-const allSecondArr = [];
+const allHourArr: number[] = [];
+const allMinuteArr: number[] = [];
+const allSecondArr: number[] = [];
 
 for (let i = 0; i < allHour; i += 1) {
   allHourArr.push(i);
@@ -174,7 +174,7 @@ rule.hour = allHourArr.filter((v) => v % 12 === 0);
 rule.minute = 0;
 
 export const monitBackupsDbJob = () => {
-  console.log(chalkWRAN('监控备份数据库定时任务启动！'));
+  console.log(chalkINFO('监控任务: 备份数据库定时任务启动！'));
   const monitJobName = MONIT_JOB.BACKUPSDB;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
@@ -188,7 +188,7 @@ export const monitBackupsDbJob = () => {
       main();
     } else {
       console.log(
-        chalkWRAN(
+        chalkWARN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
           )}，当前非生产环境，不执行${monitJobName}定时任务`

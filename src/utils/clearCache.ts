@@ -1,7 +1,7 @@
 import { Client } from 'ssh2';
 
-import { chalkERROR, chalkINFO } from '@/app/chalkTip';
 import { SSH_CONFIG } from '@/config/secret';
+import { chalkERROR, chalkINFO } from '@/utils/chalkTip';
 
 // 重启pm2进程命令
 const restartPm2Cmd = () => {
@@ -24,12 +24,12 @@ const freeCmd = () => {
  * @return {*}
  */
 const handleData = (str: string) => {
-  const arr = str.match(/\S+/g);
+  const arr = str.match(/\S+/g)!;
 
   const mem = 'Mem:';
   const swap = 'Swap:';
-  const res = [];
-  const obj = {};
+  const res: any = [];
+  const obj: any = {};
 
   res.push(arr.splice(0, 6));
   res.push(arr.splice(0, 7));
@@ -108,42 +108,38 @@ export const clearCache = () => {
 
 export const showMemory = async () => {
   const conn = new Client();
-  try {
-    const result = await new Promise((resolve, reject) => {
-      conn
-        .on('ready', () => {
-          conn.exec(
-            `
+  const result = await new Promise((resolve, reject) => {
+    conn
+      .on('ready', () => {
+        conn.exec(
+          `
             ${freeCmd()}
             `,
-            (error, stream) => {
-              if (error) throw error;
-              stream
-                .on('close', () => {
-                  console.log('close');
-                })
-                .on('data', (data) => {
-                  console.log(chalkINFO(`==========STDOUT==========`));
-                  const res = handleData(data.toString());
-                  resolve(res);
-                })
-                .stderr.on('data', (data) => {
-                  console.log(chalkERROR(`==========STDERR==========`));
-                  console.log(data.toString());
-                  reject(new Error(data.toString()));
-                });
-            }
-          );
-        })
-        .connect({
-          host: SSH_CONFIG.host,
-          port: SSH_CONFIG.port,
-          username: SSH_CONFIG.username,
-          password: SSH_CONFIG.password,
-        });
-    });
-    return result;
-  } catch (error) {
-    return { error: error?.message };
-  }
+          (error, stream) => {
+            if (error) throw error;
+            stream
+              .on('close', () => {
+                console.log('close');
+              })
+              .on('data', (data) => {
+                console.log(chalkINFO(`==========STDOUT==========`));
+                const res = handleData(data.toString());
+                resolve(res);
+              })
+              .stderr.on('data', (data) => {
+                console.log(chalkERROR(`==========STDERR==========`));
+                console.log(data.toString());
+                reject(new Error(data.toString()));
+              });
+          }
+        );
+      })
+      .connect({
+        host: SSH_CONFIG.host,
+        port: SSH_CONFIG.port,
+        username: SSH_CONFIG.username,
+        password: SSH_CONFIG.password,
+      });
+  });
+  return result;
 };

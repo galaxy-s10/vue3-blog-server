@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 
 import { REDIS_CONFIG } from './secret';
 
-import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
+import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 const redisClient = createClient({
   socket: {
@@ -13,9 +13,14 @@ const redisClient = createClient({
 });
 
 export const connectRedis = async () => {
+  const msg = (flag: boolean) =>
+    `连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis${
+      flag ? '成功' : '失败'
+    }！`;
+
   redisClient.on('error', (err) => {
+    console.log(chalkERROR(msg(false)));
     console.log(err);
-    console.log(chalkERROR('Redis Client Error'));
   });
 
   try {
@@ -25,18 +30,11 @@ export const connectRedis = async () => {
       )
     );
     await redisClient.connect();
-    console.log(
-      chalkSUCCESS(
-        `连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis成功!`
-      )
-    );
+    console.log(chalkSUCCESS(msg(true)));
   } catch (error) {
+    console.log(chalkSUCCESS(msg(false)));
     console.log(error);
-    console.log(
-      chalkERROR(
-        `连接${REDIS_CONFIG.socket.host}:${REDIS_CONFIG.socket.port}服务器的redis失败!`
-      )
-    );
+    throw new Error(msg(false));
   }
 };
 

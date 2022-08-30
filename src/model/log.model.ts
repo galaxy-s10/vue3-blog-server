@@ -22,15 +22,11 @@ const model = sequelize.define<LogModel>(
       allowNull: false,
       autoIncrement: true,
     },
-    status: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:正常 2:非法
-    },
     user_id: {
       type: DataTypes.INTEGER,
       defaultValue: -1, // -1:游客 非-1:用户
     },
-    api_sql_duration: {
+    api_duration: {
       type: DataTypes.INTEGER,
     },
     api_user_agent: {
@@ -57,11 +53,17 @@ const model = sequelize.define<LogModel>(
     api_body: {
       type: DataTypes.TEXT('long'),
     },
+    api_code: {
+      type: DataTypes.INTEGER,
+    },
+    api_error: {
+      type: DataTypes.STRING,
+    },
     api_err_msg: {
       type: DataTypes.STRING,
     },
-    api_err_stack: {
-      type: DataTypes.TEXT('long'),
+    api_err_code: {
+      type: DataTypes.INTEGER,
     },
   },
   {

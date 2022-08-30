@@ -170,7 +170,7 @@ class RoleService {
     // const user = await userModel.findOne({ where: { id } });
     const user: any = await userModel.findByPk(id);
     if (!user) {
-      throw new Error(`不存在id为${id}的用户!`);
+      throw new Error(`不存在id为${id}的用户！`);
     }
     const roles: any[] = await user.getRoles();
     const result: any = [];
@@ -220,7 +220,7 @@ class RoleService {
 
   /** 修改角色 */
   async update1({ id, p_id, role_name, role_value }: IRole) {
-    if (id === p_id) throw new Error(`id不能等于p_id!`);
+    if (id === p_id) throw new Error(`id不能等于p_id！`);
     if (p_id === 0) {
       const result = await roleModel.update(
         {

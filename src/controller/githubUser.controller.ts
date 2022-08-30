@@ -1,7 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
   GITHUB_CLIENT_ID,
@@ -10,6 +9,7 @@ import {
 } from '@/config/secret';
 import { THIRD_PLATFORM } from '@/constant';
 import { IGithubUser, IList } from '@/interface';
+import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
 import githubUserService from '@/service/githubUser.service';
 import thirdUserService from '@/service/thirdUser.service';
@@ -19,18 +19,15 @@ import axios from '@/utils/request';
 
 class GithubUserController {
   async create(ctx: ParameterizedContext, next) {
-    try {
-      const githubProps: IGithubUser = ctx.request.body;
-      const result = await githubUserService.create(githubProps);
-      successHandler({ ctx, data: result });
-      /**
-       * 这个其实是最后一个中间件了，其实加不加调不调用next都没影响，但是为了防止后面要
-       * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
-       * 因此还是得在这调用一次await next()
-       */
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const githubProps: IGithubUser = ctx.request.body;
+    const result = await githubUserService.create(githubProps);
+    successHandler({ ctx, data: result });
+    /**
+     * 这个其实是最后一个中间件了，其实加不加调不调用next都没影响，但是为了防止后面要
+     * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
+     * 因此还是得在这调用一次await next()
+     */
+
     await next();
   }
 
@@ -65,63 +62,47 @@ class GithubUserController {
    */
   bindGithub = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
-    try {
-      const { code: authCode, userInfo, message } = await authJwt(ctx);
-      if (authCode !== 200) {
-        emitError({ ctx, code: authCode, error: message });
-        return;
-      }
-      const result: any = await thirdUserService.findByUserId(userInfo!.id!);
-      const ownIsBind = result.filter(
-        (v) => v.third_platform === THIRD_PLATFORM.github
-      );
-      if (ownIsBind.length) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '你已经绑定过github，请先解绑原github!',
-        });
-        return;
-      }
-      const accessToken = await this.getAccessToken(code);
-      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      let OauthInfo: any = await this.getMeOauth({
-        access_token: accessToken.access_token,
-      });
-      const isExist = await githubUserService.isExist([OauthInfo.id]);
-
-      OauthInfo = {
-        ...OauthInfo,
-        github_id: OauthInfo.id,
-        github_created_at: OauthInfo.created_at,
-        github_updated_at: OauthInfo.updated_at,
-      };
-      delete OauthInfo.id;
-      delete OauthInfo.created_at;
-      delete OauthInfo.updated_at;
-      if (isExist) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '该github账号已被其他人绑定了!',
-        });
-        return;
-      }
-      const githubUser: any = await githubUserService.create({
-        ...OauthInfo,
-        client_id: GITHUB_CLIENT_ID,
-      });
-      await thirdUserModel.create({
-        user_id: userInfo!.id,
-        third_user_id: githubUser.id,
-        third_platform: THIRD_PLATFORM.github,
-      });
-      successHandler({ ctx, message: '绑定github成功!' });
-    } catch (error) {
-      console.log(error);
-      emitError({ ctx, code: 400, error });
-      return;
+    const { code: authCode, userInfo, message } = await authJwt(ctx);
+    if (authCode !== 200) {
+      throw new CustomError(message, authCode, authCode);
     }
+    const result: any = await thirdUserService.findByUserId(userInfo!.id!);
+    const ownIsBind = result.filter(
+      (v) => v.third_platform === THIRD_PLATFORM.github
+    );
+    if (ownIsBind.length) {
+      throw new CustomError('你已经绑定过github，请先解绑原github！', 400, 400);
+    }
+    const accessToken = await this.getAccessToken(code);
+    if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+    let OauthInfo: any = await this.getMeOauth({
+      access_token: accessToken.access_token,
+    });
+    const isExist = await githubUserService.isExist([OauthInfo.id]);
+
+    OauthInfo = {
+      ...OauthInfo,
+      github_id: OauthInfo.id,
+      github_created_at: OauthInfo.created_at,
+      github_updated_at: OauthInfo.updated_at,
+    };
+    delete OauthInfo.id;
+    delete OauthInfo.created_at;
+    delete OauthInfo.updated_at;
+    if (isExist) {
+      throw new CustomError('该github账号已被其他人绑定了！', 400, 400);
+    }
+    const githubUser: any = await githubUserService.create({
+      ...OauthInfo,
+      client_id: GITHUB_CLIENT_ID,
+    });
+    await thirdUserModel.create({
+      user_id: userInfo!.id,
+      third_user_id: githubUser.id,
+      third_platform: THIRD_PLATFORM.github,
+    });
+    successHandler({ ctx, message: '绑定github成功！' });
+
     await next();
   };
 
@@ -129,32 +110,21 @@ class GithubUserController {
    * 取消绑定github
    */
   cancelBindGithub = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
-      const ownIsBind = result.filter(
-        (v) => v.third_platform === THIRD_PLATFORM.github
-      );
-      if (!ownIsBind.length) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '你没有绑定过github，不能解绑!',
-        });
-        return;
-      }
-      await githubUserService.delete(ownIsBind[0].third_user_id);
-      await thirdUserService.delete(ownIsBind[0].id);
-      successHandler({ ctx, message: '解绑github成功!' });
-    } catch (error) {
-      console.log(error);
-      emitError({ ctx, code: 400, error });
-      return;
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
+    const ownIsBind = result.filter(
+      (v) => v.third_platform === THIRD_PLATFORM.github
+    );
+    if (!ownIsBind.length) {
+      throw new CustomError('你没有绑定过github，不能解绑！', 400, 400);
+    }
+    await githubUserService.delete(ownIsBind[0].third_user_id);
+    await thirdUserService.delete(ownIsBind[0].id);
+    successHandler({ ctx, message: '解绑github成功！' });
+
     await next();
   };
 
@@ -162,87 +132,83 @@ class GithubUserController {
    * github登录
    */
   login = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
-      const exp = 24; // token过期时间：24小时
-      const accessToken = await this.getAccessToken(code);
-      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      let OauthInfo: any = await this.getMeOauth({
-        access_token: accessToken.access_token,
-      });
-      const isExist = await githubUserService.isExist([OauthInfo.id]);
-      OauthInfo = {
+    const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
+    const exp = 24; // token过期时间：24小时
+    const accessToken = await this.getAccessToken(code);
+    if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+    let OauthInfo: any = await this.getMeOauth({
+      access_token: accessToken.access_token,
+    });
+    const isExist = await githubUserService.isExist([OauthInfo.id]);
+    OauthInfo = {
+      ...OauthInfo,
+      github_id: OauthInfo.id,
+      github_created_at: OauthInfo.created_at,
+      github_updated_at: OauthInfo.updated_at,
+    };
+    delete OauthInfo.id;
+    delete OauthInfo.created_at;
+    delete OauthInfo.updated_at;
+    if (!isExist) {
+      const githubUser: any = await githubUserService.create({
         ...OauthInfo,
-        github_id: OauthInfo.id,
-        github_created_at: OauthInfo.created_at,
-        github_updated_at: OauthInfo.updated_at,
-      };
-      delete OauthInfo.id;
-      delete OauthInfo.created_at;
-      delete OauthInfo.updated_at;
-      if (!isExist) {
-        const githubUser: any = await githubUserService.create({
-          ...OauthInfo,
-          client_id: GITHUB_CLIENT_ID,
-        });
-        const userInfo: any = await userService.create({
-          username: OauthInfo.login,
-          password: getRandomString(8),
-          avatar: OauthInfo.avatar_url,
-          desc: OauthInfo.bio,
-        });
-        await thirdUserModel.create({
-          user_id: userInfo?.id,
-          third_user_id: githubUser.id,
-          third_platform: THIRD_PLATFORM.github,
-        });
-        const token = signJwt({
-          userInfo: {
-            ...JSON.parse(JSON.stringify(userInfo)),
-            github_users: undefined,
-            qq_users: undefined,
-            email_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'github登录成功!' });
-      } else {
-        await githubUserService.updateByGithubId(OauthInfo);
-        const oldGithubUser: any = await githubUserService.findByGithubId(
-          OauthInfo.github_id
-        );
-        const thirdUserInfo: any = await thirdUserService.findUser({
-          third_platform: THIRD_PLATFORM.github,
-          third_user_id: oldGithubUser.id,
-        });
-        const userInfo: any = await userService.findAccount(
-          thirdUserInfo.user_id
-        );
-        const token = signJwt({
-          userInfo: {
-            ...JSON.parse(JSON.stringify(userInfo)),
-            github_users: undefined,
-            qq_users: undefined,
-            email_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'github登录成功!' });
-      }
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
+        client_id: GITHUB_CLIENT_ID,
+      });
+      const userInfo: any = await userService.create({
+        username: OauthInfo.login,
+        password: getRandomString(8),
+        avatar: OauthInfo.avatar_url,
+        desc: OauthInfo.bio,
+      });
+      await thirdUserModel.create({
+        user_id: userInfo?.id,
+        third_user_id: githubUser.id,
+        third_platform: THIRD_PLATFORM.github,
+      });
+      const token = signJwt({
+        userInfo: {
+          ...JSON.parse(JSON.stringify(userInfo)),
+          github_users: undefined,
+          qq_users: undefined,
+          email_users: undefined,
+        },
+        exp,
+      });
+      await userService.update({
+        id: userInfo?.id,
+        token,
+      });
+      ctx.cookies.set('token', token, { httpOnly: false });
+      successHandler({ ctx, data: token, message: 'github登录成功！' });
+    } else {
+      await githubUserService.updateByGithubId(OauthInfo);
+      const oldGithubUser: any = await githubUserService.findByGithubId(
+        OauthInfo.github_id
+      );
+      const thirdUserInfo: any = await thirdUserService.findUser({
+        third_platform: THIRD_PLATFORM.github,
+        third_user_id: oldGithubUser.id,
+      });
+      const userInfo: any = await userService.findAccount(
+        thirdUserInfo.user_id
+      );
+      const token = signJwt({
+        userInfo: {
+          ...JSON.parse(JSON.stringify(userInfo)),
+          github_users: undefined,
+          qq_users: undefined,
+          email_users: undefined,
+        },
+        exp,
+      });
+      await userService.update({
+        id: userInfo?.id,
+        token,
+      });
+      ctx.cookies.set('token', token, { httpOnly: false });
+      successHandler({ ctx, data: token, message: 'github登录成功！' });
     }
+
     /**
      * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
      * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
@@ -252,70 +218,57 @@ class GithubUserController {
   };
 
   async list(ctx: ParameterizedContext, next) {
-    try {
-      // @ts-ignore
-      const {
-        id,
-        orderBy = 'asc',
-        orderName = 'id',
-        nowPage,
-        pageSize,
-        keyWord,
-        created_at,
-        updated_at,
-      }: IList<IGithubUser> = ctx.request.query;
-      const result = await githubUserService.getList({
-        id,
-        orderBy,
-        orderName,
-        nowPage,
-        pageSize,
-        keyWord,
-        created_at,
-        updated_at,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    // @ts-ignore
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+      created_at,
+      updated_at,
+    }: IList<IGithubUser> = ctx.request.query;
+    const result = await githubUserService.getList({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+      created_at,
+      updated_at,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async find(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const result = await githubUserService.find(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const id = +ctx.params.id;
+    const result = await githubUserService.find(id);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async update(ctx: ParameterizedContext, next) {
-    try {
-      const githubProps: IGithubUser = ctx.request.body;
-      const result = await githubUserService.updateByGithubId(githubProps);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const githubProps: IGithubUser = ctx.request.body;
+    const result = await githubUserService.updateByGithubId(githubProps);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async delete(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const isExist = await githubUserService.isExist([id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的github用户!` });
-        return;
-      }
-      const result = await githubUserService.delete(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const id = +ctx.params.id;
+    const isExist = await githubUserService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(`不存在id为${id}的github用户！`, 400, 400);
     }
+    const result = await githubUserService.delete(id);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 }

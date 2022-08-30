@@ -2,19 +2,29 @@ export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
 export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV as string;
 export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
 
+export const ERROR_CODE = {
+  banIp: 1000,
+  adminDisableUser: 1001,
+};
+
+export enum DisableEnum {
+  'banIp' = 1,
+  'adminDisableUser' = 2,
+}
+
 export const COMMON_ERR_MSG = {
   banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',
   jwtExpired: '登录信息过期！',
   invalidToken: '非法token！',
-  disableUser: '你的账号已被禁用，请联系管理员处理！',
+  adminDisableUser: '你的账号已被管理员禁用，请联系管理员处理！',
 };
 // 发送邮件结果类型
 export const VERIFY_EMAIL_RESULT_CODE = {
-  ok: '发送成功!',
-  more: '一天只能发5次验证码!',
-  later: '一分钟内只能发1次验证码，请稍后再试!',
-  err: '验证码错误或已过期!',
-  system: '发送邮件错误!',
+  ok: '发送成功！',
+  more: '一天只能发5次验证码！',
+  later: '一分钟内只能发1次验证码，请稍后再试！',
+  err: '验证码错误或已过期！',
+  system: '发送邮件错误！',
 };
 
 // redis前缀
@@ -63,4 +73,19 @@ export const QINIU_PREFIX = {
   'backupsDatabase/': 'backupsDatabase/',
   'media/': 'media/',
   'nuxt-blog-client/': 'nuxt-blog-client/',
+};
+
+export const HttpErrorMsg = {
+  400: '参数错误！',
+  401: '未授权！',
+  403: '权限不足！',
+  404: '未找到！',
+  500: '服务器错误！',
+};
+
+export const HttpSuccessMsg = {
+  GET: '获取成功！',
+  POST: '新增成功！',
+  PUT: '修改成功！',
+  DELETE: '删除成功！',
 };

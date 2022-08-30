@@ -1,112 +1,93 @@
 import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IList, ITheme } from '@/interface';
+import { CustomError } from '@/model/customError.model';
 import themeService from '@/service/theme.service';
 
 class ThemeController {
   async getList(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        id,
-        orderBy = 'asc',
-        orderName = 'id',
-        nowPage,
-        pageSize,
-        keyWord,
-      }: IList<ITheme> = ctx.request.query;
-      const result = await themeService.getList({
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        keyWord,
-        id,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+    }: IList<ITheme> = ctx.request.query;
+    const result = await themeService.getList({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async find(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const result = await themeService.find(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const id = +ctx.params.id;
+    const result = await themeService.find(id);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async update(ctx: ParameterizedContext, next) {
-    try {
-      const hasAuth = await verifyUserAuth(ctx);
-      if (!hasAuth) {
-        emitError({ ctx, code: 403, error: '权限不足！' });
-        return;
-      }
-      const id = +ctx.params.id;
-      const { key, value, model, lang, desc }: ITheme = ctx.request.body;
-      const isExist = await themeService.isExist([id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的主题!` });
-        return;
-      }
-      await themeService.update({
-        id,
-        key,
-        value,
-        model,
-        lang,
-        desc,
-      });
-      successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const hasAuth = await verifyUserAuth(ctx);
+    if (!hasAuth) {
+      throw new CustomError(`权限不足！`, 403, 403);
     }
+    const id = +ctx.params.id;
+    const { key, value, model, lang, desc }: ITheme = ctx.request.body;
+    const isExist = await themeService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(`不存在id为${id}的主题！`, 400, 400);
+    }
+    await themeService.update({
+      id,
+      key,
+      value,
+      model,
+      lang,
+      desc,
+    });
+    successHandler({ ctx });
+
     await next();
   }
 
   async create(ctx: ParameterizedContext, next) {
-    try {
-      const { key, value, model, lang, desc }: ITheme = ctx.request.body;
-      await themeService.create({
-        key,
-        value,
-        model,
-        lang,
-        desc,
-      });
-      successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const { key, value, model, lang, desc }: ITheme = ctx.request.body;
+    await themeService.create({
+      key,
+      value,
+      model,
+      lang,
+      desc,
+    });
+    successHandler({ ctx });
+
     await next();
   }
 
   async delete(ctx: ParameterizedContext, next) {
-    try {
-      const hasAuth = await verifyUserAuth(ctx);
-      if (!hasAuth) {
-        emitError({ ctx, code: 403, error: '权限不足！' });
-        return;
-      }
-      const id = +ctx.params.id;
-      const isExist = await themeService.isExist([id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的主题!` });
-        return;
-      }
-      await themeService.delete(id);
-      successHandler({ ctx });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const hasAuth = await verifyUserAuth(ctx);
+    if (!hasAuth) {
+      throw new CustomError(`权限不足！`, 403, 403);
     }
+    const id = +ctx.params.id;
+    const isExist = await themeService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(`不存在id为${id}的主题！`, 400, 400);
+    }
+    await themeService.delete(id);
+    successHandler({ ctx });
+
     await next();
   }
 }

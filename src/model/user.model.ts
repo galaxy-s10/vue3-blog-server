@@ -35,7 +35,7 @@ const model = sequelize.define<UserModel>(
       // unique: true,
       // unique: {
       //   name: '???',
-      //   msg: '存在同名用户!',
+      //   msg: '存在同名用户！',
       // },
       validate: {
         // 其实不管isUnique叫啥名字，都会执行。
@@ -43,7 +43,7 @@ const model = sequelize.define<UserModel>(
         // async isUnique(username, done) {
         //   const isSameName = await userService.isSameName(username);
         //   if (isSameName) {
-        //     done(new Error('已存在同名用户!'));
+        //     done(new Error('已存在同名用户！'));
         //   } else {
         //     done();
         //   }
@@ -65,7 +65,7 @@ const model = sequelize.define<UserModel>(
       //   regPwd(value: string) {
       //     const reg = /(?![0-9]+$)(?![a-zA-Z]+$)(?![_]+$)[0-9a-zA-A_]{8,16}/g;
       //     if (!reg.test(value)) {
-      //       throw new Error('密码格式错误!');
+      //       throw new Error('密码格式错误！');
       //     }
       //   },
       // },

@@ -201,7 +201,7 @@ class QiniuModel {
           resolve({ flag: false, ...obj });
         } else if (parseInt(`${respInfo.statusCode / 100}`, 10) === 2) {
           // 200 is success, 298 is part success
-          const result = { success: [], error: [] };
+          const result: any = { success: [], error: [] };
           respBody.forEach((item) => {
             if (item.code === 200) {
               result.success.push(item.data);

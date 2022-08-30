@@ -2,33 +2,18 @@ import redisClient from '@/config/redis';
 
 class EmailController {
   getTTL = async ({ prefix = '', key = '' }) => {
-    try {
-      const res = await redisClient.ttl(`${prefix}-${key}`);
-      return res;
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
+    const res = await redisClient.ttl(`${prefix}-${key}`);
+    return res;
   };
 
   del = async ({ prefix = '', key = '' }) => {
-    try {
-      const res = await redisClient.del(`${prefix}-${key}`);
-      return res;
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
+    const res = await redisClient.del(`${prefix}-${key}`);
+    return res;
   };
 
   getVal = async ({ prefix = '', key = '' }) => {
-    try {
-      const res = await redisClient.get(`${prefix}-${key}`);
-      return res;
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
+    const res = await redisClient.get(`${prefix}-${key}`);
+    return res;
   };
 
   setVal = async ({

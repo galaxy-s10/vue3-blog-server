@@ -1,7 +1,6 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
   ADMIN_QQ_CLIENT_ID,
@@ -10,6 +9,7 @@ import {
 } from '@/config/secret';
 import { THIRD_PLATFORM } from '@/constant';
 import { IList, IQqUser } from '@/interface';
+import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
 import qqUserService from '@/service/qqUser.service';
 import thirdUserService from '@/service/thirdUser.service';
@@ -19,49 +19,45 @@ import axios from '@/utils/request';
 
 class QqUserController {
   async create(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        client_id,
-        openid,
-        unionid,
-        nickname,
-        figureurl,
-        figureurl_1,
-        figureurl_2,
-        figureurl_qq_1,
-        figureurl_qq_2,
-        constellation,
-        gender,
-        city,
-        province,
-        year,
-      }: IQqUser = ctx.request.body;
-      const result = await qqUserService.create({
-        client_id,
-        openid,
-        unionid,
-        nickname,
-        figureurl,
-        figureurl_1,
-        figureurl_2,
-        figureurl_qq_1,
-        figureurl_qq_2,
-        constellation,
-        gender,
-        city,
-        province,
-        year,
-      });
-      successHandler({ ctx, data: result });
-      /**
-       * 这个其实是最后一个中间件了，其实加不加调不调用next都没影响，但是为了防止后面要
-       * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
-       * 因此还是得在这调用一次await next()
-       */
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
-    }
+    const {
+      client_id,
+      openid,
+      unionid,
+      nickname,
+      figureurl,
+      figureurl_1,
+      figureurl_2,
+      figureurl_qq_1,
+      figureurl_qq_2,
+      constellation,
+      gender,
+      city,
+      province,
+      year,
+    }: IQqUser = ctx.request.body;
+    const result = await qqUserService.create({
+      client_id,
+      openid,
+      unionid,
+      nickname,
+      figureurl,
+      figureurl_1,
+      figureurl_2,
+      figureurl_qq_1,
+      figureurl_qq_2,
+      constellation,
+      gender,
+      city,
+      province,
+      year,
+    });
+    successHandler({ ctx, data: result });
+    /**
+     * 这个其实是最后一个中间件了，其实加不加调不调用next都没影响，但是为了防止后面要
+     * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
+     * 因此还是得在这调用一次await next()
+     */
+
     await next();
   }
 
@@ -127,87 +123,83 @@ class QqUserController {
   }
 
   login = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
-      const exp = 24; // token过期时间：24小时
-      const accessToken = await this.getAccessToken(code);
-      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      const OauthInfo: any = await this.getMeOauth({
-        access_token: accessToken.access_token,
-        unionid: 1,
-        fmt: 'json',
+    const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
+    const exp = 24; // token过期时间：24小时
+    const accessToken = await this.getAccessToken(code);
+    if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+    const OauthInfo: any = await this.getMeOauth({
+      access_token: accessToken.access_token,
+      unionid: 1,
+      fmt: 'json',
+    });
+    const getUserInfoRes: IQqUser = await this.getUserInfo({
+      access_token: accessToken.access_token,
+      oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
+      openid: OauthInfo.openid,
+    });
+    const qqUserInfo = {
+      ...getUserInfoRes,
+      client_id: OauthInfo.client_id,
+      unionid: OauthInfo.unionid,
+      openid: OauthInfo.openid,
+    };
+    const isExist = await qqUserService.isExistUnionid(OauthInfo.unionid);
+    if (!isExist) {
+      const qqUser: any = await qqUserService.create(qqUserInfo);
+      const userInfo: any = await userService.create({
+        username: qqUserInfo.nickname,
+        password: getRandomString(8),
+        avatar: qqUserInfo.figureurl_2,
       });
-      const getUserInfoRes: IQqUser = await this.getUserInfo({
-        access_token: accessToken.access_token,
-        oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
-        openid: OauthInfo.openid,
+      await thirdUserModel.create({
+        user_id: userInfo?.id,
+        third_user_id: qqUser.id,
+        third_platform: THIRD_PLATFORM.qq_admin,
       });
-      const qqUserInfo = {
-        ...getUserInfoRes,
-        client_id: OauthInfo.client_id,
-        unionid: OauthInfo.unionid,
-        openid: OauthInfo.openid,
-      };
-      const isExist = await qqUserService.isExistUnionid(OauthInfo.unionid);
-      if (!isExist) {
-        const qqUser: any = await qqUserService.create(qqUserInfo);
-        const userInfo: any = await userService.create({
-          username: qqUserInfo.nickname,
-          password: getRandomString(8),
-          avatar: qqUserInfo.figureurl_2,
-        });
-        await thirdUserModel.create({
-          user_id: userInfo?.id,
-          third_user_id: qqUser.id,
-          third_platform: THIRD_PLATFORM.qq_admin,
-        });
-        const token = signJwt({
-          userInfo: {
-            ...JSON.parse(JSON.stringify(userInfo)),
-            github_users: undefined,
-            qq_users: undefined,
-            email_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'qq登录成功!' });
-      } else {
-        await qqUserService.update(qqUserInfo);
-        const oldQqUser: any = await qqUserService.findByUnionid(
-          OauthInfo.unionid
-        );
-        const thirdUserInfo: any = await thirdUserService.findUser({
-          third_platform: THIRD_PLATFORM.qq_admin,
-          third_user_id: oldQqUser.id,
-        });
-        const userInfo: any = await userService.findAccount(
-          thirdUserInfo.user_id
-        );
-        const token = signJwt({
-          userInfo: {
-            ...JSON.parse(JSON.stringify(userInfo)),
-            github_users: undefined,
-            qq_users: undefined,
-            email_users: undefined,
-          },
-          exp,
-        });
-        await userService.update({
-          id: userInfo?.id,
-          token,
-        });
-        ctx.cookies.set('token', token, { httpOnly: false });
-        successHandler({ ctx, data: token, message: 'qq登录成功!' });
-      }
-    } catch (error) {
-      emitError({ ctx, code: 400, error, message: error.message });
-      return;
+      const token = signJwt({
+        userInfo: {
+          ...JSON.parse(JSON.stringify(userInfo)),
+          github_users: undefined,
+          qq_users: undefined,
+          email_users: undefined,
+        },
+        exp,
+      });
+      await userService.update({
+        id: userInfo?.id,
+        token,
+      });
+      ctx.cookies.set('token', token, { httpOnly: false });
+      successHandler({ ctx, data: token, message: 'qq登录成功！' });
+    } else {
+      await qqUserService.update(qqUserInfo);
+      const oldQqUser: any = await qqUserService.findByUnionid(
+        OauthInfo.unionid
+      );
+      const thirdUserInfo: any = await thirdUserService.findUser({
+        third_platform: THIRD_PLATFORM.qq_admin,
+        third_user_id: oldQqUser.id,
+      });
+      const userInfo: any = await userService.findAccount(
+        thirdUserInfo.user_id
+      );
+      const token = signJwt({
+        userInfo: {
+          ...JSON.parse(JSON.stringify(userInfo)),
+          github_users: undefined,
+          qq_users: undefined,
+          email_users: undefined,
+        },
+        exp,
+      });
+      await userService.update({
+        id: userInfo?.id,
+        token,
+      });
+      ctx.cookies.set('token', token, { httpOnly: false });
+      successHandler({ ctx, data: token, message: 'qq登录成功！' });
     }
+
     /**
      * 这个其实是最后一个中间件了，其实加不加调不调用next都没硬性，但是为了防止后面要
      * 是扩展又加了一个中间件，这里不调用await next()的话，会导致下一个中间件出现404或其他问题，
@@ -217,35 +209,33 @@ class QqUserController {
   };
 
   async list(ctx: ParameterizedContext, next) {
-    try {
-      // @ts-ignore
-      const {
-        id,
-        orderBy = 'asc',
-        orderName = 'id',
-        nowPage,
-        pageSize,
-        keyWord,
-        nickname,
-        gender,
-        created_at,
-        updated_at,
-      }: IList<IQqUser> = ctx.request.query;
-      const result = await qqUserService.getList({
-        nickname,
-        gender,
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        created_at,
-        updated_at,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
-    }
+    // @ts-ignore
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+      nickname,
+      gender,
+      created_at,
+      updated_at,
+    }: IList<IQqUser> = ctx.request.query;
+    const result = await qqUserService.getList({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+      nickname,
+      gender,
+      created_at,
+      updated_at,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
@@ -256,65 +246,51 @@ class QqUserController {
    */
   bindQQ = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
-    try {
-      const { code: authCode, userInfo, message } = await authJwt(ctx);
-      if (authCode !== 200) {
-        emitError({ ctx, code: authCode, error: message });
-        return;
-      }
-      const result: any = await thirdUserService.findByUserId(userInfo.id);
-      const ownIsBind = result.filter(
-        (v) => v.third_platform === THIRD_PLATFORM.qq_admin
-      );
-      if (ownIsBind.length) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '你已经绑定过qq，请先解绑原qq!',
-        });
-        return;
-      }
-      const accessToken = await this.getAccessToken(code);
-      if (accessToken.error) throw new Error(JSON.stringify(accessToken));
-      const OauthInfo: any = await this.getMeOauth({
-        access_token: accessToken.access_token,
-        unionid: 1,
-        fmt: 'json',
-      });
-      const getUserInfoRes: IQqUser = await this.getUserInfo({
-        access_token: accessToken.access_token,
-        oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
-        openid: OauthInfo.openid,
-      });
-      const qqUserInfo = {
-        ...getUserInfoRes,
-        client_id: OauthInfo.client_id,
-        unionid: OauthInfo.unionid,
-        openid: OauthInfo.openid,
-      };
-      const isExist = await qqUserService.isExistClientIdUnionid(
-        OauthInfo.client_id,
-        OauthInfo.unionid
-      );
-      if (isExist) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '该qq账号已被其他人绑定了!',
-        });
-        return;
-      }
-      const qqUser: any = await qqUserService.create(qqUserInfo);
-      await thirdUserModel.create({
-        user_id: userInfo?.id,
-        third_user_id: qqUser.id,
-        third_platform: THIRD_PLATFORM.qq_admin,
-      });
-      successHandler({ ctx, message: '绑定qq成功!' });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
+
+    const { code: authCode, userInfo, message } = await authJwt(ctx);
+    if (authCode !== 200) {
+      throw new CustomError(message, authCode, authCode);
     }
+    const result: any = await thirdUserService.findByUserId(userInfo!.id!);
+    const ownIsBind = result.filter(
+      (v) => v.third_platform === THIRD_PLATFORM.qq_admin
+    );
+    if (ownIsBind.length) {
+      throw new CustomError(`你已经绑定过qq，请先解绑原qq！`, 400, 400);
+    }
+    const accessToken = await this.getAccessToken(code);
+    if (accessToken.error) throw new Error(JSON.stringify(accessToken));
+    const OauthInfo: any = await this.getMeOauth({
+      access_token: accessToken.access_token,
+      unionid: 1,
+      fmt: 'json',
+    });
+    const getUserInfoRes: IQqUser = await this.getUserInfo({
+      access_token: accessToken.access_token,
+      oauth_consumer_key: OauthInfo.client_id, // oauth_consumer_key参数要求填appid，OauthInfo.client_id其实就是appid
+      openid: OauthInfo.openid,
+    });
+    const qqUserInfo = {
+      ...getUserInfoRes,
+      client_id: OauthInfo.client_id,
+      unionid: OauthInfo.unionid,
+      openid: OauthInfo.openid,
+    };
+    const isExist = await qqUserService.isExistClientIdUnionid(
+      OauthInfo.client_id,
+      OauthInfo.unionid
+    );
+    if (isExist) {
+      throw new CustomError(`该qq账号已被其他人绑定了！`, 400, 400);
+    }
+    const qqUser: any = await qqUserService.create(qqUserInfo);
+    await thirdUserModel.create({
+      user_id: userInfo?.id,
+      third_user_id: qqUser.id,
+      third_platform: THIRD_PLATFORM.qq_admin,
+    });
+    successHandler({ ctx, message: '绑定qq成功！' });
+
     await next();
   };
 
@@ -322,102 +298,76 @@ class QqUserController {
    * 取消绑定github
    */
   cancelBindQQ = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      const result: any[] = await thirdUserService.findByUserId(userInfo.id);
-      const ownIsBind = result.filter(
-        (v) => v.third_platform === THIRD_PLATFORM.qq_admin
-      );
-      if (!ownIsBind.length) {
-        emitError({
-          ctx,
-          code: 400,
-          message: '你没有绑定过qq，不能解绑!',
-        });
-        return;
-      }
-      await qqUserService.delete(ownIsBind[0].third_user_id);
-      await thirdUserService.delete(ownIsBind[0].id);
-      successHandler({ ctx, message: '解绑qq成功!' });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
+    const ownIsBind = result.filter(
+      (v) => v.third_platform === THIRD_PLATFORM.qq_admin
+    );
+    if (!ownIsBind.length) {
+      throw new CustomError('你没有绑定过qq，不能解绑', 400, 400);
+    }
+    await qqUserService.delete(ownIsBind[0].third_user_id);
+    await thirdUserService.delete(ownIsBind[0].id);
+    successHandler({ ctx, message: '解绑qq成功！' });
     await next();
   };
 
   async find(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const result = await qqUserService.find(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
-    }
+    const id = +ctx.params.id;
+    const result = await qqUserService.find(id);
+    successHandler({ ctx, data: result });
     await next();
   }
 
   async update(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        client_id,
-        openid,
-        unionid,
-        nickname,
-        figureurl,
-        figureurl_1,
-        figureurl_2,
-        figureurl_qq_1,
-        figureurl_qq_2,
-        constellation,
-        gender,
-        city,
-        province,
-        year,
-      }: IQqUser = ctx.request.body;
-      const result = await qqUserService.update({
-        client_id,
-        openid,
-        unionid,
-        nickname,
-        figureurl,
-        figureurl_1,
-        figureurl_2,
-        figureurl_qq_1,
-        figureurl_qq_2,
-        constellation,
-        gender,
-        city,
-        province,
-        year,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
-    }
+    const {
+      client_id,
+      openid,
+      unionid,
+      nickname,
+      figureurl,
+      figureurl_1,
+      figureurl_2,
+      figureurl_qq_1,
+      figureurl_qq_2,
+      constellation,
+      gender,
+      city,
+      province,
+      year,
+    }: IQqUser = ctx.request.body;
+    const result = await qqUserService.update({
+      client_id,
+      openid,
+      unionid,
+      nickname,
+      figureurl,
+      figureurl_1,
+      figureurl_2,
+      figureurl_qq_1,
+      figureurl_qq_2,
+      constellation,
+      gender,
+      city,
+      province,
+      year,
+    });
+    successHandler({ ctx, data: result });
     await next();
   }
 
   async delete(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const isExist = await qqUserService.isExist([id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的qq用户!` });
-        return;
-      }
-      const result = await qqUserService.delete(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
+    const id = +ctx.params.id;
+    const isExist = await qqUserService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(`不存在id为${id}的qq用户！`, 400, 400);
     }
+    const result = await qqUserService.delete(id);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 }

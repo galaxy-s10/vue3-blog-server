@@ -1,8 +1,6 @@
 import Joi from 'joi';
 import { ParameterizedContext } from 'koa';
 
-import emitError from '@/app/handler/emit-error';
-
 const schema = Joi.object({
   id: Joi.number(),
   username: Joi.string().min(3).max(12),
@@ -24,20 +22,11 @@ const schema = Joi.object({
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {
   const prop = ctx.request.body;
-  try {
-    await schema.validateAsync(prop, {
-      abortEarly: false, // when true，在第一个错误时停止验证，否则返回找到的所有错误。默认为true.
-      allowUnknown: false, // 当true，允许对象包含被忽略的未知键。默认为false.
-      // presence: 'required', // schema加上required()或者设置presence: 'required'。防止prop为undefined时也能通过验证
-      convert: false,
-    });
-  } catch (error) {
-    console.log(
-      '这里不仅仅会捕获joi的错误，后面的中间件报的错也会捕获到（因为洋葱路由的关系）',
-      error
-    );
-    emitError({ ctx, code: 400, error });
-    return;
-  }
+  await schema.validateAsync(prop, {
+    abortEarly: false, // when true，在第一个错误时停止验证，否则返回找到的所有错误。默认为true.
+    allowUnknown: false, // 当true，允许对象包含被忽略的未知键。默认为false.
+    // presence: 'required', // schema加上required()或者设置presence: 'required'。防止prop为undefined时也能通过验证
+    convert: false,
+  });
   await next();
 };

@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
-import { chalkERROR, chalkINFO, chalkSUCCESS, chalkWRAN } from '@/app/chalkTip';
 import { QQ_EMAIL_USER } from '@/config/secret';
 import {
   MONIT_JOB,
@@ -13,6 +12,12 @@ import otherController from '@/controller/other.controller';
 import qiniuController from '@/controller/qiniuData.controller';
 import monitService from '@/service/monit.service';
 import { formatMemorySize } from '@/utils';
+import {
+  chalkERROR,
+  chalkINFO,
+  chalkSUCCESS,
+  chalkWARN,
+} from '@/utils/chalkTip';
 import qiniuModel from '@/utils/qiniu';
 import axios from '@/utils/request';
 
@@ -39,7 +44,7 @@ export const main = () => {
           allDomainNameFlux
         )}，阈值：${formatMemorySize(threshold)}`;
         if (allDomainNameFlux > threshold) {
-          console.log(chalkWRAN('七牛云cdn流量达到阈值，停掉cdn'));
+          console.log(chalkWARN('七牛云cdn流量达到阈值，停掉cdn'));
           const domain = QINIU_CDN_DOMAIN;
           try {
             const token = qiniuModel.getOfflineToken(domain);
@@ -79,9 +84,9 @@ const rule = new schedule.RecurrenceRule();
 const allHour = 24;
 const allMinute = 60;
 const allSecond = 60;
-const allHourArr = [];
-const allMinuteArr = [];
-const allSecondArr = [];
+const allHourArr: number[] = [];
+const allMinuteArr: number[] = [];
+const allSecondArr: number[] = [];
 
 for (let i = 0; i < allHour; i += 1) {
   allHourArr.push(i);
@@ -99,7 +104,7 @@ rule.second = 0;
 
 // 监控七牛云cdn流量，最近一周内，使用流量超过2g就邮件提示（TODO）/使用流量超过5g就停掉cdn服务
 export const monitQiniuCDNJob = () => {
-  console.log(chalkWRAN('监控七牛云cdn定时任务启动！'));
+  console.log(chalkINFO('监控任务: 七牛云cdn定时任务启动！'));
   const monitJobName = MONIT_JOB.QINIUCDN;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
@@ -113,7 +118,7 @@ export const monitQiniuCDNJob = () => {
       main();
     } else {
       console.log(
-        chalkWRAN(
+        chalkWARN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
           )}，当前非生产环境，不执行${monitJobName}定时任务`

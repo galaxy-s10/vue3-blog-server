@@ -3,8 +3,6 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
-import { chalkWRAN } from '@/app/chalkTip';
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
   QINIU_BUCKET,
@@ -13,222 +11,207 @@ import {
   QINIU_PREFIX,
 } from '@/constant';
 import { IList, IQiniuData } from '@/interface';
+import { CustomError } from '@/model/customError.model';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getLastestWeek } from '@/utils';
+import { chalkWARN } from '@/utils/chalkTip';
 import qiniu from '@/utils/qiniu';
 
 class QiniuController {
   async getToken(ctx: ParameterizedContext, next) {
-    try {
-      const token = qiniu.getQiniuToken();
-      successHandler({
-        ctx,
-        data: token,
-        message: '获取七牛云token成功，有效期1小时？',
-      });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const token = qiniu.getQiniuToken();
+    successHandler({
+      ctx,
+      data: token,
+      message: '获取七牛云token成功，有效期1小时？',
+    });
+
     await next();
   }
 
   upload = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, message });
-        return;
-      }
-      if (userInfo.id !== 1) {
-        emitError({ ctx, code: 403, message: '你没有上传图片的权限~' });
-        return;
-      }
-      const { prefix } = ctx.request.body;
-      let fileArr: {
-        prefix: string;
-        filepath: string;
-        originalFilename: string;
-      }[] = [];
-      const { uploadFiles } = ctx.request.files;
-      if (Array.isArray(uploadFiles)) {
-        fileArr = uploadFiles.map((v) => {
-          return {
-            prefix,
-            filepath: v.filepath,
-            originalFilename: v.originalFilename,
-          };
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    const { prefix } = ctx.request.body;
+    let fileArr: {
+      prefix: string;
+      filepath: string;
+      originalFilename: string | null;
+    }[] = [];
+    const { uploadFiles } = ctx.request.files!;
+    if (!uploadFiles) {
+      throw new CustomError('请传入uploadFiles！', 400, 400);
+    }
+    if (Array.isArray(uploadFiles)) {
+      fileArr = uploadFiles.map((v) => {
+        return {
+          prefix,
+          filepath: v.filepath,
+          originalFilename: v.originalFilename,
+        };
+      });
+    } else {
+      fileArr.push({
+        prefix,
+        filepath: uploadFiles.filepath,
+        originalFilename: uploadFiles.originalFilename,
+      });
+    }
+    const queue: Promise<any>[] = [];
+    fileArr.forEach((v: any) => {
+      queue.push(qiniu.upload(v));
+    });
+    const queueRes = await Promise.all(queue);
+    const uploadRes: { success: any[]; error: any[] } = {
+      success: [],
+      error: [],
+    };
+    queueRes.forEach((v) => {
+      if (v.flag) {
+        uploadRes.success.push({
+          ...v.respBody,
+          original: v.original,
+          resultFilename: QINIU_CDN_URL + (v.respBody.key as string),
         });
       } else {
-        fileArr.push({
-          prefix,
-          filepath: uploadFiles.filepath,
-          originalFilename: uploadFiles.originalFilename,
+        uploadRes.error.push({
+          original: v.original,
         });
       }
-      const queue = [];
-      fileArr.forEach((v) => {
-        queue.push(qiniu.upload(v));
-      });
-      const queueRes = await Promise.all(queue);
-      const uploadRes = { success: [], error: [] };
-      queueRes.forEach((v) => {
-        if (v.flag) {
-          uploadRes.success.push({
-            ...v.respBody,
-            original: v.original,
-            resultFilename: QINIU_CDN_URL + (v.respBody.key as string),
-          });
-        } else {
-          uploadRes.error.push({
-            original: v.original,
-          });
-        }
-      });
-      // WARN七牛云官方的接口不完善，先用妥协的办法
-      // const res = await this.batchFileInfo(
-      //   uploadRes.success.map((item) => {
-      //     return { srcBucket: QINIU_BUCKET, key: item.key };
-      //   })
-      // );
-      const queue1 = [];
-      uploadRes.success.forEach((item) => {
-        queue1.push(
-          qiniuDataService.create({
-            user_id: userInfo.id,
-            prefix: item.original.prefix,
-            bucket: item.bucket,
-            qiniu_key: item.key,
-            qiniu_fsize: item.fsize,
-            qiniu_hash: item.hash,
-            qiniu_mimeType: item.mimeType,
-            qiniu_putTime: item.original.putTime,
-          })
-        );
-      });
-      await Promise.all(queue1);
-      successHandler({
-        ctx,
-        data: { ...uploadRes },
-        message: `一共上传${fileArr.length}个文件，成功：${uploadRes.success.length}个，失败：${uploadRes.error.length}个`,
-      });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    });
+    // WARN七牛云官方的接口不完善，先用妥协的办法
+    // const res = await this.batchFileInfo(
+    //   uploadRes.success.map((item) => {
+    //     return { srcBucket: QINIU_BUCKET, key: item.key };
+    //   })
+    // );
+    const queue1: any = [];
+    uploadRes.success.forEach((item) => {
+      queue1.push(
+        qiniuDataService.create({
+          user_id: userInfo!.id,
+          prefix: item.original.prefix,
+          bucket: item.bucket,
+          qiniu_key: item.key,
+          qiniu_fsize: item.fsize,
+          qiniu_hash: item.hash,
+          qiniu_mimeType: item.mimeType,
+          qiniu_putTime: item.original.putTime,
+        })
+      );
+    });
+    await Promise.all(queue1);
+    successHandler({
+      ctx,
+      data: { ...uploadRes },
+      message: `一共上传${fileArr.length}个文件，成功：${uploadRes.success.length}个，失败：${uploadRes.error.length}个`,
+    });
+
     await next();
   };
 
   // 同步七牛云数据到数据库
   syncQiniuData = async (ctx: ParameterizedContext, next) => {
-    try {
-      const { prefix, force }: { prefix: string; force: number } =
-        ctx.request.body;
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      if (userInfo.id !== 1) {
-        emitError({
-          ctx,
-          code: 403,
-          error: '你没有同步七牛云数据到数据库的权限~',
-        });
-        return;
-      }
-      if (!QINIU_PREFIX[prefix]) {
-        emitError({ ctx, code: 400, error: '错误的prefix' });
-        return;
-      }
-      const main = async () => {
-        let list = [];
-        list = await this.getQiniuListPrefix(prefix);
-        list.forEach((v) => {
-          const obj = { ...v };
-          Object.keys(obj).forEach((key) => {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            obj[`qiniu_${key}`] = `${obj[key]}`;
-            delete obj[key];
-          });
-          console.log(obj, +new Date());
-          qiniuDataService.create({
-            ...obj,
-            bucket: QINIU_BUCKET,
-            prefix,
-            user_id: userInfo.id,
-          });
-        });
-      };
-      if (force === 1) {
-        await qiniuDataService.batchDelete(prefix);
-        await main();
-      } else {
-        const count = await qiniuDataModel.count({ where: { prefix } });
-        if (count) {
-          successHandler({
-            ctx,
-            message: `已经同步过七牛云${prefix}前缀数据了！`,
-          });
-          return;
-        }
-        await main();
-      }
-      successHandler({
-        ctx,
-        data: `同步七牛云${prefix}前缀数据成功！`,
-      });
-    } catch (error) {
-      console.log(error);
-      emitError({ ctx, code: 400, error });
+    const { prefix, force }: { prefix: string; force: number } =
+      ctx.request.body;
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    if (userInfo!.id !== 1) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    if (!QINIU_PREFIX[prefix]) {
+      throw new CustomError('错误的prefix', 400, 400);
+    }
+    const main = async () => {
+      let list = [];
+      list = await this.getQiniuListPrefix(prefix);
+      list.forEach((v: any) => {
+        const obj = { ...v };
+        Object.keys(obj).forEach((key) => {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          obj[`qiniu_${key}`] = `${obj[key]}`;
+          delete obj[key];
+        });
+        console.log(obj, +new Date());
+        qiniuDataService.create({
+          ...obj,
+          bucket: QINIU_BUCKET,
+          prefix,
+          user_id: userInfo!.id,
+        });
+      });
+    };
+    if (force === 1) {
+      await qiniuDataService.batchDelete(prefix);
+      await main();
+    } else {
+      const count = await qiniuDataModel.count({ where: { prefix } });
+      if (count) {
+        successHandler({
+          ctx,
+          message: `已经同步过七牛云${prefix}前缀数据了！`,
+        });
+        return;
+      }
+      await main();
+    }
+    successHandler({
+      ctx,
+      data: `同步七牛云${prefix}前缀数据成功！`,
+    });
     await next();
   };
 
   // 获取所有七牛云文件
   async getList(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        id,
-        orderBy = 'asc',
-        orderName = 'id',
-        nowPage,
-        pageSize,
-        keyWord,
-        user_id,
-        prefix,
-        bucket,
-        qiniu_fsize,
-        qiniu_hash,
-        qiniu_key,
-        qiniu_md5,
-        qiniu_mimeType,
-        qiniu_putTime,
-        qiniu_status,
-        qiniu_type,
-      }: IList<IQiniuData> = ctx.request.query;
-      const result = await qiniuDataService.getList({
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        keyWord,
-        id,
-        user_id,
-        prefix,
-        bucket,
-        qiniu_fsize,
-        qiniu_hash,
-        qiniu_key,
-        qiniu_md5,
-        qiniu_mimeType,
-        qiniu_putTime,
-        qiniu_status,
-        qiniu_type,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+      user_id,
+      prefix,
+      bucket,
+      qiniu_fsize,
+      qiniu_hash,
+      qiniu_key,
+      qiniu_md5,
+      qiniu_mimeType,
+      qiniu_putTime,
+      qiniu_status,
+      qiniu_type,
+    }: IList<IQiniuData> = ctx.request.query;
+    const result = await qiniuDataService.getList({
+      nowPage,
+      pageSize,
+      orderBy,
+      orderName,
+      keyWord,
+      id,
+      user_id,
+      prefix,
+      bucket,
+      qiniu_fsize,
+      qiniu_hash,
+      qiniu_key,
+      qiniu_md5,
+      qiniu_mimeType,
+      qiniu_putTime,
+      qiniu_status,
+      qiniu_type,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
@@ -250,95 +233,71 @@ class QiniuController {
   };
 
   async delete(ctx: ParameterizedContext, next) {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      if (userInfo.id !== 1) {
-        emitError({
-          ctx,
-          code: 403,
-          error: '你没有删除七牛云数据的权限~',
-        });
-        return;
-      }
-      const id = +ctx.params.id;
-      const result = (await qiniuDataService.find(id)) as IQiniuData;
-      if (!result) {
-        emitError({ ctx, code: 400, message: `不存在id为${id}的资源!` });
-        return;
-      }
-      const qiniudataRes = await qiniuDataService.delete(id);
-      const qiniuOfficialRes = await qiniu.delete(
-        result.qiniu_key,
-        result.bucket
-      );
-      const cdnUrl = QINIU_CDN_URL + result.qiniu_key;
-      successHandler({
-        ctx,
-        data: `${
-          qiniudataRes === 1 ? `id:${id}删除成功` : `id:${id}删除失败`
-        }，${
-          qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`
-        }`,
-      });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    if (userInfo!.id !== 1) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    const id = +ctx.params.id;
+    const result = (await qiniuDataService.find(id)) as IQiniuData;
+    if (!result) {
+      throw new CustomError(`不存在id为${id}的资源！`, 400, 400);
+    }
+    const qiniudataRes = await qiniuDataService.delete(id);
+    const qiniuOfficialRes = await qiniu.delete(
+      result.qiniu_key,
+      result.bucket
+    );
+    const cdnUrl = QINIU_CDN_URL + result.qiniu_key!;
+    successHandler({
+      ctx,
+      data: `${qiniudataRes === 1 ? `id:${id}删除成功` : `id:${id}删除失败`}，${
+        qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`
+      }`,
+    });
+
     await next();
   }
 
   async deleteByQiniuKey(ctx: ParameterizedContext, next) {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      if (userInfo.id !== 1) {
-        emitError({
-          ctx,
-          code: 403,
-          error: '你没有删除七牛云数据的权限~',
-        });
-        return;
-      }
-      const { qiniu_key } = ctx.request.query as {
-        qiniu_key: string;
-      };
-      const result = (await qiniuDataService.findByQiniuKey(
-        qiniu_key
-      )) as IQiniuData;
-      if (!result) {
-        emitError({ ctx, code: 400, message: `不存在${qiniu_key}的资源!` });
-        return;
-      }
-      const { id } = result;
-      const qiniudataRes = await qiniuDataService.delete(id);
-      const qiniuOfficialRes = await qiniu.delete(
-        result.qiniu_key,
-        result.bucket
-      );
-      const cdnUrl = QINIU_CDN_URL + result.qiniu_key;
-      successHandler({
-        ctx,
-        data: `${
-          qiniudataRes === 1 ? `id:${id}删除成功` : `id:${id}删除失败`
-        }，${
-          qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`
-        }`,
-      });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    if (userInfo!.id !== 1) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    const { qiniu_key } = ctx.request.query as {
+      qiniu_key: string;
+    };
+    const result = (await qiniuDataService.findByQiniuKey(
+      qiniu_key
+    )) as IQiniuData;
+    if (!result) {
+      throw new CustomError(`不存在${qiniu_key}的资源！`, 400, 400);
+    }
+    const { id } = result;
+    const qiniudataRes = await qiniuDataService.delete(id!);
+    const qiniuOfficialRes = await qiniu.delete(
+      result.qiniu_key,
+      result.bucket
+    );
+    const cdnUrl = QINIU_CDN_URL + result.qiniu_key!;
+    successHandler({
+      ctx,
+      data: `${
+        qiniudataRes === 1 ? `id:${id!}删除成功` : `id:${id!}删除失败`
+      }，${qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`}`,
+    });
+
     await next();
   }
 
   // 获取所有七牛云文件
   // async getAllList(ctx: ParameterizedContext, next) {
-  //   try {
+  //
   //     // const { prefix, limit, marker } = ctx.request.query;
   //     const list = [];
   //     const limit = 1000;
@@ -371,7 +330,7 @@ class QiniuController {
    * 备份数据库
    */
   // async uploadBackupsDb(ctx: ParameterizedContext, next) {
-  //   try {
+  //
   //     const res = await qiniu.uploadBackupsDb();
   //     successHandler({
   //       ctx,
@@ -384,7 +343,7 @@ class QiniuController {
   // }
 
   getQiniuListPrefix = async (prefix: string) => {
-    const list = [];
+    const list: any = [];
     const limit = 1000;
     const { respInfo, respBody }: any = await qiniu.getListPrefix({
       limit,
@@ -409,8 +368,7 @@ class QiniuController {
   getDiff = async (ctx: ParameterizedContext, next) => {
     const { prefix }: any = ctx.request.query;
     if (!QINIU_PREFIX[prefix]) {
-      emitError({ ctx, code: 400, message: '错误的prefix' });
-      return;
+      throw new CustomError('错误的prefix', 400, 400);
     }
     const qiniuOfficialRes = await this.getQiniuListPrefix(prefix);
     const qiniuDataRes = await qiniuDataService.getPrefixList(prefix);
@@ -423,8 +381,8 @@ class QiniuController {
       // @ts-ignore
       qiniuDataResMap[item.qiniu_key] = item;
     });
-    const officialDiff = [];
-    const qiniudataDiff = [];
+    const officialDiff: any = [];
+    const qiniudataDiff: any = [];
     // 遍历七牛云官方文件
     Object.keys(qiniuOfficialResMap).forEach((item) => {
       if (qiniuOfficialResMap[item] && !qiniuDataResMap[item]?.get()) {
@@ -448,61 +406,50 @@ class QiniuController {
   };
 
   async update(ctx: ParameterizedContext, next) {
-    try {
-      const { code, userInfo, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({ ctx, code, error: message });
-        return;
-      }
-      if (userInfo.id !== 1) {
-        emitError({
-          ctx,
-          code: 403,
-          error: '你没有更新七牛云数据的权限~',
-        });
-        return;
-      }
-      const { bucket, prefix, qiniu_key }: any = ctx.request.body;
-      if (!QINIU_PREFIX[prefix]) {
-        emitError({ ctx, code: 400, message: '错误的prefix' });
-        return;
-      }
-      const hasAuth = await verifyUserAuth(ctx);
-      if (!hasAuth) {
-        emitError({ ctx, code: 403, error: '权限不足！' });
-        return;
-      }
-      const id = +ctx.params.id;
-      const file: any = await qiniuDataService.find(id);
-      if (!file) {
-        throw new Error(`不存在id为${id}的文件!`);
-      }
-      const { flag, respErr, respBody, respInfo } = await qiniu.updateQiniuFile(
-        bucket,
-        file.qiniu_key,
-        QINIU_BUCKET,
-        qiniu_key
-      );
-      if (flag) {
-        const result = await qiniu.getQiniuStat(bucket, qiniu_key);
-        await qiniuDataService.update({
-          id,
-          qiniu_key,
-          qiniu_fsize: result.respBody.fsize,
-          qiniu_md5: result.respBody.md5,
-          qiniu_putTime: String(result.respBody.putTime),
-          qiniu_type: result.respBody.type,
-          qiniu_mimeType: result.respBody.mimeType,
-          qiniu_hash: result.respBody.hash,
-        });
-        successHandler({ ctx, data: '更新成功！' });
-      } else {
-        emitError({ ctx, code: 400, error: { respErr, respBody, respInfo } });
-        return;
-      }
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== 200) {
+      throw new CustomError(message, code, code);
     }
+    if (userInfo!.id !== 1) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    const { bucket, prefix, qiniu_key }: any = ctx.request.body;
+    if (!QINIU_PREFIX[prefix]) {
+      throw new CustomError('错误的prefix', 400, 400);
+    }
+    const hasAuth = await verifyUserAuth(ctx);
+    if (!hasAuth) {
+      throw new CustomError('权限不足！', 403, 403);
+    }
+    const id = +ctx.params.id;
+    const file: any = await qiniuDataService.find(id);
+    if (!file) {
+      throw new CustomError(`不存在id为${id}的文件！`, 400, 400);
+    }
+    // eslint-disable-next-line
+    const { flag, respErr, respBody, respInfo } = await qiniu.updateQiniuFile(
+      bucket,
+      file.qiniu_key,
+      QINIU_BUCKET,
+      qiniu_key
+    );
+    if (flag) {
+      const result = await qiniu.getQiniuStat(bucket, qiniu_key);
+      await qiniuDataService.update({
+        id,
+        qiniu_key,
+        qiniu_fsize: result.respBody.fsize,
+        qiniu_md5: result.respBody.md5,
+        qiniu_putTime: String(result.respBody.putTime),
+        qiniu_type: result.respBody.type,
+        qiniu_mimeType: result.respBody.mimeType,
+        qiniu_hash: result.respBody.hash,
+      });
+      successHandler({ ctx, data: '更新成功！' });
+    } else {
+      throw new CustomError(`更新失败`, 400, 400);
+    }
+
     await next();
   }
 
@@ -551,7 +498,7 @@ class QiniuController {
               // console.log(`域名: ${domain}使用的国内流量:`, fluxChina);
               // console.log(`域名: ${domain}使用的海外流量:`, fluxOversea);
               console.log(
-                chalkWRAN(
+                chalkWARN(
                   `域名:${domain}最近一周使用的总流量:${formatMemorySize(
                     fluxChina + fluxOversea
                   )}`
@@ -559,11 +506,11 @@ class QiniuController {
               );
               allDomainNameFlux += fluxChina + fluxOversea;
             } else {
-              console.log(chalkWRAN(`域名: ${domain}最近一周没有流量数据`));
+              console.log(chalkWARN(`域名: ${domain}最近一周没有流量数据`));
             }
           });
           console.log(
-            chalkWRAN(
+            chalkWARN(
               `所有域名最近一周使用的总流量: ${formatMemorySize(
                 allDomainNameFlux
               )}`

@@ -3,7 +3,6 @@ import nodemailer from 'nodemailer';
 
 import redisController from './redis.controller';
 
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import {
   MAIL_OPTIONS_CONFIG,
@@ -11,6 +10,7 @@ import {
   QQ_EMAIL_USER,
 } from '@/config/secret';
 import { VERIFY_EMAIL_RESULT_CODE } from '@/constant';
+import { CustomError } from '@/model/customError.model';
 import { getRandomString } from '@/utils';
 
 class OtherController {
@@ -40,55 +40,48 @@ class OtherController {
     const { email } = ctx.request.body;
     const reg = /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
     if (!reg.test(email)) {
-      emitError({ ctx, code: 400, message: '请输入正确的邮箱!' });
-      return;
+      throw new CustomError('请输入正确的邮箱！', 400, 400);
     }
-    try {
-      const key = {
-        prefix: 'email',
-        key: email,
-      };
-      const oldIpdata = await redisController.getVal(key);
-      const redisExpired = 60 * 5; // redis缓存的有效期（五分钟），单位秒
-      if (!oldIpdata) {
-        const verificationCode = getRandomString(6);
-        await this.sendEmail(
-          email,
-          `《自然博客》验证码：${verificationCode}`,
-          `《自然博客》验证码：${verificationCode}，有效期五分钟`
+    const key = {
+      prefix: 'email',
+      key: email,
+    };
+    const oldIpdata = await redisController.getVal(key);
+    const redisExpired = 60 * 5; // redis缓存的有效期（五分钟），单位秒
+    if (!oldIpdata) {
+      const verificationCode = getRandomString(6);
+      await this.sendEmail(
+        email,
+        `《自然博客》验证码：${verificationCode}`,
+        `《自然博客》验证码：${verificationCode}，有效期五分钟`
+      );
+      await redisController.setVal({
+        ...key,
+        value: verificationCode,
+        exp: redisExpired,
+      });
+      successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
+    } else {
+      const ttl = await redisController.getTTL(key);
+      if (ttl > 60 * 4) {
+        throw new CustomError(
+          `操作频繁，${`请${ttl - 60 * 4}`}秒后再发送验证码！`,
+          400,
+          400
         );
-        await redisController.setVal({
-          ...key,
-          value: verificationCode,
-          exp: redisExpired,
-        });
-        successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
-      } else {
-        const ttl = await redisController.getTTL(key);
-        if (ttl > 60 * 4) {
-          emitError({
-            ctx,
-            code: 400,
-            message: `操作频繁，${`请${ttl - 60 * 4}`}秒后再发送验证码!`,
-          });
-          return;
-        }
-        const verificationCode = getRandomString(6);
-        await this.sendEmail(
-          email,
-          `《自然博客》验证码：${verificationCode}`,
-          `《自然博客》验证码：${verificationCode}，有效期五分钟`
-        );
-        await redisController.setVal({
-          ...key,
-          value: verificationCode,
-          exp: redisExpired,
-        });
-        successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
       }
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-      return;
+      const verificationCode = getRandomString(6);
+      await this.sendEmail(
+        email,
+        `《自然博客》验证码：${verificationCode}`,
+        `《自然博客》验证码：${verificationCode}，有效期五分钟`
+      );
+      await redisController.setVal({
+        ...key,
+        value: verificationCode,
+        exp: redisExpired,
+      });
+      successHandler({ ctx, message: VERIFY_EMAIL_RESULT_CODE.ok });
     }
     await next();
   };

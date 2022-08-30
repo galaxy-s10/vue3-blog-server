@@ -22,4 +22,7 @@ scheduleRouter.post(
   scheduleController.invokeClearCacheJob
 );
 
+// 执行重启pm2
+scheduleRouter.post('/restart_pm2', scheduleController.restartPm2);
+
 export default scheduleRouter;

@@ -87,6 +87,7 @@ class LogService {
     const apiNum = await logModel.count({
       where: {
         api_ip,
+        // @ts-ignore
         created_at: {
           [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
         },
@@ -113,11 +114,15 @@ class LogService {
     api_path,
     api_query,
     api_body,
+    api_code,
+    api_error,
+    api_err_code,
     api_err_msg,
-    api_err_stack,
+    api_duration,
   }: ILog) {
     const result = await logModel.update(
       {
+        id,
         user_id,
         api_user_agent,
         api_from,
@@ -127,8 +132,11 @@ class LogService {
         api_path,
         api_query,
         api_body,
+        api_code,
+        api_error,
+        api_err_code,
         api_err_msg,
-        api_err_stack,
+        api_duration,
       },
       { where: { id } }
     );
@@ -139,7 +147,6 @@ class LogService {
   async create({
     user_id,
     api_user_agent,
-    api_sql_duration,
     api_from,
     api_ip,
     api_hostname,
@@ -147,13 +154,15 @@ class LogService {
     api_path,
     api_query,
     api_body,
+    api_code,
+    api_error,
+    api_err_code,
     api_err_msg,
-    api_err_stack,
+    api_duration,
   }: ILog) {
     const result = await logModel.create({
       user_id,
       api_user_agent,
-      api_sql_duration,
       api_from,
       api_ip,
       api_hostname,
@@ -161,8 +170,11 @@ class LogService {
       api_path,
       api_query,
       api_body,
+      api_code,
+      api_error,
+      api_err_code,
       api_err_msg,
-      api_err_stack,
+      api_duration,
     });
     return result;
   }

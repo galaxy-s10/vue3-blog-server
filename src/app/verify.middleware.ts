@@ -1,9 +1,11 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import { chalkINFO } from '@/app/chalkTip';
-import emitError from '@/app/handler/emit-error';
+import { COMMON_ERR_MSG, ERROR_CODE } from '@/constant';
+import { CustomError } from '@/model/customError.model';
+import blacklistService from '@/service/blacklist.service';
 import { isAdmin } from '@/utils';
+import { chalkINFO } from '@/utils/chalkTip';
 
 // 前台的所有get和白名单内的接口不需要token
 const frontendWhiteList = [
@@ -41,7 +43,8 @@ const backendWhiteList = [
 
 const globalWhiteList = ['/init/'];
 
-export const gobalVerify = async (ctx: ParameterizedContext, next) => {
+export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
+  console.log('apiBeforeVerify中间件');
   const url = ctx.request.path;
   const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
   const admin = isAdmin(ctx);
@@ -52,6 +55,22 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
       }台接口 ${ctx.request.method} ${url}`
     )
   );
+  // 判断黑名单
+  const inBlacklist = await blacklistService.findByIp(ip);
+
+  if (inBlacklist?.type === 1) {
+    // 1是频繁操作
+    throw new CustomError(COMMON_ERR_MSG.banIp, 400, ERROR_CODE.banIp);
+  } else if (inBlacklist?.type === 2) {
+    // 2是管理员手动禁用
+    throw new CustomError(
+      COMMON_ERR_MSG.adminDisableUser,
+      400,
+      ERROR_CODE.adminDisableUser
+    );
+  } else {
+    console.log('不在黑名单里');
+  }
 
   const consoleEnd = () => {
     console.log(
@@ -65,7 +84,7 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
 
   let allowNext = false;
   globalWhiteList.forEach((item) => {
-    if (ctx.req.url.indexOf(item) === 0) {
+    if (ctx.req.url!.indexOf(item) === 0) {
       allowNext = true;
     }
   });
@@ -77,67 +96,43 @@ export const gobalVerify = async (ctx: ParameterizedContext, next) => {
     return;
   }
 
-  try {
-    if (admin) {
-      if (backendWhiteList.indexOf(url) !== -1) {
-        await next();
-        consoleEnd();
-        return;
-      }
-      const { code, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({
-          ctx,
-          code,
-          message,
-        });
-        consoleEnd();
-        return;
-      }
-      /**
-       * 这里必须await next()，因为路由匹配肯定是先匹配这个app.use的，
-       * 如果这里匹配完成后直接next()了，就会返回数据了（404），也就是不会
-       * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
-       */
-      await next();
-      consoleEnd();
-    } else {
-      // 前端的get接口都不需要判断token，白名单内的也不需要判断token（如注册登录这些接口是post的）
-      if (
-        ctx.request.method === 'GET' ||
-        frontendWhiteList.indexOf(url) !== -1
-      ) {
-        await next();
-        consoleEnd();
-        return;
-      }
-      const { code, message } = await authJwt(ctx);
-      if (code !== 200) {
-        emitError({
-          ctx,
-          code,
-          message,
-        });
-        consoleEnd();
-        return;
-      }
-      /**
-       * 因为这个verify.middleware是最先执行的中间件路由，
-       * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
-       * 必须使用await next()，如果这里使用next()，就会返回数据了（404），也就是不会
-       * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
-       */
+  if (admin) {
+    if (backendWhiteList.indexOf(url) !== -1) {
       await next();
       consoleEnd();
       return;
     }
-  } catch (error) {
-    emitError({
-      ctx,
-      error,
-      code: error.code,
-      message: error.message,
-    });
+    const { code, message } = await authJwt(ctx);
+    if (code !== 200) {
+      consoleEnd();
+      throw new CustomError(message, code, code);
+    }
+    /**
+     * 这里必须await next()，因为路由匹配肯定是先匹配这个app.use的，
+     * 如果这里匹配完成后直接next()了，就会返回数据了（404），也就是不会
+     * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
+     */
+    await next();
+    consoleEnd();
+  } else {
+    // 前端的get接口都不需要判断token，白名单内的也不需要判断token（如注册登录这些接口是post的）
+    if (ctx.request.method === 'GET' || frontendWhiteList.indexOf(url) !== -1) {
+      await next();
+      consoleEnd();
+      return;
+    }
+    const { code, message } = await authJwt(ctx);
+    if (code !== 200) {
+      consoleEnd();
+      throw new CustomError(message, code, code);
+    }
+    /**
+     * 因为这个verify.middleware是最先执行的中间件路由，
+     * 而且这个verify.middleware是异步的，因此如果需要等待异步执行完成才继续匹配后面的中间时，
+     * 必须使用await next()，如果这里使用next()，就会返回数据了（404），也就是不会
+     * 继续走后面的匹配了！但是如果加了await，就会等待后面的继续匹配完！
+     */
+    await next();
     consoleEnd();
   }
 };

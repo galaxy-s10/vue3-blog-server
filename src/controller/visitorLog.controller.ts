@@ -1,146 +1,114 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import emitError from '@/app/handler/emit-error';
 import successHandler from '@/app/handler/success-handle';
 import { IList, IVisitorLog } from '@/interface';
+import { CustomError } from '@/model/customError.model';
 import positionService from '@/service/position.service';
 import visitorLogService from '@/service/visitorLog.service';
 
 class VisitorLogController {
   async getHistoryVisitTotal(ctx: ParameterizedContext, next) {
-    try {
-      const { orderBy = 'asc', orderName = 'ip' } = ctx.request.query;
-      const result = await visitorLogService.getHistoryVisitTotal({
-        orderBy,
-        orderName,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const { orderBy = 'asc', orderName = 'ip' } = ctx.request.query;
+    const result = await visitorLogService.getHistoryVisitTotal({
+      orderBy,
+      orderName,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async getDayVisitTotal(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        orderBy = 'asc',
-        orderName = 'ip',
-        startTime,
-        endTime,
-      } = ctx.request.query;
-      const result = await visitorLogService.getDayVisitTotal({
-        orderBy,
-        orderName,
-        startTime,
-        endTime,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const {
+      orderBy = 'asc',
+      orderName = 'ip',
+      startTime,
+      endTime,
+    } = ctx.request.query;
+    const result = await visitorLogService.getDayVisitTotal({
+      orderBy,
+      orderName,
+      startTime,
+      endTime,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async getIpVisitTotal(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        nowPage,
-        pageSize,
-        orderBy = 'asc',
-        orderName = 'ip',
-        startTime,
-        endTime,
-      } = ctx.request.query;
-      const result = await visitorLogService.getIpVisitTotal({
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        startTime,
-        endTime,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const {
+      nowPage,
+      pageSize,
+      orderBy = 'asc',
+      orderName = 'ip',
+      startTime,
+      endTime,
+    } = ctx.request.query;
+    const result = await visitorLogService.getIpVisitTotal({
+      nowPage,
+      pageSize,
+      orderBy,
+      orderName,
+      startTime,
+      endTime,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async getList(ctx: ParameterizedContext, next) {
-    try {
-      const {
-        id,
-        orderBy = 'asc',
-        orderName = 'id',
-        nowPage,
-        pageSize,
-        keyWord,
-      }: IList<IVisitorLog> = ctx.request.query;
-      const result = await visitorLogService.getList({
-        nowPage,
-        pageSize,
-        orderBy,
-        orderName,
-        keyWord,
-        id,
-      });
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
-    }
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+    }: IList<IVisitorLog> = ctx.request.query;
+    const result = await visitorLogService.getList({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+    });
+    successHandler({ ctx, data: result });
+
     await next();
   }
 
   async create(ctx: ParameterizedContext, next) {
-    try {
-      const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
-      // 这个接口的userInfo不是必须的
-      const { userInfo } = await authJwt(ctx);
-      const apiNum = await visitorLogService.getOneSecondApiNums(ip);
-      // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip
-      if (apiNum > 5) {
-        await visitorLogService.update({
-          status: 2,
-          ip,
-          user_id: userInfo?.id || 2,
-        });
-        emitError({
-          ctx,
-          code: 403,
-          error: '检测到频繁操作，此ip已被禁用，请联系管理员处理!',
-        });
-      } else if (ip === '127.0.0.1') {
-        successHandler({ ctx, data: '开发环境下调用~' });
-      } else {
-        const ip_data = await positionService.get(ip);
-        const result = await visitorLogService.create({
-          ip,
-          user_id: userInfo?.id || -1,
-          ip_data: JSON.stringify(ip_data),
-        });
-        successHandler({ ctx, data: result });
-      }
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+    // 这个接口的userInfo不是必须的
+    const { userInfo } = await authJwt(ctx);
+    if (ip === '127.0.0.1') {
+      successHandler({ ctx, data: '开发环境下调用' });
+    } else {
+      const ip_data = await positionService.get(ip);
+      const result = await visitorLogService.create({
+        ip,
+        user_id: userInfo?.id || -1,
+        ip_data: JSON.stringify(ip_data),
+      });
+      successHandler({ ctx, data: result });
     }
+
     await next();
   }
 
   async delete(ctx: ParameterizedContext, next) {
-    try {
-      const id = +ctx.params.id;
-      const isExist = await visitorLogService.isExist([id]);
-      if (!isExist) {
-        emitError({ ctx, code: 400, error: `不存在id为${id}的访客日志!` });
-        return;
-      }
-      const result = await visitorLogService.delete(id);
-      successHandler({ ctx, data: result });
-    } catch (error) {
-      emitError({ ctx, code: 400, error });
+    const id = +ctx.params.id;
+    const isExist = await visitorLogService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(`不存在id为${id}的访客日志！`, 400, 400);
     }
+    const result = await visitorLogService.delete(id);
+    successHandler({ ctx, data: result });
+
     await next();
   }
 }

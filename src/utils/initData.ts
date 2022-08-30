@@ -71,7 +71,7 @@ const initAuth = () => {
       auth_value: 'TASK_MANAGE',
     },
   ];
-  const authResult = [];
+  const authResult: any = [];
 
   let id = 1;
 
@@ -215,8 +215,8 @@ const initRole = () => {
 };
 
 const initRoleAuth = () => {
-  const auth = initAuth();
-  const roleAuth = [];
+  const auth: any = initAuth();
+  const roleAuth: any = [];
   let id = 0;
   auth.forEach((v) => {
     id += 1;

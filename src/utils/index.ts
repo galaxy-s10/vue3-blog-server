@@ -1,11 +1,26 @@
 import { ParameterizedContext } from 'koa';
 import { Model, ModelStatic } from 'sequelize/types';
 
-import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/app/chalkTip';
 import sequelize from '@/config/db';
+import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/utils/chalkTip';
+
+/** 模拟ajax请求 */
+export const mockAjax = (time = 1000) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        code: 0,
+        data: {
+          name: '张三',
+          age: 18,
+        },
+      });
+    }, time);
+  });
+};
 
 export const isAdmin = (ctx: ParameterizedContext) =>
-  ctx.req.url.indexOf('/admin/') !== -1;
+  ctx.req.url!.indexOf('/admin/') !== -1;
 
 /** 转换时间格式 */
 export const formatDate = (datetime) => {
@@ -66,9 +81,9 @@ export const deleteAllForeignKeys = async () => {
       );
     });
     await Promise.all(allConstraint1);
-    console.log(chalkSUCCESS('删除所有外键成功!'));
+    console.log(chalkSUCCESS('删除所有外键成功！'));
   } catch (err) {
-    console.log(chalkERROR('删除所有外键失败!'), err);
+    console.log(chalkERROR('删除所有外键失败！'), err);
   }
 };
 
@@ -98,9 +113,9 @@ export const deleteAllIndexs = async () => {
       );
     });
     await Promise.all(allIndexs1);
-    console.log(chalkSUCCESS('删除所有索引成功!'));
+    console.log(chalkSUCCESS('删除所有索引成功！'));
   } catch (err) {
-    console.log(chalkERROR('删除所有索引失败!'), err);
+    console.log(chalkERROR('删除所有索引失败！'), err);
   }
 };
 
@@ -120,11 +135,11 @@ export const initTable = (
     if (methodArg === 'force') {
       await deleteAllForeignKeys();
       await modelArg.sync({ force: true });
-      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建!`));
+      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建！`));
     } else if (methodArg === 'alter') {
       await deleteAllForeignKeys();
       await modelArg.sync({ alter: true });
-      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚同步成功!`));
+      console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚同步成功！`));
     } else {
       console.log(chalkINFO(`加载数据库表: ${modelArg.tableName}`));
     }

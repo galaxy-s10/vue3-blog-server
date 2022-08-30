@@ -1,11 +1,11 @@
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
-import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { QQ_EMAIL_USER } from '@/config/secret';
 import { PROJECT_ENV, MONIT_JOB, MONIT_TYPE } from '@/constant';
 import otherController from '@/controller/other.controller';
 import monitService from '@/service/monit.service';
+import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
 import { formatMemorySize } from '@/utils/index';
 
@@ -14,20 +14,14 @@ const buffCacheThreshold = 20 / 100; // buff/cache阈值
 const restartPm2Threshold = 95 / 100; // 内存达到重启pm2的阈值
 
 export const main = async () => {
-  const res: any = await showMemory();
-  if (res.error) {
-    const result = res.error;
-    otherController.sendEmail(QQ_EMAIL_USER, result, result);
-    return;
-  }
-  const res1 = {};
-  Object.keys(res).forEach((v) => {
-    res1[v] = formatMemorySize(Number(res[v]));
-  });
-  const total = res['Mem:total'];
-  const used = res['Mem:used'];
-
   try {
+    const res: any = await showMemory();
+    const res1 = {};
+    Object.keys(res).forEach((v) => {
+      res1[v] = formatMemorySize(Number(res[v]));
+    });
+    const total = res['Mem:total'];
+    const used = res['Mem:used'];
     let result = '';
     const rate = `${((res['Mem:used'] / res['Mem:total']) * 100).toFixed(2)}%`;
     const thresholdRate = `${(threshold * 100).toFixed(2)}%`;
@@ -90,9 +84,9 @@ const rule = new schedule.RecurrenceRule();
 const allHour = 24;
 const allMinute = 60;
 const allSecond = 60;
-const allHourArr = [];
-const allMinuteArr = [];
-const allSecondArr = [];
+const allHourArr: number[] = [];
+const allMinuteArr: number[] = [];
+const allSecondArr: number[] = [];
 
 for (let i = 0; i < allHour; i += 1) {
   allHourArr.push(i);
@@ -109,7 +103,7 @@ rule.minute = allMinuteArr.filter((v) => v % 30 === 0);
 rule.second = 0;
 
 export const monitMemoryJob = () => {
-  console.log(chalkWRAN('监控内存定时任务启动！'));
+  console.log(chalkINFO('监控任务: 内存定时任务启动！'));
   const monitJobName = MONIT_JOB.MEMORY;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
@@ -123,7 +117,7 @@ export const monitMemoryJob = () => {
       main();
     } else {
       console.log(
-        chalkWRAN(
+        chalkWARN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
           )}，当前非生产环境，不执行${monitJobName}定时任务`

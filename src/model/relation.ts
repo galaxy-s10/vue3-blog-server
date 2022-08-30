@@ -18,7 +18,7 @@ import User from './user.model';
 import UserArticle from './userArticle.model';
 import UserRole from './userRole.model';
 
-import { chalkINFO } from '@/app/chalkTip';
+import { chalkINFO } from '@/utils/chalkTip';
 
 console.log(chalkINFO('加载了relation'));
 /**

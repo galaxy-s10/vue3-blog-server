@@ -2,8 +2,8 @@ import { Sequelize } from 'sequelize';
 
 import { MYSQL_CONFIG } from './secret';
 
-import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
 import { PROJECT_ENV } from '@/constant';
+import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 export const dbName =
   PROJECT_ENV !== 'prod'
@@ -34,7 +34,12 @@ const sequelize = new Sequelize(
 );
 
 /** 连接数据库 */
-export const connectDb = async () => {
+export const connectMysql = async () => {
+  const msg = (flag: boolean) =>
+    `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库${
+      flag ? '成功' : '失败'
+    }！`;
+
   try {
     console.log(
       chalkINFO(
@@ -42,13 +47,11 @@ export const connectDb = async () => {
       )
     );
     await sequelize.authenticate({ logging: false });
-    const okMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库成功!`;
-    console.log(chalkSUCCESS(okMsg));
+    console.log(chalkSUCCESS(msg(true)));
   } catch (error) {
-    const errMsg = `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库失败!`;
+    console.log(chalkERROR(msg(false)));
     console.log(error);
-    console.log(chalkERROR(errMsg));
-    throw new Error(errMsg);
+    throw new Error(msg(false));
   }
 };
 

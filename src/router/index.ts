@@ -2,11 +2,11 @@ import fs from 'fs';
 
 import Router from 'koa-router';
 
-import { chalkINFO, chalkERROR } from '@/app/chalkTip';
+import { chalkINFO, chalkERROR } from '@/utils/chalkTip';
 
 const router = new Router();
 
-export function useRoutes(app) {
+export function loadAllRoutes(app) {
   fs.readdirSync(__dirname).forEach((file) => {
     try {
       if (file === 'index.ts') return;

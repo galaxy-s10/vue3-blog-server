@@ -76,6 +76,12 @@ class LinkService {
     return result;
   }
 
+  /** 根据ip查找黑名单 */
+  async findByIp(ip: string) {
+    const result = await blacklistModel.findOne({ where: { ip } });
+    return result;
+  }
+
   /** 修改黑名单 */
   async update({ id, user_id, ip, msg }: IBlacklist) {
     const result = await blacklistModel.update(

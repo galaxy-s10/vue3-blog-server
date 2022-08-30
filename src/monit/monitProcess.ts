@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
-import { chalkINFO, chalkWRAN } from '@/app/chalkTip';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV } from '@/constant';
 import monitService from '@/service/monit.service';
+import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 import { formatMemorySize } from '@/utils/index';
 
 // https://github.com/node-schedule/node-schedule#cron-style-scheduling
@@ -41,9 +41,9 @@ const rule = new schedule.RecurrenceRule();
 const allHour = 24;
 const allMinute = 60;
 const allSecond = 60;
-const allHourArr = [];
-const allMinuteArr = [];
-const allSecondArr = [];
+const allHourArr: number[] = [];
+const allMinuteArr: number[] = [];
+const allSecondArr: number[] = [];
 
 for (let i = 0; i < allHour; i += 1) {
   allHourArr.push(i);
@@ -82,7 +82,7 @@ export const main = () => {
 };
 
 export const monitProcessJob = () => {
-  console.log(chalkWRAN('监控node进程定时任务启动！'));
+  console.log(chalkINFO('监控任务: node进程定时任务启动！'));
   const monitJobName = MONIT_JOB.PROCESS;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
@@ -96,7 +96,7 @@ export const monitProcessJob = () => {
       main();
     } else {
       console.log(
-        chalkWRAN(
+        chalkWARN(
           `${dayjs().format(
             'YYYY-MM-DD HH:mm:ss'
           )}，当前非生产环境，不执行${monitJobName}定时任务`

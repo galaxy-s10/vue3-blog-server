@@ -31,6 +31,9 @@ const model = sequelize.define<BlacklistModel>(
     user_id: {
       type: DataTypes.INTEGER,
     },
+    type: {
+      type: DataTypes.INTEGER, // 禁用类型,1:频繁操作；2:管理员手动禁用
+    },
     msg: {
       type: DataTypes.STRING(100),
     },

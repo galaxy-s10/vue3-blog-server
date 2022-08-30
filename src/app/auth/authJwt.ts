@@ -11,7 +11,7 @@ const authJwt = (
   return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (ctx.req.headers.authorization === undefined) {
-      resolve({ code: 401, message: '未登录!' });
+      resolve({ code: 401, message: '未登录！' });
       return;
     }
 
@@ -37,7 +37,7 @@ const authJwt = (
           );
           if (!userResult) {
             // 这个用户已经被删除了
-            resolve({ code: 401, message: '该用户不存在!' });
+            resolve({ code: 401, message: '该用户不存在！' });
             return;
           }
           if (userResult.token !== token) {
@@ -47,12 +47,12 @@ const authJwt = (
           }
           if (userResult.status === 2) {
             // 账号被禁用了
-            resolve({ code: 401, message: COMMON_ERR_MSG.disableUser });
+            resolve({ code: 401, message: COMMON_ERR_MSG.adminDisableUser });
             return;
           }
           resolve({
             code: 200,
-            message: '验证token通过!',
+            message: '验证token通过！',
             userInfo: userResult,
           });
         } catch (error: any) {

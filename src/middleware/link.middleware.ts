@@ -1,8 +1,6 @@
 import Joi from 'joi';
 import { ParameterizedContext } from 'koa';
 
-import emitError from '@/app/handler/emit-error';
-
 const schema = Joi.object({
   id: Joi.number(),
   email: Joi.string().min(3).max(50),
@@ -15,16 +13,12 @@ const schema = Joi.object({
 
 const verifyProp = async (ctx: ParameterizedContext, next) => {
   const props = ctx.request.body;
-  try {
-    await schema.validateAsync(props, {
-      abortEarly: false,
-      allowUnknown: false,
-      convert: false,
-    });
-    await next();
-  } catch (error) {
-    emitError({ ctx, code: 400, error });
-  }
+  await schema.validateAsync(props, {
+    abortEarly: false,
+    allowUnknown: false,
+    convert: false,
+  });
+  await next();
 };
 
 export { verifyProp };

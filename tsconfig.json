@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "esnext",
     "module": "esnext", // 指定生成什么模块代码。
     "lib": ["esnext"],
     "strict": true, // 启用所有严格的类型检查选项。默认:false

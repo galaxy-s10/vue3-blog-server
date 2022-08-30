@@ -1,4 +1,3 @@
-import { createServer } from 'http';
 import path from 'path';
 
 import fs from 'fs-extra';
@@ -9,47 +8,30 @@ import etag from 'koa-etag';
 import staticService from 'koa-static';
 
 import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
+import { catchErrorMiddle, corsMiddle } from './app/app.middleware';
 import { monit } from './monit';
 
-import { chalkINFO, chalkSUCCESS } from '@/app/chalkTip';
 import errorHandler from '@/app/handler/error-handle';
-import { connectDb } from '@/config/db';
+import { apiBeforeVerify } from '@/app/verify.middleware';
+import { connectMysql } from '@/config/db';
 import { connectRedis } from '@/config/redis';
 import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from '@/constant';
-import { gobalVerify } from '@/middleware/verify.middleware';
-import { useRoutes } from '@/router';
+import { loadAllRoutes } from '@/router';
+import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { handleSecretFile } from '@/utils/handleSecret';
 import { initDb } from '@/utils/initDb';
 import { initWs } from '@/websocket';
 
+const port = +PROJECT_PORT; // 端口
+
 aliasOk(); // 添加别名路径
 handleSecretFile(); // 处理config/secret.ts秘钥文件
-
-const app = new Koa();
-app.use(conditional()); // 接口缓存
-app.use(etag()); // 接口缓存
 
 const staticDir = path.join(__dirname, './public/'); // 静态目录
 const uploadDir = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
 fs.ensureDirSync(uploadDir);
 
-app.use(
-  staticService(staticDir, { maxage: 60 * 1000 }) // 静态目录的文件缓存一分钟
-);
-
-app.use(async (ctx, next) => {
-  ctx.set('Access-Control-Allow-Origin', '*');
-  ctx.set(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild'
-  );
-  ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-  if (ctx.method === 'OPTIONS') {
-    ctx.body = 200;
-  } else {
-    await next();
-  }
-});
+const app = new Koa();
 
 app.use(
   koaBody({
@@ -60,46 +42,46 @@ app.use(
       // 保留文件扩展名
       keepExtensions: true,
     },
-    strict: true, // 如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
+    // parsedMethods: ['POST', 'PUT', 'PATCH', 'GET', 'HEAD', 'DELETE'], // 声明将解析正文的 HTTP 方法，默认值['POST', 'PUT', 'PATCH']。替换strict选项。
+    // strict: true, // 废弃了。如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
   })
+); // 解析参数
+
+app.use(
+  staticService(staticDir, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
 );
 
-// 这个bodyParser有个问题，如果前端传的数据有误，经过这个中间件解析的时候，解析到错误了，还是会继续next()。
-// app.use(
-//   bodyParser({
-//     onerror: (error, ctx) => {
-//       console.log('bodyParser解析错误', error);
-//       ctx.status = 400;
-//       ctx.res.end('bodyParser解析错误');
-//     },
-//   })
-// ); // 注意顺序，需要在所有路由加载前解析
+app.use(conditional()); // 接口缓存
+app.use(etag()); // 接口缓存
+app.use(corsMiddle); // 设置允许跨域
+app.use(catchErrorMiddle); // 全局错误处理
 
-app.use(gobalVerify); // 注意顺序，需要在所有路由加载前进行接口验证
+app.on('error', errorHandler); // 接收全局错误，位置必须得放在最开头？
 
-useRoutes(app);
+// initWs(httpServer); // websocket
 
-app.on('error', errorHandler); // 全局错误处理
+async function main() {
+  try {
+    initDb(3); // 加载sequelize的relation表关联
+    await connectMysql(); // 连接mysql
+    await connectRedis(); // 连接redis
+    app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
+    loadAllRoutes(app); // 加载所有路由
+    monit(); // 监控
+    await new Promise((resolve) => {
+      // 语法糖, 等同于http.createServer(app.callback()).listen(3000);
+      app.listen(port, () => {
+        resolve('ok');
+      });
+    }); // http接口服务
+    console.log(chalkSUCCESS(`项目启动成功！`));
+    console.log(chalkWARN(`当前监听的端口: ${port}`));
+    console.log(chalkWARN(`当前的项目名称: ${PROJECT_NAME}`));
+    console.log(chalkWARN(`当前的项目环境: ${PROJECT_ENV}`));
+  } catch (error) {
+    console.log(chalkERROR(`项目启动失败！`));
+    console.log(error);
+  }
+}
 
-const port = +PROJECT_PORT; // 端口
-
-const httpServer = createServer(app.callback());
-
-initWs(httpServer); // websocket
-// monit(); // 监控
-
-httpServer.listen(port, () => {
-  console.log(chalkINFO(`当前监听的端口: ${port}`));
-  console.log(chalkINFO(`当前的项目名称: ${PROJECT_NAME}`));
-  console.log(chalkINFO(`当前的项目环境: ${PROJECT_ENV}`));
-  connectDb()
-    .then(() => {
-      initDb(3);
-      console.log(chalkSUCCESS('所有路由加载完成!'));
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-
-  connectRedis();
-});
+main();

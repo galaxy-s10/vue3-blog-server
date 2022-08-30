@@ -2,7 +2,6 @@
 
 // import { authJwt } from '@/app/auth/authJwt';
 // import { chalkINFO } from '@/app/chalkTip';
-// import emitError from '@/app/handler/emit-error';
 
 const csrf = async () => {
   /**
