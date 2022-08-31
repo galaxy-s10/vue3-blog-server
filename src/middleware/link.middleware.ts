@@ -1,6 +1,8 @@
 import Joi from 'joi';
 import { ParameterizedContext } from 'koa';
 
+import { CustomError } from '@/model/customError.model';
+
 const schema = Joi.object({
   id: Joi.number(),
   email: Joi.string().min(3).max(50),
@@ -11,14 +13,16 @@ const schema = Joi.object({
   status: [1, 2],
 });
 
-const verifyProp = async (ctx: ParameterizedContext, next) => {
-  const props = ctx.request.body;
-  await schema.validateAsync(props, {
-    abortEarly: false,
-    allowUnknown: false,
-    convert: false,
-  });
-  await next();
+export const verifyProp = async (ctx: ParameterizedContext, next) => {
+  try {
+    const props = ctx.request.body;
+    await schema.validateAsync(props, {
+      abortEarly: false,
+      allowUnknown: false,
+      convert: false,
+    });
+    await next();
+  } catch (error: any) {
+    throw new CustomError(error.message, 400, 400);
+  }
 };
-
-export { verifyProp };

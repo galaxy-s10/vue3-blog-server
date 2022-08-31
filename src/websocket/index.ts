@@ -19,7 +19,6 @@ export const initWs = (server) => {
   io.on('connection', function connection(socket) {
     socket.on(webSocketMsgType.getOnlineUser, (data) => {
       console.log(socket.id, '获取在线用户', data);
-      console.log(Object.keys(onlineList), 22222);
       // io.emit(webSocketMsgType.getOnlineUser, { count: res.size });
       io.emit(webSocketMsgType.getOnlineUser, {
         count: Object.keys(onlineList).length,

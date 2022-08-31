@@ -203,7 +203,6 @@ class RoleController {
       }
     }
     await Promise.all(diffQueqe);
-    // console.log(diffQueqeRes, '222');
     return allRole;
   }
 

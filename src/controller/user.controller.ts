@@ -155,11 +155,12 @@ class UserController {
 
   async getUserInfo(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    console.log(code, userInfo, message, 222);
     if (code === 200) {
       const result = await userService.getUserInfo(userInfo!.id!);
       successHandler({ ctx, data: result });
       await next();
+    } else {
+      throw new CustomError(message, code, code);
     }
   }
 

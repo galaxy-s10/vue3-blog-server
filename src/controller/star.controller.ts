@@ -127,9 +127,7 @@ class StarController {
       throw new CustomError(message, code, code);
     }
     let from_user_id = -1;
-    if (code === 200) {
-      from_user_id = userInfo!.id!;
-    }
+    from_user_id = userInfo!.id!;
     const articleIsExist = await articleService.isExist([article_id]);
     if (!articleIsExist) {
       throw new CustomError(`不存在id为${article_id}的文章！`, 400, 400);
