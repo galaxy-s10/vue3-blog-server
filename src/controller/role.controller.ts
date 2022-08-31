@@ -103,7 +103,6 @@ class RoleController {
     const id = +ctx.params.id;
     const result = await roleService.find(id);
     successHandler({ ctx, data: result });
-
     await next();
   }
 
@@ -112,7 +111,6 @@ class RoleController {
     const user_id = +ctx.params.user_id;
     const result = await roleService.getMyRole(user_id);
     successHandler({ ctx, data: { total: result.length, result } });
-
     await next();
   }
 
@@ -125,7 +123,6 @@ class RoleController {
     }
     const result = await roleService.getRoleAuth(id);
     successHandler({ ctx, data: { total: result.length, result } });
-
     await next();
   }
 
@@ -134,7 +131,6 @@ class RoleController {
     const id = +ctx.params.id;
     const result = await roleService.getRoleAuth(id);
     successHandler({ ctx, data: { total: result.length, result } });
-
     await next();
   }
 
@@ -240,10 +236,11 @@ class RoleController {
 
   // 修改某个角色的权限
   async updateRoleAuth(ctx: ParameterizedContext, next) {
-    const { id, auth_ids } = ctx.request.body as {
-      id: number;
-      auth_ids: number[];
-    };
+    const id = +ctx.params.id;
+    const { role_auths }: IRole = ctx.request.body;
+    if (!role_auths) {
+      throw new CustomError(`role_auths不能为空`, 400, 400);
+    }
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
@@ -259,16 +256,16 @@ class RoleController {
       throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
     }
     const isExistAuth =
-      auth_ids.length === 0 ? true : await authService.isExist(auth_ids);
+      role_auths.length === 0 ? true : await authService.isExist(role_auths);
     if (!isExistAuth) {
       throw new CustomError(
-        `${auth_ids.toString()}中存在不存在的权限！`,
+        `${role_auths.toString()}中存在不存在的权限！`,
         400,
         400
       );
     }
     const role: any = await roleService.find(id);
-    role.setAuths(auth_ids);
+    role.setAuths(role_auths);
     successHandler({ ctx });
 
     await next();

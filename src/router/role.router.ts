@@ -40,7 +40,7 @@ roleRouter.put('/update/:id', verifyProp, roleController.update);
 // DONE 查找角色
 roleRouter.get('/find/:id', roleController.find);
 
-// DONE 删除角色
+// DONE 删除角色（会删除底下关联的所有子角色）
 roleRouter.delete('/delete/:id', roleController.delete);
 
 // DONE 获取该角色的子角色（只找一层）
@@ -59,6 +59,6 @@ roleRouter.get('/get_my_role', roleController.getMyRole);
 roleRouter.get('/get_role_auth/:id', roleController.getRoleAuth);
 
 // 修改某个角色的权限
-roleRouter.put('/update_role_auth', roleController.updateRoleAuth);
+roleRouter.put('/update_role_auth/:id', roleController.updateRoleAuth);
 
 export default roleRouter;

@@ -68,7 +68,7 @@ class TagController {
 
   async getArticleList(ctx: ParameterizedContext, next) {
     const tag_id = +ctx.params.tag_id;
-    const { nowPage, pageSize = '10' }: any = ctx.request.query;
+    const { nowPage, pageSize } = ctx.request.query;
     const result = await tagService.getArticleList({
       tag_id,
       nowPage,

@@ -84,8 +84,12 @@ class TagService {
 
   /** 获取标签文章列表 */
   async getArticleList({ tag_id, nowPage, pageSize }) {
-    const offset = (nowPage - 1) * pageSize;
-    const limit = pageSize;
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const inst = await tagModel.findOne({ where: { id: tag_id } });
     // @ts-ignore
     const count = await inst.countArticles();

@@ -255,8 +255,12 @@ class CommentService {
     orderName,
     from_user_id,
   }) {
-    const offset = (nowPage - 1) * pageSize;
-    const limit = pageSize;
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const startTime = +new Date();
     const result: any = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
@@ -387,8 +391,12 @@ class CommentService {
     parent_comment_id,
     article_id,
   }) {
-    const offset = (nowPage - 1) * pageSize;
-    const limit = pageSize;
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
     const startTime = +new Date();
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],

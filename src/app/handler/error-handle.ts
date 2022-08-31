@@ -24,10 +24,10 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
       ctx.status = defaultError.code;
       ctx.body = {
         code: defaultError.errorCode,
+        errorCode: defaultError.errorCode,
         error: defaultError.error,
         message: defaultError.message,
       };
-
       return;
     }
 
