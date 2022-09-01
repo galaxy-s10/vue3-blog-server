@@ -245,7 +245,7 @@ export interface ILog {
   api_path?: string;
   api_query?: string;
   api_body?: string;
-  api_code?: number;
+  api_status_code?: number;
   api_error?: string;
   api_err_msg?: string;
   api_err_code?: number;

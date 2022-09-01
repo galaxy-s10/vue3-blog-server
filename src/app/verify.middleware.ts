@@ -1,7 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import { COMMON_ERR_MSG, ERROR_CODE } from '@/constant';
+import { ALLOW_HTTP_CODE, COMMON_ERR_MSG, ERROR_HTTP_CODE } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import blacklistService from '@/service/blacklist.service';
 import { isAdmin } from '@/utils';
@@ -60,13 +60,17 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
 
   if (inBlacklist?.type === 1) {
     // 1是频繁操作
-    throw new CustomError(COMMON_ERR_MSG.banIp, 400, ERROR_CODE.banIp);
+    throw new CustomError(
+      COMMON_ERR_MSG.banIp,
+      ALLOW_HTTP_CODE.authReject,
+      ERROR_HTTP_CODE.banIp
+    );
   } else if (inBlacklist?.type === 2) {
     // 2是管理员手动禁用
     throw new CustomError(
       COMMON_ERR_MSG.adminDisableUser,
-      400,
-      ERROR_CODE.adminDisableUser
+      ALLOW_HTTP_CODE.authReject,
+      ERROR_HTTP_CODE.adminDisableUser
     );
   } else {
     console.log('不在黑名单里');
@@ -103,7 +107,7 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
       return;
     }
     const { code, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       consoleEnd();
       throw new CustomError(message, code, code);
     }
@@ -122,7 +126,7 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
       return;
     }
     const { code, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       consoleEnd();
       throw new CustomError(message, code, code);
     }

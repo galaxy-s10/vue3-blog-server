@@ -1,6 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, IThirdUser } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserService from '@/service/thirdUser.service';
@@ -42,7 +43,11 @@ class ThirdUserController {
       ctx.request.body;
     const isExist = await thirdUserService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的第三方用户记录！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的第三方用户记录！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await thirdUserService.update({
       id,
@@ -72,7 +77,11 @@ class ThirdUserController {
     const id = +ctx.params.id;
     const isExist = await thirdUserService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的第三方用户记录！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的第三方用户记录！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await thirdUserService.delete(id);
     successHandler({ ctx, data: result });

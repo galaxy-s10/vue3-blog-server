@@ -64,12 +64,12 @@ export const deleteAllForeignKeys = async () => {
     const queryInterface = sequelize.getQueryInterface();
     const allTables: string[] = await queryInterface.showAllTables();
     console.log(chalkINFO(`所有表:${allTables.toString()}`));
-    const allConstraint = [];
+    const allConstraint: any = [];
     allTables.forEach((v) => {
       allConstraint.push(queryInterface.getForeignKeysForTables([v]));
     });
     const res1 = await Promise.all(allConstraint);
-    const allConstraint1 = [];
+    const allConstraint1: any = [];
     res1.forEach((v) => {
       const tableName = Object.keys(v)[0];
       const constraint: string[] = v[tableName];
@@ -93,12 +93,12 @@ export const deleteAllIndexs = async () => {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
     console.log(chalkINFO(`所有表:${allTables.toString()}`));
-    const allIndexs = [];
+    const allIndexs: any = [];
     allTables.forEach((v) => {
       allIndexs.push(queryInterface.showIndex(v));
     });
     const res1 = await Promise.all(allIndexs);
-    const allIndexs1 = [];
+    const allIndexs1: any = [];
     res1.forEach((v: any[]) => {
       const { tableName }: { tableName: string } = v[0];
       const indexStrArr: string[] = [];
@@ -144,7 +144,7 @@ export const initTable = (
       console.log(chalkINFO(`加载数据库表: ${modelArg.tableName}`));
     }
   }
-  main(model, method).catch((err) => {
+  main(model, method!).catch((err) => {
     console.log(chalkERROR(`initTable失败`), err.message);
     console.log(err);
   });
@@ -273,7 +273,7 @@ export const arrayToTree = ({
     // eslint-disable-next-line no-shadow
     function loop(pid: number) {
       // 保存得到的数据
-      const res = [];
+      const res: any = [];
       // 遍历原数组
       for (let i = 0; i < arr.length; i += 1) {
         const item = arr[i];
@@ -286,10 +286,12 @@ export const arrayToTree = ({
 
           delete item[originPidKey];
         }
+        // @ts-ignore
         if (item[originPidKey] === pid || item[resPidKey] === pid) {
           // 如果遍历到当前item的p_id等于目标pid，在将该item插入到res前，
           // 先遍历该item的id，找到原数组arr里面该item的所有children后，再将该item连同找到的children一起插入到res
           // item[resChildrenKey] = loop(item[resIdKey] || item[originIdKey]);
+          // @ts-ignore
           const children = loop(item[resIdKey] || item[originIdKey]);
           if (children.length) item[resChildrenKey] = children;
           // 如果当前item的p_id等于目标pid，则将这个item插入res

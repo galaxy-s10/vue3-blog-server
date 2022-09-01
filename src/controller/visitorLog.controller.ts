@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, IVisitorLog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import positionService from '@/service/position.service';
@@ -104,7 +105,11 @@ class VisitorLogController {
     const id = +ctx.params.id;
     const isExist = await visitorLogService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的访客日志！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的访客日志！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await visitorLogService.delete(id);
     successHandler({ ctx, data: result });

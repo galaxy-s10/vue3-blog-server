@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from './auth/authJwt';
 
-import { ERROR_CODE, PROJECT_ENV } from '@/constant';
+import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import logService from '@/service/log.service';
 import { isAdmin } from '@/utils';
@@ -13,7 +13,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
   console.log('catchErrorMiddle中间件');
   const start = Date.now();
   const insertLog = async (info: {
-    code: number;
+    statusCode: number;
     errorCode: number;
     error: string;
     message: string;
@@ -31,7 +31,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         api_method: ctx.request.method,
         api_hostname: ctx.request.hostname,
         api_path: ctx.request.path,
-        api_code: info.code,
+        api_status_code: info.statusCode,
         api_error: info.error,
         api_err_msg: info.message,
         api_duration: Date.now() - start,
@@ -43,34 +43,67 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     console.log('catchErrorMiddle中间件开始...');
     await next();
     console.log('catchErrorMiddle中间件通过！');
-    const defaultSuccess = {
-      code: 200,
-      errorCode: 200,
-      error: '请求成功！',
-      message: '请求成功！',
-    };
-    // 请求成功写入日志表
-    insertLog(defaultSuccess);
+    const statusCode = ctx.status;
+    /**
+     * 如果通过了catchErrorMiddle中间件，但是返回的状态不是200，
+     * 代表了在next前面没有设置ctx状态码，因此默认就是返回404！
+     * 如果调用了，successHandler会设置200状态码的，
+     * 因此业务层必须在next前设置ctx的状态码200，让接口通过catchErrorMiddle中间件，让它返回数据，
+     * 或者业务层直接throw new Error或者CustomError，不让这个接口通过catchErrorMiddle中间件，
+     * 让catchErrorMiddle中间件判断错误，并且返回错误数据！
+     */
+    if (statusCode !== ALLOW_HTTP_CODE.ok) {
+      if (statusCode === ALLOW_HTTP_CODE.notFound) {
+        const defaultSuccess = {
+          statusCode,
+          errorCode: ERROR_HTTP_CODE.notFound,
+          error: '这个返回了404的http状态码，请排查问题！',
+          message: '这个返回了404的http状态码，请排查问题！',
+        };
+        // 404接口写入日志表
+        insertLog(defaultSuccess);
+      } else {
+        const defaultSuccess = {
+          statusCode,
+          errorCode: ERROR_HTTP_CODE.errStatusCode,
+          error: '返回了即不是200也不是404的http状态码，请排查问题！',
+          message: '返回了即不是200也不是404的http状态码，请排查问题！',
+        };
+        // 既不是200也不是404，写入日志表
+        insertLog(defaultSuccess);
+      }
+    } else {
+      const defaultSuccess = {
+        statusCode,
+        errorCode: statusCode,
+        error: '请求成功！',
+        message: '请求成功！',
+      };
+      // 请求成功写入日志表
+      insertLog(defaultSuccess);
+    }
   } catch (error: any) {
     console.log('catchErrorMiddle中间件捕获到错误！');
     ctx.app.emit('error', error, ctx);
     if (!(error instanceof CustomError)) {
       const defaultError = {
-        code: 500,
-        errorCode: 1000,
-        error: error.message,
+        statusCode: ALLOW_HTTP_CODE.serverError,
+        errorCode: ERROR_HTTP_CODE.serverError,
+        error: error?.message,
         message: '服务器错误！',
       };
       // 不是CustomError，也写入日志表
       insertLog(defaultError);
       return;
     }
-    // 是CustomError，判断errorCode
+    // 是CustomError，判断errorCode，非法的错误（频繁请求和被禁用）不写入日志
     if (
-      ![ERROR_CODE.banIp, ERROR_CODE.adminDisableUser].includes(error.errorCode)
+      ![ERROR_HTTP_CODE.banIp, ERROR_HTTP_CODE.adminDisableUser].includes(
+        error.errorCode
+      )
     ) {
       insertLog({
-        code: error.code,
+        statusCode: error.statusCode,
         error: error.message,
         errorCode: error.errorCode,
         message: error.message,
@@ -81,7 +114,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
 
 // 跨域中间件
 export const corsMiddle = async (ctx, next) => {
-  console.log('跨域中间件');
+  console.log('corsMiddle跨域中间件');
   ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set(
     'Access-Control-Allow-Headers',
@@ -89,7 +122,7 @@ export const corsMiddle = async (ctx, next) => {
   );
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
   if (ctx.method === 'OPTIONS') {
-    ctx.body = 200;
+    ctx.body = ALLOW_HTTP_CODE.ok;
   } else {
     await next();
   }

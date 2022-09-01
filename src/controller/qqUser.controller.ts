@@ -7,7 +7,7 @@ import {
   ADMIN_QQ_CLIENT_SECRET,
   ADMIN_QQ_REDIRECT_URI,
 } from '@/config/secret';
-import { THIRD_PLATFORM } from '@/constant';
+import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
 import { IList, IQqUser } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
@@ -248,7 +248,7 @@ class QqUserController {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
 
     const { code: authCode, userInfo, message } = await authJwt(ctx);
-    if (authCode !== 200) {
+    if (authCode !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, authCode, authCode);
     }
     const result: any = await thirdUserService.findByUserId(userInfo!.id!);
@@ -256,7 +256,11 @@ class QqUserController {
       (v) => v.third_platform === THIRD_PLATFORM.qq_admin
     );
     if (ownIsBind.length) {
-      throw new CustomError(`你已经绑定过qq，请先解绑原qq！`, 400, 400);
+      throw new CustomError(
+        `你已经绑定过qq，请先解绑原qq！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const accessToken = await this.getAccessToken(code);
     if (accessToken.error) throw new Error(JSON.stringify(accessToken));
@@ -281,7 +285,11 @@ class QqUserController {
       OauthInfo.unionid
     );
     if (isExist) {
-      throw new CustomError(`该qq账号已被其他人绑定了！`, 400, 400);
+      throw new CustomError(
+        `该qq账号已被其他人绑定了！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const qqUser: any = await qqUserService.create(qqUserInfo);
     await thirdUserModel.create({
@@ -299,7 +307,7 @@ class QqUserController {
    */
   cancelBindQQ = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
@@ -307,7 +315,11 @@ class QqUserController {
       (v) => v.third_platform === THIRD_PLATFORM.qq_admin
     );
     if (!ownIsBind.length) {
-      throw new CustomError('你没有绑定过qq，不能解绑', 400, 400);
+      throw new CustomError(
+        '你没有绑定过qq，不能解绑',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await qqUserService.delete(ownIsBind[0].third_user_id);
     await thirdUserService.delete(ownIsBind[0].id);
@@ -363,7 +375,11 @@ class QqUserController {
     const id = +ctx.params.id;
     const isExist = await qqUserService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的qq用户！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的qq用户！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await qqUserService.delete(id);
     successHandler({ ctx, data: result });

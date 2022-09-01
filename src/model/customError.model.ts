@@ -1,12 +1,18 @@
+import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE } from '@/constant';
+
 export class CustomError extends Error {
-  code: number;
+  statusCode: number;
 
   errorCode: number;
 
-  constructor(message = '服务器错误', code = 500, errorCode = 1000) {
+  constructor(
+    message = '服务器错误',
+    statusCode = ALLOW_HTTP_CODE.serverError,
+    errorCode = ERROR_HTTP_CODE.serverError
+  ) {
     super();
     this.message = message;
-    this.code = code;
+    this.statusCode = statusCode;
     this.errorCode = errorCode;
   }
 }

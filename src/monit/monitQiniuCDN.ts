@@ -31,6 +31,7 @@ export const main = () => {
   qiniuController
     .monitCDN()
     .then(
+      // @ts-ignore
       async ({
         allDomainNameFlux,
         start,

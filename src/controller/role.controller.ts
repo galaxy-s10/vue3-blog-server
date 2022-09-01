@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import { PROJECT_ENV } from '@/constant';
+import { ALLOW_HTTP_CODE, PROJECT_ENV } from '@/constant';
 import { IList, IRole } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import authService from '@/service/auth.service';
@@ -63,7 +63,11 @@ class RoleController {
       orderName = 'id',
     }: IList<IRole> = ctx.request.query;
     if (Number.isNaN(+id)) {
-      throw new CustomError(`id格式不对`, 400, 400);
+      throw new CustomError(
+        `id格式不对`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const { rows } = await roleService.getAllList({ orderBy, orderName });
     const result = arrayToTree({
@@ -119,7 +123,11 @@ class RoleController {
     const id = +ctx.params.id;
     const isExist = await roleService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await roleService.getRoleAuth(id);
     successHandler({ ctx, data: { total: result.length, result } });
@@ -137,7 +145,7 @@ class RoleController {
   // 获取我的角色
   getMyRole = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const result = await roleService.getMyRole(userInfo!.id!);
@@ -149,7 +157,7 @@ class RoleController {
   // 获取我的角色（递归找所有）
   getMyAllRole = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const result = await roleService.getMyRole(userInfo!.id!);
@@ -211,7 +219,11 @@ class RoleController {
     const id = +ctx.params.id;
     const isExist = await roleService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await this.commonGetAllChildRole(id);
     console.log(result.length, 333333);
@@ -225,7 +237,11 @@ class RoleController {
     const id = +ctx.params.id;
     const isExist = await roleService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await roleService.findByPid(id);
     successHandler({ ctx, data: { total: result.length, result } });
@@ -238,29 +254,45 @@ class RoleController {
     const id = +ctx.params.id;
     const { role_auths }: IRole = ctx.request.body;
     if (!role_auths) {
-      throw new CustomError(`role_auths不能为空`, 400, 400);
+      throw new CustomError(
+        `role_auths不能为空`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`权限不足！`, 403, 403);
+        throw new CustomError(
+          `权限不足！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const isExistRole = await roleService.isExist([id]);
     if (!isExistRole) {
-      throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExistAuth =
       role_auths.length === 0 ? true : await authService.isExist(role_auths);
     if (!isExistAuth) {
       throw new CustomError(
         `${role_auths.toString()}中存在不存在的权限！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const role: any = await roleService.find(id);
@@ -275,23 +307,43 @@ class RoleController {
     const { p_id, role_name, role_value, type, priority }: IRole =
       ctx.request.body;
     if (!p_id) {
-      throw new CustomError(`p_id不能为空！`, 400, 400);
+      throw new CustomError(
+        `p_id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (id === 1 && p_id !== 0) {
-      throw new CustomError(`不能修改根角色的p_id！`, 400, 400);
+      throw new CustomError(
+        `不能修改根角色的p_id！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (id === p_id) {
-      throw new CustomError(`父角色不能等于子角色！`, 400, 400);
+      throw new CustomError(
+        `父角色不能等于子角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`权限不足！`, 403, 403);
+        throw new CustomError(
+          `权限不足！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === 1) {
       await roleService.update({
@@ -307,13 +359,17 @@ class RoleController {
       if (!isExist) {
         throw new CustomError(
           `${[id, p_id].toString()}中存在不存在的角色！`,
-          400,
-          400
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
         );
       }
       const c_role: any = await roleService.find(p_id);
       if (id !== 1 && c_role.p_id === id) {
-        throw new CustomError(`不能将自己的子角色作为父角色！`, 400, 400);
+        throw new CustomError(
+          `不能将自己的子角色作为父角色！`,
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
+        );
       }
       await roleService.update({
         id,
@@ -340,11 +396,19 @@ class RoleController {
     }: IRole = ctx.request.body;
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const isExist = p_id === 0 ? false : await roleService.isExist([p_id!]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${p_id!}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${p_id!}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await roleService.create({
       p_id,
@@ -362,30 +426,50 @@ class RoleController {
   batchDeleteChildRoles = async (ctx: ParameterizedContext, next) => {
     const { id, c_roles }: IRole = ctx.request.body;
     if (!id) {
-      throw new CustomError(`id不能为空！`, 400, 400);
+      throw new CustomError(
+        `id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`权限不足！`, 403, 403);
+        throw new CustomError(
+          `权限不足！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === undefined) {
-      throw new CustomError(`id不能为空！`, 400, 400);
+      throw new CustomError(
+        `id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (!c_roles || !c_roles.length) {
-      throw new CustomError(`请传入要删除的子角色！`, 400, 400);
+      throw new CustomError(
+        `请传入要删除的子角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExist = await roleService.isExist([id, ...c_roles]);
     if (!isExist) {
       throw new CustomError(
         `${[id, ...c_roles].toString()}中存在不存在的角色！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const all_child_roles: any = await roleService.findByPid(id);
@@ -394,8 +478,8 @@ class RoleController {
     if (hasDiff.length) {
       throw new CustomError(
         `${c_roles.toString()}中的角色父级id不是${id}！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const queue: any = [];
@@ -419,33 +503,57 @@ class RoleController {
   batchAddChildRoles = async (ctx: ParameterizedContext, next) => {
     const { id, c_roles }: IRole = ctx.request.body;
     if (!id) {
-      throw new CustomError(`id不能为空！`, 400, 400);
+      throw new CustomError(
+        `id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`权限不足！`, 403, 403);
+        throw new CustomError(
+          `权限不足！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === undefined) {
-      throw new CustomError(`请传入id！`, 400, 400);
+      throw new CustomError(
+        `请传入id！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (!c_roles || !c_roles.length) {
-      throw new CustomError(`请传入要新增的子角色！`, 400, 400);
+      throw new CustomError(
+        `请传入要新增的子角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (c_roles.includes(id)) {
-      throw new CustomError(`父级角色不能在子角色里面！`, 400, 400);
+      throw new CustomError(
+        `父级角色不能在子角色里面！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExist = await roleService.isExist([id, ...c_roles]);
     if (!isExist) {
       throw new CustomError(
         `${[id, ...c_roles].toString()}中存在不存在的角色！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const result1: any = await roleService.findAllByInId(c_roles);
@@ -454,8 +562,8 @@ class RoleController {
     if (!isUnique) {
       throw new CustomError(
         `${c_roles.toString()}不是同一个父级角色！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     await roleService.updateMany(c_roles, id);
@@ -469,19 +577,35 @@ class RoleController {
     if (PROJECT_ENV === 'beta') {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`权限不足！`, 403, 403);
+        throw new CustomError(
+          `权限不足！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === 1) {
-      throw new CustomError(`不能删除根角色！`, 400, 400);
+      throw new CustomError(
+        `不能删除根角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const role: any = await roleService.find(id);
     if (!role) {
-      throw new CustomError(`不存在id为${id}的角色！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的角色！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const auths = await role.getAuths();
     await role.removeAuths(auths); // 删除该角色的权限

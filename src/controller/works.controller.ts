@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, IWorks } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import worksService from '@/service/works.service';
@@ -43,14 +44,22 @@ class WorksController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { name, desc, bg_url, priority, url, status }: IWorks =
       ctx.request.body;
     const isExist = await worksService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的作品！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的作品！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await worksService.update({
       id,
@@ -69,7 +78,11 @@ class WorksController {
   async create(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { name, desc, bg_url, priority, url, status }: IWorks =
       ctx.request.body;
@@ -89,12 +102,20 @@ class WorksController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await worksService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的作品！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的作品！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await worksService.delete(id);
     successHandler({ ctx });

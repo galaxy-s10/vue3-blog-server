@@ -5,6 +5,7 @@ import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import {
+  ALLOW_HTTP_CODE,
   QINIU_BUCKET,
   QINIU_CDN_DOMAIN,
   QINIU_CDN_URL,
@@ -32,11 +33,15 @@ class QiniuController {
 
   upload = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { prefix } = ctx.request.body;
     let fileArr: {
@@ -46,7 +51,11 @@ class QiniuController {
     }[] = [];
     const { uploadFiles } = ctx.request.files!;
     if (!uploadFiles) {
-      throw new CustomError('请传入uploadFiles！', 400, 400);
+      throw new CustomError(
+        '请传入uploadFiles！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (Array.isArray(uploadFiles)) {
       fileArr = uploadFiles.map((v) => {
@@ -121,14 +130,22 @@ class QiniuController {
     const { prefix, force }: { prefix: string; force: number } =
       ctx.request.body;
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (!QINIU_PREFIX[prefix]) {
-      throw new CustomError('错误的prefix', 400, 400);
+      throw new CustomError(
+        '错误的prefix',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const main = async () => {
       let list = [];
@@ -234,16 +251,24 @@ class QiniuController {
 
   async delete(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const result = (await qiniuDataService.find(id)) as IQiniuData;
     if (!result) {
-      throw new CustomError(`不存在id为${id}的资源！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的资源！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const qiniudataRes = await qiniuDataService.delete(id);
     const qiniuOfficialRes = await qiniu.delete(
@@ -263,11 +288,15 @@ class QiniuController {
 
   async deleteByQiniuKey(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { qiniu_key } = ctx.request.query as {
       qiniu_key: string;
@@ -276,7 +305,11 @@ class QiniuController {
       qiniu_key
     )) as IQiniuData;
     if (!result) {
-      throw new CustomError(`不存在${qiniu_key}的资源！`, 400, 400);
+      throw new CustomError(
+        `不存在${qiniu_key}的资源！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const { id } = result;
     const qiniudataRes = await qiniuDataService.delete(id!);
@@ -294,53 +327,6 @@ class QiniuController {
 
     await next();
   }
-
-  // 获取所有七牛云文件
-  // async getAllList(ctx: ParameterizedContext, next) {
-  //
-  //     // const { prefix, limit, marker } = ctx.request.query;
-  //     const list = [];
-  //     const limit = 1000;
-  //     const { respInfo, respBody }: any = await qiniu.getListPrefix({
-  //       limit,
-  //     });
-  //     let { marker } = respBody;
-  //     const { items } = respInfo.data;
-  //     list.push(...items);
-  //     while (marker) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       const res: any = await qiniu.getListPrefix({
-  //         marker,
-  //         limit,
-  //       });
-  //       list.push(...res.respInfo.data.items);
-  //       marker = res.respBody.marker;
-  //     }
-  //     successHandler({
-  //       ctx,
-  //       data: { list },
-  //     });
-  //   } catch (error) {
-  //     emitError({ ctx, code: 400, error });
-  //   }
-  //   await next();
-  // }
-
-  /**
-   * 备份数据库
-   */
-  // async uploadBackupsDb(ctx: ParameterizedContext, next) {
-  //
-  //     const res = await qiniu.uploadBackupsDb();
-  //     successHandler({
-  //       ctx,
-  //       data: res,
-  //     });
-  //   } catch (error) {
-  //     emitError({ ctx, code: 400, error });
-  //   }
-  //   await next();
-  // }
 
   getQiniuListPrefix = async (prefix: string) => {
     const list: any = [];
@@ -368,7 +354,11 @@ class QiniuController {
   getDiff = async (ctx: ParameterizedContext, next) => {
     const { prefix }: any = ctx.request.query;
     if (!QINIU_PREFIX[prefix]) {
-      throw new CustomError('错误的prefix', 400, 400);
+      throw new CustomError(
+        '错误的prefix',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const qiniuOfficialRes = await this.getQiniuListPrefix(prefix);
     const qiniuDataRes = await qiniuDataService.getPrefixList(prefix);
@@ -407,24 +397,40 @@ class QiniuController {
 
   async update(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { bucket, prefix, qiniu_key }: any = ctx.request.body;
     if (!QINIU_PREFIX[prefix]) {
-      throw new CustomError('错误的prefix', 400, 400);
+      throw new CustomError(
+        '错误的prefix',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const file: any = await qiniuDataService.find(id);
     if (!file) {
-      throw new CustomError(`不存在id为${id}的文件！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的文件！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     // eslint-disable-next-line
     const { flag, respErr, respBody, respInfo } = await qiniu.updateQiniuFile(
@@ -447,7 +453,11 @@ class QiniuController {
       });
       successHandler({ ctx, data: '更新成功！' });
     } else {
-      throw new CustomError(`更新失败`, 400, 400);
+      throw new CustomError(
+        `更新失败`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
 
     await next();

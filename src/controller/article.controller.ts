@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IArticle, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import articleService from '@/service/article.service';
@@ -24,23 +25,23 @@ class ArticleController {
       tags,
     }: IArticle = ctx.request.body;
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const tagIsExist = await tagService.isExist(arrayUnique(tags!));
     if (!tagIsExist) {
       throw new CustomError(
         `标签id:${tags!.toString()}中存在不存在的标签！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const typeIsExist = await typeService.isExist(arrayUnique(types!));
     if (!typeIsExist) {
       throw new CustomError(
         `分类id:${types!.toString()}中存在不存在的分类！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const result = await articleService.create({
@@ -65,7 +66,11 @@ class ArticleController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const {
@@ -81,15 +86,27 @@ class ArticleController {
     }: IArticle = ctx.request.body;
     const article: any = await articleService.find(id);
     if (!article) {
-      throw new CustomError(`不存在id为${id}的文章！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的文章！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExistTag = await tagService.isExist(tags);
     if (!isExistTag) {
-      throw new CustomError(`不存在id为${id}的标签！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的标签！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExistType = await typeService.isExist(types);
     if (!isExistType) {
-      throw new CustomError(`不存在id为${id}的分类！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的分类！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await articleService.update({
       id,
@@ -112,7 +129,7 @@ class ArticleController {
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
     const { code, userInfo } = await authJwt(ctx);
-    if (code === 200) {
+    if (code === ALLOW_HTTP_CODE.ok) {
       from_user_id = userInfo!.id!;
     }
     const result = await articleService.findArticleDetail(id, from_user_id);
@@ -175,12 +192,20 @@ class ArticleController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const article: any = await articleService.find(id);
     if (!article) {
-      throw new CustomError(`不存在id为${id}的文章！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的文章！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     article.setTypes([]);
     article.setTags([]);

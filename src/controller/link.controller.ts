@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import { QQ_EMAIL_USER } from '@/config/secret';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import otherController from '@/controller/other.controller';
 import { ILink, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
@@ -45,13 +46,21 @@ class LinkController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { email, name, avatar, desc, url, status }: ILink = ctx.request.body;
     const isExist = await linkService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的友链！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的友链！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await linkService.update({
       id,
@@ -97,12 +106,20 @@ class LinkController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await linkService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的友链！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的友链！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await linkService.delete(id);
     successHandler({ ctx });

@@ -7,7 +7,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GITHUB_REDIRECT_URI,
 } from '@/config/secret';
-import { THIRD_PLATFORM } from '@/constant';
+import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
 import { IGithubUser, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
@@ -63,7 +63,7 @@ class GithubUserController {
   bindGithub = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
     const { code: authCode, userInfo, message } = await authJwt(ctx);
-    if (authCode !== 200) {
+    if (authCode !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, authCode, authCode);
     }
     const result: any = await thirdUserService.findByUserId(userInfo!.id!);
@@ -71,7 +71,11 @@ class GithubUserController {
       (v) => v.third_platform === THIRD_PLATFORM.github
     );
     if (ownIsBind.length) {
-      throw new CustomError('你已经绑定过github，请先解绑原github！', 400, 400);
+      throw new CustomError(
+        '你已经绑定过github，请先解绑原github！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const accessToken = await this.getAccessToken(code);
     if (accessToken.error) throw new Error(JSON.stringify(accessToken));
@@ -90,7 +94,11 @@ class GithubUserController {
     delete OauthInfo.created_at;
     delete OauthInfo.updated_at;
     if (isExist) {
-      throw new CustomError('该github账号已被其他人绑定了！', 400, 400);
+      throw new CustomError(
+        '该github账号已被其他人绑定了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const githubUser: any = await githubUserService.create({
       ...OauthInfo,
@@ -111,7 +119,7 @@ class GithubUserController {
    */
   cancelBindGithub = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
@@ -119,7 +127,11 @@ class GithubUserController {
       (v) => v.third_platform === THIRD_PLATFORM.github
     );
     if (!ownIsBind.length) {
-      throw new CustomError('你没有绑定过github，不能解绑！', 400, 400);
+      throw new CustomError(
+        '你没有绑定过github，不能解绑！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await githubUserService.delete(ownIsBind[0].third_user_id);
     await thirdUserService.delete(ownIsBind[0].id);
@@ -264,7 +276,11 @@ class GithubUserController {
     const id = +ctx.params.id;
     const isExist = await githubUserService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的github用户！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的github用户！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await githubUserService.delete(id);
     successHandler({ ctx, data: result });

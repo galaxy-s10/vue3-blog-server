@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ITheme } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import themeService from '@/service/theme.service';
@@ -40,13 +41,21 @@ class ThemeController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { key, value, model, lang, desc }: ITheme = ctx.request.body;
     const isExist = await themeService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的主题！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的主题！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await themeService.update({
       id,
@@ -78,12 +87,20 @@ class ThemeController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await themeService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的主题！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的主题！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await themeService.delete(id);
     successHandler({ ctx });

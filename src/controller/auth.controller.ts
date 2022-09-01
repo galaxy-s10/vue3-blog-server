@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import { PROJECT_ENV } from '@/constant';
+import { PROJECT_ENV, ALLOW_HTTP_CODE } from '@/constant';
 import { IAuth, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import authService from '@/service/auth.service';
@@ -105,7 +105,11 @@ class AuthController {
     const id = +ctx.params.id;
     const isExist = await authService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的权限！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的权限！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await authService.findByPid(id);
     successHandler({ ctx, data: { total: result.length, result } });
@@ -117,7 +121,11 @@ class AuthController {
     const id = +ctx.params.id;
     const isExist = await authService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的权限！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的权限！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await this.commonGetAllChildAuth(id);
     successHandler({ ctx, data: { total: result.length, result } });
@@ -128,7 +136,11 @@ class AuthController {
   async create(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const {
       p_id,
@@ -138,11 +150,19 @@ class AuthController {
       priority = 1,
     }: IAuth = ctx.request.body;
     if (!p_id) {
-      throw new CustomError('p_id不能为空！', 400, 400);
+      throw new CustomError(
+        'p_id不能为空！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExist = p_id === 0 ? false : await authService.isExist([p_id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${p_id}的权限！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${p_id}的权限！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await authService.create({
       p_id,
@@ -161,24 +181,44 @@ class AuthController {
     if (PROJECT_ENV === 'beta') {
       const role: any = await authService.find(id);
       if (role.type === 1) {
-        throw new CustomError('测试环境不能操作默认权限！', 403, 403);
+        throw new CustomError(
+          '测试环境不能操作默认权限！',
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
 
     const { p_id, auth_name, auth_value, type, priority }: IAuth =
       ctx.request.body;
     if (!p_id) {
-      throw new CustomError(`p_id不能为空！`, 400, 400);
+      throw new CustomError(
+        `p_id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (id === 1 && p_id !== 0) {
-      throw new CustomError(`不能修改根权限的p_id哦！`, 400, 400);
+      throw new CustomError(
+        `不能修改根权限的p_id哦！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (id === p_id) {
-      throw new CustomError(`父权限不能等于子权限！`, 400, 400);
+      throw new CustomError(
+        `父权限不能等于子权限！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (id === 1) {
       await authService.update({
@@ -194,13 +234,17 @@ class AuthController {
       if (!isExist) {
         throw new CustomError(
           `${[id, p_id].toString()}中存在不存在的权限！`,
-          400,
-          400
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
         );
       }
       const c_auth: any = await authService.find(p_id);
       if (id !== 1 && c_auth.p_id === id) {
-        throw new CustomError(`不能将自己的子权限作为父权限！`, 400, 400);
+        throw new CustomError(
+          `不能将自己的子权限作为父权限！`,
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
+        );
       }
       await authService.update({
         id,
@@ -222,12 +266,20 @@ class AuthController {
     if (PROJECT_ENV === 'beta') {
       const role: any = await authService.find(id);
       if (role.type === 1) {
-        throw new CustomError('测试环境不能操作默认权限！', 403, 403);
+        throw new CustomError(
+          '测试环境不能操作默认权限！',
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === 1) {
       throw new Error(`不能删除根权限哦！`);
@@ -249,17 +301,29 @@ class AuthController {
   batchAddChildAuths = async (ctx: ParameterizedContext, next) => {
     const { id, c_auths }: IAuth = ctx.request.body;
     if (!id) {
-      throw new CustomError(`id不能为空！`, 400, 400);
+      throw new CustomError(
+        `id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await authService.find(id);
       if (role.type === 1) {
-        throw new CustomError('测试环境不能操作默认权限！', 403, 403);
+        throw new CustomError(
+          '测试环境不能操作默认权限！',
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === undefined) {
       throw new Error(`请传入id！`);
@@ -289,30 +353,50 @@ class AuthController {
   batchDeleteChildAuths = async (ctx: ParameterizedContext, next) => {
     const { id, c_auths }: IAuth = ctx.request.body;
     if (!id) {
-      throw new CustomError(`id不能为空！`, 400, 400);
+      throw new CustomError(
+        `id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (PROJECT_ENV === 'beta') {
       const role: any = await authService.find(id);
       if (role.type === 1) {
-        throw new CustomError(`测试环境不能操作默认权限！`, 403, 403);
+        throw new CustomError(
+          `测试环境不能操作默认权限！`,
+          ALLOW_HTTP_CODE.authReject,
+          ALLOW_HTTP_CODE.authReject
+        );
       }
     }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     if (id === undefined) {
-      throw new CustomError(`请传入id！`, 400, 400);
+      throw new CustomError(
+        `请传入id！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (!c_auths || !c_auths.length) {
-      throw new CustomError(`请传入要删除的子权限！`, 400, 400);
+      throw new CustomError(
+        `请传入要删除的子权限！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExist = await authService.isExist([id, ...c_auths]);
     if (!isExist) {
       throw new CustomError(
         `${[id, ...c_auths].toString()}中存在不存在的权限！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const all_child_auths: any = await authService.findByPid(id);
@@ -321,8 +405,8 @@ class AuthController {
     if (hasDiff.length) {
       throw new CustomError(
         `${c_auths.toString()}中的权限父级id不是${id}！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const queue: any = [];

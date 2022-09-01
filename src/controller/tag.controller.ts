@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ITag } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import tagService from '@/service/tag.service';
@@ -40,13 +41,21 @@ class TagController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { name, color }: ITag = ctx.request.body;
     const isExist = await tagService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的标签！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的标签！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await tagService.update({ id, name, color });
     successHandler({ ctx });
@@ -57,7 +66,11 @@ class TagController {
   async create(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { name, color }: ITag = ctx.request.body;
     await tagService.create({ name, color });
@@ -82,12 +95,20 @@ class TagController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await tagService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的标签！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的标签！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await tagService.delete(id);
     successHandler({ ctx });

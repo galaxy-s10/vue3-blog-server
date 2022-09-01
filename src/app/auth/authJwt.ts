@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 import { JWT_SECRET } from '@/config/secret';
-import { COMMON_ERR_MSG } from '@/constant';
+import { ALLOW_HTTP_CODE, COMMON_ERR_MSG } from '@/constant';
 import { IUser } from '@/interface';
 import userService from '@/service/user.service';
 
@@ -11,7 +11,7 @@ const authJwt = (
   return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (ctx.req.headers.authorization === undefined) {
-      resolve({ code: 401, message: '未登录！' });
+      resolve({ code: ALLOW_HTTP_CODE.noAuth, message: '未登录！' });
       return;
     }
 
@@ -27,7 +27,7 @@ const authJwt = (
         if (err.message.indexOf('invalid') !== -1) {
           message = COMMON_ERR_MSG.invalidToken;
         }
-        resolve({ code: 401, message });
+        resolve({ code: ALLOW_HTTP_CODE.noAuth, message });
         return;
       }
       async function main() {
@@ -37,26 +37,35 @@ const authJwt = (
           );
           if (!userResult) {
             // 这个用户已经被删除了
-            resolve({ code: 401, message: '该用户不存在！' });
+            resolve({
+              code: ALLOW_HTTP_CODE.noAuth,
+              message: '该用户不存在！',
+            });
             return;
           }
           if (userResult.token !== token) {
             // 单点登录（防止修改密码后，原本的token还能用）
-            resolve({ code: 401, message: COMMON_ERR_MSG.jwtExpired });
+            resolve({
+              code: ALLOW_HTTP_CODE.noAuth,
+              message: COMMON_ERR_MSG.jwtExpired,
+            });
             return;
           }
           if (userResult.status === 2) {
             // 账号被禁用了
-            resolve({ code: 401, message: COMMON_ERR_MSG.adminDisableUser });
+            resolve({
+              code: ALLOW_HTTP_CODE.noAuth,
+              message: COMMON_ERR_MSG.adminDisableUser,
+            });
             return;
           }
           resolve({
-            code: 200,
+            code: ALLOW_HTTP_CODE.ok,
             message: '验证token通过！',
             userInfo: userResult,
           });
         } catch (error: any) {
-          resolve({ code: 400, message: error });
+          resolve({ code: ALLOW_HTTP_CODE.paramsError, message: error });
         }
       }
       // 如果token正确，解密token获取用户id，根据id查数据库的token判断是否一致。

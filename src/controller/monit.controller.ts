@@ -1,6 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, IMonit } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import monitService from '@/service/monit.service';
@@ -43,7 +44,11 @@ class MonitController {
     const { type, info }: IMonit = ctx.request.body;
     const isExist = await monitService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的监控！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的监控！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await monitService.update({
       id,
@@ -70,7 +75,11 @@ class MonitController {
     const id = +ctx.params.id;
     const isExist = await monitService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的监控！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的监控！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await monitService.delete(id);
     successHandler({ ctx, data: result });

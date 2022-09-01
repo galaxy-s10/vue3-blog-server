@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import { COMMON_ERR_MSG } from '@/constant';
+import { ALLOW_HTTP_CODE, COMMON_ERR_MSG } from '@/constant';
 import { IList, ILog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import blacklistService from '@/service/blacklist.service';
@@ -52,14 +52,18 @@ class LogController {
       api_query,
       api_body,
       api_err_msg,
-      api_code,
+      api_status_code,
       api_duration,
       api_err_code,
       api_error,
     }: ILog = ctx.request.body;
     const isExist = await logService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的日志！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的日志！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await logService.update({
       id,
@@ -73,7 +77,7 @@ class LogController {
       api_query,
       api_body,
       api_err_msg,
-      api_code,
+      api_status_code,
       api_duration,
       api_err_code,
       api_error,
@@ -95,7 +99,7 @@ class LogController {
       api_query,
       api_body,
       api_err_msg,
-      api_code,
+      api_status_code,
       api_duration,
       api_err_code,
       api_error,
@@ -111,7 +115,11 @@ class LogController {
         ip,
         msg: COMMON_ERR_MSG.banIp,
       });
-      throw new CustomError(COMMON_ERR_MSG.banIp, 403, 403);
+      throw new CustomError(
+        COMMON_ERR_MSG.banIp,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const result = await logService.create({
       user_id,
@@ -124,7 +132,7 @@ class LogController {
       api_query,
       api_body,
       api_err_msg,
-      api_code,
+      api_status_code,
       api_duration,
       api_err_code,
       api_error,
@@ -138,7 +146,11 @@ class LogController {
     const id = +ctx.params.id;
     const isExist = await logService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的日志！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的日志！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await logService.delete(id);
     successHandler({ ctx, data: result });

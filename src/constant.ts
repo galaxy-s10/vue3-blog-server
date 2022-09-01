@@ -2,15 +2,37 @@ export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
 export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV as string;
 export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
 
-export const ERROR_CODE = {
+export const ERROR_HTTP_CODE = {
+  serverError: 10000, // 服务器错误
   banIp: 1000,
   adminDisableUser: 1001,
+  notFound: 1002, // 返回了404的http状态码
+  errStatusCode: 1003, // 返回了即不是200也不是404的http状态码
 };
 
-export enum DisableEnum {
-  'banIp' = 1,
-  'adminDisableUser' = 2,
-}
+export const ALLOW_HTTP_CODE = {
+  ok: 200,
+  notFound: 404,
+  paramsError: 400,
+  noAuth: 401,
+  authReject: 403,
+  serverError: 500,
+};
+
+export const HttpErrorMsg = {
+  400: '参数错误！',
+  401: '未授权！',
+  403: '权限不足！',
+  404: '未找到！',
+  500: '服务器错误！',
+};
+
+export const HttpSuccessMsg = {
+  GET: '获取成功！',
+  POST: '新增成功！',
+  PUT: '修改成功！',
+  DELETE: '删除成功！',
+};
 
 export const COMMON_ERR_MSG = {
   banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',
@@ -18,6 +40,13 @@ export const COMMON_ERR_MSG = {
   invalidToken: '非法token！',
   adminDisableUser: '你的账号已被管理员禁用，请联系管理员处理！',
 };
+
+// 没有用到这个DisableEnum枚举，eslint会报错
+// export enum DisableEnum {
+//   'banIp' = 1,
+//   'adminDisableUser' = 2,
+// }
+
 // 发送邮件结果类型
 export const VERIFY_EMAIL_RESULT_CODE = {
   ok: '发送成功！',
@@ -73,19 +102,4 @@ export const QINIU_PREFIX = {
   'backupsDatabase/': 'backupsDatabase/',
   'media/': 'media/',
   'nuxt-blog-client/': 'nuxt-blog-client/',
-};
-
-export const HttpErrorMsg = {
-  400: '参数错误！',
-  401: '未授权！',
-  403: '权限不足！',
-  404: '未找到！',
-  500: '服务器错误！',
-};
-
-export const HttpSuccessMsg = {
-  GET: '获取成功！',
-  POST: '新增成功！',
-  PUT: '修改成功！',
-  DELETE: '删除成功！',
 };

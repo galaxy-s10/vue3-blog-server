@@ -6,6 +6,7 @@ import redisController from './redis.controller';
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
 import {
+  ALLOW_HTTP_CODE,
   REDIS_PREFIX,
   THIRD_PLATFORM,
   VERIFY_EMAIL_RESULT_CODE,
@@ -97,7 +98,11 @@ class EmailUserController {
   login = async (ctx: ParameterizedContext, next) => {
     const { email, code, exp = 24 }: IEmail = ctx.request.body;
     if (!email) {
-      throw new CustomError('email不能为空！', 400, 400);
+      throw new CustomError(
+        'email不能为空！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const key = {
       prefix: REDIS_PREFIX.emailLogin,
@@ -106,17 +111,29 @@ class EmailUserController {
     // 判断redis中的验证码是否正确
     const redisData = await redisController.getVal(key);
     if (redisData !== code || !redisData) {
-      throw new CustomError('验证码错误或已过期！', 400, 400);
+      throw new CustomError(
+        '验证码错误或已过期！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExistEmail = await emailUserService.findByEmail(email);
     if (!isExistEmail) {
-      throw new CustomError(`${email}还未绑定过用户！`, 400, 400);
+      throw new CustomError(
+        `${email}还未绑定过用户！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const findEmailUserRes = await emailUserService.findThirdUser(email);
     // @ts-ignore
     const userInfo = findEmailUserRes.users[0];
     if (!userInfo) {
-      throw new CustomError(`${email}用户有误，请联系管理员！`, 400, 400);
+      throw new CustomError(
+        `${email}用户有误，请联系管理员！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const token = signJwt({
       userInfo,
@@ -137,15 +154,27 @@ class EmailUserController {
   register = async (ctx: ParameterizedContext, next) => {
     const { email, code, exp = 24 }: IEmail = ctx.request.body;
     if (!email) {
-      throw new CustomError('email不能为空！', 400, 400);
+      throw new CustomError(
+        'email不能为空！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const reg = /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
     if (!reg.test(email)) {
-      throw new CustomError('请输入正确的邮箱！', 400, 400);
+      throw new CustomError(
+        '请输入正确的邮箱！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const emailIsExist = await emailUserService.emailsIsExist([email]);
     if (emailIsExist) {
-      throw new CustomError('该邮箱已被他人使用！', 400, 400);
+      throw new CustomError(
+        '该邮箱已被他人使用！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     } else {
       const key = {
         prefix: REDIS_PREFIX.emailRegister,
@@ -154,7 +183,11 @@ class EmailUserController {
       // 判断redis中的验证码是否正确
       const redisData = await redisController.getVal(key);
       if (redisData !== code || !redisData) {
-        throw new CustomError('验证码错误或已过期！', 400, 400);
+        throw new CustomError(
+          '验证码错误或已过期！',
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
+        );
       }
       // 用户表创建用户
       const createUserRes = await userService.create({
@@ -192,7 +225,11 @@ class EmailUserController {
       desc: '登录博客',
     });
     if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
-      throw new CustomError(result, 400, 400);
+      throw new CustomError(
+        result,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     successHandler({ ctx, message: result });
     await next();
@@ -209,7 +246,11 @@ class EmailUserController {
       desc: '注册用户',
     });
     if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
-      throw new CustomError(result, 400, 400);
+      throw new CustomError(
+        result,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     successHandler({ ctx, message: result });
     await next();
@@ -218,7 +259,7 @@ class EmailUserController {
   /** 发送绑定邮箱验证码 */
   sendBindEmailCode = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const { email } = ctx.request.body;
@@ -230,7 +271,11 @@ class EmailUserController {
       desc: '绑定邮箱',
     });
     if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
-      throw new CustomError(result, 400, 400);
+      throw new CustomError(
+        result,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     successHandler({ ctx, message: result });
     await next();
@@ -239,7 +284,7 @@ class EmailUserController {
   /** 发送取消绑定邮箱验证码 */
   sendCancelBindEmailCode = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const { email } = ctx.request.body;
@@ -252,7 +297,11 @@ class EmailUserController {
       desc: '取消绑定邮箱',
     });
     if (result !== VERIFY_EMAIL_RESULT_CODE.ok) {
-      throw new CustomError(result, 400, 400);
+      throw new CustomError(
+        result,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     successHandler({ ctx, message: result });
     await next();
@@ -289,23 +338,35 @@ class EmailUserController {
    */
   bindEmail = async (ctx: ParameterizedContext, next) => {
     const { code: authCode, userInfo, message } = await authJwt(ctx);
-    if (authCode !== 200) {
+    if (authCode !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, authCode, authCode);
     }
     const { email, code } = ctx.request.body;
     if (!code) {
-      throw new CustomError('验证码不能为空！', 400, 400);
+      throw new CustomError(
+        '验证码不能为空！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
     const ownIsBind = result.filter(
       (v) => v.third_platform === THIRD_PLATFORM.email
     );
     if (ownIsBind.length) {
-      throw new CustomError('你已经绑定过邮箱，请先解绑原邮箱！', 400, 400);
+      throw new CustomError(
+        '你已经绑定过邮箱，请先解绑原邮箱！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const otherIsBind = await emailUserService.findByEmail(email);
     if (otherIsBind) {
-      throw new CustomError('该邮箱已被其他人绑定！', 400, 400);
+      throw new CustomError(
+        '该邮箱已被其他人绑定！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const key = {
       prefix: `${REDIS_PREFIX.userBindEmail}-${userInfo!.id!}`,
@@ -315,7 +376,11 @@ class EmailUserController {
       ...key,
     });
     if (redisData !== code || !redisData) {
-      throw new CustomError(VERIFY_EMAIL_RESULT_CODE.err, 400, 400);
+      throw new CustomError(
+        VERIFY_EMAIL_RESULT_CODE.err,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const createEmailRes: any = await emailUserService.create({ email });
     await thirdUserService.create({
@@ -336,19 +401,27 @@ class EmailUserController {
    */
   cancelBindEmail = async (ctx: ParameterizedContext, next) => {
     const { code: authCode, userInfo, message } = await authJwt(ctx);
-    if (authCode !== 200) {
+    if (authCode !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, authCode, authCode);
     }
     const { code } = ctx.request.body;
     if (!code) {
-      throw new CustomError('验证码不能为空！', 400, 400);
+      throw new CustomError(
+        '验证码不能为空！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
     const ownIsBind = result.filter(
       (v) => v.third_platform === THIRD_PLATFORM.email
     );
     if (!ownIsBind.length) {
-      throw new CustomError('你没有绑定过邮箱，不能解绑！', 400, 400);
+      throw new CustomError(
+        '你没有绑定过邮箱，不能解绑！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const userEmail: any = await emailUserService.findById(
       ownIsBind[0].third_user_id
@@ -361,7 +434,11 @@ class EmailUserController {
       ...key,
     });
     if (redisData !== code || !redisData) {
-      throw new CustomError(VERIFY_EMAIL_RESULT_CODE.err, 400, 400);
+      throw new CustomError(
+        VERIFY_EMAIL_RESULT_CODE.err,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await emailUserService.delete(ownIsBind[0].third_user_id);
     await thirdUserService.delete(ownIsBind[0].id);

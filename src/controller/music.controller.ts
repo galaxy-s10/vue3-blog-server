@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, IMusic } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import musicService from '@/service/music.service';
@@ -43,14 +44,22 @@ class MusicController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { name, cover_pic, audio_url, author, status }: IMusic =
       ctx.request.body;
     const isExist = await musicService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的音乐！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的音乐！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await musicService.update({
       id,
@@ -68,7 +77,11 @@ class MusicController {
   async create(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const { name, cover_pic, audio_url, author, status }: IMusic =
       ctx.request.body;
@@ -87,12 +100,20 @@ class MusicController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await musicService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的音乐！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的音乐！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await musicService.delete(id);
     successHandler({ ctx });

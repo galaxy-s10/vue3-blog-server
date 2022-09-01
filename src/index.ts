@@ -20,7 +20,7 @@ import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { handleSecretFile } from '@/utils/handleSecret';
 import { initDb } from '@/utils/initDb';
-import { initWs } from '@/websocket';
+// import { initWs } from '@/websocket';
 
 const port = +PROJECT_PORT; // 端口
 

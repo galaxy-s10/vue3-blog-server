@@ -53,7 +53,7 @@ const model = sequelize.define<LogModel>(
     api_body: {
       type: DataTypes.TEXT('long'),
     },
-    api_code: {
+    api_status_code: {
       type: DataTypes.INTEGER,
     },
     api_error: {

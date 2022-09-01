@@ -3,7 +3,7 @@ import schedule from 'node-schedule';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import { MONIT_JOB } from '@/constant';
+import { ALLOW_HTTP_CODE, MONIT_JOB } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import { main } from '@/monit/monitBackupsDb';
 import { showMemory, clearCache, restartPm2 } from '@/utils/clearCache';
@@ -28,11 +28,15 @@ class ScheduleController {
 
   async invokeDbJob(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     main(userInfo!.id);
     successHandler({
@@ -45,11 +49,15 @@ class ScheduleController {
 
   async invokeClearCacheJob(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     clearCache();
     successHandler({
@@ -62,11 +70,15 @@ class ScheduleController {
 
   async restartPm2(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     successHandler({
       ctx,
@@ -78,11 +90,15 @@ class ScheduleController {
 
   async invokeShowMemoryJob(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     if (userInfo!.id !== 1) {
-      throw new CustomError(`权限不足！`, 403, 403);
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const data = await showMemory();
     successHandler({

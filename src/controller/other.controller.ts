@@ -9,7 +9,7 @@ import {
   QQ_EMAIL_PASS,
   QQ_EMAIL_USER,
 } from '@/config/secret';
-import { VERIFY_EMAIL_RESULT_CODE } from '@/constant';
+import { ALLOW_HTTP_CODE, VERIFY_EMAIL_RESULT_CODE } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import { getRandomString } from '@/utils';
 
@@ -40,7 +40,11 @@ class OtherController {
     const { email } = ctx.request.body;
     const reg = /^[A-Za-z0-9\u4E00-\u9FA5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
     if (!reg.test(email)) {
-      throw new CustomError('请输入正确的邮箱！', 400, 400);
+      throw new CustomError(
+        '请输入正确的邮箱！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const key = {
       prefix: 'email',
@@ -66,8 +70,8 @@ class OtherController {
       if (ttl > 60 * 4) {
         throw new CustomError(
           `操作频繁，${`请${ttl - 60 * 4}`}秒后再发送验证码！`,
-          400,
-          400
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
         );
       }
       const verificationCode = getRandomString(6);

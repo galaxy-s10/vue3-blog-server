@@ -168,7 +168,7 @@ class QiniuModel {
 
     return new Promise<{ flag: boolean; respErr; respInfo; respBody }>(
       (resolve) => {
-        bucketManager.delete(bucket, key, (respErr, respBody, respInfo) => {
+        bucketManager.delete(bucket!, key!, (respErr, respBody, respInfo) => {
           if (respInfo.statusCode === 200) {
             resolve({ flag: true, respErr, respInfo, respBody });
           } else {

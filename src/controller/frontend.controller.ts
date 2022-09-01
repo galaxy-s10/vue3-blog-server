@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IFrontend } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import frontendService from '@/service/frontend.service';
@@ -21,7 +22,11 @@ class FrontendController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const {

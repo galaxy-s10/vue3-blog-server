@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import successHandler from '@/app/handler/success-handle';
 import sequelize from '@/config/db';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import AuthModel from '@/model/auth.model';
 import { CustomError } from '@/model/customError.model';
 import dayDataModel from '@/model/dayData.model';
@@ -49,7 +50,11 @@ class InitController {
       await RoleModel.bulkCreate(bulkCreateRole);
       successHandler({ ctx, message: '初始化角色成功！' });
     } else {
-      throw new CustomError('已经初始化过角色，不能再初始化了！', 400, 400);
+      throw new CustomError(
+        '已经初始化过角色，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await next();
   }
@@ -61,7 +66,11 @@ class InitController {
       await AuthModel.bulkCreate(bulkCreateAuth);
       successHandler({ ctx, message: '初始化权限成功！' });
     } else {
-      throw new CustomError('已经初始化过权限了，不能再初始化了！', 400, 400);
+      throw new CustomError(
+        '已经初始化过权限了，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
 
     await next();
@@ -76,8 +85,8 @@ class InitController {
     } else {
       throw new CustomError(
         '已经初始化过角色权限了，不能再初始化了！',
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
   }
@@ -90,7 +99,11 @@ class InitController {
       await initDb(1);
       successHandler({ ctx, data: '初始化数据库成功！' });
     } else {
-      throw new CustomError('已经初始化过数据库了，不能再初始化了！', 400, 400);
+      throw new CustomError(
+        '已经初始化过数据库了，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
 
     await next();
@@ -105,7 +118,11 @@ class InitController {
       await sequelize.query(sql3);
       successHandler({ ctx, data: '初始化时间表成功！' });
     } else {
-      throw new CustomError('已经初始化过时间表了，不能再初始化了！', 400, 400);
+      throw new CustomError(
+        '已经初始化过时间表了，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
 
     await next();
@@ -122,7 +139,11 @@ class InitController {
       adminUser.setRoles([3, 7]);
       successHandler({ ctx, data: '初始化管理员成功！' });
     } else {
-      throw new CustomError('已经初始化过管理员了，不能再初始化了！', 400, 400);
+      throw new CustomError(
+        '已经初始化过管理员了，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
 
     await next();

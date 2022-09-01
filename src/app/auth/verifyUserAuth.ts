@@ -2,11 +2,12 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from './authJwt';
 
+import { ALLOW_HTTP_CODE } from '@/constant';
 import roleService from '@/service/role.service';
 
 export const verifyUserAuth = async (ctx: ParameterizedContext) => {
   const { code, userInfo, message } = await authJwt(ctx);
-  if (code !== 200) {
+  if (code !== ALLOW_HTTP_CODE.ok) {
     console.log(message);
     return false;
   }

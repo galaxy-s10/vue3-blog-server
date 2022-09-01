@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IComment, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import articleService from '@/service/article.service';
@@ -48,7 +49,7 @@ class CommentController {
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
     const { code, userInfo } = await authJwt(ctx);
-    if (code === 200) {
+    if (code === ALLOW_HTTP_CODE.ok) {
       from_user_id = userInfo!.id!;
     }
     const result = await commentService.getArticleCommentList({
@@ -85,17 +86,24 @@ class CommentController {
       content,
     }: IComment = ctx.request.body;
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const comment: any = await commentService.find(id);
     if (userInfo!.id !== comment.from_user_id) {
-      throw new CustomError(`你不能修改其他人的评论哦！`, 400, 400);
+      throw new CustomError(
+        `你不能修改其他人的评论哦！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const isExist = await commentService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的评论！`, 400, 400);
-      throw new CustomError(`不存在id为${id}的评论！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的评论！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result = await commentService.update({
       id,
@@ -121,22 +129,38 @@ class CommentController {
       content,
     }: IComment = ctx.request.body;
     if (!article_id) {
-      throw new CustomError(`article_id不能为空！`, 400, 400);
+      throw new CustomError(
+        `article_id不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (parent_comment_id === -1 && to_user_id !== -1) {
-      throw new CustomError(`不能在父评论里回复其他用户哦！`, 400, 400);
+      throw new CustomError(
+        `不能在父评论里回复其他用户哦！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     if (parent_comment_id === -1 && reply_comment_id !== -1) {
-      throw new CustomError(`不能在父评论里回复其他评论哦！`, 400, 400);
+      throw new CustomError(
+        `不能在父评论里回复其他评论哦！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const articleIsExist =
       article_id === -1 ? true : await articleService.isExist([article_id]);
     if (!articleIsExist) {
-      throw new CustomError(`不存在id为${article_id}的文章！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${article_id}的文章！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const commentIdArr = arrayUnique(
       [parent_comment_id!, reply_comment_id!].filter((v) => v !== -1)
@@ -148,14 +172,18 @@ class CommentController {
     if (!commentIsExist) {
       throw new CustomError(
         `不存在id为${commentIdArr.toString()}的评论！`,
-        400,
-        400
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
     }
     const userIsExist =
       to_user_id === -1 ? true : await userService.isExist([to_user_id!]);
     if (!userIsExist) {
-      throw new CustomError(`不存在id为${to_user_id!}的用户！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${to_user_id!}的用户！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const ua = ctx.request.headers['user-agent'];
     const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
@@ -189,7 +217,7 @@ class CommentController {
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
     const { code, userInfo } = await authJwt(ctx);
-    if (code === 200) {
+    if (code === ALLOW_HTTP_CODE.ok) {
       from_user_id = userInfo!.id!;
     }
     const result = await commentService.getCommentList({
@@ -219,7 +247,7 @@ class CommentController {
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
     const { code, userInfo } = await authJwt(ctx);
-    if (code === 200) {
+    if (code === ALLOW_HTTP_CODE.ok) {
       from_user_id = userInfo!.id!;
     }
     const result = await commentService.getChildrenCommentList({
@@ -247,8 +275,16 @@ class CommentController {
     const id = +ctx.params.parent_comment_id;
     const isExist = await commentService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的评论！`, 400, 400);
-      throw new CustomError(`不存在id为${id}的评论！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的评论！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+      throw new CustomError(
+        `不存在id为${id}的评论！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const result: any = await this.commonGetAllChildrenComment(id);
     successHandler({ ctx, data: result });
@@ -260,16 +296,24 @@ class CommentController {
   delete = async (ctx: ParameterizedContext, next) => {
     const id = +ctx.params.id;
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== 200) {
+    if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
     const isExist = await commentService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的评论！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的评论！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     const comment: any = await commentService.find(id);
     if (userInfo!.id !== comment.from_user_id) {
-      throw new CustomError(`你不能删除其他人的评论哦！`, 400, 400);
+      throw new CustomError(
+        `你不能删除其他人的评论哦！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     let effect = 0;
     // 如果删的是父评论,

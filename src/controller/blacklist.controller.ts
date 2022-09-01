@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IBlacklist, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import blacklistService from '@/service/blacklist.service';
@@ -38,13 +39,21 @@ class BlacklistController {
   async update(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const { user_id, ip, msg }: IBlacklist = ctx.request.body;
     const isExist = await blacklistService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的黑名单！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的黑名单！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await blacklistService.update({
       id,
@@ -70,12 +79,20 @@ class BlacklistController {
   async delete(ctx: ParameterizedContext, next) {
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
-      throw new CustomError('权限不足！', 403, 403);
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.authReject,
+        ALLOW_HTTP_CODE.authReject
+      );
     }
     const id = +ctx.params.id;
     const isExist = await blacklistService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(`不存在id为${id}的黑名单！`, 400, 400);
+      throw new CustomError(
+        `不存在id为${id}的黑名单！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
     }
     await blacklistService.delete(id);
     successHandler({ ctx });
