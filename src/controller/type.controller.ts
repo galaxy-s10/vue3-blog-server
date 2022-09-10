@@ -43,8 +43,8 @@ class TypeController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -68,8 +68,8 @@ class TypeController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const { name }: IType = ctx.request.body;
@@ -91,8 +91,8 @@ class TypeController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

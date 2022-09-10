@@ -43,8 +43,8 @@ class TagController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -68,8 +68,8 @@ class TagController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const { name, color }: ITag = ctx.request.body;
@@ -97,8 +97,8 @@ class TagController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

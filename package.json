@@ -7,7 +7,7 @@
     "commit": "cz",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint:fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
-    "typecheck":"tsc -p ./tsconfig.json --noEmit",
+    "typecheck": "tsc -p ./tsconfig.json --noEmit",
     "prepare": "husky install",
     "prettier": "prettier --write .",
     "push": "cz && standard-version",
@@ -82,6 +82,7 @@
     "husky": "^7.0.0",
     "lint-staged": "^12.1.6",
     "nodemon": "^2.0.15",
+    "pm2": "^5.2.0",
     "prettier": "^2.6.0",
     "standard-version": "^9.3.2",
     "ts-node": "^10.4.0"

@@ -4,6 +4,3 @@
 .eslintignore
 .browserlistrc
 .editorconfig
-**/*.jpg
-**/*.png
-**/*.svg

@@ -11,7 +11,7 @@ const authJwt = (
   return new Promise((resolve) => {
     // 首先判断请求头有没有authorization
     if (ctx.req.headers.authorization === undefined) {
-      resolve({ code: ALLOW_HTTP_CODE.noAuth, message: '未登录！' });
+      resolve({ code: ALLOW_HTTP_CODE.unauthorized, message: '未登录！' });
       return;
     }
 
@@ -27,7 +27,7 @@ const authJwt = (
         if (err.message.indexOf('invalid') !== -1) {
           message = COMMON_ERR_MSG.invalidToken;
         }
-        resolve({ code: ALLOW_HTTP_CODE.noAuth, message });
+        resolve({ code: ALLOW_HTTP_CODE.unauthorized, message });
         return;
       }
       async function main() {
@@ -38,7 +38,7 @@ const authJwt = (
           if (!userResult) {
             // 这个用户已经被删除了
             resolve({
-              code: ALLOW_HTTP_CODE.noAuth,
+              code: ALLOW_HTTP_CODE.unauthorized,
               message: '该用户不存在！',
             });
             return;
@@ -46,7 +46,7 @@ const authJwt = (
           if (userResult.token !== token) {
             // 单点登录（防止修改密码后，原本的token还能用）
             resolve({
-              code: ALLOW_HTTP_CODE.noAuth,
+              code: ALLOW_HTTP_CODE.unauthorized,
               message: COMMON_ERR_MSG.jwtExpired,
             });
             return;
@@ -54,7 +54,7 @@ const authJwt = (
           if (userResult.status === 2) {
             // 账号被禁用了
             resolve({
-              code: ALLOW_HTTP_CODE.noAuth,
+              code: ALLOW_HTTP_CODE.unauthorized,
               message: COMMON_ERR_MSG.adminDisableUser,
             });
             return;

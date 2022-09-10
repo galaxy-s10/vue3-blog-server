@@ -6,6 +6,7 @@ import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import logService from '@/service/log.service';
 import { isAdmin } from '@/utils';
+import { chalkINFO } from '@/utils/chalkTip';
 
 // 全局错误处理中间件
 export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
@@ -18,7 +19,8 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     error: string;
     message: string;
   }) => {
-    if (PROJECT_ENV === 'prod') {
+    if (PROJECT_ENV !== 'beta') {
+      console.log(chalkINFO('当前不是beta环境，写入日志'));
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
       logService.create({
@@ -42,17 +44,21 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
   try {
     console.log('catchErrorMiddle中间件开始...');
     await next();
-    console.log('catchErrorMiddle中间件通过！');
+    console.log(
+      chalkINFO(`catchErrorMiddle中间件通过！http状态码：${ctx.status}`)
+    );
     const statusCode = ctx.status;
     /**
      * 如果通过了catchErrorMiddle中间件，但是返回的状态不是200，
      * 代表了在next前面没有设置ctx状态码，因此默认就是返回404！
-     * 如果调用了，successHandler会设置200状态码的，
      * 因此业务层必须在next前设置ctx的状态码200，让接口通过catchErrorMiddle中间件，让它返回数据，
      * 或者业务层直接throw new Error或者CustomError，不让这个接口通过catchErrorMiddle中间件，
      * 让catchErrorMiddle中间件判断错误，并且返回错误数据！
      */
-    if (statusCode !== ALLOW_HTTP_CODE.ok) {
+    if (
+      statusCode !== ALLOW_HTTP_CODE.ok &&
+      statusCode !== ALLOW_HTTP_CODE.apiCache
+    ) {
       if (statusCode === ALLOW_HTTP_CODE.notFound) {
         const defaultSuccess = {
           statusCode,
@@ -72,6 +78,11 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         // 既不是200也不是404，写入日志表
         insertLog(defaultSuccess);
       }
+      throw new CustomError(
+        '返回了即不是200也不是404的http状态码，请排查问题！',
+        ALLOW_HTTP_CODE.notFound,
+        ALLOW_HTTP_CODE.notFound
+      );
     } else {
       const defaultSuccess = {
         statusCode,

@@ -34,8 +34,8 @@ class ScheduleController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     main(userInfo!.id);
@@ -55,8 +55,8 @@ class ScheduleController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     clearCache();
@@ -76,8 +76,8 @@ class ScheduleController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     successHandler({
@@ -96,8 +96,8 @@ class ScheduleController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const data = await showMemory();

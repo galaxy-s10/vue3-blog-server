@@ -10,4 +10,4 @@ export const chalkSUCCESS = (v) =>
 export const chalkERROR = (v) =>
   `${chalk.bgRedBright.black(' ERROR ')} ${chalk.redBright(v)}`;
 export const chalkWARN = (v) =>
-  `${chalk.bgHex('#FFA500').black(' WRAN ')} ${chalk.hex('#FFA500')(v)}`;
+  `${chalk.bgHex('#FFA500').black(' WARN ')} ${chalk.hex('#FFA500')(v)}`;

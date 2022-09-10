@@ -1,5 +1,3 @@
-import path from 'path';
-
 import fs from 'fs-extra';
 import Koa from 'koa';
 import koaBody from 'koa-body';
@@ -8,14 +6,22 @@ import etag from 'koa-etag';
 import staticService from 'koa-static';
 
 import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
-import { catchErrorMiddle, corsMiddle } from './app/app.middleware';
-import { monit } from './monit';
+import { CustomError } from './model/customError.model';
+import { getFileExt } from './utils';
 
+import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
 import { connectMysql } from '@/config/db';
 import { connectRedis } from '@/config/redis';
-import { PROJECT_ENV, PROJECT_NAME, PROJECT_PORT } from '@/constant';
+import {
+  PROJECT_ENV,
+  PROJECT_NAME,
+  PROJECT_PORT,
+  staticDir,
+  uploadDir,
+} from '@/constant';
+import { monit } from '@/monit';
 import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { handleSecretFile } from '@/utils/handleSecret';
@@ -27,11 +33,11 @@ const port = +PROJECT_PORT; // 端口
 aliasOk(); // 添加别名路径
 handleSecretFile(); // 处理config/secret.ts秘钥文件
 
-const staticDir = path.join(__dirname, './public/'); // 静态目录
-const uploadDir = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
 fs.ensureDirSync(uploadDir);
 
 const app = new Koa();
+
+app.use(catchErrorMiddle); // 全局错误处理
 
 app.use(
   koaBody({
@@ -41,6 +47,15 @@ app.use(
       uploadDir, // 默认os.tmpdir()
       // 保留文件扩展名
       keepExtensions: true,
+      maxFileSize: 1024 * 1024 * 300, // 300m
+      onFileBegin(name, file) {
+        // file.filepath ='可覆盖地址'
+        console.log(file, '------');
+      },
+    },
+    onError(err) {
+      console.log('koaBody错误', err);
+      throw new CustomError(err.message, 500, 500);
     },
     // parsedMethods: ['POST', 'PUT', 'PATCH', 'GET', 'HEAD', 'DELETE'], // 声明将解析正文的 HTTP 方法，默认值['POST', 'PUT', 'PATCH']。替换strict选项。
     // strict: true, // 废弃了。如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
@@ -54,7 +69,6 @@ app.use(
 app.use(conditional()); // 接口缓存
 app.use(etag()); // 接口缓存
 app.use(corsMiddle); // 设置允许跨域
-app.use(catchErrorMiddle); // 全局错误处理
 
 app.on('error', errorHandler); // 接收全局错误，位置必须得放在最开头？
 

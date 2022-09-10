@@ -46,8 +46,8 @@ class MusicController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -79,8 +79,8 @@ class MusicController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const { name, cover_pic, audio_url, author, status }: IMusic =
@@ -102,8 +102,8 @@ class MusicController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

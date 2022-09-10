@@ -62,14 +62,14 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
     // 1是频繁操作
     throw new CustomError(
       COMMON_ERR_MSG.banIp,
-      ALLOW_HTTP_CODE.authReject,
+      ALLOW_HTTP_CODE.forbidden,
       ERROR_HTTP_CODE.banIp
     );
   } else if (inBlacklist?.type === 2) {
     // 2是管理员手动禁用
     throw new CustomError(
       COMMON_ERR_MSG.adminDisableUser,
-      ALLOW_HTTP_CODE.authReject,
+      ALLOW_HTTP_CODE.forbidden,
       ERROR_HTTP_CODE.adminDisableUser
     );
   } else {

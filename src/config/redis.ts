@@ -32,7 +32,7 @@ export const connectRedis = async () => {
     await redisClient.connect();
     console.log(chalkSUCCESS(msg(true)));
   } catch (error) {
-    console.log(chalkSUCCESS(msg(false)));
+    console.log(chalkERROR(msg(false)));
     console.log(error);
     throw new Error(msg(false));
   }

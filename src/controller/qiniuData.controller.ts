@@ -1,21 +1,40 @@
+import fs from 'fs';
+
 import dayjs from 'dayjs';
+import {
+  remove,
+  copySync,
+  readdirSync,
+  appendFileSync,
+  readFileSync,
+  removeSync,
+  existsSync,
+  emptyDirSync,
+  ensureDirSync,
+  pathExistsSync,
+} from 'fs-extra';
 import { ParameterizedContext } from 'koa';
+
+import redisController from './redis.controller';
 
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import {
   ALLOW_HTTP_CODE,
+  ERROR_HTTP_CODE,
   QINIU_BUCKET,
   QINIU_CDN_DOMAIN,
   QINIU_CDN_URL,
   QINIU_PREFIX,
+  REDIS_PREFIX,
+  uploadDir,
 } from '@/constant';
 import { IList, IQiniuData } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
-import { formatMemorySize, getLastestWeek } from '@/utils';
+import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
 import qiniu from '@/utils/qiniu';
 
@@ -31,7 +50,7 @@ class QiniuController {
     await next();
   }
 
-  upload = async (ctx: ParameterizedContext, next) => {
+  mergeChunk = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
     if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
@@ -39,16 +58,62 @@ class QiniuController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { prefix } = ctx.request.body;
-    let fileArr: {
-      prefix: string;
-      filepath: string;
-      originalFilename: string | null;
-    }[] = [];
+    const { hash, ext } = ctx.request.query as { hash: string; ext: string };
+    const resultPath = `${uploadDir + hash}.${ext}`;
+    const chunkDir = uploadDir + hash;
+    // 判断是否是目录
+    if (fs.statSync(chunkDir).isDirectory()) {
+      const bufferArr: Buffer[] = [];
+      // 读取目录
+      readdirSync(chunkDir)
+        .sort((a: string, b: string) => +a - +b)
+        .forEach((v) => {
+          const buffer = Buffer.from(readFileSync(`${chunkDir}/${v}`));
+          bufferArr.push(buffer);
+        });
+      // 将buffer数组写入到resultPath
+      fs.writeFileSync(resultPath, Buffer.concat(bufferArr));
+      // 删除chunk目录
+      removeSync(uploadDir + hash);
+      successHandler({
+        ctx,
+        data: { code: 1 },
+        message: '合并成功！',
+      });
+    } else {
+      successHandler({
+        ctx,
+        data: { code: 2 },
+        message: `合并失败！${chunkDir}目录不存在！`,
+      });
+    }
+
+    next();
+  };
+
+  uploadChunk = async (ctx: ParameterizedContext, next) => {
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== ALLOW_HTTP_CODE.ok) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const {
+      prefix,
+      hash,
+      chunkName,
+      chunkTotal,
+    }: { prefix: string; hash: string; chunkName: string; chunkTotal: string } =
+      ctx.request.body;
     const { uploadFiles } = ctx.request.files!;
     if (!uploadFiles) {
       throw new CustomError(
@@ -58,71 +123,324 @@ class QiniuController {
       );
     }
     if (Array.isArray(uploadFiles)) {
-      fileArr = uploadFiles.map((v) => {
-        return {
-          prefix,
-          filepath: v.filepath,
-          originalFilename: v.originalFilename,
-        };
-      });
-    } else {
-      fileArr.push({
-        prefix,
-        filepath: uploadFiles.filepath,
-        originalFilename: uploadFiles.originalFilename,
-      });
-    }
-    const queue: Promise<any>[] = [];
-    fileArr.forEach((v: any) => {
-      queue.push(qiniu.upload(v));
-    });
-    const queueRes = await Promise.all(queue);
-    const uploadRes: { success: any[]; error: any[] } = {
-      success: [],
-      error: [],
-    };
-    queueRes.forEach((v) => {
-      if (v.flag) {
-        uploadRes.success.push({
-          ...v.respBody,
-          original: v.original,
-          resultFilename: QINIU_CDN_URL + (v.respBody.key as string),
-        });
-      } else {
-        uploadRes.error.push({
-          original: v.original,
-        });
-      }
-    });
-    // WARN七牛云官方的接口不完善，先用妥协的办法
-    // const res = await this.batchFileInfo(
-    //   uploadRes.success.map((item) => {
-    //     return { srcBucket: QINIU_BUCKET, key: item.key };
-    //   })
-    // );
-    const queue1: any = [];
-    uploadRes.success.forEach((item) => {
-      queue1.push(
-        qiniuDataService.create({
-          user_id: userInfo!.id,
-          prefix: item.original.prefix,
-          bucket: item.bucket,
-          qiniu_key: item.key,
-          qiniu_fsize: item.fsize,
-          qiniu_hash: item.hash,
-          qiniu_mimeType: item.mimeType,
-          qiniu_putTime: item.original.putTime,
-        })
+      throw new CustomError(
+        'uploadFiles不能是数组！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
       );
+    }
+    const fileInfo = {
+      prefix,
+      hash,
+      filepath: uploadFiles.filepath,
+      originalFilename: uploadFiles.originalFilename,
+    };
+    try {
+      console.log(`${uploadDir + hash}`, 'uploadDiruploadDir');
+      const destHashDir = uploadDir + hash;
+      const destHashChunk = `${destHashDir}/${chunkName}`;
+      ensureDirSync(destHashDir);
+
+      if (existsSync(destHashChunk)) {
+        const num = readdirSync(destHashDir).length;
+        const percentage = ((num / +chunkTotal) * 100) / 2;
+        console.log(num, '当前num');
+        console.log('存在了', destHashChunk);
+        // 删除临时文件
+        remove(fileInfo?.filepath);
+        successHandler({
+          ctx,
+          data: {
+            code: 2,
+            percentage,
+            message: `${hash}/${chunkName}已存在！`,
+          },
+        });
+        return;
+      }
+      copySync(fileInfo.filepath, destHashChunk);
+      removeSync(fileInfo.filepath);
+      const num = readdirSync(destHashDir).length;
+      const percentage = ((num / +chunkTotal) * 100) / 2;
+      console.log(num, '当前num');
+      const key = {
+        prefix: REDIS_PREFIX.fileProgress,
+        key: hash,
+      };
+
+      const info = {
+        type: REDIS_PREFIX.fileProgress,
+        hash,
+        percentage,
+      };
+      await redisController.setVal({
+        prefix: key.prefix,
+        key: key.key,
+        value: JSON.stringify(info),
+        exp: 24 * 60 * 60,
+      });
+      successHandler({
+        ctx,
+        data: {
+          code: 1,
+          percentage,
+          message: `${hash}/${chunkName}上传成功！`,
+        },
+      });
+    } catch (error: any) {
+      // 删除临时文件
+      remove(fileInfo?.filepath);
+      throw new CustomError(error?.message);
+    }
+  };
+
+  upload = async (ctx: ParameterizedContext, next) => {
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== ALLOW_HTTP_CODE.ok) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const { hash, ext } = ctx.request.query as { hash: string; ext: string };
+    const res = await qiniu.upload({
+      ext,
+      prefix: QINIU_PREFIX['image/'],
+      hash,
     });
-    await Promise.all(queue1);
     successHandler({
       ctx,
-      data: { ...uploadRes },
-      message: `一共上传${fileArr.length}个文件，成功：${uploadRes.success.length}个，失败：${uploadRes.error.length}个`,
+      data: res,
     });
+    next();
+  };
 
-    await next();
+  upload2 = async (ctx: ParameterizedContext, next) => {
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== ALLOW_HTTP_CODE.ok) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const { prefix, hash }: { prefix: string; hash: string } = ctx.request.body;
+    const { uploadFiles } = ctx.request.files!;
+    const fileArr: {
+      prefix: string;
+      hash: string;
+      filepath: string;
+      originalFilename: string | null;
+    }[] = [];
+
+    try {
+      if (!uploadFiles) {
+        throw new CustomError(
+          '请传入uploadFiles！',
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
+        );
+      }
+      // TODO: 传多个文件的话，hash会有问题！待优化
+      console.log('当前是数组吗', Array.isArray(uploadFiles));
+      if (!Array.isArray(uploadFiles)) {
+        fileArr.push({
+          prefix,
+          hash,
+          filepath: uploadFiles.filepath,
+          originalFilename: uploadFiles.originalFilename,
+        });
+      }
+      fileArr.forEach((v) => {
+        const ext = getFileExt(v.filepath);
+        copySync(v.filepath, `${uploadDir + hash}.${ext}`);
+      });
+      const queue: Promise<any>[] = [];
+      fileArr.forEach((v: any) => {
+        queue.push(qiniu.upload(v));
+      });
+      const queueRes = await Promise.all(queue);
+      const uploadRes: { success: any[]; error: any[] } = {
+        success: [],
+        error: [],
+      };
+      queueRes.forEach((v) => {
+        if (v.flag) {
+          uploadRes.success.push({
+            respBody: v.respBody,
+            original: v.original,
+            url: QINIU_CDN_URL + (v.respBody.key as string),
+            hash: v.hash,
+          });
+        } else {
+          uploadRes.error.push({
+            original: v.original,
+          });
+        }
+      });
+      // WARN七牛云官方的接口不完善，先用妥协的办法
+      // const res = await this.batchFileInfo(
+      //   uploadRes.success.map((item) => {
+      //     return { srcBucket: QINIU_BUCKET, key: item.key };
+      //   })
+      // );
+      const queue1: any = [];
+      uploadRes.success.forEach((item) => {
+        queue1.push(
+          qiniuDataService.create({
+            user_id: userInfo!.id,
+            prefix: item.original.prefix,
+            bucket: item.bucket,
+            qiniu_key: item.key,
+            qiniu_fsize: item.fsize,
+            qiniu_hash: item.hash,
+            qiniu_mimeType: item.mimeType,
+            qiniu_putTime: item.original.putTime,
+          })
+        );
+      });
+      await Promise.all(queue1);
+      uploadRes.success.forEach((v) => {
+        // 删除redis记录
+        redisController.del({ prefix: REDIS_PREFIX.fileProgress, key: v.hash });
+      });
+      successHandler({
+        ctx,
+        data: { ...uploadRes },
+        message: `一共上传${fileArr.length}个文件，成功：${uploadRes.success.length}个，失败：${uploadRes.error.length}个`,
+      });
+
+      await next();
+    } catch (error) {
+      console.log(uploadFiles);
+      console.log(error, fileArr.length, 9999);
+      fileArr.forEach((v) => {
+        // 删除临时文件
+        remove(v.filepath);
+      });
+      // successHandler({ ctx, data: 'result' });
+      // await next();
+      // throw CustomError()
+    }
+  };
+
+  upload1 = async (ctx: ParameterizedContext, next) => {
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== ALLOW_HTTP_CODE.ok) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const { prefix, hash }: { prefix: string; hash: string } = ctx.request.body;
+    const { uploadFiles } = ctx.request.files!;
+    const fileArr: {
+      prefix: string;
+      hash: string;
+      filepath: string;
+      originalFilename: string | null;
+    }[] = [];
+
+    try {
+      if (!uploadFiles) {
+        throw new CustomError(
+          '请传入uploadFiles！',
+          ALLOW_HTTP_CODE.paramsError,
+          ALLOW_HTTP_CODE.paramsError
+        );
+      }
+      // TODO: 传多个文件的话，hash会有问题！待优化
+      console.log('当前是数组吗', Array.isArray(uploadFiles));
+      if (!Array.isArray(uploadFiles)) {
+        fileArr.push({
+          prefix,
+          hash,
+          filepath: uploadFiles.filepath,
+          originalFilename: uploadFiles.originalFilename,
+        });
+      }
+      fileArr.forEach((v) => {
+        const ext = getFileExt(v.filepath);
+        copySync(v.filepath, `${uploadDir + hash}.${ext}`);
+      });
+      const queue: Promise<any>[] = [];
+      fileArr.forEach((v: any) => {
+        queue.push(qiniu.upload(v));
+      });
+      const queueRes = await Promise.all(queue);
+      const uploadRes: { success: any[]; error: any[] } = {
+        success: [],
+        error: [],
+      };
+      queueRes.forEach((v) => {
+        if (v.flag) {
+          uploadRes.success.push({
+            respBody: v.respBody,
+            original: v.original,
+            url: QINIU_CDN_URL + (v.respBody.key as string),
+            hash: v.hash,
+          });
+        } else {
+          uploadRes.error.push({
+            original: v.original,
+          });
+        }
+      });
+      // WARN七牛云官方的接口不完善，先用妥协的办法
+      // const res = await this.batchFileInfo(
+      //   uploadRes.success.map((item) => {
+      //     return { srcBucket: QINIU_BUCKET, key: item.key };
+      //   })
+      // );
+      const queue1: any = [];
+      uploadRes.success.forEach((item) => {
+        queue1.push(
+          qiniuDataService.create({
+            user_id: userInfo!.id,
+            prefix: item.original.prefix,
+            bucket: item.bucket,
+            qiniu_key: item.key,
+            qiniu_fsize: item.fsize,
+            qiniu_hash: item.hash,
+            qiniu_mimeType: item.mimeType,
+            qiniu_putTime: item.original.putTime,
+          })
+        );
+      });
+      await Promise.all(queue1);
+      uploadRes.success.forEach((v) => {
+        // 删除redis记录
+        redisController.del({ prefix: REDIS_PREFIX.fileProgress, key: v.hash });
+      });
+      successHandler({
+        ctx,
+        data: { ...uploadRes },
+        message: `一共上传${fileArr.length}个文件，成功：${uploadRes.success.length}个，失败：${uploadRes.error.length}个`,
+      });
+
+      await next();
+    } catch (error) {
+      console.log(uploadFiles);
+      console.log(error, fileArr.length, 9999);
+      fileArr.forEach((v) => {
+        // 删除临时文件
+        remove(v.filepath);
+      });
+      // successHandler({ ctx, data: 'result' });
+      // await next();
+      // throw CustomError()
+    }
   };
 
   // 同步七牛云数据到数据库
@@ -136,8 +454,8 @@ class QiniuController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (!QINIU_PREFIX[prefix]) {
@@ -238,6 +556,19 @@ class QiniuController {
     return result;
   }
 
+  // 获取文件上传进度
+  getProgress = async (ctx: ParameterizedContext, next) => {
+    const { hash } = ctx.request.query as { hash: string };
+    const key = {
+      prefix: REDIS_PREFIX.fileProgress,
+      key: hash,
+    };
+    // 判断redis中
+    const redisData = await redisController.getVal(key);
+    successHandler({ ctx, data: JSON.parse(redisData!) });
+    await next();
+  };
+
   // 批量获取文件信息
   getBatchFileInfo = async (ctx: ParameterizedContext, next) => {
     const result = await this.batchFileInfo([
@@ -257,8 +588,8 @@ class QiniuController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -294,8 +625,8 @@ class QiniuController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const { qiniu_key } = ctx.request.query as {
@@ -403,8 +734,8 @@ class QiniuController {
     if (userInfo!.id !== 1) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const { bucket, prefix, qiniu_key }: any = ctx.request.body;
@@ -419,8 +750,8 @@ class QiniuController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

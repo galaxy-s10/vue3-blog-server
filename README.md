@@ -36,7 +36,7 @@ yarn run start:prod
 
 ## 注意事项
 
-`yarn start` 启动后，会默认在src/config/secret.ts生成秘钥文件，请在该文件里面填写本项目所需的秘钥信息~
+`yarn start` 启动后，会默认在 src/config/secret.ts 生成秘钥文件，请在该文件里面填写本项目所需的秘钥信息~
 
 # 环境
 

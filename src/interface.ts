@@ -195,7 +195,7 @@ export interface IUploadRes {
       prefix: string;
       putTime: string;
     };
-    resultFilename: string;
+    url: string;
   }[];
 }
 

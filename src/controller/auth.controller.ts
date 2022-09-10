@@ -138,8 +138,8 @@ class AuthController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const {
@@ -183,8 +183,8 @@ class AuthController {
       if (role.type === 1) {
         throw new CustomError(
           '测试环境不能操作默认权限！',
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -192,8 +192,8 @@ class AuthController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
 
@@ -268,8 +268,8 @@ class AuthController {
       if (role.type === 1) {
         throw new CustomError(
           '测试环境不能操作默认权限！',
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -277,8 +277,8 @@ class AuthController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === 1) {
@@ -312,8 +312,8 @@ class AuthController {
       if (role.type === 1) {
         throw new CustomError(
           '测试环境不能操作默认权限！',
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -321,8 +321,8 @@ class AuthController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === undefined) {
@@ -364,8 +364,8 @@ class AuthController {
       if (role.type === 1) {
         throw new CustomError(
           `测试环境不能操作默认权限！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -373,8 +373,8 @@ class AuthController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === undefined) {

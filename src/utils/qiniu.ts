@@ -1,9 +1,20 @@
+import { existsSync, outputFileSync, readFileSync, removeSync } from 'fs-extra';
 import qiniu from 'qiniu';
 
-import { getRandomString } from '.';
+import { chalkERROR } from './chalkTip';
+
+import { formatMemorySize, getRandomString, promiseQueue } from './index';
 
 import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/config/secret';
-import { QINIU_BUCKET } from '@/constant';
+import {
+  qiniuProgressV1Log,
+  QINIU_BUCKET,
+  QINIU_CDN_URL,
+  QINIU_PREFIX,
+  REDIS_PREFIX,
+  uploadDir,
+} from '@/constant';
+import redisController from '@/controller/redis.controller';
 import { IQiniuData } from '@/interface';
 
 const qiniuConfConfig = new qiniu.conf.Config();
@@ -37,11 +48,11 @@ class QiniuModel {
   }
 
   /**
-   * 获取七牛云凭证
-   * @param expires 过期时间，单位：秒
-   * @returns
+   * @description 获取七牛云凭证
+   * @param {*} expires 过期时间，单位：秒，默认600秒
+   * @return {*}
    */
-  getQiniuToken(expires = 60) {
+  getQiniuToken(expires = 600) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const options: qiniu.rs.PutPolicyOptions = {
       scope: QINIU_BUCKET,
@@ -58,91 +69,147 @@ class QiniuModel {
     return uploadToken;
   }
 
-  // uploadBackupsDb(localFileUrl = '') {
-  //   const uploadToken = this.getQiniuToken();
-  //   const { config } = this;
-  //   const formUploader = new qiniu.form_up.FormUploader(config);
-  //   const putExtra = new qiniu.form_up.PutExtra();
-  //   const parseLocalFileUrl = localFileUrl.split('/');
-  //   // fileName是根据localFileUrl生成的。
-  //   const fileName =
-  //     QINIU_PREFIX['backupsDatabase/'] +
-  //     +new Date() +
-  //     parseLocalFileUrl[parseLocalFileUrl.length - 1];
-  //   return new Promise((resolve, reject) => {
-  //     formUploader.putFile(
-  //       uploadToken,
-  //       fileName,
-  //       localFileUrl,
-  //       putExtra,
-  //       (respErr, respBody, respInfo) => {
-  //         if (respErr) {
-  //           reject(respErr);
-  //           throw respErr;
-  //         }
-  //         if (respInfo.statusCode === 200) {
-  //           resolve({ ...respBody, fileName });
-  //         } else {
-  //           reject({ statusCode: respInfo.statusCode, respBody });
-  //         }
-  //       }
-  //     );
-  //   });
-  // }
-
-  upload(file: { prefix: string; filepath: string; originalFilename: string }) {
-    const uploadToken = this.getQiniuToken();
-    const { config } = this;
-    const formUploader = new qiniu.form_up.FormUploader(config);
-    const putExtra = new qiniu.form_up.PutExtra();
-    const originalKey = `${file.prefix}${+new Date()}__${getRandomString(4)}__${
-      file.originalFilename
-    }`;
-    const { originalFilename, prefix } = file;
+  /**
+   * @description 复制文件副本
+   * @param srcBucket 源空间名称
+   * @param srcKey 源文件名称
+   * @param destBucket 目标空间名称
+   * @param destKey 目标文件名称
+   * @return {*}
+   */
+  copy({
+    srcBucket,
+    srcKey,
+    destBucket,
+    destKey,
+  }: {
+    srcBucket: string;
+    srcKey: string;
+    destBucket: string;
+    destKey: string;
+  }) {
+    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
+    const config = new qiniu.conf.Config();
+    // @ts-ignore
+    config.zone = qiniu.zone.Zone_z0; // 空间对应的机房
+    const bucketManager = new qiniu.rs.BucketManager(mac, config);
+    const options = {
+      force: false, // true强制覆盖已有同名文件；false:不强制覆盖已有同名文件
+    };
     return new Promise<{
       flag: boolean;
-      respErr: any;
-      respBody: any;
-      respInfo: any;
-      original: {
-        filename: string;
-        key: string;
-        prefix: string;
-        putTime: string;
-      };
+      resultUrl?: string;
+      respErr?;
+      respBody?;
+      respInfo?;
     }>((resolve) => {
-      formUploader.putFile(
-        uploadToken,
-        originalKey,
-        file.filepath,
-        putExtra,
+      bucketManager.copy(
+        srcBucket,
+        srcKey,
+        destBucket,
+        destKey,
+        options,
         (respErr, respBody, respInfo) => {
-          const obj = {
-            respErr,
-            respBody,
-            respInfo,
-            original: {
-              filename: originalFilename,
-              key: originalKey,
-              prefix,
-              putTime: `${+new Date()}0000`,
-            },
-          };
           if (respErr) {
-            console.log('respErr');
-            resolve({ flag: false, ...obj });
-            return;
-          }
-          if (respInfo.statusCode === 200) {
-            console.log('上传成功', obj);
-            resolve({ flag: true, ...obj });
+            console.log(respErr, respBody, respInfo);
+            resolve({ flag: false, respErr, respBody, respInfo });
+          } else if (respInfo.statusCode === 200) {
+            resolve({
+              flag: true,
+              resultUrl: QINIU_CDN_URL + destKey,
+              respErr,
+              respBody,
+              respInfo,
+            });
           } else {
-            console.log('上传失败', obj);
-            console.log({ respErr, respBody, respInfo });
-            resolve({ flag: false, ...obj });
+            resolve({ flag: false, respErr, respBody, respInfo });
           }
         }
       );
+    });
+  }
+
+  async upload({
+    prefix,
+    hash,
+    ext,
+  }: {
+    prefix: string;
+    hash: string;
+    ext: string;
+  }) {
+    const filename = `${hash}.${ext}`;
+    const filepath = uploadDir + filename;
+    const key = prefix + filename;
+    const { flag } = await this.getQiniuStat(QINIU_BUCKET, key);
+    if (flag) {
+      console.log('文件已存在，直接copy');
+      const destKey = `${prefix + hash}__${getRandomString(4)}.${ext}`;
+      const res = await this.copy({
+        srcBucket: QINIU_BUCKET,
+        srcKey: key,
+        destBucket: QINIU_BUCKET,
+        destKey,
+      });
+      return res;
+    }
+    const uploadToken = this.getQiniuToken();
+    const { config } = this;
+    const formUploader = new qiniu.resume_up.ResumeUploader(config);
+    const putExtra = new qiniu.resume_up.PutExtra();
+    if (!existsSync(qiniuProgressV1Log)) {
+      outputFileSync(qiniuProgressV1Log, '{}');
+    }
+    putExtra.resumeRecordFile = qiniuProgressV1Log; // 断点续传日志文件路径v1版本下载完成会自动删除该文件！但v2版本的不会自动删除！
+    putExtra.version = 'v1'; // v1版本
+    putExtra.partSize = 1024 * 1024 * 4; // 4m，partSize的值必须是整数，不能带小数点！v1版本大小不等超过4m，v2版本才可以自定义块大小
+    putExtra.progressCallback = (uploadBytes: number, totalBytes: number) => {
+      console.log('progressCallback', uploadBytes, totalBytes);
+      const info = {
+        type: REDIS_PREFIX.fileProgress,
+        hash,
+        percentage: 50 + ((uploadBytes / totalBytes) * 100) / 2,
+      };
+      redisController.setVal({
+        prefix: REDIS_PREFIX.fileProgress,
+        key: hash,
+        value: JSON.stringify(info),
+        exp: 24 * 60 * 60,
+      });
+    };
+
+    return new Promise<{
+      flag: boolean;
+      respErr?;
+      respBody?;
+      respInfo?;
+    }>((resolve) => {
+      try {
+        formUploader.putFile(
+          uploadToken,
+          key, // 这个key一定要设置null，如果同一个文件但是设置了不同的key，v1版本不报错（可能v1版本源码里面没有读取这个key），但在v2版本会报错no such uploadId
+          filepath,
+          putExtra,
+          (respErr, respBody, respInfo) => {
+            if (respErr) {
+              resolve({ flag: false, respErr, respBody, respInfo });
+              return;
+            }
+            if (respInfo.statusCode === 200) {
+              console.log('上传成功');
+              // removeSync(filepath);
+              resolve({ flag: true, respErr, respBody, respInfo });
+            } else {
+              console.log('上传失败', respErr, respBody, respInfo);
+              resolve({ flag: false, respErr, respBody, respInfo });
+            }
+          }
+        );
+      } catch (error) {
+        console.log(chalkERROR('formUploader.putFile错误！'));
+        console.log(error);
+        resolve({ flag: false });
+      }
     });
   }
 
@@ -161,12 +228,11 @@ class QiniuModel {
   delete(key: IQiniuData['qiniu_key'], bucket: IQiniuData['bucket']) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const config = new qiniu.conf.Config();
-    // config.useHttpsDomain = true;
     // @ts-ignore
-    config.zone = qiniu.zone.Zone_z0;
+    config.zone = qiniu.zone.Zone_z0; // 空间对应的机房
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 
-    return new Promise<{ flag: boolean; respErr; respInfo; respBody }>(
+    return new Promise<{ flag: boolean; respErr?; respBody?; respInfo? }>(
       (resolve) => {
         bucketManager.delete(bucket!, key!, (respErr, respBody, respInfo) => {
           if (respInfo.statusCode === 200) {
@@ -183,7 +249,7 @@ class QiniuModel {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
     const config = new qiniu.conf.Config();
     // @ts-ignore
-    config.zone = qiniu.zone.Zone_z0;
+    config.zone = qiniu.zone.Zone_z0; // 空间对应的机房
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     // 每个operations的数量不可以超过1000个，如果总数量超过1000，需要分批发送
     const statOperations = fileList.map((item) => {
@@ -225,9 +291,9 @@ class QiniuModel {
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     return new Promise<{
       flag: boolean;
-      respErr: any;
-      respBody: any;
-      respInfo: any;
+      respErr?;
+      respBody?;
+      respInfo?;
     }>((resolve) => {
       bucketManager.stat(bucket, key, (respErr, respBody, respInfo) => {
         const obj = { respErr, respBody, respInfo };
@@ -238,7 +304,6 @@ class QiniuModel {
         if (respInfo.statusCode === 200) {
           resolve({ flag: true, ...obj });
         } else {
-          console.log(obj);
           resolve({ flag: false, ...obj });
         }
       });
@@ -259,9 +324,9 @@ class QiniuModel {
     };
     return new Promise<{
       flag: boolean;
-      respErr: any;
-      respBody: any;
-      respInfo: any;
+      respErr?;
+      respBody?;
+      respInfo?;
     }>((resolve) => {
       bucketManager.listPrefix(
         bucket,
@@ -295,7 +360,7 @@ class QiniuModel {
     const options = {
       force: false, // true强制覆盖已有同名文件；false:不强制覆盖已有同名文件
     };
-    return new Promise<{ flag: boolean; respErr; respBody; respInfo }>(
+    return new Promise<{ flag: boolean; respErr?; respBody?; respInfo? }>(
       (resolve) => {
         bucketManager.move(
           srcBucket,

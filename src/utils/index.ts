@@ -4,6 +4,43 @@ import { Model, ModelStatic } from 'sequelize/types';
 import sequelize from '@/config/db';
 import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/utils/chalkTip';
 
+export const getFileExt = (name: string) => {
+  return name.split('.')[1];
+};
+
+/**
+ * @description:
+ * @param {any} fnArray
+ * @param {*} time
+ * @return {*}
+ */
+export const promiseQueue = async (fnArray: any[], time?: number) => {
+  const asyncPromise = (fn: any, index: number) => {
+    return new Promise((resolve) => {
+      if (Object.prototype.toString.call(fn) === '[object Function]') {
+        // 首次不走定时器
+        if (index === 0) {
+          fn?.();
+          resolve(true);
+        } else if (time) {
+          setTimeout(() => {
+            fn?.();
+            resolve(true);
+          }, time);
+        } else {
+          fn?.();
+          resolve(true);
+        }
+      }
+    });
+  };
+  for (let i = 0; i < fnArray.length; i += 1) {
+    const fn = fnArray[i];
+    // eslint-disable-next-line
+    await asyncPromise(fn, i);
+  }
+};
+
 /** 模拟ajax请求 */
 export const mockAjax = (time = 1000) => {
   return new Promise((resolve) => {
@@ -186,7 +223,8 @@ export const getRandomString = (length: number): string => {
   const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let res = '';
   for (let i = 0; i < length; i += 1) {
-    res += str.charAt(getRangeRandom(0, str.length - 1));
+    // res += str.charAt(getRangeRandom(0, str.length - 1));
+    res += str[getRangeRandom(0, str.length - 1)];
   }
   return res;
 };
@@ -324,6 +362,7 @@ export const getLastestWeek = () => {
  * @return {*}
  */
 export const formatMemorySize = (val: number, num = 2) => {
+  // bit:"比特"或"位",1byte=8bit
   const oneByte = 1;
   const oneKb = oneByte * 1024;
   const oneMb = oneKb * 1024;

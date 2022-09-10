@@ -117,8 +117,8 @@ class LogController {
       });
       throw new CustomError(
         COMMON_ERR_MSG.banIp,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const result = await logService.create({

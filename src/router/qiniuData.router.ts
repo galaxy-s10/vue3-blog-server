@@ -8,7 +8,19 @@ const qiniuRouter = new Router({ prefix: '/qiniu_data' });
 // 获取token
 // qiniuRouter.get('/get_token', qiniuController.getToken);
 
+// 上传文件，只支持一次性上传一个文件
 qiniuRouter.post('/upload', verifyEnv, qiniuController.upload);
+
+// 上传chunk
+qiniuRouter.post('/upload_chunk', verifyEnv, qiniuController.uploadChunk);
+
+// 合并chunk
+qiniuRouter.post('/merge_chunk', verifyEnv, qiniuController.mergeChunk);
+
+// 上传文件，只支持一次性上传多个文件
+qiniuRouter.post('/mulit_upload', verifyEnv, qiniuController.upload);
+
+qiniuRouter.get('/progress', qiniuController.getProgress);
 
 qiniuRouter.get('/diff', verifyEnv, qiniuController.getDiff);
 

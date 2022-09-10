@@ -265,8 +265,8 @@ class RoleController {
       if (role.type === 1) {
         throw new CustomError(
           `权限不足！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -274,8 +274,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const isExistRole = await roleService.isExist([id]);
@@ -332,8 +332,8 @@ class RoleController {
       if (role.type === 1) {
         throw new CustomError(
           `权限不足！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -341,8 +341,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === 1) {
@@ -398,8 +398,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const isExist = p_id === 0 ? false : await roleService.isExist([p_id!]);
@@ -437,8 +437,8 @@ class RoleController {
       if (role.type === 1) {
         throw new CustomError(
           `权限不足！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -446,8 +446,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === undefined) {
@@ -514,8 +514,8 @@ class RoleController {
       if (role.type === 1) {
         throw new CustomError(
           `权限不足！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -523,8 +523,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === undefined) {
@@ -579,8 +579,8 @@ class RoleController {
       if (role.type === 1) {
         throw new CustomError(
           `权限不足！`,
-          ALLOW_HTTP_CODE.authReject,
-          ALLOW_HTTP_CODE.authReject
+          ALLOW_HTTP_CODE.forbidden,
+          ALLOW_HTTP_CODE.forbidden
         );
       }
     }
@@ -588,8 +588,8 @@ class RoleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     if (id === 1) {

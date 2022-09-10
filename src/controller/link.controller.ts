@@ -48,8 +48,8 @@ class LinkController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -108,8 +108,8 @@ class LinkController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

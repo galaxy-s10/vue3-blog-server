@@ -1,6 +1,13 @@
+import path from 'path';
+
 export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
 export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV as string;
 export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
+
+export const staticDir = path.join(__dirname, './public/'); // 静态目录
+export const uploadDir = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
+export const qiniuProgressV1Log = path.join(uploadDir, 'progressv1.log'); // 上传文件接口接收到的文件存放的目录
+export const qiniuProgressV2Log = path.join(uploadDir, 'progressv2.log'); // 上传文件接口接收到的文件存放的目录
 
 export const ERROR_HTTP_CODE = {
   serverError: 10000, // 服务器错误
@@ -11,20 +18,21 @@ export const ERROR_HTTP_CODE = {
 };
 
 export const ALLOW_HTTP_CODE = {
-  ok: 200,
-  notFound: 404,
-  paramsError: 400,
-  noAuth: 401,
-  authReject: 403,
-  serverError: 500,
+  ok: 200, // 成功
+  apiCache: 304, // 接口缓存
+  paramsError: 400, // 参数错误
+  unauthorized: 401, // 未授权
+  forbidden: 403, // 权限不足
+  notFound: 404, // 未找到
+  serverError: 500, // 服务器错误
 };
 
 export const HttpErrorMsg = {
-  400: '参数错误！',
-  401: '未授权！',
-  403: '权限不足！',
-  404: '未找到！',
-  500: '服务器错误！',
+  paramsError: '参数错误！',
+  unauthorized: '未授权！',
+  forbidden: '权限不足！',
+  notFound: '未找到！',
+  serverError: '服务器错误！',
 };
 
 export const HttpSuccessMsg = {
@@ -60,9 +68,10 @@ export const VERIFY_EMAIL_RESULT_CODE = {
 export const REDIS_PREFIX = {
   emailLogin: `${PROJECT_NAME}-${PROJECT_ENV}-emailLogin`, // 登录不区分前后台
   emailRegister: `${PROJECT_NAME}-${PROJECT_ENV}-emailRegister`, // 注册不区分前后台
-  userBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userBindEmail`,
-  userCancelBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userCancelBindEmail`,
-  chatInfo: `${PROJECT_NAME}-${PROJECT_ENV}-chatInfo`,
+  userBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userBindEmail`, // 用户绑定邮箱
+  userCancelBindEmail: `${PROJECT_NAME}-${PROJECT_ENV}-userCancelBindEmail`, // 用户取消绑定邮箱
+  fileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-fileProgress`, // 文件上传进度
+  chunkFileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-chunkFileProgress`, // 分片文件上传进度
 };
 
 // 平台类型
@@ -97,9 +106,9 @@ export const MONIT_TYPE = {
 export const QINIU_CDN_DOMAIN = 'resource.hsslive.cn';
 export const QINIU_CDN_URL = 'https://resource.hsslive.cn/';
 export const QINIU_BUCKET = 'hssblog'; // 七牛云bucket
-export const QINIU_PREFIX = {
-  'image/': 'image/',
-  'backupsDatabase/': 'backupsDatabase/',
-  'media/': 'media/',
-  'nuxt-blog-client/': 'nuxt-blog-client/',
-};
+export enum QINIU_PREFIX {
+  'image/' = 'image/',
+  'backupsDatabase/' = 'backupsDatabase/',
+  'media/' = 'media/',
+  'nuxt-blog-client/' = 'nuxt-blog-client/',
+}

@@ -12,9 +12,10 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
   const time = new Date().toLocaleString();
   const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
   // eslint-disable-next-line
-  async function main() {
+  function main() {
     if (!(error instanceof CustomError)) {
-      console.log(chalkERROR(`不是自定义错误`));
+      console.log(chalkERROR(`收到非自定义错误！`));
+      console.log(error);
       const defaultError = {
         code: ALLOW_HTTP_CODE.serverError,
         errorCode: ERROR_HTTP_CODE.serverError,
@@ -26,8 +27,12 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
         code: defaultError.errorCode,
         errorCode: defaultError.errorCode,
         error: defaultError.error,
-        message: defaultError.message,
+        message: HttpErrorMsg[500],
       };
+      console.log(
+        chalkERROR(`非自定义错误返回前端的数据，http状态码：${ctx.status}`),
+        defaultError
+      );
       return;
     }
 
