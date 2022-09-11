@@ -7,7 +7,6 @@ import staticService from 'koa-static';
 
 import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
 import { CustomError } from './model/customError.model';
-import { getFileExt } from './utils';
 
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';

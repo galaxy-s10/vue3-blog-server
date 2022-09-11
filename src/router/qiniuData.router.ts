@@ -20,6 +20,7 @@ qiniuRouter.post('/merge_chunk', verifyEnv, qiniuController.mergeChunk);
 // 上传文件，只支持一次性上传多个文件
 qiniuRouter.post('/mulit_upload', verifyEnv, qiniuController.upload);
 
+// 文件进度
 qiniuRouter.get('/progress', qiniuController.getProgress);
 
 qiniuRouter.get('/diff', verifyEnv, qiniuController.getDiff);

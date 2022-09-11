@@ -34,9 +34,14 @@ import { IList, IQiniuData } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
-import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
+import {
+  formatMemorySize,
+  getFileExt,
+  getLastestWeek,
+  getRandomString,
+} from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
-import qiniu from '@/utils/qiniu';
+import qiniu, { IQiniuKey } from '@/utils/qiniu';
 
 class QiniuController {
   async getToken(ctx: ParameterizedContext, next) {
@@ -81,13 +86,13 @@ class QiniuController {
       removeSync(uploadDir + hash);
       successHandler({
         ctx,
-        data: { code: 1 },
+        code: 1,
         message: '合并成功！',
       });
     } else {
       successHandler({
         ctx,
-        data: { code: 2 },
+        code: 2,
         message: `合并失败！${chunkDir}目录不存在！`,
       });
     }
@@ -110,10 +115,34 @@ class QiniuController {
     const {
       prefix,
       hash,
+      ext,
       chunkName,
       chunkTotal,
-    }: { prefix: string; hash: string; chunkName: string; chunkTotal: string } =
-      ctx.request.body;
+    }: {
+      prefix: string;
+      hash: string;
+      ext: string;
+      chunkName: string;
+      chunkTotal: string;
+    } = ctx.request.body;
+    const key = prefix + hash;
+    const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
+    if (flag) {
+      console.log('文件已存在，直接copy');
+      const destKey = `${prefix + hash}__${getRandomString(4)}.${ext}`;
+      const res = await qiniu.copy({
+        srcBucket: QINIU_BUCKET,
+        srcKey: key,
+        destBucket: QINIU_BUCKET,
+        destKey,
+      });
+      successHandler({
+        ctx,
+        code: 1,
+        message: '秒传',
+      });
+      await next();
+    }
     const { uploadFiles } = ctx.request.files!;
     if (!uploadFiles) {
       throw new CustomError(
@@ -136,16 +165,13 @@ class QiniuController {
       originalFilename: uploadFiles.originalFilename,
     };
     try {
-      console.log(`${uploadDir + hash}`, 'uploadDiruploadDir');
       const destHashDir = uploadDir + hash;
       const destHashChunk = `${destHashDir}/${chunkName}`;
       ensureDirSync(destHashDir);
-
       if (existsSync(destHashChunk)) {
         const num = readdirSync(destHashDir).length;
         const percentage = ((num / +chunkTotal) * 100) / 2;
         console.log(num, '当前num');
-        console.log('存在了', destHashChunk);
         // 删除临时文件
         remove(fileInfo?.filepath);
         successHandler({
@@ -156,17 +182,12 @@ class QiniuController {
             message: `${hash}/${chunkName}已存在！`,
           },
         });
-        return;
       }
       copySync(fileInfo.filepath, destHashChunk);
       removeSync(fileInfo.filepath);
       const num = readdirSync(destHashDir).length;
       const percentage = ((num / +chunkTotal) * 100) / 2;
       console.log(num, '当前num');
-      const key = {
-        prefix: REDIS_PREFIX.fileProgress,
-        key: hash,
-      };
 
       const info = {
         type: REDIS_PREFIX.fileProgress,
@@ -174,8 +195,8 @@ class QiniuController {
         percentage,
       };
       await redisController.setVal({
-        prefix: key.prefix,
-        key: key.key,
+        prefix: REDIS_PREFIX.fileProgress,
+        key: hash,
         value: JSON.stringify(info),
         exp: 24 * 60 * 60,
       });
@@ -187,6 +208,7 @@ class QiniuController {
           message: `${hash}/${chunkName}上传成功！`,
         },
       });
+      await next();
     } catch (error: any) {
       // 删除临时文件
       remove(fileInfo?.filepath);
@@ -558,14 +580,37 @@ class QiniuController {
 
   // 获取文件上传进度
   getProgress = async (ctx: ParameterizedContext, next) => {
-    const { hash } = ctx.request.query as { hash: string };
-    const key = {
-      prefix: REDIS_PREFIX.fileProgress,
-      key: hash,
-    };
-    // 判断redis中
-    const redisData = await redisController.getVal(key);
-    successHandler({ ctx, data: JSON.parse(redisData!) });
+    // @ts-ignore
+    const { prefix, hash, ext }: IQiniuKey = ctx.request.query;
+    const key = `${prefix + hash}.${ext}`;
+    const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
+    console.log(prefix, hash, ext, flag, '---');
+    if (flag) {
+      successHandler({
+        code: 3,
+        ctx,
+        message: '文件已存在，无需merge，请直接调用upload',
+      });
+    } else {
+      const redisData = await redisController.getVal({
+        prefix: REDIS_PREFIX.fileProgress,
+        key: hash,
+      });
+      if (redisData) {
+        successHandler({
+          code: 1,
+          ctx,
+          data: JSON.parse(redisData),
+          message: '获取上传进度成功！',
+        });
+      } else {
+        successHandler({
+          code: 2,
+          ctx,
+          message: `没有该文件的上传进度！`,
+        });
+      }
+    }
     await next();
   };
 

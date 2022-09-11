@@ -17,6 +17,12 @@ import {
 import redisController from '@/controller/redis.controller';
 import { IQiniuData } from '@/interface';
 
+export interface IQiniuKey {
+  prefix: string;
+  hash: string;
+  ext: string;
+}
+
 const qiniuConfConfig = new qiniu.conf.Config();
 
 // @ts-ignore
@@ -129,15 +135,7 @@ class QiniuModel {
     });
   }
 
-  async upload({
-    prefix,
-    hash,
-    ext,
-  }: {
-    prefix: string;
-    hash: string;
-    ext: string;
-  }) {
+  async upload({ prefix, hash, ext }: IQiniuKey) {
     const filename = `${hash}.${ext}`;
     const filepath = uploadDir + filename;
     const key = prefix + filename;
@@ -180,6 +178,7 @@ class QiniuModel {
 
     return new Promise<{
       flag: boolean;
+      resultUrl?: string;
       respErr?;
       respBody?;
       respInfo?;
@@ -197,8 +196,14 @@ class QiniuModel {
             }
             if (respInfo.statusCode === 200) {
               console.log('上传成功');
-              // removeSync(filepath);
-              resolve({ flag: true, respErr, respBody, respInfo });
+              removeSync(filepath);
+              resolve({
+                flag: true,
+                resultUrl: QINIU_CDN_URL + key,
+                respErr,
+                respBody,
+                respInfo,
+              });
             } else {
               console.log('上传失败', respErr, respBody, respInfo);
               resolve({ flag: false, respErr, respBody, respInfo });
@@ -232,17 +237,21 @@ class QiniuModel {
     config.zone = qiniu.zone.Zone_z0; // 空间对应的机房
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
 
-    return new Promise<{ flag: boolean; respErr?; respBody?; respInfo? }>(
-      (resolve) => {
-        bucketManager.delete(bucket!, key!, (respErr, respBody, respInfo) => {
-          if (respInfo.statusCode === 200) {
-            resolve({ flag: true, respErr, respInfo, respBody });
-          } else {
-            resolve({ flag: false, respErr, respInfo, respBody });
-          }
-        });
-      }
-    );
+    return new Promise<{
+      flag: boolean;
+      resultUrl?: string;
+      respErr?;
+      respBody?;
+      respInfo?;
+    }>((resolve) => {
+      bucketManager.delete(bucket!, key!, (respErr, respBody, respInfo) => {
+        if (respInfo.statusCode === 200) {
+          resolve({ flag: true, respErr, respInfo, respBody });
+        } else {
+          resolve({ flag: false, respErr, respInfo, respBody });
+        }
+      });
+    });
   }
 
   batchGetFileInfo(fileList: any[]) {
@@ -291,6 +300,7 @@ class QiniuModel {
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
     return new Promise<{
       flag: boolean;
+      resultUrl?: string;
       respErr?;
       respBody?;
       respInfo?;
@@ -324,6 +334,7 @@ class QiniuModel {
     };
     return new Promise<{
       flag: boolean;
+      resultUrl?: string;
       respErr?;
       respBody?;
       respInfo?;
@@ -360,24 +371,28 @@ class QiniuModel {
     const options = {
       force: false, // true强制覆盖已有同名文件；false:不强制覆盖已有同名文件
     };
-    return new Promise<{ flag: boolean; respErr?; respBody?; respInfo? }>(
-      (resolve) => {
-        bucketManager.move(
-          srcBucket,
-          srcKey,
-          destBucket,
-          destKey,
-          options,
-          (respErr, respBody, respInfo) => {
-            if (respInfo.statusCode === 200) {
-              resolve({ flag: true, respErr, respBody, respInfo });
-            } else {
-              resolve({ flag: false, respErr, respBody, respInfo });
-            }
+    return new Promise<{
+      flag: boolean;
+      resultUrl?: string;
+      respErr?;
+      respBody?;
+      respInfo?;
+    }>((resolve) => {
+      bucketManager.move(
+        srcBucket,
+        srcKey,
+        destBucket,
+        destKey,
+        options,
+        (respErr, respBody, respInfo) => {
+          if (respInfo.statusCode === 200) {
+            resolve({ flag: true, respErr, respBody, respInfo });
+          } else {
+            resolve({ flag: false, respErr, respBody, respInfo });
           }
-        );
-      }
-    );
+        }
+      );
+    });
   }
 }
 
