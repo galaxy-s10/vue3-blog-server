@@ -308,8 +308,7 @@ export const arrayToTree = ({
   // eslint-disable-next-line no-shadow
   const handleToTree = (arr: any[], pid: number) => {
     // 循环，获取该id的children
-    // eslint-disable-next-line no-shadow
-    function loop(pid: number) {
+    function loop(_pid: number) {
       // 保存得到的数据
       const res: any = [];
       // 遍历原数组
@@ -325,14 +324,14 @@ export const arrayToTree = ({
           delete item[originPidKey];
         }
         // @ts-ignore
-        if (item[originPidKey] === pid || item[resPidKey] === pid) {
-          // 如果遍历到当前item的p_id等于目标pid，在将该item插入到res前，
+        if (item[originPidKey] === _pid || item[resPidKey] === _pid) {
+          // 如果遍历到当前item的p_id等于目标_pid，在将该item插入到res前，
           // 先遍历该item的id，找到原数组arr里面该item的所有children后，再将该item连同找到的children一起插入到res
           // item[resChildrenKey] = loop(item[resIdKey] || item[originIdKey]);
           // @ts-ignore
           const children = loop(item[resIdKey] || item[originIdKey]);
           if (children.length) item[resChildrenKey] = children;
-          // 如果当前item的p_id等于目标pid，则将这个item插入res
+          // 如果当前item的p_id等于目标_pid，则将这个item插入res
           res.push(item);
         }
       }

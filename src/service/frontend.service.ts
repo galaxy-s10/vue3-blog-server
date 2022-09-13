@@ -6,16 +6,14 @@ import qqUserModel from '@/model/qqUser.model';
 import userModel from '@/model/user.model';
 
 class FrontendService {
-  /** 查找前端设置 */
-  async find(id: number) {
+  /** 统计 */
+  async static() {
     const article_total = await articleModel.count();
     const article_read_total = await articleModel.sum('click');
     const comment_total = await commentModel.count();
     const user_total = await userModel.count();
     const qq_user_total = await qqUserModel.count();
-    const result = await frontendModel.findOne({ where: { id } });
     return {
-      frontend: result,
       user: {
         total: user_total,
       },
@@ -32,6 +30,11 @@ class FrontendService {
     };
   }
 
+  async find(id: number) {
+    const result = await frontendModel.findOne({ where: { id } });
+    return result;
+  }
+
   /** 修改前端设置 */
   async update({
     id,
@@ -43,6 +46,8 @@ class FrontendService {
     frontend_email_login,
     frontend_dialog,
     frontend_dialog_content,
+    frontend_shutdown,
+    frontend_shutdown_content,
   }: IFrontend) {
     const result = await frontendModel.update(
       {
@@ -54,6 +59,8 @@ class FrontendService {
         frontend_email_login,
         frontend_dialog,
         frontend_dialog_content,
+        frontend_shutdown,
+        frontend_shutdown_content,
       },
       { where: { id } }
     );

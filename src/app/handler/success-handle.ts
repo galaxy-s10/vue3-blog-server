@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { chalkSUCCESS } from '../../utils/chalkTip';
 
-import { ALLOW_HTTP_CODE, HttpSuccessMsg } from '@/constant';
+import { ALLOW_HTTP_CODE, HTTP_SUCCESS_MSG } from '@/constant';
 
 const successHandler = ({
   statusCode = ALLOW_HTTP_CODE.ok,
@@ -24,7 +24,7 @@ const successHandler = ({
   ctx.body = {
     code,
     data,
-    message: message || HttpSuccessMsg[methods],
+    message: message || HTTP_SUCCESS_MSG[methods],
   };
 
   console.log(chalkSUCCESS(`👆👆👆👆 success-handle 👆👆👆👆`));

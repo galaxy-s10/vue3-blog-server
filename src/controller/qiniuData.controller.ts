@@ -5,13 +5,10 @@ import {
   remove,
   copySync,
   readdirSync,
-  appendFileSync,
   readFileSync,
   removeSync,
   existsSync,
-  emptyDirSync,
   ensureDirSync,
-  pathExistsSync,
 } from 'fs-extra';
 import { ParameterizedContext } from 'koa';
 
@@ -22,24 +19,19 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import {
   ALLOW_HTTP_CODE,
-  ERROR_HTTP_CODE,
   QINIU_BUCKET,
   QINIU_CDN_DOMAIN,
   QINIU_CDN_URL,
   QINIU_PREFIX,
+  QINIU_UPLOAD_PROGRESS_TYPE,
   REDIS_PREFIX,
-  uploadDir,
+  UPLOAD_DIR,
 } from '@/constant';
 import { IList, IQiniuData } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
-import {
-  formatMemorySize,
-  getFileExt,
-  getLastestWeek,
-  getRandomString,
-} from '@/utils';
+import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
 import qiniu, { IQiniuKey } from '@/utils/qiniu';
 
@@ -67,9 +59,9 @@ class QiniuController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { hash, ext } = ctx.request.query as { hash: string; ext: string };
-    const resultPath = `${uploadDir + hash}.${ext}`;
-    const chunkDir = uploadDir + hash;
+    const { hash, ext }: IQiniuKey = ctx.request.body;
+    const resultPath = `${UPLOAD_DIR + hash}.${ext}`;
+    const chunkDir = UPLOAD_DIR + hash;
     // 判断是否是目录
     if (fs.statSync(chunkDir).isDirectory()) {
       const bufferArr: Buffer[] = [];
@@ -83,7 +75,7 @@ class QiniuController {
       // 将buffer数组写入到resultPath
       fs.writeFileSync(resultPath, Buffer.concat(bufferArr));
       // 删除chunk目录
-      removeSync(uploadDir + hash);
+      removeSync(UPLOAD_DIR + hash);
       successHandler({
         ctx,
         code: 1,
@@ -100,6 +92,25 @@ class QiniuController {
     next();
   };
 
+  // 设置上传进度
+  setUploadProgress = async ({
+    prefix,
+    key,
+    value,
+  }: {
+    prefix: string;
+    key: string;
+    value: { type: number; hash: string; percentage: number };
+  }) => {
+    await redisController.setVal({
+      prefix,
+      key,
+      value: JSON.stringify(value),
+      exp: 24 * 60 * 60,
+    });
+  };
+
+  // 上传chunk
   uploadChunk = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
     if (code !== ALLOW_HTTP_CODE.ok) {
@@ -125,23 +136,16 @@ class QiniuController {
       chunkName: string;
       chunkTotal: string;
     } = ctx.request.body;
-    const key = prefix + hash;
+    const key = `${prefix + hash}.${ext}`;
     const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
     if (flag) {
-      console.log('文件已存在，直接copy');
-      const destKey = `${prefix + hash}__${getRandomString(4)}.${ext}`;
-      const res = await qiniu.copy({
-        srcBucket: QINIU_BUCKET,
-        srcKey: key,
-        destBucket: QINIU_BUCKET,
-        destKey,
-      });
       successHandler({
+        code: 3,
         ctx,
-        code: 1,
-        message: '秒传',
+        message: '文件已存在，无需merge，请直接调用upload',
       });
       await next();
+      return;
     }
     const { uploadFiles } = ctx.request.files!;
     if (!uploadFiles) {
@@ -158,60 +162,53 @@ class QiniuController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    const fileInfo = {
+    const chunkInfo = {
       prefix,
       hash,
       filepath: uploadFiles.filepath,
       originalFilename: uploadFiles.originalFilename,
     };
     try {
-      const destHashDir = uploadDir + hash;
+      const destHashDir = UPLOAD_DIR + hash;
       const destHashChunk = `${destHashDir}/${chunkName}`;
       ensureDirSync(destHashDir);
+      // 这个chunk已经存在了
       if (existsSync(destHashChunk)) {
-        const num = readdirSync(destHashDir).length;
-        const percentage = ((num / +chunkTotal) * 100) / 2;
-        console.log(num, '当前num');
         // 删除临时文件
-        remove(fileInfo?.filepath);
+        remove(chunkInfo.filepath);
         successHandler({
           ctx,
-          data: {
-            code: 2,
+          code: 2,
+          message: `${hash}/${chunkName}已存在！`,
+        });
+      } else {
+        copySync(chunkInfo.filepath, destHashChunk);
+        removeSync(chunkInfo.filepath);
+        const num = readdirSync(destHashDir).length;
+        const percentage = ((num / +chunkTotal) * 100) / 2;
+
+        await this.setUploadProgress({
+          prefix: REDIS_PREFIX.fileProgress,
+          key: hash,
+          value: {
+            type: QINIU_UPLOAD_PROGRESS_TYPE.chunkFileProgress,
+            hash,
             percentage,
-            message: `${hash}/${chunkName}已存在！`,
           },
         });
-      }
-      copySync(fileInfo.filepath, destHashChunk);
-      removeSync(fileInfo.filepath);
-      const num = readdirSync(destHashDir).length;
-      const percentage = ((num / +chunkTotal) * 100) / 2;
-      console.log(num, '当前num');
-
-      const info = {
-        type: REDIS_PREFIX.fileProgress,
-        hash,
-        percentage,
-      };
-      await redisController.setVal({
-        prefix: REDIS_PREFIX.fileProgress,
-        key: hash,
-        value: JSON.stringify(info),
-        exp: 24 * 60 * 60,
-      });
-      successHandler({
-        ctx,
-        data: {
+        successHandler({
+          ctx,
           code: 1,
-          percentage,
+          data: {
+            percentage,
+          },
           message: `${hash}/${chunkName}上传成功！`,
-        },
-      });
+        });
+      }
       await next();
     } catch (error: any) {
       // 删除临时文件
-      remove(fileInfo?.filepath);
+      remove(chunkInfo?.filepath);
       throw new CustomError(error?.message);
     }
   };
@@ -228,15 +225,25 @@ class QiniuController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { hash, ext } = ctx.request.query as { hash: string; ext: string };
-    const res = await qiniu.upload({
+    const { hash, ext, prefix }: IQiniuKey = ctx.request.body;
+    const result = await qiniu.upload({
       ext,
-      prefix: QINIU_PREFIX['image/'],
+      prefix,
       hash,
+    });
+    qiniuDataService.create({
+      user_id: userInfo!.id,
+      prefix,
+      bucket: result.respBody.bucket,
+      qiniu_key: result.respBody.key,
+      qiniu_fsize: result.respBody.fsize,
+      qiniu_hash: result.respBody.hash,
+      qiniu_mimeType: result.respBody.mimeType,
+      qiniu_putTime: result.putTime,
     });
     successHandler({
       ctx,
-      data: res,
+      data: result,
     });
     next();
   };
@@ -253,7 +260,7 @@ class QiniuController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { prefix, hash }: { prefix: string; hash: string } = ctx.request.body;
+    const { prefix, hash }: IQiniuKey = ctx.request.body;
     const { uploadFiles } = ctx.request.files!;
     const fileArr: {
       prefix: string;
@@ -282,7 +289,7 @@ class QiniuController {
       }
       fileArr.forEach((v) => {
         const ext = getFileExt(v.filepath);
-        copySync(v.filepath, `${uploadDir + hash}.${ext}`);
+        copySync(v.filepath, `${UPLOAD_DIR + hash}.${ext}`);
       });
       const queue: Promise<any>[] = [];
       fileArr.forEach((v: any) => {
@@ -394,7 +401,7 @@ class QiniuController {
       }
       fileArr.forEach((v) => {
         const ext = getFileExt(v.filepath);
-        copySync(v.filepath, `${uploadDir + hash}.${ext}`);
+        copySync(v.filepath, `${UPLOAD_DIR + hash}.${ext}`);
       });
       const queue: Promise<any>[] = [];
       fileArr.forEach((v: any) => {
@@ -638,10 +645,10 @@ class QiniuController {
       );
     }
     const id = +ctx.params.id;
-    const result = (await qiniuDataService.find(id)) as IQiniuData;
+    const result = await qiniuDataService.find(id);
     if (!result) {
       throw new CustomError(
-        `不存在id为${id}的资源！`,
+        `不存在id为${id}的资源记录！`,
         ALLOW_HTTP_CODE.paramsError,
         ALLOW_HTTP_CODE.paramsError
       );
@@ -654,8 +661,14 @@ class QiniuController {
     const cdnUrl = QINIU_CDN_URL + result.qiniu_key!;
     successHandler({
       ctx,
-      data: `${qiniudataRes === 1 ? `id:${id}删除成功` : `id:${id}删除失败`}，${
-        qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`
+      data: `${
+        qiniudataRes === 1
+          ? `删除id:${id}资源记录成功`
+          : `删除id:${id}资源记录失败`
+      }，${
+        qiniuOfficialRes.flag
+          ? `删除${cdnUrl}资源成功`
+          : `删除${cdnUrl}资源失败`
       }`,
     });
 
@@ -677,29 +690,36 @@ class QiniuController {
     const { qiniu_key } = ctx.request.query as {
       qiniu_key: string;
     };
-    const result = (await qiniuDataService.findByQiniuKey(
-      qiniu_key
-    )) as IQiniuData;
+    const qiniuOfficialRes = await qiniu.delete(qiniu_key, QINIU_BUCKET);
+    const result = await qiniuDataService.findByQiniuKey(qiniu_key);
+    const cdnUrl = QINIU_CDN_URL + qiniu_key;
+
     if (!result) {
-      throw new CustomError(
-        `不存在${qiniu_key}的资源！`,
-        ALLOW_HTTP_CODE.paramsError,
-        ALLOW_HTTP_CODE.paramsError
-      );
+      successHandler({
+        ctx,
+        data: `不存在${qiniu_key}的资源记录！，${
+          qiniuOfficialRes.flag
+            ? `资源${cdnUrl}删除成功！`
+            : `资源${cdnUrl}删除失败！`
+        }`,
+      });
+    } else {
+      const { id } = result;
+      const qiniudataRes = await qiniuDataService.delete(id!);
+
+      successHandler({
+        ctx,
+        data: `${
+          qiniudataRes === 1
+            ? `删除id:${result.id!}资源记录成功！`
+            : `删除id:${result.id!}资源记录失败！`
+        }，${
+          qiniuOfficialRes.flag
+            ? `删除${cdnUrl}资源成功！`
+            : `删除${cdnUrl}资源失败！`
+        }`,
+      });
     }
-    const { id } = result;
-    const qiniudataRes = await qiniuDataService.delete(id!);
-    const qiniuOfficialRes = await qiniu.delete(
-      result.qiniu_key,
-      result.bucket
-    );
-    const cdnUrl = QINIU_CDN_URL + result.qiniu_key!;
-    successHandler({
-      ctx,
-      data: `${
-        qiniudataRes === 1 ? `id:${id!}删除成功` : `id:${id!}删除失败`
-      }，${qiniuOfficialRes.flag ? `${cdnUrl}删除成功` : `${cdnUrl}删除失败`}`,
-    });
 
     await next();
   }
@@ -752,14 +772,12 @@ class QiniuController {
     // 遍历七牛云官方文件
     Object.keys(qiniuOfficialResMap).forEach((item) => {
       if (qiniuOfficialResMap[item] && !qiniuDataResMap[item]?.get()) {
-        console.log('七牛云官方有的文件但qiniudata没有', item);
         officialDiff.push(item);
       }
     });
     // 遍历qiniudata
     Object.keys(qiniuDataResMap).forEach((item) => {
       if (qiniuDataResMap[item]?.get() && !qiniuOfficialResMap[item]) {
-        console.log('qiniudata有的文件但七牛云官方没有', item);
         qiniudataDiff.push(item);
       }
     });

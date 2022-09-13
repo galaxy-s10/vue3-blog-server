@@ -180,10 +180,9 @@ class RoleController {
     const queue: any[] = [];
     const result: any[] = [id];
     const tmp: any[] = [];
-    // eslint-disable-next-line no-shadow
-    const getChildRole = async (id: number): Promise<any[]> => {
-      const c: any = await roleService.findAllChildren(id);
-      tmp.push(id);
+    const getChildRole = async (_id: number): Promise<any[]> => {
+      const c: any = await roleService.findAllChildren(_id);
+      tmp.push(_id);
       if (c.length > 0) allRole.push(...c);
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
@@ -199,7 +198,6 @@ class RoleController {
     res.forEach((v) => {
       v[0] && result.push(v[0].id);
     });
-    console.log(result, tmp, arrayGetDifference(result, tmp));
     const diff: any[] = arrayGetDifference(result, tmp);
     const diffQueqe: any[] = [];
     if (diff.length) {
@@ -226,7 +224,6 @@ class RoleController {
       );
     }
     const result = await this.commonGetAllChildRole(id);
-    console.log(result.length, 333333);
     successHandler({ ctx, data: { total: result.length, result } });
 
     await next();

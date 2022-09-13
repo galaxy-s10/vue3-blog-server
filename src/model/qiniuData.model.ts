@@ -35,7 +35,7 @@ const model = sequelize.define<QiniuDataModel>(
       type: DataTypes.STRING(50),
     },
     qiniu_key: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     qiniu_hash: {
       type: DataTypes.STRING(50),

@@ -5,8 +5,16 @@ import { verifyEnv } from '@/middleware/qiniuData.middleware';
 
 const qiniuRouter = new Router({ prefix: '/qiniu_data' });
 
+// TIP 路由==》控制器
+// TIP 控制器（比如删除图片）不需要关心用户权限，因为用户只能调用接口，只要在接口加上中间件即可限制用户不进入控制器即可
+
 // 获取token
 // qiniuRouter.get('/get_token', qiniuController.getToken);
+
+qiniuRouter.get('/list', qiniuController.getList);
+
+// 对比差异
+qiniuRouter.get('/diff', qiniuController.getDiff);
 
 // 上传文件，只支持一次性上传一个文件
 qiniuRouter.post('/upload', verifyEnv, qiniuController.upload);
@@ -21,13 +29,9 @@ qiniuRouter.post('/merge_chunk', verifyEnv, qiniuController.mergeChunk);
 qiniuRouter.post('/mulit_upload', verifyEnv, qiniuController.upload);
 
 // 文件进度
-qiniuRouter.get('/progress', qiniuController.getProgress);
-
-qiniuRouter.get('/diff', verifyEnv, qiniuController.getDiff);
+qiniuRouter.get('/progress', verifyEnv, qiniuController.getProgress);
 
 qiniuRouter.get('/batch_list', verifyEnv, qiniuController.getBatchFileInfo);
-
-qiniuRouter.get('/list', qiniuController.getList);
 
 qiniuRouter.delete('/delete/:id', verifyEnv, qiniuController.delete);
 

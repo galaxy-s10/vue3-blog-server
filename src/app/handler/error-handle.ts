@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { chalkERROR, chalk } from '../../utils/chalkTip';
 
-import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, HttpErrorMsg } from '@/constant';
+import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, HTTP_ERROE_MSG } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import { isAdmin } from '@/utils';
 
@@ -27,7 +27,7 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
         code: defaultError.errorCode,
         errorCode: defaultError.errorCode,
         error: defaultError.error,
-        message: HttpErrorMsg[500],
+        message: HTTP_ERROE_MSG[500],
       };
       console.log(
         chalkERROR(`非自定义错误返回前端的数据，http状态码：${ctx.status}`),
@@ -59,7 +59,7 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
     ctx.body = {
       code: error.errorCode,
       errorCode: error.errorCode,
-      message: error?.message || HttpErrorMsg[error.statusCode],
+      message: error?.message || HTTP_ERROE_MSG[error.statusCode],
     };
 
     console.log(

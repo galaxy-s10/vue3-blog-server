@@ -11,14 +11,14 @@ import { CustomError } from './model/customError.model';
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
-import { connectMysql } from '@/config/db';
+import { connectMysql, dbName } from '@/config/db';
 import { connectRedis } from '@/config/redis';
 import {
   PROJECT_ENV,
   PROJECT_NAME,
   PROJECT_PORT,
-  staticDir,
-  uploadDir,
+  STATIC_DIR,
+  UPLOAD_DIR,
 } from '@/constant';
 import { monit } from '@/monit';
 import { loadAllRoutes } from '@/router';
@@ -31,8 +31,7 @@ const port = +PROJECT_PORT; // 端口
 
 aliasOk(); // 添加别名路径
 handleSecretFile(); // 处理config/secret.ts秘钥文件
-
-fs.ensureDirSync(uploadDir);
+fs.ensureDirSync(UPLOAD_DIR); // 确保存在上传目录
 
 const app = new Koa();
 
@@ -43,14 +42,13 @@ app.use(
     multipart: true,
     formidable: {
       // 上传目录
-      uploadDir, // 默认os.tmpdir()
+      uploadDir: UPLOAD_DIR, // 默认os.tmpdir()
       // 保留文件扩展名
       keepExtensions: true,
       maxFileSize: 1024 * 1024 * 300, // 300m
-      onFileBegin(name, file) {
-        // file.filepath ='可覆盖地址'
-        console.log(file, '------');
-      },
+      // onFileBegin(name, file) {
+      //   file.filepath = '可覆盖地址';
+      // },
     },
     onError(err) {
       console.log('koaBody错误', err);
@@ -62,7 +60,7 @@ app.use(
 ); // 解析参数
 
 app.use(
-  staticService(staticDir, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
+  staticService(STATIC_DIR, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
 );
 
 app.use(conditional()); // 接口缓存
@@ -88,6 +86,7 @@ async function main() {
       });
     }); // http接口服务
     console.log(chalkSUCCESS(`项目启动成功！`));
+    console.log(chalkWARN(`当前连接的数据库: ${dbName}`));
     console.log(chalkWARN(`当前监听的端口: ${port}`));
     console.log(chalkWARN(`当前的项目名称: ${PROJECT_NAME}`));
     console.log(chalkWARN(`当前的项目环境: ${PROJECT_ENV}`));

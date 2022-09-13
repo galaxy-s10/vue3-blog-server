@@ -13,8 +13,8 @@ class AuthController {
     const allAuth: any = [];
     const queue: any = [];
     // eslint-disable-next-line no-shadow
-    const getChildAuth = async (id: number) => {
-      const c: any = await authService.findAllChildren(id);
+    const getChildAuth = async (_id: number) => {
+      const c: any = await authService.findAllChildren(_id);
       if (c.length > 0) allAuth.push(...c);
       for (let i = 0; i < c.length; i += 1) {
         const item = c[i];
@@ -417,7 +417,6 @@ class AuthController {
     const authRes = await Promise.all(queue);
     // 将二维数组拍平
     const authResFlat = authRes.flat();
-    console.log([...authResFlat.map((v) => v.id), ...c_auths]);
     await authService.delete([...authResFlat.map((v) => v.id), ...c_auths]);
     successHandler({
       ctx,

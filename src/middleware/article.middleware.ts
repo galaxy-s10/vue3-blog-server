@@ -12,7 +12,7 @@ const schema = Joi.object({
   priority: [Joi.number(), null],
   is_comment: [1, 2],
   status: [1, 2],
-  head_img: [Joi.string().min(3).max(80), null],
+  head_img: [Joi.string().min(3).max(100), null],
   click: Joi.number(),
   tags: Joi.array().items(Joi.number()),
   types: Joi.array().items(Joi.number()),
@@ -30,12 +30,13 @@ export const verifyProp = async (ctx: ParameterizedContext, next) => {
       allowUnknown: false,
       convert: false,
     });
-    await next();
   } catch (error: any) {
+    console.log(error);
     throw new CustomError(
       error.message,
       ALLOW_HTTP_CODE.paramsError,
       ALLOW_HTTP_CODE.paramsError
     );
   }
+  await next();
 };

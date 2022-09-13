@@ -75,7 +75,7 @@ const model = sequelize.define<UserModel>(
       defaultValue: 1, // 1:正常 2:禁用
     },
     avatar: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     desc: {
       type: DataTypes.STRING(50),

@@ -29,13 +29,13 @@ const model = sequelize.define<MusicModel>(
       type: DataTypes.STRING(50),
     },
     cover_pic: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     author: {
       type: DataTypes.STRING(50),
     },
     audio_url: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     status: {
       type: DataTypes.INTEGER,

@@ -14,8 +14,9 @@ class FrontendController {
     await next();
   }
 
-  async getDetail1(ctx: ParameterizedContext, next) {
-    successHandler({ ctx, data: 111 });
+  async getStatis(ctx: ParameterizedContext, next) {
+    const result = await frontendService.static();
+    successHandler({ ctx, data: result });
     await next();
   }
 
@@ -38,6 +39,8 @@ class FrontendController {
       frontend_email_login,
       frontend_dialog,
       frontend_dialog_content,
+      frontend_shutdown,
+      frontend_shutdown_content,
     }: IFrontend = ctx.request.body;
     await frontendService.update({
       id,
@@ -49,6 +52,8 @@ class FrontendController {
       frontend_email_login,
       frontend_dialog,
       frontend_dialog_content,
+      frontend_shutdown,
+      frontend_shutdown_content,
     });
     successHandler({ ctx });
     await next();

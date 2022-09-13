@@ -1,18 +1,20 @@
-import { existsSync, outputFileSync, readFileSync, removeSync } from 'fs-extra';
+import path from 'path';
+
+import { existsSync, outputFileSync, removeSync } from 'fs-extra';
 import qiniu from 'qiniu';
 
 import { chalkERROR } from './chalkTip';
 
-import { formatMemorySize, getRandomString, promiseQueue } from './index';
+import { getRandomString } from './index';
 
 import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/config/secret';
 import {
-  qiniuProgressV1Log,
   QINIU_BUCKET,
   QINIU_CDN_URL,
   QINIU_PREFIX,
+  QINIU_UPLOAD_PROGRESS_TYPE,
   REDIS_PREFIX,
-  uploadDir,
+  UPLOAD_DIR,
 } from '@/constant';
 import redisController from '@/controller/redis.controller';
 import { IQiniuData } from '@/interface';
@@ -28,7 +30,7 @@ const qiniuConfConfig = new qiniu.conf.Config();
 // @ts-ignore
 qiniuConfConfig.zone = qiniu.zone.Zone_z2; // https://developer.qiniu.com/kodo/1289/nodejs#general-uptoken，qiniu.zone.Zone_z2代表华南
 
-class QiniuModel {
+class QiniuUtils {
   config = qiniuConfConfig;
 
   /**
@@ -117,9 +119,10 @@ class QiniuModel {
         options,
         (respErr, respBody, respInfo) => {
           if (respErr) {
-            console.log(respErr, respBody, respInfo);
+            console.log('copy失败', respErr, respBody, respInfo);
             resolve({ flag: false, respErr, respBody, respInfo });
           } else if (respInfo.statusCode === 200) {
+            console.log('copy成功', respBody);
             resolve({
               flag: true,
               resultUrl: QINIU_CDN_URL + destKey,
@@ -128,6 +131,7 @@ class QiniuModel {
               respInfo,
             });
           } else {
+            console.log('copy失败', respErr, respBody, respInfo);
             resolve({ flag: false, respErr, respBody, respInfo });
           }
         }
@@ -137,41 +141,45 @@ class QiniuModel {
 
   async upload({ prefix, hash, ext }: IQiniuKey) {
     const filename = `${hash}.${ext}`;
-    const filepath = uploadDir + filename;
+    const filepath = UPLOAD_DIR + filename;
     const key = prefix + filename;
-    const { flag } = await this.getQiniuStat(QINIU_BUCKET, key);
+    const { flag, respBody } = await this.getQiniuStat(QINIU_BUCKET, key);
     if (flag) {
-      console.log('文件已存在，直接copy');
-      const destKey = `${prefix + hash}__${getRandomString(4)}.${ext}`;
+      const destKey = `${prefix + hash}__${getRandomString(6)}.${ext}`;
+      // 理论上任何存在重名或者需要确保唯一的操作都需要查数据库
+      // 这里可以while使用this.getQiniuStat(QINIU_BUCKET, destKey);判断是否随机生成的key已存在
       const res = await this.copy({
         srcBucket: QINIU_BUCKET,
         srcKey: key,
         destBucket: QINIU_BUCKET,
         destKey,
       });
-      return res;
+      // 这个copy方法返回的Promise类型里没有putTime，但是下面的new Promise返回的Promise类型里面有putTime，由于ts的类型兼容，这个upload方法的Promise类型里面就会包括putTime
+      // 最好两者返回固定的类型，保持一致
+      return { ...res, respBody, putTime: respBody.putTime }; // copy成功返回的respBody是null，这里将getQiniuStat的respBody设置给它
     }
     const uploadToken = this.getQiniuToken();
     const { config } = this;
     const formUploader = new qiniu.resume_up.ResumeUploader(config);
     const putExtra = new qiniu.resume_up.PutExtra();
-    if (!existsSync(qiniuProgressV1Log)) {
-      outputFileSync(qiniuProgressV1Log, '{}');
+    const logFile = path.join(UPLOAD_DIR, `${hash}.log`); // 上传文件接口接收到的文件存放的目录
+
+    if (!existsSync(logFile)) {
+      outputFileSync(logFile, '{}');
     }
-    putExtra.resumeRecordFile = qiniuProgressV1Log; // 断点续传日志文件路径v1版本下载完成会自动删除该文件！但v2版本的不会自动删除！
+    putExtra.resumeRecordFile = logFile; // 断点续传日志文件路径v1版本下载完成会自动删除该文件！但v2版本的不会自动删除！
     putExtra.version = 'v1'; // v1版本
     putExtra.partSize = 1024 * 1024 * 4; // 4m，partSize的值必须是整数，不能带小数点！v1版本大小不等超过4m，v2版本才可以自定义块大小
     putExtra.progressCallback = (uploadBytes: number, totalBytes: number) => {
       console.log('progressCallback', uploadBytes, totalBytes);
-      const info = {
-        type: REDIS_PREFIX.fileProgress,
-        hash,
-        percentage: 50 + ((uploadBytes / totalBytes) * 100) / 2,
-      };
       redisController.setVal({
         prefix: REDIS_PREFIX.fileProgress,
         key: hash,
-        value: JSON.stringify(info),
+        value: JSON.stringify({
+          type: QINIU_UPLOAD_PROGRESS_TYPE.chunkFileProgress,
+          hash,
+          percentage: 50 + ((uploadBytes / totalBytes) * 100) / 2,
+        }),
         exp: 24 * 60 * 60,
       });
     };
@@ -179,6 +187,7 @@ class QiniuModel {
     return new Promise<{
       flag: boolean;
       resultUrl?: string;
+      putTime?: string;
       respErr?;
       respBody?;
       respInfo?;
@@ -189,13 +198,15 @@ class QiniuModel {
           key, // 这个key一定要设置null，如果同一个文件但是设置了不同的key，v1版本不报错（可能v1版本源码里面没有读取这个key），但在v2版本会报错no such uploadId
           filepath,
           putExtra,
+          // eslint-disable-next-line @typescript-eslint/no-shadow
           (respErr, respBody, respInfo) => {
             if (respErr) {
+              console.log('upload上传失败', respErr, respBody, respInfo);
               resolve({ flag: false, respErr, respBody, respInfo });
               return;
             }
             if (respInfo.statusCode === 200) {
-              console.log('上传成功');
+              console.log('upload上传成功');
               removeSync(filepath);
               resolve({
                 flag: true,
@@ -203,9 +214,10 @@ class QiniuModel {
                 respErr,
                 respBody,
                 respInfo,
+                putTime: `${+new Date()}0000`,
               });
             } else {
-              console.log('上传失败', respErr, respBody, respInfo);
+              console.log('upload上传失败', respErr, respBody, respInfo);
               resolve({ flag: false, respErr, respBody, respInfo });
             }
           }
@@ -215,6 +227,60 @@ class QiniuModel {
         console.log(error);
         resolve({ flag: false });
       }
+    });
+  }
+
+  uploadForm({
+    prefix,
+    filepath,
+    originalFilename,
+  }: {
+    prefix: QINIU_PREFIX;
+    filepath: string;
+    originalFilename: string;
+  }) {
+    const uploadToken = this.getQiniuToken();
+    const { config } = this;
+    const formUploader = new qiniu.form_up.FormUploader(config);
+    const putExtra = new qiniu.form_up.PutExtra();
+    const key = `${prefix}${+new Date()}__${getRandomString(
+      6
+    )}__${originalFilename}`;
+    return new Promise<{
+      flag: boolean;
+      respErr?;
+      respBody?;
+      respInfo?;
+      resultUrl?: string;
+      putTime?: string;
+    }>((resolve) => {
+      formUploader.putFile(
+        uploadToken,
+        key,
+        filepath,
+        putExtra,
+        (respErr, respBody, respInfo) => {
+          if (respErr) {
+            console.log('uploadForm上传失败', respErr, respBody, respInfo);
+            resolve({ flag: false, respErr, respBody, respInfo });
+            return;
+          }
+          if (respInfo.statusCode === 200) {
+            console.log('uploadForm上传成功');
+            resolve({
+              flag: true,
+              resultUrl: QINIU_CDN_URL + key,
+              respErr,
+              respBody,
+              respInfo,
+            });
+          } else {
+            console.log('uploadForm上传失败', respErr, respBody, respInfo);
+            console.log({ respErr, respBody, respInfo });
+            resolve({ flag: false, respErr, respBody, respInfo });
+          }
+        }
+      );
     });
   }
 
@@ -396,4 +462,4 @@ class QiniuModel {
   }
 }
 
-export default new QiniuModel();
+export default new QiniuUtils();

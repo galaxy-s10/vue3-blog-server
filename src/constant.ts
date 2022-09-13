@@ -1,13 +1,18 @@
 import path from 'path';
 
+export enum PROJECT_ENV_ENUM {
+  development = 'development',
+  prod = 'prod',
+  beta = 'beta',
+}
+
 export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
-export const PROJECT_ENV = process.env.NODE_APP_RELEASE_PROJECT_ENV as string;
+export const PROJECT_ENV = process.env
+  .NODE_APP_RELEASE_PROJECT_ENV as PROJECT_ENV_ENUM;
 export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
 
-export const staticDir = path.join(__dirname, './public/'); // 静态目录
-export const uploadDir = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
-export const qiniuProgressV1Log = path.join(uploadDir, 'progressv1.log'); // 上传文件接口接收到的文件存放的目录
-export const qiniuProgressV2Log = path.join(uploadDir, 'progressv2.log'); // 上传文件接口接收到的文件存放的目录
+export const STATIC_DIR = path.join(__dirname, './public/'); // 静态目录
+export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
 
 export const ERROR_HTTP_CODE = {
   serverError: 10000, // 服务器错误
@@ -27,7 +32,7 @@ export const ALLOW_HTTP_CODE = {
   serverError: 500, // 服务器错误
 };
 
-export const HttpErrorMsg = {
+export const HTTP_ERROE_MSG = {
   paramsError: '参数错误！',
   unauthorized: '未授权！',
   forbidden: '权限不足！',
@@ -35,7 +40,7 @@ export const HttpErrorMsg = {
   serverError: '服务器错误！',
 };
 
-export const HttpSuccessMsg = {
+export const HTTP_SUCCESS_MSG = {
   GET: '获取成功！',
   POST: '新增成功！',
   PUT: '修改成功！',
@@ -103,6 +108,13 @@ export const MONIT_TYPE = {
   BACKUPS_DB_ERR: 8, // 备份数据库失败
 };
 
+// 七牛云文件上传进度类型
+export enum QINIU_UPLOAD_PROGRESS_TYPE {
+  fileProgress = 1,
+  chunkFileProgress = 2,
+}
+export const QINIU_PROGRESS_LOG_V1 = path.join(UPLOAD_DIR, 'progressv1.log'); // 上传文件接口接收到的文件存放的目录
+export const QINIU_PROGRESS_LOG_V2 = path.join(UPLOAD_DIR, 'progressv2.log'); // 上传文件接口接收到的文件存放的目录
 export const QINIU_CDN_DOMAIN = 'resource.hsslive.cn';
 export const QINIU_CDN_URL = 'https://resource.hsslive.cn/';
 export const QINIU_BUCKET = 'hssblog'; // 七牛云bucket

@@ -55,6 +55,14 @@ const model = sequelize.define<FrontendModel>(
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:关闭申请友链 2:关闭申请友链
     },
+    frontend_shutdown: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1, // 1:停机维护 2:正常运行
+    },
+    frontend_shutdown_content: {
+      // 停机维护公告
+      type: DataTypes.TEXT('long'),
+    },
     frontend_dialog: {
       type: DataTypes.INTEGER,
       defaultValue: 2, // 1:开启首页弹窗 2:关闭首页弹窗

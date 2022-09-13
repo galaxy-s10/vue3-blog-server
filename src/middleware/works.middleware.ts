@@ -10,7 +10,7 @@ const schema = Joi.object({
   desc: Joi.string().min(3).max(50),
   url: Joi.string().min(5).max(80),
   bg_url: Joi.string().min(5).max(80),
-  priority: Joi.number(),
+  priority: [Joi.number(), null],
   status: [1, 2],
 });
 

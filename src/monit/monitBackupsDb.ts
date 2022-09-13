@@ -4,17 +4,11 @@ import { Client } from 'ssh2';
 
 import { dbName } from '@/config/db';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
-import {
-  MONIT_JOB,
-  MONIT_TYPE,
-  PROJECT_ENV,
-  QINIU_BUCKET,
-  QINIU_PREFIX,
-} from '@/constant';
+import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_PREFIX } from '@/constant';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
-import qiniuController from '@/utils/qiniu';
+import QiniuUtils from '@/utils/qiniu';
 
 // 备份目录
 const backupsDirectory = '/node/backups/mysql/';
@@ -57,13 +51,15 @@ export const main = (user_id?: number) => {
           stream
             .on('close', () => {
               console.log('close');
-              qiniuController
-                .upload({
-                  prefix: QINIU_PREFIX['backupsDatabase/'],
-                  filepath: `${backupsDirectory + fileName}.sql`,
-                  originalFilename: `${fileName}.sql`,
-                })
-                .then(({ flag, respBody, respErr, respInfo, original }) => {
+              const prefix = QINIU_PREFIX['backupsDatabase/'];
+              const filepath = `${backupsDirectory + fileName}.sql`;
+              const originalFilename = `${fileName}.sql`;
+              QiniuUtils.uploadForm({
+                prefix,
+                filepath,
+                originalFilename,
+              })
+                .then(({ flag, respBody, respErr, respInfo, putTime }) => {
                   if (flag) {
                     const info = `备份${dbName}数据库成功！`;
                     console.log(info);
@@ -73,13 +69,13 @@ export const main = (user_id?: number) => {
                     });
                     qiniuDataService.create({
                       user_id,
-                      prefix: QINIU_PREFIX['backupsDatabase/'],
-                      bucket: QINIU_BUCKET,
+                      prefix,
+                      bucket: respBody.bucket,
                       qiniu_key: respBody.key,
                       qiniu_fsize: respBody.fsize,
                       qiniu_hash: respBody.hash,
                       qiniu_mimeType: respBody.mimeType,
-                      qiniu_putTime: original.putTime,
+                      qiniu_putTime: putTime,
                     });
                   } else {
                     const info = `备份${dbName}数据库失败！`;

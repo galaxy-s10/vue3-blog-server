@@ -32,7 +32,7 @@ const model = sequelize.define<WorksModel>(
       type: DataTypes.STRING(100),
     },
     bg_url: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     url: {
       type: DataTypes.STRING(100),

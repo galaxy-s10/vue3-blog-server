@@ -29,7 +29,7 @@ const model = sequelize.define<LinkModel>(
       type: DataTypes.STRING(100),
     },
     avatar: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
     },
     desc: {
       type: DataTypes.STRING(100),

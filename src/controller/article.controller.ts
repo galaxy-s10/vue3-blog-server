@@ -54,9 +54,9 @@ class ArticleController {
       priority,
     });
     // @ts-ignore
-    await result.setTags(tags);
+    tags && (await result.setTags(tags));
     // @ts-ignore
-    await result.setTypes(types);
+    types && (await result.setTypes(types));
     // @ts-ignore
     await result.setUsers([userInfo.id]);
     successHandler({ ctx, data: result });
@@ -68,8 +68,8 @@ class ArticleController {
     if (!hasAuth) {
       throw new CustomError(
         `权限不足！`,
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;
@@ -194,8 +194,8 @@ class ArticleController {
     if (!hasAuth) {
       throw new CustomError(
         '权限不足！',
-        ALLOW_HTTP_CODE.authReject,
-        ALLOW_HTTP_CODE.authReject
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
       );
     }
     const id = +ctx.params.id;

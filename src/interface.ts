@@ -28,6 +28,8 @@ export interface IFrontend {
   frontend_comment?: number;
   frontend_link?: number;
   frontend_about?: string;
+  frontend_shutdown?: number;
+  frontend_shutdown_content?: string;
   frontend_dialog?: number;
   frontend_dialog_content?: string;
   created_at?: string;

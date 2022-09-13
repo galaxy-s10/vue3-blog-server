@@ -53,7 +53,7 @@ const model = sequelize.define<ArticleModel>(
       defaultValue: 2, // 1:已审核 2:未审核
     },
     head_img: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
       allowNull: true,
     },
     content: {
