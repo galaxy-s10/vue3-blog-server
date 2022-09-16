@@ -360,16 +360,16 @@ class CommentService {
         article_id,
       },
     });
-    const sql_duration = +new Date() - startTime;
     result.rows.forEach((item) => {
       const v = item.get();
       v.is_star_id = v.is_star?.id || null;
-      v.is_star = v.is_star !== null;
-
+      v.is_star = Boolean(v.is_star);
       delete v.stars;
+
       item.children_comment.forEach((child) => {
         const children = child.get();
-        children.is_star = children.is_star !== null;
+        children.is_star_id = children.is_star?.id;
+        children.is_star = Boolean(children.is_star);
         delete children.stars;
       });
     });
@@ -377,7 +377,6 @@ class CommentService {
       ...handlePaging(result, nowPage, pageSize),
       total,
       childrenPageSize: parseInt(childrenPageSize, 10),
-      sql_duration,
     };
   }
 
@@ -435,7 +434,6 @@ class CommentService {
         parent_comment_id,
       },
     });
-    const sql_duration = +new Date() - startTime;
 
     result.rows.forEach((item) => {
       const v: any = item.get();
@@ -445,7 +443,6 @@ class CommentService {
     });
     return {
       ...handlePaging(result, nowPage, pageSize),
-      sql_duration,
     };
   }
 

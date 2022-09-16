@@ -66,6 +66,7 @@ class ArticleService {
     if (!result) return null;
     const starPromise = starModel.findAndCountAll({
       attributes: [
+        [Sequelize.col('star.id'), 'star_id'],
         [Sequelize.col('user.id'), 'id'],
         [Sequelize.col('user.avatar'), 'avatar'],
         [Sequelize.col('user.username'), 'username'],
@@ -77,7 +78,7 @@ class ArticleService {
           required: true,
         },
       ],
-      limit: 5,
+      // limit: 5,
       where: {
         article_id: id,
         comment_id: -1,

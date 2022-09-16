@@ -273,6 +273,7 @@ class QiniuUtils {
               respErr,
               respBody,
               respInfo,
+              putTime: `${+new Date()}0000`,
             });
           } else {
             console.log('uploadForm上传失败', respErr, respBody, respInfo);

@@ -4,6 +4,7 @@ import commentModel from '@/model/comment.model';
 import frontendModel from '@/model/frontend.model';
 import qqUserModel from '@/model/qqUser.model';
 import userModel from '@/model/user.model';
+import VisitorLogModel from '@/model/visitorLog.model';
 
 class FrontendService {
   /** 统计 */
@@ -13,6 +14,7 @@ class FrontendService {
     const comment_total = await commentModel.count();
     const user_total = await userModel.count();
     const qq_user_total = await qqUserModel.count();
+    const visit_total = await VisitorLogModel.count();
     return {
       user: {
         total: user_total,
@@ -26,6 +28,9 @@ class FrontendService {
       },
       comment: {
         total: comment_total,
+      },
+      visit: {
+        total: visit_total,
       },
     };
   }
