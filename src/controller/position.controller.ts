@@ -8,7 +8,10 @@ class PositionController {
     const result = await positionService.get(
       ctx.request.headers['x-real-ip'] as string
     );
-    successHandler({ ctx, data: result });
+    successHandler({
+      ctx,
+      data: { gaode: result, ip: ctx.request.headers['x-real-ip'] || 'ip错误' },
+    });
     await next();
   }
 }

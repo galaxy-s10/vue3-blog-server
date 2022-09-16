@@ -28,7 +28,6 @@ class PositionService {
         city: 'localhost',
         adcode: 'localhost',
         rectangle: 'localhost',
-        ip: '127.0.0.1',
       };
     }
     const data: IIpdata = await axios.get(GAODE_WEB_IP_URL, {
