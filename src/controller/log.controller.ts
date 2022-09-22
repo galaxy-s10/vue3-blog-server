@@ -18,6 +18,14 @@ class LogController {
       pageSize,
       keyWord,
     }: IList<ILog> = ctx.request.query;
+    const { userInfo } = await authJwt(ctx);
+    if (userInfo?.id !== 1) {
+      throw new CustomError(
+        `权限不足！`,
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
     const result = await logService.getList({
       nowPage,
       pageSize,

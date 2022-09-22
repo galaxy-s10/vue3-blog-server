@@ -240,9 +240,9 @@ class QqUserController {
   }
 
   /**
-   * 绑定github
-   * 1，如果已经绑定过github，则不能绑定，只能先解绑了再绑定
-   * 2，如果要绑定的github已经被别人绑定了，则不能绑定
+   * 绑定qq
+   * 1，如果已经绑定过qq，则不能绑定，只能先解绑了再绑定
+   * 2，如果要绑定的qq已经被别人绑定了，则不能绑定
    */
   bindQQ = async (ctx: ParameterizedContext, next) => {
     const { code } = ctx.request.body; // 注意此code会在10分钟内过期。
@@ -303,20 +303,32 @@ class QqUserController {
   };
 
   /**
-   * 取消绑定github
+   * 取消绑定qq
    */
   cancelBindQQ = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== ALLOW_HTTP_CODE.ok) {
+    if (!userInfo) {
       throw new CustomError(message, code, code);
     }
-    const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
+    const result: any[] = await thirdUserService.findByUserId(userInfo.id!);
     const ownIsBind = result.filter(
       (v) => v.third_platform === THIRD_PLATFORM.qq_admin
     );
     if (!ownIsBind.length) {
       throw new CustomError(
         '你没有绑定过qq，不能解绑',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    // 至少得绑定一个第三方平台，否则不能解绑
+    const user = await userService.findAccount(userInfo.id!);
+    if (
+      Number(user?.github_users!.length) + Number(user?.email_users!.length) ===
+      0
+    ) {
+      throw new CustomError(
+        '不能解绑，至少得绑定一个第三方平台（github、email、qq）！',
         ALLOW_HTTP_CODE.paramsError,
         ALLOW_HTTP_CODE.paramsError
       );

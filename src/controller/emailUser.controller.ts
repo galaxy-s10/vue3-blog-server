@@ -401,7 +401,7 @@ class EmailUserController {
    */
   cancelBindEmail = async (ctx: ParameterizedContext, next) => {
     const { code: authCode, userInfo, message } = await authJwt(ctx);
-    if (authCode !== ALLOW_HTTP_CODE.ok) {
+    if (!userInfo) {
       throw new CustomError(message, authCode, authCode);
     }
     const { code } = ctx.request.body;
@@ -412,7 +412,7 @@ class EmailUserController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
+    const result: any[] = await thirdUserService.findByUserId(userInfo.id!);
     const ownIsBind = result.filter(
       (v) => v.third_platform === THIRD_PLATFORM.email
     );
@@ -427,7 +427,7 @@ class EmailUserController {
       ownIsBind[0].third_user_id
     );
     const key = {
-      prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo!.id!}`,
+      prefix: `${REDIS_PREFIX.userCancelBindEmail}-${userInfo.id!}`,
       key: userEmail.email,
     };
     const redisData = await redisController.getVal({
@@ -436,6 +436,18 @@ class EmailUserController {
     if (redisData !== code || !redisData) {
       throw new CustomError(
         VERIFY_EMAIL_RESULT_CODE.err,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    // 至少得绑定一个第三方平台，否则不能解绑
+    const user = await userService.findAccount(userInfo.id!);
+    if (
+      Number(user?.github_users!.length) + Number(user?.qq_users!.length) ===
+      0
+    ) {
+      throw new CustomError(
+        '不能解绑，至少得绑定一个第三方平台（github、email、qq）！',
         ALLOW_HTTP_CODE.paramsError,
         ALLOW_HTTP_CODE.paramsError
       );

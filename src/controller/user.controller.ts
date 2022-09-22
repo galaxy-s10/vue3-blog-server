@@ -186,6 +186,20 @@ class UserController {
     await next();
   }
 
+  async getPwd(ctx: ParameterizedContext, next) {
+    const { userInfo } = await authJwt(ctx);
+    if (!userInfo) {
+      throw new CustomError(
+        `请登录！`,
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const result = await userService.findPwd(userInfo.id!);
+    successHandler({ ctx, data: result });
+    await next();
+  }
+
   async getUserInfo(ctx: ParameterizedContext, next) {
     const { code, userInfo, message } = await authJwt(ctx);
     if (code === ALLOW_HTTP_CODE.ok) {
@@ -195,6 +209,39 @@ class UserController {
     } else {
       throw new CustomError(message, code, code);
     }
+  }
+
+  async updatePwd(ctx: ParameterizedContext, next) {
+    const { userInfo } = await authJwt(ctx);
+    if (!userInfo) {
+      throw new CustomError(
+        `请登录！`,
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const { oldpwd, newpwd } = ctx.request.body;
+    if (!oldpwd || !newpwd) {
+      throw new CustomError(
+        `oldpwd和newpwd不能为空！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    const user = await userService.findPwd(userInfo.id!);
+    if (user?.password !== oldpwd) {
+      throw new CustomError(
+        `旧密码错误！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    await userService.updatePwd({
+      id: userInfo.id,
+      password: newpwd,
+    });
+    successHandler({ ctx, message: '修改密码成功！' });
+    await next();
   }
 
   async update(ctx: ParameterizedContext, next) {

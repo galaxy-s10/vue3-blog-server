@@ -20,7 +20,11 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     message: string;
   }) => {
     if (PROJECT_ENV !== 'beta') {
-      console.log(chalkINFO('当前不是beta环境，写入日志'));
+      console.log(
+        chalkINFO(
+          `当前不是beta环境，写入日志，api_status_code：${info.statusCode}`
+        )
+      );
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
       logService.create({
@@ -67,6 +71,9 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
           message: '这个返回了404的http状态码，请排查问题！',
         };
         // 404接口写入日志表
+        console.log(
+          chalkINFO(`404接口写入日志表，api_status_code：${statusCode}`)
+        );
         insertLog(defaultSuccess);
       } else {
         const defaultSuccess = {
@@ -76,6 +83,11 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
           message: '返回了即不是200也不是404的http状态码，请排查问题！',
         };
         // 既不是200也不是404，写入日志表
+        console.log(
+          chalkINFO(
+            `既不是200也不是404，写入日志表，api_status_code：${statusCode}`
+          )
+        );
         insertLog(defaultSuccess);
       }
       throw new CustomError(

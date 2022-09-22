@@ -119,16 +119,28 @@ class GithubUserController {
    */
   cancelBindGithub = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== ALLOW_HTTP_CODE.ok) {
+    if (!userInfo) {
       throw new CustomError(message, code, code);
     }
-    const result: any[] = await thirdUserService.findByUserId(userInfo!.id!);
+    const result: any[] = await thirdUserService.findByUserId(userInfo.id!);
     const ownIsBind = result.filter(
       (v) => v.third_platform === THIRD_PLATFORM.github
     );
     if (!ownIsBind.length) {
       throw new CustomError(
         '你没有绑定过github，不能解绑！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    // 至少得绑定一个第三方平台，否则不能解绑
+    const user = await userService.findAccount(userInfo.id!);
+    if (
+      Number(user?.qq_users!.length) + Number(user?.email_users!.length) ===
+      0
+    ) {
+      throw new CustomError(
+        '不能解绑，至少得绑定一个第三方平台（github、email、qq）！',
         ALLOW_HTTP_CODE.paramsError,
         ALLOW_HTTP_CODE.paramsError
       );

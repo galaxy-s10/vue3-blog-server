@@ -112,6 +112,21 @@ class UserService {
     return result;
   }
 
+  /** 根据id查找用户密码 */
+  async findPwd(id: number) {
+    const result = await userModel.findOne({
+      where: { id },
+      attributes: ['password'],
+    });
+    return result;
+  }
+
+  /** 根据id修改用户密码 */
+  async updatePwd({ id, password }: IUser) {
+    const result = await userModel.update({ password }, { where: { id } });
+    return result;
+  }
+
   /** 根据id查找用户（包括其他账号信息） */
   async findAccount(id: number) {
     const result = await userModel.findOne({
