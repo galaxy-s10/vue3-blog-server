@@ -81,8 +81,8 @@ export const REDIS_PREFIX = {
 
 // 平台类型
 export const THIRD_PLATFORM = {
-  website: 1, // 站内
-  qq_www: 2, // qq前台
+  website: 1, // 站内（user表里面的用户就是这个类型，但是不记录在third_user表里）
+  qq_www: 2, // qq前台（现在不存在这个类型了）
   qq_admin: 3, // qq后台
   github: 4, // github
   email: 5, // 邮箱
