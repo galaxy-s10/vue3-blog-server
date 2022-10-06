@@ -136,17 +136,28 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
 };
 
 // 跨域中间件
-export const corsMiddle = async (ctx, next) => {
+export const corsMiddle = async (ctx: ParameterizedContext, next) => {
   console.log('corsMiddle跨域中间件');
-  ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set(
     'Access-Control-Allow-Headers',
-    'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild'
-  );
-  ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+    'Content-Type, Content-Length, Authorization, Accept, X-Requested-With'
+  ); // 允许的请求头
+  ctx.set('Access-Control-Allow-Credentials', 'true'); // 允许携带cookie
+  ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS'); // 允许的方法
+  ctx.set('Access-Control-Allow-Origin', '*'); // 允许所有源
+  // const allowOrigin = ['http://localhost:8000', 'http://localhost:8080'];
+  // if (allowOrigin.includes(ctx.header.origin!)) {
+  //   ctx.set('Access-Control-Allow-Origin', ctx.header.origin!); // 允许的源
+  // }
+  // // else {
+  // //   console.log('非法源！');
+  // // }
+
   if (ctx.method === 'OPTIONS') {
-    ctx.body = ALLOW_HTTP_CODE.ok;
+    // 跨域请求时，浏览器会先发送options
+    ctx.body = 'ok';
   } else {
     await next();
+    console.log(chalkINFO(`corsMiddle中间件通过！ `));
   }
 };

@@ -36,7 +36,6 @@ fs.ensureDirSync(UPLOAD_DIR); // 确保存在上传目录
 const app = new Koa();
 
 app.use(catchErrorMiddle); // 全局错误处理
-
 app.use(
   koaBody({
     multipart: true,
@@ -58,11 +57,9 @@ app.use(
     // strict: true, // 废弃了。如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
   })
 ); // 解析参数
-
 app.use(
   staticService(STATIC_DIR, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
 );
-
 app.use(conditional()); // 接口缓存
 app.use(etag()); // 接口缓存
 app.use(corsMiddle); // 设置允许跨域
