@@ -4,11 +4,13 @@
 # Date: 2022-04-26 01:54:48
 # Description: https://github.com/galaxy-s10/sh/blob/master/build.sh
 # Email: 2274751790@qq.com
-# FilePath: /vue3-blog-server/build.sh
+# FilePath: /github/vue3-blog-server/build.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2022-08-25 03:40:18
+# LastEditTime: 2022-10-16 09:27:55
 # LastEditors: shuisheng
 ###
+
+# 生成头部文件快捷键：ctrl+cmd+i
 
 # 该build.sh文件会在Jenkins构建完成后被执行
 # 注意:JOBNAME=$1,这个等号左右不能有空格！
