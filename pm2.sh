@@ -6,13 +6,20 @@
 # Email: 2274751790@qq.com
 # FilePath: /github/vue3-blog-server/pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2022-10-16 09:30:48
+# LastEditTime: 2022-10-16 11:37:18
 # LastEditors: shuisheng
 ###
 
 # 生成头部文件快捷键：ctrl+cmd+i
 
-# 该pm2.sh文件会在Jenkins构建完成后被执行
+# 静态部署的项目，一般流程是在jenkins里面执行build.sh进行构建，
+# 构建完成后会连接ssh，执行/node/sh/frontend.sh，frontend.sh会将构建的完成资源复制到/node/xxx。
+# 复制完成后，frontend.sh会执行清除buff/cache操作
+
+# node项目，一般流程是在jenkins里面执行build.sh进行构建，
+# 构建完成后会连接ssh，执行/node/sh/node.sh，node.sh会将构建的完成资源复制到/node/xxx，并且执行/node/xxx/pm2.sh。
+# 最后，node.sh会执行清除buff/cache操作
+
 # 注意:JOBNAME=$1,这个等号左右不能有空格！
 JOBNAME=$1      #约定$1为任务名
 ENV=$2          #约定$2为环境
@@ -59,10 +66,14 @@ pnpm install
 
 if ! type pm2 >/dev/null 2>&1; then
   echo 'pm2未安装,先全局安装pm2'
-  pnpm i pm2 -g
+  npm install pm2 -g
+  pm2 update
 else
   echo 'pm2已安装'
 fi
+
+echo 查看pm2版本:
+pm2 -v
 
 # 注意：要先进入项目所在的目录，然后再执行pm2命令!!!
 # 否则的话约等于在其他目录执行npm run dev,如果所在的目录没有package.json文件就会报错！
@@ -80,8 +91,3 @@ pm2 save
 
 # echo 使用pm2维护:
 # pm2 start $PUBLICDIR/$JOBNAME/app.js --name $JOBNAME
-
-echo 清除buff/cache:
-
-sync
-echo 3 >/proc/sys/vm/drop_caches
