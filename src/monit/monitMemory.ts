@@ -11,17 +11,18 @@ import { formatMemorySize } from '@/utils/index';
 
 const threshold = 85 / 100; // 内存阈值
 const buffCacheThreshold = 20 / 100; // buff/cache阈值
-const restartPm2Threshold = 95 / 100; // 内存达到重启pm2的阈值
+const restartPm2Threshold = 10 / 100; // 如果可用内存小于10%，则重启pm2
 
 export const main = async () => {
   try {
     const res: any = await showMemory();
-    const res1 = {};
+    const formatRes = {};
     Object.keys(res).forEach((v) => {
-      res1[v] = formatMemorySize(Number(res[v]));
+      formatRes[v] = formatMemorySize(Number(res[v]));
     });
     const total = res['Mem:total'];
     const used = res['Mem:used'];
+    const free = res['Mem:free'];
     let result = '';
     const rate = `${((res['Mem:used'] / res['Mem:total']) * 100).toFixed(2)}%`;
     const thresholdRate = `${(threshold * 100).toFixed(2)}%`;
@@ -30,8 +31,13 @@ export const main = async () => {
     )}%`;
     const currBuffCacheRate = res['Mem:buff/cache'] / res['Mem:total'];
 
-    if (total * restartPm2Threshold < used) {
-      result = `服务器内存使用率达到重启pm2的阈值（${restartPm2ThresholdRate}）！当前使用率：${rate}，开始重启所有pm2进程`;
+    // 如果可用内存小于10%，则重启pm2
+    if (total * restartPm2Threshold > free) {
+      result = `服务器可用内存小于${`${
+        restartPm2Threshold * 100
+      }%`}，达到重启pm2的阈值（${restartPm2ThresholdRate}）！当前内存使用率：${rate}， ，可用内存：${
+        formatRes['Mem:free'] as ''
+      }，开始重启所有pm2进程`;
       otherController.sendEmail(QQ_EMAIL_USER, result, result);
       await monitService.create({
         type: MONIT_TYPE.RESTART_PM2,
@@ -42,10 +48,10 @@ export const main = async () => {
     }
     if (total * threshold < used) {
       result = `服务器内存使用率超过阈值（${thresholdRate}），当前使用率：${rate}（总内存：${
-        res1['Mem:total'] as ''
-      }，已使用：${res1['Mem:used'] as ''}，可用：${
-        res1['Mem:free'] as ''
-      }，buff/cache：${res1['Mem:buff/cache'] as ''}）`;
+        formatRes['Mem:total'] as ''
+      }，已使用：${formatRes['Mem:used'] as ''}，可用：${
+        formatRes['Mem:free'] as ''
+      }，buff/cache：${formatRes['Mem:buff/cache'] as ''}）`;
       otherController.sendEmail(QQ_EMAIL_USER, result, result);
       monitService.create({
         type: MONIT_TYPE.MEMORY_THRESHOLD,
@@ -53,10 +59,10 @@ export const main = async () => {
       });
     } else {
       result = `服务器内存使用率阈值：${thresholdRate}，当前使用率：${rate}（总内存：${
-        res1['Mem:total'] as ''
-      }，已使用：${res1['Mem:used'] as ''}，可用：${
-        res1['Mem:free'] as ''
-      }，buff/cache：${res1['Mem:buff/cache'] as ''}）`;
+        formatRes['Mem:total'] as ''
+      }，已使用：${formatRes['Mem:used'] as ''}，可用：${
+        formatRes['Mem:free'] as ''
+      }，buff/cache：${formatRes['Mem:buff/cache'] as ''}）`;
       monitService.create({
         type: MONIT_TYPE.MEMORY_LOG,
         info: result,
@@ -64,7 +70,7 @@ export const main = async () => {
     }
     if (currBuffCacheRate > buffCacheThreshold) {
       const str = `buff/cache超过阈值，清除buff/cache，当前buff/cache占用：${
-        res1['Mem:buff/cache'] as ''
+        formatRes['Mem:buff/cache'] as ''
       }，阈值：${formatMemorySize(res['Mem:total'] * buffCacheThreshold)}`;
       console.log(chalkINFO(str));
       await monitService.create({
