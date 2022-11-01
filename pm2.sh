@@ -6,7 +6,7 @@
 # Email: 2274751790@qq.com
 # FilePath: /github/vue3-blog-server/pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2022-10-16 11:37:18
+# LastEditTime: 2022-10-16 14:27:08
 # LastEditors: shuisheng
 ###
 
@@ -84,10 +84,18 @@ pm2 del $JOBNAME-$ENV-$PORT
 
 echo 使用pm2维护:
 # pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/nodemon
-# pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/ts-node
-# pm2 start --name $JOBNAME-$ENV ts-node -- -P tsconfig.json ./src/index.ts
-npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start --name $JOBNAME-$ENV-$PORT ts-node -- -P tsconfig.json ./src/index.ts
-pm2 save
 
-# echo 使用pm2维护:
-# pm2 start $PUBLICDIR/$JOBNAME/app.js --name $JOBNAME
+# yarn和pnpm都能用
+npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./src/index.ts --name $JOBNAME-$ENV-$PORT --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json'
+
+# 在使用yarn时，下面的命令报错：[PM2][ERROR] Script not found: /Users/huangshuisheng/Desktop/hss/github/vue3-blog-server/ts-node
+# cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start --name $JOBNAME-$ENV-$PORT ts-node -- -P tsconfig.json ./src/index.ts
+
+# 在使用yarn时，下面的命令生效（和上面的命令相比只是差了一个npx）
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start --name $JOBNAME-$ENV-$PORT ts-node -- -P tsconfig.json ./src/index.ts
+
+# 写死测试1，yarn和pnpm都能用
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 pm2 start --name JOBNAME-beta-3300 --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json' ./src/index.ts
+
+# 写死测试2，yarn和pnpm都能用
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 pm2 start ./src/index.ts --name JOBNAME-beta-3300 --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json'

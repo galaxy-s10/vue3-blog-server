@@ -156,7 +156,11 @@ class QiniuUtils {
       });
       // 这个copy方法返回的Promise类型里没有putTime，但是下面的new Promise返回的Promise类型里面有putTime，由于ts的类型兼容，这个upload方法的Promise类型里面就会包括putTime
       // 最好两者返回固定的类型，保持一致
-      return { ...res, respBody, putTime: respBody.putTime }; // copy成功返回的respBody是null，这里将getQiniuStat的respBody设置给它
+      return {
+        ...res,
+        respBody: { ...respBody, key: destKey, bucket: QINIU_BUCKET },
+        putTime: respBody.putTime.toString(),
+      }; // copy成功返回的respBody是null，这里将getQiniuStat的respBody设置给它
     }
     const uploadToken = this.getQiniuToken();
     const { config } = this;
