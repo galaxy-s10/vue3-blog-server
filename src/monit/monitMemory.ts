@@ -14,9 +14,9 @@ const memoryThreshold = 85 / 100; // 内存阈值
 const buffCacheThreshold = 20 / 100; // buff/cache阈值
 const restartPm2Threshold = 10 / 100; // 如果可用内存小于10%，则重启pm2
 
-const memoryRate = `${memoryThreshold}%`; // 内存比率
-const buffCacheRate = `${buffCacheThreshold}%`; // buff/cache比率
-const restartPm2Rate = `${restartPm2Threshold}%`; // 重启pm2比率
+const memoryRate = `${(memoryThreshold * 100).toFixed(2)}%`; // 内存比率
+const buffCacheRate = `${(buffCacheThreshold * 100).toFixed(2)}%`; // buff/cache比率
+const restartPm2Rate = `${(restartPm2Threshold * 100).toFixed(2)}%`; // 重启pm2比率
 
 export const main = async () => {
   try {
@@ -43,11 +43,11 @@ export const main = async () => {
       result = `服务器可用内存小于${`${restartPm2Threshold}%`}，开始重启所有pm2进程`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
-        memoryThreshold,
+        memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
-        buffCacheThreshold,
+        buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
         buffCacheRate,
-        restartPm2Threshold,
+        restartPm2Threshold: formatMemorySize(total * restartPm2Threshold),
         restartPm2Rate,
         currMemoryRate,
         currBuffCacheRate,
@@ -55,6 +55,8 @@ export const main = async () => {
         Memused: formatRes['Mem:used'],
         Memfree: formatRes['Mem:free'],
         Membuffcache: formatRes['Mem:buff/cache'],
+        Memavailable: formatRes['Mem:available'],
+        Memshared: formatRes['Mem:shared'],
         Swaptotal: formatRes['Swap:total'],
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
@@ -75,11 +77,11 @@ export const main = async () => {
       result = `服务器内存使用率超过阈值（${currMemoryRate}）`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
-        memoryThreshold,
+        memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
-        buffCacheThreshold,
+        buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
         buffCacheRate,
-        restartPm2Threshold,
+        restartPm2Threshold: formatMemorySize(total * restartPm2Threshold),
         restartPm2Rate,
         currMemoryRate,
         currBuffCacheRate,
@@ -87,6 +89,8 @@ export const main = async () => {
         Memused: formatRes['Mem:used'],
         Memfree: formatRes['Mem:free'],
         Membuffcache: formatRes['Mem:buff/cache'],
+        Memavailable: formatRes['Mem:available'],
+        Memshared: formatRes['Mem:shared'],
         Swaptotal: formatRes['Swap:total'],
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
@@ -115,11 +119,11 @@ export const main = async () => {
       const result = `buff/cache超过阈值（${currBuffCacheRate}），开始清除buff/cache`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
-        memoryThreshold,
+        memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
-        buffCacheThreshold,
+        buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
         buffCacheRate,
-        restartPm2Threshold,
+        restartPm2Threshold: formatMemorySize(total * restartPm2Threshold),
         restartPm2Rate,
         currMemoryRate,
         currBuffCacheRate,
@@ -127,6 +131,8 @@ export const main = async () => {
         Memused: formatRes['Mem:used'],
         Memfree: formatRes['Mem:free'],
         Membuffcache: formatRes['Mem:buff/cache'],
+        Memavailable: formatRes['Mem:available'],
+        Memshared: formatRes['Mem:shared'],
         Swaptotal: formatRes['Swap:total'],
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
