@@ -7,58 +7,101 @@ import otherController from '@/controller/other.controller';
 import monitService from '@/service/monit.service';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
-import { formatMemorySize } from '@/utils/index';
+import { formatMemorySize, replaceKeyFromValue } from '@/utils/index';
+import { emailTmp } from '@/utils/tmp';
 
-const threshold = 85 / 100; // 内存阈值
+const memoryThreshold = 85 / 100; // 内存阈值
 const buffCacheThreshold = 20 / 100; // buff/cache阈值
 const restartPm2Threshold = 10 / 100; // 如果可用内存小于10%，则重启pm2
 
+const memoryRate = `${memoryThreshold}%`; // 内存比率
+const buffCacheRate = `${buffCacheThreshold}%`; // buff/cache比率
+const restartPm2Rate = `${restartPm2Threshold}%`; // 重启pm2比率
+
 export const main = async () => {
   try {
-    const res: any = await showMemory();
+    const memoryRes: any = await showMemory();
     const formatRes = {};
-    Object.keys(res).forEach((v) => {
-      formatRes[v] = formatMemorySize(Number(res[v]));
+    Object.keys(memoryRes).forEach((v) => {
+      formatRes[v] = formatMemorySize(Number(memoryRes[v]));
     });
-    const total = res['Mem:total'];
-    const used = res['Mem:used'];
-    const free = res['Mem:free'];
+    const total = memoryRes['Mem:total'];
+    const used = memoryRes['Mem:used'];
+    const free = memoryRes['Mem:free'];
     let result = '';
-    const rate = `${((res['Mem:used'] / res['Mem:total']) * 100).toFixed(2)}%`;
-    const thresholdRate = `${(threshold * 100).toFixed(2)}%`;
-    const restartPm2ThresholdRate = `${(restartPm2Threshold * 100).toFixed(
-      2
-    )}%`;
-    const currBuffCacheRate = res['Mem:buff/cache'] / res['Mem:total'];
+    // 当前内存使用比率
+    const currMemoryRate = `${(
+      (memoryRes['Mem:used'] / memoryRes['Mem:total']) *
+      100
+    ).toFixed(2)}%`;
+    // 当前buff/cache使用比率
+    const currBuffCacheRate =
+      memoryRes['Mem:buff/cache'] / memoryRes['Mem:total'];
 
     // 如果可用内存小于10%，则重启pm2
     if (total * restartPm2Threshold > free) {
-      result = `服务器可用内存小于${`${
-        restartPm2Threshold * 100
-      }%`}，达到重启pm2的阈值（${restartPm2ThresholdRate}）！当前内存使用率：${rate}， ，可用内存：${
-        formatRes['Mem:free'] as ''
-      }，开始重启所有pm2进程`;
-      otherController.sendEmail(QQ_EMAIL_USER, result, result);
+      result = `服务器可用内存小于${`${restartPm2Threshold}%`}，开始重启所有pm2进程`;
+      const emialContent = replaceKeyFromValue(emailTmp, {
+        title: result,
+        memoryThreshold,
+        memoryRate,
+        buffCacheThreshold,
+        buffCacheRate,
+        restartPm2Threshold,
+        restartPm2Rate,
+        currMemoryRate,
+        currBuffCacheRate,
+        Memtotal: formatRes['Mem:total'],
+        Memused: formatRes['Mem:used'],
+        Memfree: formatRes['Mem:free'],
+        Membuffcache: formatRes['Mem:buff/cache'],
+        Swaptotal: formatRes['Swap:total'],
+        Swapused: formatRes['Swap:used'],
+        Swapfree: formatRes['Swap:free'],
+      });
+      await otherController.sendEmail(
+        QQ_EMAIL_USER,
+        emialContent,
+        emialContent
+      );
       await monitService.create({
         type: MONIT_TYPE.RESTART_PM2,
-        info: result,
+        info: emialContent,
       });
       restartPm2();
       return;
     }
-    if (total * threshold < used) {
-      result = `服务器内存使用率超过阈值（${thresholdRate}），当前使用率：${rate}（总内存：${
-        formatRes['Mem:total'] as ''
-      }，已使用：${formatRes['Mem:used'] as ''}，可用：${
-        formatRes['Mem:free'] as ''
-      }，buff/cache：${formatRes['Mem:buff/cache'] as ''}）`;
-      otherController.sendEmail(QQ_EMAIL_USER, result, result);
-      monitService.create({
+    if (total * memoryThreshold < used) {
+      result = `服务器内存使用率超过阈值（${currMemoryRate}）`;
+      const emialContent = replaceKeyFromValue(emailTmp, {
+        title: result,
+        memoryThreshold,
+        memoryRate,
+        buffCacheThreshold,
+        buffCacheRate,
+        restartPm2Threshold,
+        restartPm2Rate,
+        currMemoryRate,
+        currBuffCacheRate,
+        Memtotal: formatRes['Mem:total'],
+        Memused: formatRes['Mem:used'],
+        Memfree: formatRes['Mem:free'],
+        Membuffcache: formatRes['Mem:buff/cache'],
+        Swaptotal: formatRes['Swap:total'],
+        Swapused: formatRes['Swap:used'],
+        Swapfree: formatRes['Swap:free'],
+      });
+      await otherController.sendEmail(
+        QQ_EMAIL_USER,
+        emialContent,
+        emialContent
+      );
+      await monitService.create({
         type: MONIT_TYPE.MEMORY_THRESHOLD,
-        info: result,
+        info: emialContent,
       });
     } else {
-      result = `服务器内存使用率阈值：${thresholdRate}，当前使用率：${rate}（总内存：${
+      result = `服务器内存使用率阈值：${memoryRate}，当前使用率：${currMemoryRate}（总内存：${
         formatRes['Mem:total'] as ''
       }，已使用：${formatRes['Mem:used'] as ''}，可用：${
         formatRes['Mem:free'] as ''
@@ -69,16 +112,36 @@ export const main = async () => {
       });
     }
     if (currBuffCacheRate > buffCacheThreshold) {
-      const str = `buff/cache超过阈值，清除buff/cache，当前buff/cache占用：${
-        formatRes['Mem:buff/cache'] as ''
-      }，阈值：${formatMemorySize(res['Mem:total'] * buffCacheThreshold)}`;
-      console.log(chalkINFO(str));
+      const result = `buff/cache超过阈值（${currBuffCacheRate}），开始清除buff/cache`;
+      const emialContent = replaceKeyFromValue(emailTmp, {
+        title: result,
+        memoryThreshold,
+        memoryRate,
+        buffCacheThreshold,
+        buffCacheRate,
+        restartPm2Threshold,
+        restartPm2Rate,
+        currMemoryRate,
+        currBuffCacheRate,
+        Memtotal: formatRes['Mem:total'],
+        Memused: formatRes['Mem:used'],
+        Memfree: formatRes['Mem:free'],
+        Membuffcache: formatRes['Mem:buff/cache'],
+        Swaptotal: formatRes['Swap:total'],
+        Swapused: formatRes['Swap:used'],
+        Swapfree: formatRes['Swap:free'],
+      });
+      await otherController.sendEmail(
+        QQ_EMAIL_USER,
+        emialContent,
+        emialContent
+      );
+      console.log(chalkINFO(result));
       await monitService.create({
         type: MONIT_TYPE.CLEAR_CACHE,
-        info: str,
+        info: emialContent,
       });
       clearCache();
-      otherController.sendEmail(QQ_EMAIL_USER, str, str);
     }
   } catch (err) {
     console.log(err);

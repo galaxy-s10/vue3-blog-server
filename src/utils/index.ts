@@ -4,8 +4,42 @@ import { Model, ModelStatic } from 'sequelize/types';
 import sequelize from '@/config/db';
 import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/utils/chalkTip';
 
+/**
+ * @description: 处理free命令返回的内存信息
+ * @param {string} str
+ * @return {*}
+ */
+export const handleData = (str: string) => {
+  const arr = str.match(/\S+/g)!;
+
+  const mem = 'Mem:';
+  const swap = 'Swap:';
+  const res: any = [];
+  const obj: any = {};
+
+  res.push(arr.splice(0, 6));
+  res.push(arr.splice(0, 7));
+  res.push(arr.splice(0, arr.length));
+
+  res[0].forEach((key: string, index: number) => {
+    res[1][index + 1] && (obj[mem + key] = res[1][index + 1]);
+    res[2][index + 1] && (obj[swap + key] = res[2][index + 1]);
+  });
+  return obj;
+};
+
+export const replaceKeyFromValue = (str: string, obj: object) => {
+  let res = str;
+  Object.keys(obj).forEach((v) => {
+    res = res.replace(new RegExp(`{${v}}`, 'ig'), obj[v]);
+  });
+  return res;
+};
+
 export const getFileExt = (name: string) => {
-  return name.split('.')[1];
+  const arr = name.split('.');
+  const ext = arr[arr.length - 1];
+  return ext;
 };
 
 /**

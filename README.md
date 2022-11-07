@@ -20,23 +20,23 @@
 ## 安装依赖
 
 ```bash
-yarn install
+pnpm install
 ```
 
 ## 启动项目
 
 ```bash
-# yarn run start，运行在3300端口
-yarn run start
-# 或者yarn run start:beta，运行在3300端口
-yarn run start:beta
-# 或者yarn run start:prod，运行在3200端口
-yarn run start:prod
+# pnpm run start，运行在3300端口
+pnpm run start
+# 或者pnpm run start:beta，运行在3300端口
+pnpm run start:beta
+# 或者pnpm run start:prod，运行在3200端口
+pnpm run start:prod
 ```
 
 ## 注意事项
 
-`yarn start` 启动后，会默认在 src/config/secret.ts 生成秘钥文件，请在该文件里面填写本项目所需的秘钥信息~
+`pnpm start` 启动后，会默认在 src/config/secret.ts 生成秘钥文件，请在该文件里面填写本项目所需的秘钥信息~
 
 # 环境
 
