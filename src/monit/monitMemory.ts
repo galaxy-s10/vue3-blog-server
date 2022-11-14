@@ -10,13 +10,18 @@ import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
 import { formatMemorySize, replaceKeyFromValue } from '@/utils/index';
 import { emailTmp } from '@/utils/tmp';
 
+// 0.32 ===> 32%
+const computedRate = (val: number) => {
+  return `${(val * 100).toFixed(2)}%`;
+};
+
 const memoryThreshold = 85 / 100; // 内存阈值
 const buffCacheThreshold = 20 / 100; // buff/cache阈值
 const restartPm2Threshold = 10 / 100; // 如果可用内存小于10%，则重启pm2
 
-const memoryRate = `${(memoryThreshold * 100).toFixed(2)}%`; // 内存比率
-const buffCacheRate = `${(buffCacheThreshold * 100).toFixed(2)}%`; // buff/cache比率
-const restartPm2Rate = `${(restartPm2Threshold * 100).toFixed(2)}%`; // 重启pm2比率
+const memoryRate = computedRate(memoryThreshold); // 内存比率，带百分比号
+const buffCacheRate = computedRate(buffCacheThreshold); // buff/cache比率，带百分比号
+const restartPm2Rate = computedRate(restartPm2Threshold); // 重启pm2比率，带百分比号
 
 export const main = async () => {
   try {
@@ -26,23 +31,33 @@ export const main = async () => {
       formatRes[v] = formatMemorySize(Number(memoryRes[v]));
     });
     const total = memoryRes['Mem:total'];
-    const used = memoryRes['Mem:used'];
     const free = memoryRes['Mem:free'];
     let result = '';
-    // 当前内存使用比率
-    const currMemoryRate = `${(
-      (memoryRes['Mem:used'] / memoryRes['Mem:total']) *
-      100
-    ).toFixed(2)}%`;
-    // 当前buff/cache使用比率
-    const currBuffCacheRate =
+
+    // 当前内存使用
+    const currMemoryUsed = memoryRes['Mem:used'] / memoryRes['Mem:total'];
+    // 当前buff/cache使用
+    const currBuffCacheUsed =
       memoryRes['Mem:buff/cache'] / memoryRes['Mem:total'];
+
+    // 当前内存使用比率
+    const currMemoryRate = computedRate(
+      memoryRes['Mem:used'] / memoryRes['Mem:total']
+    );
+    // 当前buff/cache使用比率
+    const currBuffCacheRate = computedRate(
+      memoryRes['Mem:buff/cache'] / memoryRes['Mem:total']
+    );
+    const triggerTime = new Date().toLocaleString();
 
     // 如果可用内存小于10%，则重启pm2
     if (total * restartPm2Threshold > free) {
-      result = `服务器可用内存小于${`${restartPm2Threshold}%`}，开始重启所有pm2进程`;
+      result = `服务器可用内存小于${`${formatMemorySize(
+        total * restartPm2Threshold
+      )}`}，开始重启所有pm2进程`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
+        triggerTime,
         memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
         buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
@@ -61,11 +76,7 @@ export const main = async () => {
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
       });
-      await otherController.sendEmail(
-        QQ_EMAIL_USER,
-        emialContent,
-        emialContent
-      );
+      await otherController.sendEmail(QQ_EMAIL_USER, result, emialContent);
       await monitService.create({
         type: MONIT_TYPE.RESTART_PM2,
         info: emialContent,
@@ -73,10 +84,11 @@ export const main = async () => {
       restartPm2();
       return;
     }
-    if (total * memoryThreshold < used) {
-      result = `服务器内存使用率超过阈值（${currMemoryRate}）`;
+    if (memoryThreshold < currMemoryUsed) {
+      result = `服务器内存使用率超过${currMemoryRate}`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
+        triggerTime,
         memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
         buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
@@ -95,11 +107,7 @@ export const main = async () => {
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
       });
-      await otherController.sendEmail(
-        QQ_EMAIL_USER,
-        emialContent,
-        emialContent
-      );
+      await otherController.sendEmail(QQ_EMAIL_USER, result, emialContent);
       await monitService.create({
         type: MONIT_TYPE.MEMORY_THRESHOLD,
         info: emialContent,
@@ -115,10 +123,11 @@ export const main = async () => {
         info: result,
       });
     }
-    if (currBuffCacheRate > buffCacheThreshold) {
-      const result = `buff/cache超过阈值（${currBuffCacheRate}），开始清除buff/cache`;
+    if (currBuffCacheUsed > buffCacheThreshold) {
+      const result = `buff/cache使用超过${buffCacheRate}，开始清除buff/cache`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: result,
+        triggerTime,
         memoryThreshold: formatMemorySize(total * memoryThreshold),
         memoryRate,
         buffCacheThreshold: formatMemorySize(total * buffCacheThreshold),
@@ -137,11 +146,7 @@ export const main = async () => {
         Swapused: formatRes['Swap:used'],
         Swapfree: formatRes['Swap:free'],
       });
-      await otherController.sendEmail(
-        QQ_EMAIL_USER,
-        emialContent,
-        emialContent
-      );
+      await otherController.sendEmail(QQ_EMAIL_USER, result, emialContent);
       console.log(chalkINFO(result));
       await monitService.create({
         type: MONIT_TYPE.CLEAR_CACHE,

@@ -7,16 +7,20 @@ console.log(
 
 module.exports = {
   types: [
-    { type: 'feat', section: 'Features', hidden: false },
-    { type: 'fix', section: 'Bug Fixes', hidden: false },
-    { type: 'docs', section: 'Docs', hidden: false },
-    { type: 'style', section: 'Styling', hidden: false },
-    { type: 'refactor', section: 'Code Refactoring', hidden: false },
-    { type: 'perf', section: 'Performance Improvements', hidden: false },
-    { type: 'test', section: 'Tests', hidden: false },
-    { type: 'build', section: 'Build System', hidden: false },
-    { type: 'ci', section: 'CI', hidden: false },
-    { type: 'chore', section: 'Others', hidden: false },
-    { type: 'revert', section: 'Reverts', hidden: false },
+    { type: 'feat', section: '✨ 新特性', hidden: false },
+    { type: 'fix', section: '🐛 Bug修复', hidden: false },
+    { type: 'docs', section: '📝 文档更改', hidden: false },
+    { type: 'style', section: '🎨 样式更改', hidden: false },
+    { type: 'refactor', section: '🔨 代码重构', hidden: false },
+    {
+      type: 'perf',
+      section: '⚡️ 优化性能',
+      hidden: false,
+    },
+    { type: 'test', section: '🧪 测试', hidden: false },
+    { type: 'build', section: '🚀 构建', hidden: false },
+    { type: 'ci', section: '👷 CI', hidden: false },
+    { type: 'chore', section: '🏗 其他', hidden: false },
+    { type: 'revert', section: '⏪ 回退', hidden: false },
   ],
 };

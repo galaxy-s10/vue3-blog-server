@@ -1,6 +1,10 @@
 {
   "name": "vue3-blog-server",
-  "version": "0.0.3",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/galaxy-s10/vue3-blog-server"
+  },
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
@@ -11,6 +15,7 @@
     "prettier": "prettier --write .",
     "push": "cz && standard-version",
     "release": "standard-version",
+    "release:first": "standard-version --first-release",
     "start": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
     "start:beta": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
     "start:prod": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./src/index.ts",
