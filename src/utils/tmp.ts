@@ -1,38 +1,41 @@
 export const emailTmp = `
 <div
   style="
-    padding-bottom: 20px;
+    padding: 20px 0;
     background-color: #f7f8fa;
-    min-width: 320px;
     max-width: 660px;
+    min-width: 320px;
     margin: 0 auto;
-    font-family: '宋体';
   "
 >
   <table style="width: 100%">
     <tbody>
       <tr>
-        <td style="width: 2%; max-width: 30px"></td>
+        <td style="width: 2.5%; max-width: 30px"></td>
         <td>
           <div>
-            <div
-              style="
-                height: 30px;
-                display: flex;
-                align-items: center;
-                margin-top: 10px;
-              "
-            >
-              <img
-                src="https://resource.hsslive.cn/image/fafb8ef1b480f4e263161db54d264e36.jpg"
-                alt=""
-                style="width: 30px; height: 30px; border-radius: 4px"
-              />
-              <div
-                style="font-weight: 400; font-size: 18px; margin-left: 6px"
+            <div>
+              <a
+                style="
+                  height: 30px;
+                  display: flex;
+                  align-items: center;
+                  font-weight: 400;
+                  font-size: 18px;
+                  text-decoration: none;
+                  color: #333;
+                  cursor: pointer;
+                "
+                href="https://www.hsslive.cn"
+                target="_blank"
               >
-                自然博客
-              </div>
+                <img
+                  src="https://resource.hsslive.cn/image/fafb8ef1b480f4e263161db54d264e36.jpg"
+                  alt=""
+                  style="width: 30px; height: 30px; border-radius: 4px"
+                />
+                <span style="margin-left: 6px">自然博客</span>
+              </a>
             </div>
 
             <table
@@ -41,7 +44,7 @@ export const emailTmp = `
                 background-color: #fff;
                 box-shadow: 0px 1px 1px 0px rgb(122 55 55 / 20%);
                 font-size: 14px;
-                color: rgb(51, 51, 51);
+                color: #333;
                 font-weight: 300;
               "
             >
@@ -52,7 +55,7 @@ export const emailTmp = `
                     background-color: #00a4ff;
                     padding: 0;
                     width: 100%;
-                    margin-top: 14px;
+                    margin-top: 12px;
                   "
                 ></div>
                 <td style="width: 2%; max-width: 30px"></td>
@@ -64,7 +67,7 @@ export const emailTmp = `
                       font-weight: bold;
                     "
                   >
-                    {title}ds第四个
+                    {title}
                   </h1>
                   <p style="color: #00a4ff; margin: 6px 0 0 0">
                     <span>触发时间：</span>
@@ -125,7 +128,7 @@ export const emailTmp = `
             </table>
           </div>
         </td>
-        <td style="width: 2%; max-width: 30px"></td>
+        <td style="width: 2.5%; max-width: 30px"></td>
       </tr>
     </tbody>
   </table>
@@ -137,7 +140,9 @@ export const emailTmp = `
       text-align: center;
     "
   >
-    此为系统邮件，请勿回复。
+    <div>此为系统邮件，请勿回复。</div>
+    <div style="margin: 2px 0">Copyright © 2019 - 2022 hsslive.cn.</div>
+    <div>All Rights Reserved. 自然博客 版权所有</div>
   </div>
 </div>
 `;
