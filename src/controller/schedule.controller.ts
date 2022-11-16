@@ -59,7 +59,7 @@ class ScheduleController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    clearCache();
+    await clearCache();
     successHandler({
       ctx,
       message: '开始执行清除buff/cache任务',

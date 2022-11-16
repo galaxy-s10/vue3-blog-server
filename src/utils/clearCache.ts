@@ -22,7 +22,6 @@ const freeCmd = () => {
 
 export const restartPm2 = () => {
   const conn = new Client();
-
   conn
     .on('ready', () => {
       conn.exec(
@@ -54,39 +53,46 @@ export const restartPm2 = () => {
 
 export const clearCache = () => {
   const conn = new Client();
-
-  conn
-    .on('ready', () => {
-      conn.exec(
-        `
+  const result = new Promise((resolve, reject) => {
+    conn
+      .on('ready', () => {
+        conn.exec(
+          `
         ${clearCacheCmd()}
         `,
-        (error, stream) => {
-          if (error) throw error;
-          stream
-            .on('close', () => {
-              console.log('close');
-            })
-            .on('data', (data: string) => {
-              console.log(`STDOUT: ${data}`);
-            })
-            .stderr.on('data', (data: string) => {
-              console.log(`STDERR: ${data}`);
-            });
-        }
-      );
-    })
-    .connect({
-      host: SSH_CONFIG.host,
-      port: SSH_CONFIG.port,
-      username: SSH_CONFIG.username,
-      password: SSH_CONFIG.password,
-    });
+          (error, stream) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            stream
+              .on('close', () => {
+                console.log('close');
+              })
+              .on('data', (data: string) => {
+                console.log(`STDOUT: ${data}`);
+                resolve(data);
+              })
+              .stderr.on('data', (data: string) => {
+                console.log(`STDERR: ${data}`);
+                reject(data);
+              });
+          }
+        );
+      })
+      .connect({
+        host: SSH_CONFIG.host,
+        port: SSH_CONFIG.port,
+        username: SSH_CONFIG.username,
+        password: SSH_CONFIG.password,
+      });
+  });
+  return result;
 };
 
-export const showMemory = async () => {
+export const showMemory = () => {
   const conn = new Client();
-  const result = await new Promise((resolve, reject) => {
+  const result = new Promise((resolve, reject) => {
     conn
       .on('ready', () => {
         conn.exec(
@@ -94,20 +100,21 @@ export const showMemory = async () => {
             ${freeCmd()}
             `,
           (error, stream) => {
-            if (error) throw error;
+            if (error) {
+              reject(error);
+              return;
+            }
             stream
               .on('close', () => {
                 console.log('close');
               })
               .on('data', (data) => {
                 console.log(chalkINFO(`==========STDOUT==========`));
-                const res = handleData(data.toString());
-                resolve(res);
+                resolve(handleData(data.toString()));
               })
               .stderr.on('data', (data) => {
                 console.log(chalkERROR(`==========STDERR==========`));
-                console.log(data.toString());
-                reject(new Error(data.toString()));
+                reject(data);
               });
           }
         );
