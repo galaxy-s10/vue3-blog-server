@@ -34,6 +34,9 @@ handleSecretFile(); // 处理config/secret.ts秘钥文件
 fs.ensureDirSync(UPLOAD_DIR); // 确保存在上传目录
 
 const app = new Koa();
+app.proxy = true;
+// app.proxyIpHeader 代理 ip 消息头, 默认为 X-Forwarded-For
+// app.proxyIpHeader = 'X-Real-IP';
 
 app.use(catchErrorMiddle); // 全局错误处理
 app.use(

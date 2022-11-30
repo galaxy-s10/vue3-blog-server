@@ -33,9 +33,13 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         api_from: isAdmin(ctx) ? 2 : 1,
         api_body: JSON.stringify(ctx.request.body || {}),
         api_query: JSON.stringify(ctx.query),
-        api_ip: (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
+        api_real_ip:
+          (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
         api_method: ctx.request.method,
-        api_hostname: ctx.request.hostname,
+        // ctx.request.host存在时获取主机（hostname:port）。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
+        api_host: ctx.request.host, // ctx.request.hostname不带端口号;ctx.request.host带端口号
+        // ctx.request.hostname存在时获取主机名。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
+        api_hostname: ctx.request.hostname, // ctx.request.hostname不带端口号;ctx.request.host带端口号
         api_path: ctx.request.path,
         api_status_code: info.statusCode,
         api_error: info.error,

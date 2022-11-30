@@ -7,7 +7,7 @@ import {
   ADMIN_QQ_CLIENT_SECRET,
   ADMIN_QQ_REDIRECT_URI,
 } from '@/config/secret';
-import { ALLOW_HTTP_CODE, PROJECT_ENV, THIRD_PLATFORM } from '@/constant';
+import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
 import { IList, IQqUser } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';

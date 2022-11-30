@@ -51,7 +51,12 @@ class LogService {
           },
         },
         {
-          api_ip: {
+          api_real_ip: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          api_host: {
             [Op.like]: `%${keyWord}%`,
           },
         },
@@ -81,12 +86,12 @@ class LogService {
   }
 
   /** 获取一秒内ip的访问次数 */
-  async getOneSecondApiNums(api_ip: ILog['api_ip']) {
+  async getOneSecondApiNums(api_real_ip: ILog['api_real_ip']) {
     const nowDate = new Date().getTime();
     const beforeDate = nowDate - 1000;
     const apiNum = await logModel.count({
       where: {
-        api_ip,
+        api_real_ip,
         // @ts-ignore
         created_at: {
           [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
@@ -108,7 +113,8 @@ class LogService {
     user_id,
     api_user_agent,
     api_from,
-    api_ip,
+    api_real_ip,
+    api_host,
     api_hostname,
     api_method,
     api_path,
@@ -126,7 +132,8 @@ class LogService {
         user_id,
         api_user_agent,
         api_from,
-        api_ip,
+        api_real_ip,
+        api_host,
         api_hostname,
         api_method,
         api_path,
@@ -148,7 +155,8 @@ class LogService {
     user_id,
     api_user_agent,
     api_from,
-    api_ip,
+    api_real_ip,
+    api_host,
     api_hostname,
     api_method,
     api_path,
@@ -164,7 +172,8 @@ class LogService {
       user_id,
       api_user_agent,
       api_from,
-      api_ip,
+      api_real_ip,
+      api_host,
       api_hostname,
       api_method,
       api_path,

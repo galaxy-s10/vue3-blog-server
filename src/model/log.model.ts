@@ -35,8 +35,11 @@ const model = sequelize.define<LogModel>(
     api_from: {
       type: DataTypes.INTEGER, // 1:前台 2:后台
     },
-    api_ip: {
+    api_real_ip: {
       type: DataTypes.STRING(50),
+    },
+    api_host: {
+      type: DataTypes.STRING(100),
     },
     api_hostname: {
       type: DataTypes.STRING(100),
