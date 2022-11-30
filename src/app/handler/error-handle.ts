@@ -19,6 +19,7 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
     console.log(chalk.redBright('query:'), { ...ctx.request.query });
     console.log(chalk.redBright('params:'), ctx.params);
     console.log(chalk.redBright('body:'), ctx.request.body);
+    console.log(chalk.redBright('host:'), ctx.request.header.host);
     console.log(chalk.redBright('referer:'), ctx.request.header.referer);
     console.log(chalk.redBright('cookie:'), ctx.request.header.cookie);
     console.log(chalk.redBright('token:'), ctx.request.headers.authorization);

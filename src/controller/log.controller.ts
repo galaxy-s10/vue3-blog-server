@@ -34,6 +34,13 @@ class LogController {
       keyWord,
       id,
     });
+    // for (const key in ctx.headers) {
+    //   console.log(key, '=====', ctx.headers[key]);
+    // }
+    for (const key in ctx.request.headers) {
+      console.log(key, '=====', ctx.request.headers[key]);
+    }
+
     successHandler({ ctx, data: result });
 
     await next();
@@ -53,6 +60,8 @@ class LogController {
       user_id,
       api_user_agent,
       api_from,
+      api_referer,
+      api_forwarded_for,
       api_real_ip,
       api_host,
       api_hostname,
@@ -79,6 +88,8 @@ class LogController {
       user_id,
       api_user_agent,
       api_from,
+      api_referer,
+      api_forwarded_for,
       api_real_ip,
       api_host,
       api_hostname,
@@ -102,6 +113,8 @@ class LogController {
       user_id,
       api_user_agent,
       api_from,
+      api_referer,
+      api_forwarded_for,
       api_real_ip,
       api_host,
       api_hostname,
@@ -136,6 +149,8 @@ class LogController {
       user_id,
       api_user_agent,
       api_from,
+      api_referer,
+      api_forwarded_for,
       api_real_ip,
       api_host,
       api_hostname,

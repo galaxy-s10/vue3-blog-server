@@ -35,6 +35,8 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         api_query: JSON.stringify(ctx.query),
         api_real_ip:
           (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
+        api_forwarded_for: ctx.request.headers['x-forwarded-for'] as string,
+        api_referer: ctx.request.headers.referer,
         api_method: ctx.request.method,
         // ctx.request.host存在时获取主机（hostname:port）。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
         api_host: ctx.request.host, // ctx.request.hostname不带端口号;ctx.request.host带端口号
