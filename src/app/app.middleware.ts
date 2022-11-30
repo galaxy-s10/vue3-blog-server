@@ -145,7 +145,7 @@ export const corsMiddle = async (ctx: ParameterizedContext, next) => {
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS'); // 允许的方法
 
   const allowOrigin = [
-    'http://localhost:8000',
+    'http://localhost',
     'https://www.hsslive.cn',
     'https://admin.hsslive.cn',
   ];
