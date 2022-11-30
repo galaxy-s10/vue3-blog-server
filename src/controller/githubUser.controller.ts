@@ -7,7 +7,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GITHUB_REDIRECT_URI,
 } from '@/config/secret';
-import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
+import { ALLOW_HTTP_CODE, PROJECT_ENV, THIRD_PLATFORM } from '@/constant';
 import { IGithubUser, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
@@ -205,10 +205,22 @@ class GithubUserController {
       ctx.cookies.set('token', token, {
         httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
         // sameSite: 'none',
-        secure: true, // 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
-        // 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
-        // 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
-        domain: 'hsslive.cn',
+        /**
+         * secure
+         * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+         * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+         * true，因为线上是https://admin.hsslive.cn
+         */
+        secure: PROJECT_ENV !== 'development',
+        /**
+         * domain
+         * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+         * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+         */
+        domain:
+          ctx.header.origin?.indexOf('localhost') !== -1
+            ? 'localhost'
+            : 'hsslive.cn',
       });
       successHandler({ ctx, data: token, message: 'github登录成功！' });
     } else {
@@ -239,10 +251,22 @@ class GithubUserController {
       ctx.cookies.set('token', token, {
         httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
         // sameSite: 'none',
-        secure: true, // 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
-        // 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
-        // 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
-        domain: 'hsslive.cn',
+        /**
+         * secure
+         * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+         * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+         * true，因为线上是https://admin.hsslive.cn
+         */
+        secure: PROJECT_ENV !== 'development',
+        /**
+         * domain
+         * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+         * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+         */
+        domain:
+          ctx.header.origin?.indexOf('localhost') !== -1
+            ? 'localhost'
+            : 'hsslive.cn',
       });
       successHandler({ ctx, data: token, message: 'github登录成功！' });
     }
