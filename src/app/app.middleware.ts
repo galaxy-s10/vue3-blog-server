@@ -142,16 +142,23 @@ export const corsMiddle = async (ctx: ParameterizedContext, next) => {
     'Access-Control-Allow-Headers',
     'Content-Type, Content-Length, Authorization, Accept, X-Requested-With'
   ); // 允许的请求头
-  ctx.set('Access-Control-Allow-Credentials', 'true'); // 允许携带cookie
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS'); // 允许的方法
-  ctx.set('Access-Control-Allow-Origin', '*'); // 允许所有源
-  // const allowOrigin = ['http://localhost:8000', 'http://localhost:8080'];
-  // if (allowOrigin.includes(ctx.header.origin!)) {
-  //   ctx.set('Access-Control-Allow-Origin', ctx.header.origin!); // 允许的源
-  // }
-  // // else {
-  // //   console.log('非法源！');
-  // // }
+
+  const allowOrigin = [
+    'http://localhost:8000',
+    'https://www.hsslive.cn',
+    'https://admin.hsslive.cn',
+  ];
+
+  // @ts-ignore
+  if (allowOrigin === '*') {
+    ctx.set('Access-Control-Allow-Origin', '*'); // 允许所有源
+  } else if (allowOrigin.includes(ctx.header.origin!)) {
+    ctx.set('Access-Control-Allow-Credentials', 'true'); // 允许携带cookie，Access-Control-Allow-Origin为*的时候不能设置Access-Control-Allow-Credentials:true！
+    ctx.set('Access-Control-Allow-Origin', ctx.header.origin!); // 允许的源
+  } else {
+    console.log('非法源！');
+  }
 
   if (ctx.method === 'OPTIONS') {
     // 跨域请求时，浏览器会先发送options

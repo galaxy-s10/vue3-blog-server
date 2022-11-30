@@ -202,7 +202,14 @@ class GithubUserController {
         id: userInfo?.id,
         token,
       });
-      ctx.cookies.set('token', token, { httpOnly: false });
+      ctx.cookies.set('token', token, {
+        httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+        // sameSite: 'none',
+        secure: true, // 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+        // 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+        // 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+        domain: 'hsslive.cn',
+      });
       successHandler({ ctx, data: token, message: 'github登录成功！' });
     } else {
       await githubUserService.updateByGithubId(OauthInfo);
@@ -229,7 +236,14 @@ class GithubUserController {
         id: userInfo?.id,
         token,
       });
-      ctx.cookies.set('token', token, { httpOnly: false });
+      ctx.cookies.set('token', token, {
+        httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+        // sameSite: 'none',
+        secure: true, // 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+        // 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+        // 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+        domain: 'hsslive.cn',
+      });
       successHandler({ ctx, data: token, message: 'github登录成功！' });
     }
 
