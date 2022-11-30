@@ -20,6 +20,12 @@ import axios from '@/utils/request';
 // WARN 有时候qq登录的回调会是这样的：https://admin.hsslive.cn/oauth/qq_login?error=100070&error_description=the+account+has+security+exception&state=99
 // WARN 即qq那边的回调错误，导致这个的原因可能是科学上网，关掉科学上网或者换个节点应该就能解决。
 
+// WARN 目前的流程是qq授权成功后，postmessage给本地的页面发通知
+// 然后本地发起请求，如果本地调用线上的https接口，Set-Cookie会不生效（因为子域名、主域名都不一样，
+// 本地是localhost，而线上是hsslive.cn），虽然Set-Cookie不生效，但是仍然会返回token，因此
+// 上层的应用（也就是前后台的页面）可以使用返回的token，不使用cookie
+// 如果是线上环境，就没有这个问题，因为主域名一样，只是子域名不一样。
+
 class QqUserController {
   async create(ctx: ParameterizedContext, next) {
     const {
@@ -172,26 +178,48 @@ class QqUserController {
         id: userInfo?.id,
         token,
       });
-      ctx.cookies.set('token', token, {
-        httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
-        // sameSite: 'none',
-        /**
-         * secure
-         * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
-         * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
-         * true，因为线上是https://admin.hsslive.cn
-         */
-        secure: PROJECT_ENV !== 'development',
-        /**
-         * domain
-         * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
-         * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
-         */
-        domain:
-          ctx.header.origin?.indexOf('localhost') !== -1
-            ? 'localhost'
-            : 'hsslive.cn',
-      });
+      if (ctx.header.origin?.indexOf('localhost') !== -1) {
+        ctx.cookies.set('token', token, {
+          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+          /**
+           * secure
+           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+           * true，因为线上是https://admin.hsslive.cn
+           */
+          secure: false,
+          /**
+           * domain
+           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+           */
+          domain:
+            ctx.header.origin?.indexOf('localhost') !== -1
+              ? 'localhost'
+              : 'hsslive.cn',
+        });
+      } else {
+        ctx.cookies.set('token', token, {
+          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+          sameSite: 'none', // 跨站点cookie需要设置sameSite: 'none'，设置sameSite: 'none'后，secure也要跟着设置true！
+          /**
+           * secure
+           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+           * true，因为线上是https://admin.hsslive.cn
+           */
+          secure: true,
+          /**
+           * domain
+           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+           */
+          domain:
+            ctx.header.origin?.indexOf('localhost') !== -1
+              ? 'localhost'
+              : 'hsslive.cn',
+        });
+      }
       successHandler({ ctx, data: token, message: 'qq登录成功！' });
     } else {
       await qqUserService.update(qqUserInfo);
@@ -218,26 +246,48 @@ class QqUserController {
         id: userInfo?.id,
         token,
       });
-      ctx.cookies.set('token', token, {
-        httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
-        // sameSite: 'none',
-        /**
-         * secure
-         * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
-         * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
-         * true，因为线上是https://admin.hsslive.cn
-         */
-        secure: PROJECT_ENV !== 'development',
-        /**
-         * domain
-         * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
-         * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
-         */
-        domain:
-          ctx.header.origin?.indexOf('localhost') !== -1
-            ? 'localhost'
-            : 'hsslive.cn',
-      });
+      if (ctx.header.origin?.indexOf('localhost') !== -1) {
+        ctx.cookies.set('token', token, {
+          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+          /**
+           * secure
+           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+           * true，因为线上是https://admin.hsslive.cn
+           */
+          secure: false,
+          /**
+           * domain
+           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+           */
+          domain:
+            ctx.header.origin?.indexOf('localhost') !== -1
+              ? 'localhost'
+              : 'hsslive.cn',
+        });
+      } else {
+        ctx.cookies.set('token', token, {
+          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+          sameSite: 'none', // 跨站点cookie需要设置sameSite: 'none'，设置sameSite: 'none'后，secure也要跟着设置true！
+          /**
+           * secure
+           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+           * true，因为线上是https://admin.hsslive.cn
+           */
+          secure: true,
+          /**
+           * domain
+           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+           */
+          domain:
+            ctx.header.origin?.indexOf('localhost') !== -1
+              ? 'localhost'
+              : 'hsslive.cn',
+        });
+      }
       successHandler({ ctx, data: token, message: 'qq登录成功！' });
     }
 

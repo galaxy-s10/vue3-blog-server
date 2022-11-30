@@ -278,7 +278,6 @@ class QiniuController {
         );
       }
       // TODO: 传多个文件的话，hash会有问题！待优化
-      console.log('当前是数组吗', Array.isArray(uploadFiles));
       if (!Array.isArray(uploadFiles)) {
         fileArr.push({
           prefix,
@@ -349,7 +348,7 @@ class QiniuController {
       await next();
     } catch (error) {
       console.log(uploadFiles);
-      console.log(error, fileArr.length, 9999);
+      console.log(error);
       fileArr.forEach((v) => {
         // 删除临时文件
         remove(v.filepath);
@@ -390,7 +389,6 @@ class QiniuController {
         );
       }
       // TODO: 传多个文件的话，hash会有问题！待优化
-      console.log('当前是数组吗', Array.isArray(uploadFiles));
       if (!Array.isArray(uploadFiles)) {
         fileArr.push({
           prefix,
@@ -461,7 +459,7 @@ class QiniuController {
       await next();
     } catch (error) {
       console.log(uploadFiles);
-      console.log(error, fileArr.length, 9999);
+      console.log(error);
       fileArr.forEach((v) => {
         // 删除临时文件
         remove(v.filepath);
@@ -504,7 +502,6 @@ class QiniuController {
           obj[`qiniu_${key}`] = `${obj[key]}`;
           delete obj[key];
         });
-        console.log(obj, +new Date());
         qiniuDataService.create({
           ...obj,
           bucket: QINIU_BUCKET,
@@ -591,7 +588,6 @@ class QiniuController {
     const { prefix, hash, ext }: IQiniuKey = ctx.request.query;
     const key = `${prefix + hash}.${ext}`;
     const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
-    console.log(prefix, hash, ext, flag, '---');
     if (flag) {
       successHandler({
         code: 3,
