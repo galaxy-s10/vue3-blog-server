@@ -34,6 +34,12 @@ class LogController {
       keyWord,
       id,
     });
+    // for (const key in ctx.headers) {
+    //   console.log(key, '=====', ctx.headers[key]);
+    // }
+    for (const key in ctx.request.headers) {
+      console.log(key, '=====', ctx.request.headers[key]);
+    }
 
     successHandler({ ctx, data: result });
 

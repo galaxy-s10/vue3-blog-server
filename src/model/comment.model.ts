@@ -56,6 +56,10 @@ const model = sequelize.define<CommentModel>(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    status: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1, // 状态：1显示；2不显示
+    },
     ua: {
       type: DataTypes.STRING,
     },

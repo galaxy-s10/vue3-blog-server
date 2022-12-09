@@ -9,7 +9,7 @@ import articleService from '@/service/article.service';
 import commentService from '@/service/comment.service';
 import positionService from '@/service/position.service';
 import userService from '@/service/user.service';
-import { arrayUnique } from '@/utils';
+import { arrayUnique, isAdmin } from '@/utils';
 
 class CommentController {
   // 评论列表
@@ -21,6 +21,7 @@ class CommentController {
       nowPage,
       pageSize,
       keyWord,
+      status,
     }: IList<IComment> = ctx.request.query;
     const result = await commentService.getList({
       id,
@@ -29,6 +30,7 @@ class CommentController {
       nowPage,
       pageSize,
       keyWord,
+      status: isAdmin(ctx) ? status : 1,
     });
     successHandler({ ctx, data: result });
 
@@ -45,6 +47,7 @@ class CommentController {
       nowPage,
       pageSize,
       keyWord,
+      status,
     }: IList<IComment> = ctx.request.query;
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
@@ -59,6 +62,7 @@ class CommentController {
       nowPage,
       pageSize,
       keyWord,
+      status: isAdmin(ctx) ? status : 1,
       from_user_id,
       article_id,
     });
@@ -213,6 +217,7 @@ class CommentController {
       pageSize,
       orderBy = 'asc',
       orderName = 'created_at',
+      status,
     }: any = ctx.request.query;
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
@@ -226,6 +231,7 @@ class CommentController {
       pageSize,
       orderBy,
       orderName,
+      status: isAdmin(ctx) ? status : 1,
       from_user_id,
       article_id,
     });
@@ -243,6 +249,7 @@ class CommentController {
       pageSize,
       orderBy = 'asc',
       orderName = 'created_at',
+      status,
     }: any = ctx.request.query;
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
@@ -258,6 +265,7 @@ class CommentController {
       from_user_id,
       parent_comment_id,
       article_id,
+      status: isAdmin(ctx) ? status : 1,
     });
     successHandler({ ctx, data: result });
 
@@ -275,11 +283,6 @@ class CommentController {
     const id = +ctx.params.parent_comment_id;
     const isExist = await commentService.isExist([id]);
     if (!isExist) {
-      throw new CustomError(
-        `不存在id为${id}的评论！`,
-        ALLOW_HTTP_CODE.paramsError,
-        ALLOW_HTTP_CODE.paramsError
-      );
       throw new CustomError(
         `不存在id为${id}的评论！`,
         ALLOW_HTTP_CODE.paramsError,

@@ -305,6 +305,7 @@ export interface IComment {
   from_user?: IUser;
   stars?: any[];
   star_total?: number;
+  status?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;

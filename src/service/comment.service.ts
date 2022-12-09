@@ -30,6 +30,7 @@ class CommentService {
     nowPage,
     pageSize,
     keyWord,
+    status,
   }: IList<IComment>) {
     let offset;
     let limit;
@@ -68,7 +69,7 @@ class CommentService {
       ],
       limit,
       offset,
-      where: { ...allWhere },
+      where: { ...allWhere, status },
     });
     return handlePaging(result, nowPage, pageSize);
   }
@@ -81,6 +82,7 @@ class CommentService {
     nowPage,
     pageSize,
     keyWord,
+    status,
     from_user_id,
     article_id,
   }: IList<IComment>) {
@@ -169,6 +171,7 @@ class CommentService {
       distinct: true,
       where: {
         article_id,
+        status,
         ...allWhere,
       },
       // attributes: {
@@ -191,6 +194,7 @@ class CommentService {
     const total = await commentModel.count({
       where: {
         article_id,
+        status,
       },
     });
     const promiseTotalRes: any = [];
@@ -254,6 +258,7 @@ class CommentService {
     orderBy,
     orderName,
     from_user_id,
+    status,
   }) {
     let offset;
     let limit;
@@ -261,7 +266,6 @@ class CommentService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const startTime = +new Date();
     const result: any = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -349,6 +353,7 @@ class CommentService {
       where: {
         article_id,
         parent_comment_id: -1,
+        status,
       },
       attributes: {
         include: [],
@@ -358,6 +363,7 @@ class CommentService {
     const total = await commentModel.count({
       where: {
         article_id,
+        status,
       },
     });
     result.rows.forEach((item) => {
@@ -389,6 +395,7 @@ class CommentService {
     from_user_id,
     parent_comment_id,
     article_id,
+    status,
   }) {
     let offset;
     let limit;
@@ -396,7 +403,6 @@ class CommentService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const startTime = +new Date();
     const result = await commentModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
@@ -429,10 +435,7 @@ class CommentService {
           paranoid: false,
         },
       ],
-      where: {
-        article_id,
-        parent_comment_id,
-      },
+      where: { status, article_id, parent_comment_id },
     });
 
     result.rows.forEach((item) => {
