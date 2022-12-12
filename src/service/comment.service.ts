@@ -42,6 +42,9 @@ class CommentService {
     if (id) {
       allWhere.id = +id;
     }
+    if (status) {
+      allWhere.status = +status;
+    }
     if (keyWord) {
       const keyWordWhere = [
         {
@@ -69,7 +72,7 @@ class CommentService {
       ],
       limit,
       offset,
-      where: { ...allWhere, status },
+      where: { ...allWhere },
     });
     return handlePaging(result, nowPage, pageSize);
   }

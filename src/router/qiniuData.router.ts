@@ -15,6 +15,8 @@ const qiniuRouter = new Router({ prefix: '/qiniu_data' });
 
 qiniuRouter.get('/list', qiniuController.getList);
 
+qiniuRouter.post('/prefetch', qiniuController.prefetch);
+
 // 对比差异
 qiniuRouter.get('/diff', qiniuController.getDiff);
 

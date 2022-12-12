@@ -34,6 +34,7 @@ import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
 import qiniu, { IQiniuKey } from '@/utils/qiniu';
+import axios from '@/utils/request';
 
 class QiniuController {
   async getToken(ctx: ParameterizedContext, next) {
@@ -46,6 +47,74 @@ class QiniuController {
 
     await next();
   }
+
+  prefetchQiniu = async (urls: string[]) => {
+    try {
+      // https://developer.qiniu.com/fusion/1227/file-prefetching
+      const reqUrl = `http://fusion.qiniuapi.com/v2/tune/prefetch`;
+      const contentType = 'application/json';
+      const reqBody = {
+        urls,
+      };
+      const token = qiniu.getAccessToken(reqUrl, 'POST', contentType, reqBody);
+      const res = await axios.post(reqUrl, reqBody, {
+        headers: {
+          'Content-Type': contentType,
+          Authorization: token,
+        },
+      });
+      console.log(res, '文件渔区');
+      return res;
+    } catch (error) {
+      console.log('prefetchQiniu失败', error);
+      throw new CustomError(
+        '预取失败！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+  };
+
+  prefetch = async (ctx: ParameterizedContext, next) => {
+    const { code, userInfo, message } = await authJwt(ctx);
+    if (code !== ALLOW_HTTP_CODE.ok) {
+      throw new CustomError(message, code, code);
+    }
+    if (userInfo!.id !== 1) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const { prefix } = ctx.request.body;
+    console.log(prefix, 'prefix');
+    const qiniuOfficialRes = await this.getQiniuListPrefix(prefix);
+    const prefetch: string[][] = [];
+    const list = qiniuOfficialRes.map((item) => {
+      // eslint-disable-next-line
+      return `${QINIU_CDN_URL}${item.key}`;
+    });
+    for (let i = 0; i < list.length; i += 60) {
+      prefetch.push(list.slice(i, i + 60));
+    }
+    const promise = prefetch.map((item) => {
+      return this.prefetchQiniu(item);
+    });
+    const prefetchRes = await Promise.all([promise]);
+    console.log('prefetchRes', prefetchRes);
+    successHandler({
+      ctx,
+      code: 1,
+      data: {
+        prefetchRes,
+        promise,
+      },
+      message: '预取成功！',
+    });
+
+    await next();
+  };
 
   mergeChunk = async (ctx: ParameterizedContext, next) => {
     const { code, userInfo, message } = await authJwt(ctx);
@@ -720,7 +789,7 @@ class QiniuController {
     await next();
   }
 
-  getQiniuListPrefix = async (prefix: string) => {
+  getQiniuListPrefix = async (prefix: string): Promise<any[]> => {
     const list: any = [];
     const limit = 1000;
     const { respInfo, respBody }: any = await qiniu.getListPrefix({

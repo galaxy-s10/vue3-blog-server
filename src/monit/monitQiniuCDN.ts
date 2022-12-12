@@ -48,9 +48,10 @@ export const main = () => {
           console.log(chalkWARN('七牛云cdn流量达到阈值，停掉cdn'));
           const domain = QINIU_CDN_DOMAIN;
           try {
-            const token = qiniuModel.getOfflineToken(domain);
+            const reqUrl = `https://api.qiniu.com/domain/${domain}/offline`;
+            const token = qiniuModel.getAccessToken(reqUrl);
             await axios.post(
-              `https://api.qiniu.com/domain/${domain}/offline`,
+              reqUrl,
               {},
               {
                 headers: {

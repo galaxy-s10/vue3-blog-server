@@ -34,16 +34,25 @@ class QiniuUtils {
   config = qiniuConfConfig;
 
   /**
-   * 获取七牛云mac
+   * 获取七牛云accessToken
    * @returns
    */
-  getOfflineToken(domain: string) {
+  getAccessToken(
+    url: string,
+    reqMethod: string,
+    reqcontentType: string,
+    reqBody: any
+  ) {
     const mac = new qiniu.auth.digest.Mac(QINIU_ACCESSKEY, QINIU_SECRETKEY);
-    const offlineToken = qiniu.util.generateAccessToken(
+    const accessToken = qiniu.util.generateAccessTokenV2(
       mac,
-      `https://api.qiniu.com/domain/${domain}/offline`
+      url,
+      reqMethod,
+      reqcontentType,
+      JSON.stringify(reqBody)
     );
-    return offlineToken;
+    // const accessToken = qiniu.util.generateAccessToken(mac, url);
+    return accessToken;
   }
 
   /**
