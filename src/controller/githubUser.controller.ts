@@ -55,6 +55,32 @@ class GithubUserController {
     return OauthInfo;
   }
 
+  /** https://docs.github.com/cn/rest/reference/users#get-the-authenticated-user */
+  getRepoStargazers = async (ctx: ParameterizedContext, next) => {
+    // getRepoStargazers = async ({ repo }: { repo: string }) => {
+    const { repo }: { repo: string } = ctx.request.query;
+    const accessToken = '666';
+    console.log(111111111, accessToken);
+    const data: any = await axios.get(
+      `https://api.github.com/repos/galaxy-s10/${repo}/stargazers?per_page=50`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3.star+json',
+          Authorization: `token ${accessToken}`,
+        },
+      }
+    );
+    // console.log(data);
+    successHandler({
+      ctx,
+      data: {
+        data,
+        len: data.length,
+      },
+      message: '绑定github成功！',
+    });
+  };
+
   /**
    * 绑定github
    * 1，如果已经绑定过github，则不能绑定，只能先解绑了再绑定

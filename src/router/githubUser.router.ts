@@ -7,6 +7,9 @@ const githubUserRouter = new Router({ prefix: '/github_user' });
 // 用户列表
 githubUserRouter.get('/list', githubUserController.list);
 
+// 用户列表
+githubUserRouter.get('/stargazers', githubUserController.getRepoStargazers);
+
 // 用户github登录
 githubUserRouter.post('/login', githubUserController.login);
 
