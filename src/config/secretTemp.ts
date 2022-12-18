@@ -13,7 +13,8 @@ export const ADMIN_QQ_REDIRECT_URI = '**********'; // qq登录回调地址
 
 export const GITHUB_CLIENT_ID = '**********'; // github登录APP ID
 export const GITHUB_CLIENT_SECRET = '**********'; // github登录APP Key
-export const GITHUB_REDIRECT_URI = '**********'; // github登录回调地址
+export const GITHUB_REDIRECT_URI =
+  '**************************************************'; // github登录回调地址
 
 export const GAODE_WEB_IP_URL = '**********'; // 高德地图url
 export const GAODE_WEB_IP_KEY = '**********'; // 高德地图key

@@ -1,12 +1,9 @@
-import fs from 'fs-extra';
+import './init';
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
 import staticService from 'koa-static';
-
-import aliasOk from './app/alias'; // 这个后面的代码才能用@别名
-import { CustomError } from './model/customError.model';
 
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
@@ -20,18 +17,14 @@ import {
   STATIC_DIR,
   UPLOAD_DIR,
 } from '@/constant';
+import { CustomError } from '@/model/customError.model';
 import { monit } from '@/monit';
 import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
-import { handleSecretFile } from '@/utils/handleSecret';
 import { initDb } from '@/utils/initDb';
 // import { initWs } from '@/websocket';
 
 const port = +PROJECT_PORT; // 端口
-
-aliasOk(); // 添加别名路径
-handleSecretFile(); // 处理config/secret.ts秘钥文件
-fs.ensureDirSync(UPLOAD_DIR); // 确保存在上传目录
 
 const app = new Koa();
 app.proxy = true;
@@ -39,6 +32,7 @@ app.proxy = true;
 // app.proxyIpHeader = 'X-Real-IP';
 
 app.use(catchErrorMiddle); // 全局错误处理
+
 app.use(
   koaBody({
     multipart: true,
@@ -60,11 +54,14 @@ app.use(
     // strict: true, // 废弃了。如果启用，则不解析 GET、HEAD、DELETE 请求，默认true。即delete不会解析data数据
   })
 ); // 解析参数
+
 app.use(
   staticService(STATIC_DIR, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
 );
+
 app.use(conditional()); // 接口缓存
 app.use(etag()); // 接口缓存
+
 app.use(corsMiddle); // 设置允许跨域
 
 app.on('error', errorHandler); // 接收全局错误，位置必须得放在最开头？

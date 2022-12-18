@@ -13,6 +13,8 @@ export const PROJECT_PORT = process.env.NODE_APP_RELEASE_PROJECT_PORT as string;
 
 export const STATIC_DIR = path.join(__dirname, './public/'); // 静态目录
 export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
+export const SECRET_FILE = path.join(__dirname, './config/secret.ts'); // 秘钥文件
+export const SECRETTEMP_FILE = path.join(__dirname, './config/secretTemp.ts'); // 秘钥文件模板
 
 export const ERROR_HTTP_CODE = {
   serverError: 10000, // 服务器错误
