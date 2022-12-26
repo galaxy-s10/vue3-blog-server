@@ -171,7 +171,7 @@ class QiniuController {
     key: string;
     value: { type: number; hash: string; percentage: number };
   }) => {
-    await redisController.setVal({
+    await redisController.setExVal({
       prefix,
       key,
       value: JSON.stringify(value),

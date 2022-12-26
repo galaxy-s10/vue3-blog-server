@@ -63,7 +63,7 @@ class EmailUserController {
         content.subject,
         `<h1>${content.content}</h1>`
       );
-      await redisController.setVal({
+      await redisController.setExVal({
         ...key,
         value: verificationCode,
         exp,
@@ -86,7 +86,7 @@ class EmailUserController {
       content.subject,
       `<h1>${content.content}</h1>`
     );
-    await redisController.setVal({
+    await redisController.setExVal({
       ...key,
       value: verificationCode,
       exp,

@@ -25,6 +25,18 @@ class RedisController {
     prefix,
     key,
     value,
+  }: {
+    prefix: string;
+    key: string;
+    value: string;
+  }) => {
+    await redisClient.set(`${prefix}-${key}`, value); // string类型
+  };
+
+  setExVal = async ({
+    prefix,
+    key,
+    value,
     exp,
   }: {
     prefix: string;

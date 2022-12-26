@@ -4,8 +4,8 @@ import schedule from 'node-schedule';
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
 import { ALLOW_HTTP_CODE, MONIT_JOB } from '@/constant';
+import { main } from '@/init/monit/monitBackupsDb';
 import { CustomError } from '@/model/customError.model';
-import { main } from '@/monit/monitBackupsDb';
 import { showMemory, clearCache, restartPm2 } from '@/utils/clearCache';
 
 class ScheduleController {

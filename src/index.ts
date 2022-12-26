@@ -1,3 +1,4 @@
+// 一定要将import './init';放到最开头,因为它里面初始化了路径别名
 import './init';
 import Koa from 'koa';
 import koaBody from 'koa-body';
@@ -17,12 +18,12 @@ import {
   STATIC_DIR,
   UPLOAD_DIR,
 } from '@/constant';
+import { initDb } from '@/init/initDb';
+import { initMonit } from '@/init/monit';
+import { connectWebSocket } from '@/init/websocket';
 import { CustomError } from '@/model/customError.model';
-import { monit } from '@/monit';
 import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
-import { initDb } from '@/utils/initDb';
-// import { initWs } from '@/websocket';
 
 const port = +PROJECT_PORT; // 端口
 
@@ -56,8 +57,10 @@ app.use(
 ); // 解析参数
 
 app.use(
-  staticService(STATIC_DIR, { maxage: 60 * 1000 }) // 静态文件目录（缓存时间：1分钟）
-);
+  staticService(STATIC_DIR, {
+    maxage: 60 * 1000, // 缓存时间：1分钟
+  })
+); // 静态文件目录
 
 app.use(conditional()); // 接口缓存
 app.use(etag()); // 接口缓存
@@ -66,21 +69,22 @@ app.use(corsMiddle); // 设置允许跨域
 
 app.on('error', errorHandler); // 接收全局错误，位置必须得放在最开头？
 
-// initWs(httpServer); // websocket
-
 async function main() {
   try {
+    await Promise.all([
+      connectMysql(), // 连接mysql
+      connectRedis(), // 连接redis
+    ]);
+    initMonit(); // 初始化监控
     initDb(3); // 加载sequelize的relation表关联
-    await connectMysql(); // 连接mysql
-    await connectRedis(); // 连接redis
     app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
     loadAllRoutes(app); // 加载所有路由
-    monit(); // 监控
     await new Promise((resolve) => {
       // 语法糖, 等同于http.createServer(app.callback()).listen(3000);
-      app.listen(port, () => {
+      const httpServer = app.listen(port, () => {
         resolve('ok');
       });
+      connectWebSocket(httpServer); // 初始化websocket
     }); // http接口服务
     console.log(chalkSUCCESS(`项目启动成功！`));
     console.log(chalkWARN(`当前连接的数据库: ${dbName}`));

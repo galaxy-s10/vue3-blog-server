@@ -185,7 +185,7 @@ class QiniuUtils {
     putExtra.partSize = 1024 * 1024 * 4; // 4m，partSize的值必须是整数，不能带小数点！v1版本大小不等超过4m，v2版本才可以自定义块大小
     putExtra.progressCallback = (uploadBytes: number, totalBytes: number) => {
       console.log('progressCallback', uploadBytes, totalBytes);
-      redisController.setVal({
+      redisController.setExVal({
         prefix: REDIS_PREFIX.fileProgress,
         key: hash,
         value: JSON.stringify({

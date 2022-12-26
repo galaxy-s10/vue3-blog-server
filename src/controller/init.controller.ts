@@ -3,18 +3,18 @@ import { ParameterizedContext } from 'koa';
 import successHandler from '@/app/handler/success-handle';
 import sequelize from '@/config/db';
 import { ALLOW_HTTP_CODE } from '@/constant';
+import {
+  bulkCreateAuth,
+  bulkCreateRole,
+  bulkCreateRoleAuth,
+} from '@/init/initData';
+import { initDb } from '@/init/initDb';
 import AuthModel from '@/model/auth.model';
 import { CustomError } from '@/model/customError.model';
 import dayDataModel from '@/model/dayData.model';
 import RoleModel from '@/model/role.model';
 import RoleAuthModel from '@/model/roleAuth.model';
 import userModel from '@/model/user.model';
-import {
-  bulkCreateAuth,
-  bulkCreateRole,
-  bulkCreateRoleAuth,
-} from '@/utils/initData';
-import { initDb } from '@/utils/initDb';
 
 const sql1 = `
 DROP PROCEDURE IF EXISTS insert_many_dates;

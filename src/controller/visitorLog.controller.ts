@@ -15,8 +15,8 @@ class VisitorLogController {
       orderBy,
       orderName,
     });
-    successHandler({ ctx, data: result });
 
+    successHandler({ ctx, data: result });
     await next();
   }
 

@@ -59,7 +59,7 @@ class OtherController {
         `《自然博客》验证码：${verificationCode}`,
         `《自然博客》验证码：${verificationCode}，有效期五分钟`
       );
-      await redisController.setVal({
+      await redisController.setExVal({
         ...key,
         value: verificationCode,
         exp: redisExpired,
@@ -80,7 +80,7 @@ class OtherController {
         `《自然博客》验证码：${verificationCode}`,
         `《自然博客》验证码：${verificationCode}，有效期五分钟`
       );
-      await redisController.setVal({
+      await redisController.setExVal({
         ...key,
         value: verificationCode,
         exp: redisExpired,
