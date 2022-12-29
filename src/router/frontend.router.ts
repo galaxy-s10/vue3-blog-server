@@ -14,4 +14,6 @@ frontendRouter.get('/list', frontendController.getList);
 
 frontendRouter.put('/update/:id', frontendController.update);
 
+frontendRouter.delete('/delete/:id', frontendController.delete);
+
 export default frontendRouter;

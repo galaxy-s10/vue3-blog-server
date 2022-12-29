@@ -1,11 +1,6 @@
 import { REDIS_PREFIX } from '@/constant';
 import redisController from '@/controller/redis.controller';
 
-interface IKey {
-  prefix: string;
-  key: string;
-}
-
 const chooseSongListKey = 'chooseSongListKey';
 
 class WSController {

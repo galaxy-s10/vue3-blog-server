@@ -85,6 +85,30 @@ class FrontendController {
     successHandler({ ctx });
     await next();
   }
+
+  async delete(ctx: ParameterizedContext, next) {
+    const hasAuth = await verifyUserAuth(ctx);
+    if (!hasAuth) {
+      throw new CustomError(
+        '权限不足！',
+        ALLOW_HTTP_CODE.forbidden,
+        ALLOW_HTTP_CODE.forbidden
+      );
+    }
+    const id = +ctx.params.id;
+    const isExist = await frontendService.isExist([id]);
+    if (!isExist) {
+      throw new CustomError(
+        `不存在id为${id}的前端设置！`,
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    await frontendService.delete(id);
+    successHandler({ ctx });
+
+    await next();
+  }
 }
 
 export default new FrontendController();

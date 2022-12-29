@@ -40,6 +40,17 @@ class FrontendService {
     };
   }
 
+  async isExist(ids: number[]) {
+    const res = await frontendModel.count({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+      },
+    });
+    return res === ids.length;
+  }
+
   async find(id: number) {
     const result = await frontendModel.findOne({ where: { id } });
     return result;
@@ -110,6 +121,14 @@ class FrontendService {
       },
       { where: { id } }
     );
+    return result;
+  }
+
+  async delete(id: number) {
+    const result = await frontendModel.destroy({
+      where: { id },
+      individualHooks: true,
+    });
     return result;
   }
 }
