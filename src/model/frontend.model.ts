@@ -35,44 +35,21 @@ const model = sequelize.define<FrontendModel>(
     //   type: DataTypes.INTEGER,
     //   defaultValue: 1, // 1:关闭站内注册 2:开启站内注册
     // },
-    frontend_qq_login: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭qq登录 2:开启qq登录
+    key: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    frontend_github_login: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭github登录 2:开启github登录
-    },
-    frontend_email_login: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭email登录 2:开启email登录
-    },
-    frontend_comment: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭留言 2:开启留言
-    },
-    frontend_link: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:关闭申请友链 2:关闭申请友链
-    },
-    frontend_shutdown: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1, // 1:停机维护 2:正常运行
-    },
-    frontend_shutdown_content: {
-      // 停机维护公告
+    value: {
       type: DataTypes.TEXT('long'),
+      allowNull: false,
     },
-    frontend_dialog: {
-      type: DataTypes.INTEGER,
-      defaultValue: 2, // 1:开启首页弹窗 2:关闭首页弹窗
+    desc: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-    frontend_dialog_content: {
-      // 首页弹窗内容
-      type: DataTypes.TEXT('long'),
-    },
-    frontend_about: {
-      type: DataTypes.TEXT('long'),
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {

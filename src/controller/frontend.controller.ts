@@ -3,13 +3,58 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import { ALLOW_HTTP_CODE } from '@/constant';
-import { IFrontend } from '@/interface';
+import { IFrontend, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import frontendService from '@/service/frontend.service';
 
 class FrontendController {
   async getDetail(ctx: ParameterizedContext, next) {
-    const result = await frontendService.find(1);
+    const result = await frontendService.findAll();
+    const obj: any = {};
+    result.forEach((item) => {
+      const val = item.get();
+      obj[val.key!] = val.value;
+    });
+    successHandler({ ctx, data: obj });
+    await next();
+  }
+
+  async find(ctx: ParameterizedContext, next) {
+    const id = +ctx.params.id;
+    const result = await frontendService.find(id);
+    successHandler({ ctx, data: result });
+    await next();
+  }
+
+  async create(ctx: ParameterizedContext, next) {
+    const { type, key, value, desc }: IFrontend = ctx.request.body;
+    await frontendService.create({
+      type,
+      key,
+      value,
+      desc,
+    });
+    successHandler({ ctx });
+    await next();
+  }
+
+  async getList(ctx: ParameterizedContext, next) {
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+    }: IList<IFrontend> = ctx.request.query;
+    const result = await frontendService.getList({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+    });
     successHandler({ ctx, data: result });
     await next();
   }
@@ -30,30 +75,12 @@ class FrontendController {
       );
     }
     const id = +ctx.params.id;
-    const {
-      frontend_about,
-      frontend_comment,
-      frontend_link,
-      frontend_qq_login,
-      frontend_github_login,
-      frontend_email_login,
-      frontend_dialog,
-      frontend_dialog_content,
-      frontend_shutdown,
-      frontend_shutdown_content,
-    }: IFrontend = ctx.request.body;
+    const { key, value, desc }: IFrontend = ctx.request.body;
     await frontendService.update({
       id,
-      frontend_about,
-      frontend_comment,
-      frontend_link,
-      frontend_qq_login,
-      frontend_github_login,
-      frontend_email_login,
-      frontend_dialog,
-      frontend_dialog_content,
-      frontend_shutdown,
-      frontend_shutdown_content,
+      key,
+      value,
+      desc,
     });
     successHandler({ ctx });
     await next();

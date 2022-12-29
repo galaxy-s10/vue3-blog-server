@@ -20,22 +20,29 @@ export interface IBlacklist {
   deleted_at?: string;
 }
 
+type IFormType =
+  | 'input'
+  | 'password'
+  | 'number'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'markdown'
+  | 'switch'
+  | 'upload'
+  | 'treeSelect';
+
 export interface IFrontend {
   id?: number;
-  frontend_qq_login?: number;
-  frontend_github_login?: number;
-  frontend_email_login?: number;
-  frontend_comment?: number;
-  frontend_link?: number;
-  frontend_about?: string;
-  frontend_shutdown?: number;
-  frontend_shutdown_content?: string;
-  frontend_dialog?: number;
-  frontend_dialog_content?: string;
+  key?: string;
+  value?: string;
+  desc?: string;
+  type?: IFormType;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
 }
+
 export interface IIpdata {
   city: string;
   country: string;

@@ -19,7 +19,10 @@ initRouter.post('/role_auth', initController.initRoleAuth);
 // 初始化时间表
 initRouter.post('/day_data', initController.initDayData);
 
-// 初始化时间表
+// 初始化管理员
 initRouter.post('/admin_user', initController.initAdminUser);
+
+// 初始化前端设置
+initRouter.post('/frontend', initController.initFrontend);
 
 export default initRouter;
