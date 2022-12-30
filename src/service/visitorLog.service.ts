@@ -135,6 +135,57 @@ class VisitorLogService {
     return handlePaging(result, nowPage, pageSize);
   }
 
+  /** 获取访客日志列表 */
+  async getList2({
+    id,
+    orderBy,
+    orderName,
+    nowPage,
+    pageSize,
+    keyWord,
+  }: IList<IVisitorLog>) {
+    let offset;
+    let limit;
+    if (nowPage && pageSize) {
+      offset = (+nowPage - 1) * +pageSize;
+      limit = +pageSize;
+    }
+    const allWhere: any = {};
+    if (id) {
+      allWhere.id = +id;
+    }
+    if (keyWord) {
+      const keyWordWhere = [
+        {
+          user_id: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          ip: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          ip_data: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+      ];
+      allWhere[Op.or] = keyWordWhere;
+    }
+    // @ts-ignore
+    const result = await visitorLogModel.findAndCountAll({
+      order: [[orderName, orderBy]],
+      limit,
+      offset,
+      where: {
+        ...allWhere,
+      },
+    });
+    return handlePaging(result, nowPage, pageSize);
+  }
+
   /** 获取一秒内ip的访问次数 */
   async getOneSecondApiNums(ip: string) {
     const nowDate = new Date().getTime();

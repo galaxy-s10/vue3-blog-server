@@ -14,8 +14,11 @@ visitorLogRouter.get('/day', visitorLogController.getDayVisitTotal);
 // 获取ip访问总数
 visitorLogRouter.get('/ip_total', visitorLogController.getIpVisitTotal);
 
-// 访客日志列表
+// 访客日志列表（只带用户id，不带用户信息）
 visitorLogRouter.get('/list', visitorLogController.getList);
+
+// 访客日志列表（带用户信息）
+visitorLogRouter.get('/list2', visitorLogController.getList2);
 
 // 创建访客日志
 visitorLogRouter.post('/create', verifyProp, visitorLogController.create);

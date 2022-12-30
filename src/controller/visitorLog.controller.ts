@@ -82,6 +82,27 @@ class VisitorLogController {
     await next();
   }
 
+  async getList2(ctx: ParameterizedContext, next) {
+    const {
+      id,
+      orderBy = 'asc',
+      orderName = 'id',
+      nowPage,
+      pageSize,
+      keyWord,
+    }: IList<IVisitorLog> = ctx.request.query;
+    const result = await visitorLogService.getList2({
+      id,
+      orderBy,
+      orderName,
+      nowPage,
+      pageSize,
+      keyWord,
+    });
+    successHandler({ ctx, data: result });
+    await next();
+  }
+
   async create(ctx: ParameterizedContext, next) {
     const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
     // 这个接口的userInfo不是必须的
