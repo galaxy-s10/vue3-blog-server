@@ -13,7 +13,12 @@ class FrontendController {
     const obj: any = {};
     result.forEach((item) => {
       const val = item.get();
-      obj[val.key!] = val.value;
+      // obj[val.key!] = JSON.stringify(item);
+      obj[val.key!] = {
+        value: val.value,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      };
     });
     successHandler({ ctx, data: obj });
     await next();
