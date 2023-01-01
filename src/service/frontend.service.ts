@@ -4,7 +4,6 @@ import { IFrontend, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import frontendModel from '@/model/frontend.model';
-import qqUserModel from '@/model/qqUser.model';
 import userModel from '@/model/user.model';
 import VisitorLogModel from '@/model/visitorLog.model';
 import { handlePaging } from '@/utils';
@@ -14,18 +13,22 @@ const { Op } = Sequelize;
 class FrontendService {
   /** 统计 */
   async static() {
-    const article_total = await articleModel.count();
-    const article_read_total = await articleModel.sum('click');
-    const comment_total = await commentModel.count();
-    const user_total = await userModel.count();
-    const qq_user_total = await qqUserModel.count();
-    const visit_total = await VisitorLogModel.count();
+    const [
+      article_total,
+      article_read_total,
+      comment_total,
+      user_total,
+      visit_total,
+    ] = await Promise.all([
+      articleModel.count(),
+      articleModel.sum('click'),
+      commentModel.count(),
+      userModel.count(),
+      VisitorLogModel.count(),
+    ]);
     return {
       user: {
         total: user_total,
-      },
-      qq_user: {
-        total: qq_user_total,
       },
       article: {
         total: article_total,

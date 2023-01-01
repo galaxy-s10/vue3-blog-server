@@ -80,6 +80,7 @@ export const REDIS_PREFIX = {
   fileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-fileProgress`, // 文件上传进度
   chunkFileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-chunkFileProgress`, // 分片文件上传进度
   chooseSongList: `${PROJECT_NAME}-${PROJECT_ENV}-chooseSongList`, // 点歌列表
+  setHistoryHightOnlineNum: `${PROJECT_NAME}-${PROJECT_ENV}-setHistoryHightOnlineNum`, // 历史最高同时在线数
 };
 
 // 平台类型

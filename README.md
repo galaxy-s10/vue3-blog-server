@@ -1,6 +1,6 @@
 # 简介
 
-基于 Typescript + Node 搭建的后端项目模板，并主要使用了以下插件：
+基于 Typescript + Node 搭建的博客后端，并主要使用了以下插件：
 
 - koa
 - sequelize
@@ -11,9 +11,9 @@
 - jsonwebtoken
 - socket.io
 
-# 接口
+# apifox 接口文档
 
-> Apifox: [https://www.apifox.cn/apidoc/shared-e73bb55d-ccdd-40a2-ab41-961e1ffcfa10/doc-543592](https://www.apifox.cn/apidoc/shared-e73bb55d-ccdd-40a2-ab41-961e1ffcfa10/doc-543592)，绝大部分接口都写了，可能还有一些接口没写~
+[https://www.apifox.cn/apidoc/shared-e73bb55d-ccdd-40a2-ab41-961e1ffcfa10/doc-543592](https://www.apifox.cn/apidoc/shared-e73bb55d-ccdd-40a2-ab41-961e1ffcfa10/doc-543592)，绝大部分接口都写了，可能还有一些接口没写~
 
 # 运行
 
@@ -34,10 +34,15 @@ pnpm run start:beta
 pnpm run start:prod
 ```
 
-## 注意事项
+# 服务器环境
+
+- 操作系统：CentOS Linux release 8.2.2004
+- nginx 版本：1.21.4
+- node 版本：14.19.0
+- redis 版本：5.0.3
+- mysql 版本：8.0.26
+- pm2 版本：5.1.2
+
+# 注意
 
 `pnpm start` 启动后，会默认在 src/config/secret.ts 生成秘钥文件，请在该文件里面填写本项目所需的秘钥信息~
-
-# 环境
-
-node 版本：v14.17.0
