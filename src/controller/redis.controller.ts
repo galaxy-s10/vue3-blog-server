@@ -47,6 +47,51 @@ class RedisController {
   }) => {
     await redisClient.setEx(`${prefix}-${key}`, exp, value); // string类型
   };
+
+  setHashVal = async (key: string, field: string, value: any) => {
+    const res = await redisClient.hSetNX(key, field, JSON.stringify(value));
+    return res;
+  };
+
+  delHashVal = async (key: string, field: string) => {
+    const res = await redisClient.hDel(key, field);
+    return res;
+  };
+
+  getHashVal = async (key: string, field: string) => {
+    const res = await redisClient.hGet(key, field);
+    return res;
+  };
+
+  getAllHashVal = async (key: string) => {
+    const res = await redisClient.hVals(key);
+    return res;
+  };
+
+  getHashLenVal = async (key: string) => {
+    const res = await redisClient.hLen(key);
+    return res;
+  };
+
+  setSetVal = async (key: string, value: string) => {
+    const res = await redisClient.sAdd(key, value);
+    return res;
+  };
+
+  getSetVal = async (key: string) => {
+    const res = await redisClient.sMembers(key);
+    return res;
+  };
+
+  setListVal = async (key: string, value: string) => {
+    const res = await redisClient.lPush(key, value);
+    return res;
+  };
+
+  getListVal = async (key: string) => {
+    const res = await redisClient.lRange(key, 0, -1);
+    return res;
+  };
 }
 
 export default new RedisController();

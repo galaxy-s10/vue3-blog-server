@@ -51,7 +51,7 @@ export const initDb = async (v) => {
         console.log(chalkSUCCESS('校正数据库所有表完成！'));
         break;
       case 3:
-        // loadAllModel();
+        loadAllModel();
         // eslint-disable-next-line global-require
         require('@/model/relation');
         break;

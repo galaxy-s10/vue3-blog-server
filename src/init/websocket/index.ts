@@ -1,8 +1,10 @@
 import { Server } from 'socket.io';
 
-import { PROJECT_ENV } from '@/constant';
-import { chalkINFO } from '@/utils/chalkTip';
+import WsRedisController from './redis.controller';
 
+import { PROJECT_ENV } from '@/constant';
+import interactionController from '@/controller/interaction.controller';
+import { chalkINFO } from '@/utils/chalkTip';
 // websocket消息类型
 export const wsMsgType = {
   /** 用户连接 */
@@ -31,6 +33,8 @@ export const wsConnectStatus = {
   connected: 'connected',
   /** 断开连接 */
   disconnect: 'disconnect',
+  /** 断开连接*/
+  disconnecting: 'disconnecting',
   /** 重新连接 */
   reconnect: 'reconnect',
 };
@@ -41,19 +45,11 @@ export const wsUserType = {
   user: 2, // 用户
 };
 
-const onlineList = {};
-
-function getOnline() {
-  let visitor = 0;
-  let user = 0;
-  Object.keys(onlineList).forEach((key) => {
-    const item = onlineList[key];
-    if (item.userType === wsUserType.visitor) {
-      visitor += 1;
-    } else if (item.userType === wsUserType.user) {
-      user += 1;
-    }
-  });
+async function getOnline() {
+  const [visitor, user] = await Promise.all([
+    WsRedisController.getAllOnlineVisitorNum(),
+    WsRedisController.getAllOnlineUserNum(),
+  ]);
   return { visitor, user };
 }
 
@@ -66,55 +62,118 @@ export const connectWebSocket = (server) => {
   const io = new Server(server);
   io.on('connection', function connection(socket) {
     // 获取在线用户
-    socket.on(wsMsgType.getOnlineUserNum, (data) => {
-      console.log(socket.id, '获取在线用户', onlineList, data);
+    socket.on(wsMsgType.getOnlineUserNum, async (data) => {
+      const { visitor, user } = await getOnline();
+      console.log(socket.id, '获取在线用户', data);
       io.emit(wsMsgType.getOnlineUserNum, {
-        count: getOnline().user,
+        count: user,
+        time: new Date().toLocaleString(),
+      });
+      io.emit(wsMsgType.getOnlineVisitorNum, {
+        count: visitor,
         time: new Date().toLocaleString(),
       });
     });
 
     // 获取在线游客
-    socket.on(wsMsgType.getOnlineVisitorNum, (data) => {
+    socket.on(wsMsgType.getOnlineVisitorNum, async (data) => {
       console.log(socket.id, '获取在线游客', data);
+      const { visitor } = await getOnline();
       io.emit(wsMsgType.getOnlineVisitorNum, {
-        count: getOnline().visitor,
+        count: visitor,
         time: new Date().toLocaleString(),
       });
     });
 
     // 用户进房间
-    socket.on(wsMsgType.userInRoom, (data) => {
-      console.log(socket.id, '用户进房间', data);
-      const { id } = socket;
-      onlineList[id] = data;
-      io.emit(wsMsgType.userInRoom, {
-        ...data,
-        time: new Date().toLocaleString(),
-      });
-      io.emit(wsMsgType.getOnlineVisitorNum, {
-        count: getOnline().visitor,
-        time: new Date().toLocaleString(),
-      });
-      io.emit(wsMsgType.getOnlineUserNum, {
-        count: getOnline().user,
-        time: new Date().toLocaleString(),
-      });
-    });
+    socket.on(
+      wsMsgType.userInRoom,
+      async (data: {
+        userInfo: {
+          id: string;
+          userType: number;
+          username: string;
+          avatar: string;
+        };
+        userType: number;
+        value: any;
+      }) => {
+        console.log(socket.id, socket.request['x-real-ip'], '用户进房间', data);
+        const { id } = socket;
+        const { userType } = data;
+        await Promise.all([
+          userType === wsUserType.user
+            ? WsRedisController.addOnlineUser(id, data)
+            : WsRedisController.addOnlineVisitor(id, data),
+          WsRedisController.addOnlineList(id, data),
+        ]);
+        const { visitor, user } = await getOnline();
+        io.emit(wsMsgType.userInRoom, {
+          id,
+          userInfo: data.userInfo,
+          userType: data.userType,
+          value: data.value,
+          time: new Date().toLocaleString(),
+        });
+        io.emit(wsMsgType.getOnlineVisitorNum, {
+          count: visitor,
+          time: new Date().toLocaleString(),
+        });
+        io.emit(wsMsgType.getOnlineUserNum, {
+          count: user,
+          time: new Date().toLocaleString(),
+        });
+      }
+    );
 
     // 用户退出房间
-    socket.on(wsMsgType.userOutRoom, (data) => {
-      console.log(socket.id, '用户退出房间', data);
-      io.emit(wsMsgType.userOutRoom, {
-        ...data,
-        time: new Date().toLocaleString(),
-      });
-      delete onlineList[socket.id];
-      io.emit(wsMsgType.getOnlineVisitorNum, {
-        count: getOnline().visitor,
-        time: new Date().toLocaleString(),
-      });
-    });
+    socket.on(
+      wsMsgType.userOutRoom,
+      async (data: {
+        userInfo: {
+          id: string;
+          userType: number;
+          username: string;
+          avatar: string;
+        };
+        userType: number;
+      }) => {
+        console.log(socket.id, '用户退出房间', data);
+        const { id } = socket;
+        const { userType } = data;
+        const res = await WsRedisController.getOnlineUser(id);
+        await Promise.all([
+          userType === wsUserType.user
+            ? WsRedisController.deleteOnlineUser(id)
+            : WsRedisController.deleteOnlineVisitor(id),
+          WsRedisController.deleteOnlineList(id),
+        ]);
+        const { visitor, user } = await getOnline();
+        if (res) {
+          io.emit(wsMsgType.userOutRoom, {
+            id,
+            userInfo: JSON.parse(res).userInfo,
+            userType: JSON.parse(res).userType,
+            time: new Date().toLocaleString(),
+          });
+        } else if (data) {
+          io.emit(wsMsgType.userOutRoom, {
+            id,
+            userInfo: data.userInfo,
+            userType: data.userType,
+            time: new Date().toLocaleString(),
+          });
+        }
+        io.emit(wsMsgType.getOnlineVisitorNum, {
+          count: visitor,
+          time: new Date().toLocaleString(),
+        });
+        io.emit(wsMsgType.getOnlineUserNum, {
+          count: user,
+          time: new Date().toLocaleString(),
+        });
+      }
+    );
 
     // 用户发送消息
     socket.on(wsMsgType.userSendMsg, (data) => {
@@ -122,9 +181,21 @@ export const connectWebSocket = (server) => {
       //  socket.emit会将消息发送给发件人
       //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
+      const { id } = socket;
       io.emit(wsMsgType.userSendMsg, {
-        ...data,
+        id,
+        userInfo: data.userInfo,
+        userType: data.userType,
+        value: data.value,
         time: new Date().toLocaleString(),
+      });
+      interactionController.common.create({
+        client_ip: socket.request['x-real-ip'] || '-1',
+        client: '',
+        user_info: JSON.stringify(data.userInfo),
+        user_type: data.userType,
+        type: wsMsgType.userSendMsg,
+        value: JSON.stringify(data.value),
       });
     });
 
@@ -135,7 +206,6 @@ export const connectWebSocket = (server) => {
       //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
       const { avatar } = data;
-      onlineList[socket.id].avatar = avatar;
       io.emit(wsMsgType.visitorSwitchAvatar, {
         code: 200,
         avatar,
@@ -143,46 +213,44 @@ export const connectWebSocket = (server) => {
       });
     });
 
-    // // 用户点歌
-    // socket.on(wsMsgType.chooseSong, (data) => {
-    //   console.log(socket.id, '用户点歌', data);
-    //   // 判断nickname, avatar等用户输入
-    //   const { nickname, avatar, msg } = data;
-    //   //  socket.emit会将消息发送给发件人
-    //   //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
-    //   // io.emit会将消息发送给所有人，包括发件人
-    //   io.emit(wsMsgType.userSendMsg, {
-    //     id: socket.id,
-    //     nickname,
-    //     avatar,
-    //     msg,
-    //     time: new Date().toLocaleString(),
-    //   });
-    // });
-
-    // 断开
-    socket.on('disconnect', (reason) => {
+    // 断开连接
+    socket.on(wsConnectStatus.disconnect, async (reason) => {
       console.log(
         socket.id,
-        chalkINFO(`${new Date().toLocaleString()}-disconnect`)
+        chalkINFO(`${new Date().toLocaleString()}，断开连接`)
       );
       console.log(reason);
       const { id } = socket;
+      const data = await WsRedisController.getOnlineList(id);
 
-      if (onlineList[id]) {
+      if (data) {
+        const { userInfo } = JSON.parse(data);
         io.emit(wsMsgType.userOutRoom, {
           id,
+          userInfo,
+          userType: userInfo.userType,
           time: new Date().toLocaleString(),
         });
-        delete onlineList[socket.id];
+        if (userInfo.userType === wsUserType.user) {
+          WsRedisController.deleteOnlineUser(id);
+        } else if (userInfo.userType === wsUserType.visitor) {
+          WsRedisController.deleteOnlineVisitor(id);
+        }
+        WsRedisController.deleteOnlineList(id);
       }
+      const { visitor, user } = await getOnline();
+
       io.emit(wsMsgType.getOnlineVisitorNum, {
-        count: getOnline().visitor,
+        count: visitor,
+        time: new Date().toLocaleString(),
+      });
+      io.emit(wsMsgType.getOnlineUserNum, {
+        count: user,
         time: new Date().toLocaleString(),
       });
     });
 
-    socket.on('disconnecting', (reason) => {
+    socket.on(wsConnectStatus.disconnecting, (reason) => {
       console.log(
         socket.id,
         chalkINFO(`${new Date().toLocaleString()}-disconnecting`)

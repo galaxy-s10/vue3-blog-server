@@ -25,4 +25,7 @@ initRouter.post('/admin_user', initController.initAdminUser);
 // 初始化前端设置
 initRouter.post('/frontend', initController.initFrontend);
 
+// 初始化互动统计
+initRouter.post('/interaction_statis', initController.initInteractionStatis);
+
 export default initRouter;

@@ -81,6 +81,9 @@ export const REDIS_PREFIX = {
   chunkFileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-chunkFileProgress`, // 分片文件上传进度
   chooseSongList: `${PROJECT_NAME}-${PROJECT_ENV}-chooseSongList`, // 点歌列表
   setHistoryHightOnlineNum: `${PROJECT_NAME}-${PROJECT_ENV}-setHistoryHightOnlineNum`, // 历史最高同时在线数
+  onlineUser: `${PROJECT_NAME}-${PROJECT_ENV}-onlineUser`, // 当前在线用户
+  onlineVisitor: `${PROJECT_NAME}-${PROJECT_ENV}-onlineVisitor`, // 当前在线游客
+  onlineList: `${PROJECT_NAME}-${PROJECT_ENV}-onlineList`, // 当前在线游客+用户
 };
 
 // 平台类型

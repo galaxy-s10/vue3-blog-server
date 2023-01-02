@@ -20,7 +20,7 @@ export interface IBlacklist {
   deleted_at?: string;
 }
 
-type IFormType =
+export type IFormType =
   | 'input'
   | 'password'
   | 'number'
@@ -32,6 +32,32 @@ type IFormType =
   | 'upload'
   | 'treeSelect';
 
+export type InteractionStatisType =
+  | 'historyHightOnlineNum'
+  | 'currOnlineVisitorNum'
+  | 'currOnlineUserNum';
+
+export interface IInteractionStatis {
+  id?: number;
+  key?: InteractionStatisType;
+  value?: string;
+  desc?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+export interface IInteraction {
+  id?: number;
+  user_type?: number;
+  user_info?: string;
+  client_ip?: string;
+  client?: string;
+  type?: string;
+  value?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
 export interface IFrontend {
   id?: number;
   key?: string;
