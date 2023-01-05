@@ -1,5 +1,7 @@
 // 一定要将import './init';放到最开头,因为它里面初始化了路径别名
 import './init';
+import { createServer } from 'http';
+
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import conditional from 'koa-conditional-get';
@@ -71,7 +73,7 @@ app.on('error', errorHandler); // 接收全局错误，位置必须得放在最�
 
 async function main() {
   try {
-    await Promise.all([
+    const [sequelizeRes, redisRes] = await Promise.all([
       connectMysql(), // 连接mysql
       connectRedis(), // 连接redis
     ]);
@@ -79,6 +81,8 @@ async function main() {
     initDb(3); // 加载sequelize的relation表关联
     app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
     loadAllRoutes(app); // 加载所有路由
+    // const httpServer = createServer(app.callback()).listen(port);
+    // connectWebSocket(httpServer); // 初始化websocket
     await new Promise((resolve) => {
       // 语法糖, 等同于http.createServer(app.callback()).listen(3000);
       const httpServer = app.listen(port, () => {

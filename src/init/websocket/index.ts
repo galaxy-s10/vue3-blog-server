@@ -1,10 +1,14 @@
+import { createAdapter } from '@socket.io/redis-adapter';
+import { createClient } from 'redis';
 import { Server } from 'socket.io';
 
 import WsRedisController from './redis.controller';
 
+import { REDIS_CONFIG } from '@/config/secret';
 import { PROJECT_ENV } from '@/constant';
 import interactionController from '@/controller/interaction.controller';
 import { chalkINFO } from '@/utils/chalkTip';
+
 // websocket消息类型
 export const wsMsgType = {
   /** 用户连接 */
@@ -60,6 +64,36 @@ export const connectWebSocket = (server) => {
   }
   console.log(chalkINFO('当前非beta环境，初始化websocket'));
   const io = new Server(server);
+  const pubClient = createClient({
+    socket: {
+      port: REDIS_CONFIG.socket.port,
+      host: REDIS_CONFIG.socket.host,
+    },
+    password: REDIS_CONFIG.password,
+  });
+
+  const subClient = pubClient.duplicate();
+
+  Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+    console.log('llllllllll');
+    // 用了适配器反而报错了？
+    // io.adapter(createAdapter(pubClient, subClient));
+    // io.listen(3100);
+    // io.attach(server);
+    pubClient.set('aaa', 'bbb');
+    pubClient.expire('aaa', 2);
+    pubClient.set('ddd', 'bbb');
+    pubClient.expire('ddd', 4);
+    const expired_subKey = `__keyevent@0__:expired`;
+
+    pubClient.subscribe(expired_subKey, function (a, b, c) {
+      console.log('::::::', a, b, c);
+      // pubClient.on('message', function (info, msg) {
+      //   console.log(info, msg);
+      // });
+    });
+  });
+
   io.on('connection', function connection(socket) {
     // 获取在线用户
     socket.on(wsMsgType.getOnlineUserNum, async (data) => {
