@@ -1,6 +1,6 @@
 # 简介
 
-基于 Typescript + Node 搭建的博客后端，并主要使用了以下插件：11
+基于 Typescript + Node 搭建的博客后端，并主要使用了以下插件：1111
 
 - koa
 - sequelize
