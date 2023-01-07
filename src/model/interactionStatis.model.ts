@@ -5,7 +5,7 @@ import {
   Model,
 } from 'sequelize';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { IInteractionStatis } from '@/interface';
 import { initTable } from '@/utils';
 
@@ -34,6 +34,10 @@ const model = sequelize.define<IInteractionStatisModel>(
       allowNull: false,
     },
     desc: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    type: {
       type: DataTypes.STRING,
       allowNull: true,
     },

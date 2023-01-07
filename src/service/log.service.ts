@@ -85,20 +85,71 @@ class LogService {
     return handlePaging(result, nowPage, pageSize);
   }
 
-  /** 获取一秒内ip的访问次数 */
-  async getOneSecondApiNums(api_real_ip: ILog['api_real_ip']) {
+  /** 判断该ip今天的日志记录是否合法 */
+  async isPass(api_real_ip: ILog['api_real_ip']) {
+    let flag = true;
     const nowDate = new Date().getTime();
-    const beforeDate = nowDate - 1000;
-    const apiNum = await logModel.count({
-      where: {
-        api_real_ip,
-        // @ts-ignore
-        created_at: {
-          [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
-        },
-      },
-    });
-    return apiNum;
+    const [oneSecondApiNum, oneMinuteApiNum, oneHourApiNum, oneDayApiNum] =
+      await Promise.all([
+        logModel.count({
+          where: {
+            api_real_ip,
+            created_at: {
+              // 一秒钟内访问的次数
+              [Op.between]: [formatDate(nowDate - 1000), formatDate(nowDate)],
+            },
+          },
+        }),
+        logModel.count({
+          where: {
+            api_real_ip,
+            created_at: {
+              // 一分钟内访问的次数
+              [Op.between]: [
+                formatDate(nowDate - 1000 * 60),
+                formatDate(nowDate),
+              ],
+            },
+          },
+        }),
+        logModel.count({
+          where: {
+            api_real_ip,
+            created_at: {
+              // 一小时内访问的次数
+              [Op.between]: [
+                formatDate(nowDate - 1000 * 60 * 60),
+                formatDate(nowDate),
+              ],
+            },
+          },
+        }),
+        logModel.count({
+          where: {
+            api_real_ip,
+            created_at: {
+              // 一天内访问的次数
+              [Op.between]: [
+                formatDate(nowDate - 1000 * 60 * 60 * 24),
+                formatDate(nowDate),
+              ],
+            },
+          },
+        }),
+      ]);
+    console.log(
+      oneSecondApiNum,
+      oneMinuteApiNum,
+      oneHourApiNum,
+      oneDayApiNum,
+      '判断该ip今天的日志记录是否合法'
+    );
+
+    oneSecondApiNum > 20 && (flag = false);
+    oneMinuteApiNum > 100 && (flag = false);
+    oneHourApiNum > 2000 && (flag = false);
+    oneDayApiNum > 5000 && (flag = false);
+    return flag;
   }
 
   /** 查找日志 */

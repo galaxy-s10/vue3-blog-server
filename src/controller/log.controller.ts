@@ -2,13 +2,16 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import { ALLOW_HTTP_CODE, COMMON_ERR_MSG } from '@/constant';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ILog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
-import blacklistService from '@/service/blacklist.service';
 import logService from '@/service/log.service';
 
 class LogController {
+  common = {
+    create: (data: ILog) => logService.create(data),
+  };
+
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
@@ -34,16 +37,16 @@ class LogController {
       keyWord,
       id,
     });
-    // for (const key in ctx.headers) {
-    //   console.log(key, '=====', ctx.headers[key]);
-    // }
-    for (const key in ctx.request.headers) {
-      console.log(key, '=====', ctx.request.headers[key]);
-    }
 
     successHandler({ ctx, data: result });
 
     await next();
+  }
+
+  async isPass(ctx: ParameterizedContext) {
+    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+    const result = await logService.isPass(ip);
+    return result;
   }
 
   async find(ctx: ParameterizedContext, next) {
@@ -128,24 +131,8 @@ class LogController {
       api_err_code,
       api_error,
     }: ILog = ctx.request.body;
-    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
-    // 这个接口的userInfo不是必须的
-    const { userInfo } = await authJwt(ctx);
-    const apiNum = await logService.getOneSecondApiNums(ip);
-    // 如果在1000毫秒内请求了5次，判断为频繁操作，禁用该ip
-    if (apiNum > 5) {
-      blacklistService.create({
-        user_id: userInfo?.id,
-        ip,
-        msg: COMMON_ERR_MSG.banIp,
-      });
-      throw new CustomError(
-        COMMON_ERR_MSG.banIp,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
-    const result = await logService.create({
+
+    const result = await this.common.create({
       user_id,
       api_user_agent,
       api_from,

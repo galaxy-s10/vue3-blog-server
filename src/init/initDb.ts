@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { chalkERROR, chalkSUCCESS } from '@/utils/chalkTip';
 import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 

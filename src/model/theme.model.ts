@@ -8,7 +8,7 @@ import {
   Model,
 } from 'sequelize';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { ITheme } from '@/interface';
 import { initTable } from '@/utils';
 

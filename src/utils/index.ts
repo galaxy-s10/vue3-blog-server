@@ -1,8 +1,23 @@
 import { ParameterizedContext } from 'koa';
 import { Model, ModelStatic } from 'sequelize/types';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { chalkERROR, chalkSUCCESS, chalkINFO } from '@/utils/chalkTip';
+
+/**
+ * 获取日期当天的开始时间到结束时间
+ */
+export function dateStartAndEnd(date: Date) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const startTime = `${y}-${m}-${d} 00:00:00`;
+  const endTime = `${y}-${m}-${d} 23:59:59`;
+  return {
+    startTime,
+    endTime,
+  };
+}
 
 /**
  * @description: 处理free命令返回的内存信息

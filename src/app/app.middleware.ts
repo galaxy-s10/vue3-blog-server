@@ -3,8 +3,8 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from './auth/authJwt';
 
 import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
+import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
-import logService from '@/service/log.service';
 import { isAdmin } from '@/utils';
 import { chalkINFO } from '@/utils/chalkTip';
 
@@ -27,7 +27,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       );
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
-      logService.create({
+      logController.common.create({
         user_id: userInfo?.id || -1,
         api_user_agent: ctx.request.headers['user-agent'],
         api_from: isAdmin(ctx) ? 2 : 1,

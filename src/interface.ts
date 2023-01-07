@@ -9,6 +9,7 @@ export interface ITheme {
   updated_at?: string;
   deleted_at?: string;
 }
+
 export interface IBlacklist {
   id?: number;
   ip?: string;
@@ -32,16 +33,17 @@ export type IFormType =
   | 'upload'
   | 'treeSelect';
 
-export type InteractionStatisType =
-  | 'historyHightOnlineNum'
-  | 'currOnlineVisitorNum'
-  | 'currOnlineUserNum';
+export enum InteractionStatisType {
+  historyInfo = 'historyInfo', // 历史数据，只有一条记录
+  dayInfo = 'dayInfo', // 每天数据，有很多条记录
+}
 
 export interface IInteractionStatis {
   id?: number;
-  key?: InteractionStatisType;
+  key?: string;
   value?: string;
   desc?: string;
+  type?: InteractionStatisType;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -406,6 +408,9 @@ export type IList<T> = {
   orderBy?: string;
   orderName?: string;
   keyWord?: string;
+  rangTimeType?: 'created_at' | 'updated_at' | 'deleted_at';
+  rangTimeStart?: string;
+  rangTimeEnd?: string;
 } & T;
 
 export interface IArticleTag {

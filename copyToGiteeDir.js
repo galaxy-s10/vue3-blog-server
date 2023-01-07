@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const allFile = [];
-const ignore = ['.DS_Store', '.git', 'node_modules'];
+const ignore = ['.DS_Store', '.git', '.gitignore', 'node_modules'];
 const localDir = path.resolve(__filename, '../');
 const giteeDir = path.resolve(
   __filename,

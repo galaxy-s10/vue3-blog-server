@@ -1,0 +1,54 @@
+// websocket消息类型
+export const wsMsgType = {
+  /** 用户连接 */
+  connect: 'connect',
+  /** 用户进入聊天 */
+  userInRoom: 'userInRoom',
+  /** 游客切换头像 */
+  visitorSwitchAvatar: 'visitorSwitchAvatar',
+  /** 用户退出聊天 */
+  userOutRoom: 'userOutRoom',
+  /** 用户发送消息 */
+  userSendMsg: 'userSendMsg',
+  /** 获取在线数据 */
+  getOnlineData: 'getOnlineData',
+  /** 用户存活 */
+  live: 'live',
+};
+
+// websocket连接状态
+export const wsConnectStatus = {
+  /** 已连接 */
+  connection: 'connection',
+  /** 连接中 */
+  connecting: 'connecting',
+  /** 已连接 */
+  connected: 'connected',
+  /** 断开连接中 */
+  disconnecting: 'disconnecting',
+  /** 已断开连接 */
+  disconnect: 'disconnect',
+  /** 重新连接 */
+  reconnect: 'reconnect',
+};
+
+// websocket用户类型
+export const wsUserType = {
+  visitor: 1, // 游客
+  user: 2, // 用户
+};
+
+export const liveExp = 60 * 5; // 5分钟过期
+
+export interface IData {
+  created_at: string;
+  exp?: number;
+  data: any;
+}
+
+export interface IUserInfo {
+  id: string;
+  userType: number;
+  username: string;
+  avatar: string;
+}

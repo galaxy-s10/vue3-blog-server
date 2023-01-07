@@ -22,6 +22,7 @@ export const ERROR_HTTP_CODE = {
   adminDisableUser: 1001,
   notFound: 1002, // 返回了404的http状态码
   errStatusCode: 1003, // 返回了即不是200也不是404的http状态码
+  shutdown: 1004, // 停机维护
 };
 
 export const ALLOW_HTTP_CODE = {
@@ -49,11 +50,17 @@ export const HTTP_SUCCESS_MSG = {
   DELETE: '删除成功！',
 };
 
+export const BLACKLIST_TYPE = {
+  banIp: 1, // 频繁操作
+  adminDisableUser: 2, // 被管理员禁用
+};
+
 export const COMMON_ERR_MSG = {
   banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',
   jwtExpired: '登录信息过期！',
   invalidToken: '非法token！',
   adminDisableUser: '你的账号已被管理员禁用，请联系管理员处理！',
+  shutdown: '停机维护中~',
 };
 
 // 没有用到这个DisableEnum枚举，eslint会报错
@@ -80,10 +87,12 @@ export const REDIS_PREFIX = {
   fileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-fileProgress`, // 文件上传进度
   chunkFileProgress: `${PROJECT_NAME}-${PROJECT_ENV}-chunkFileProgress`, // 分片文件上传进度
   chooseSongList: `${PROJECT_NAME}-${PROJECT_ENV}-chooseSongList`, // 点歌列表
-  setHistoryHightOnlineNum: `${PROJECT_NAME}-${PROJECT_ENV}-setHistoryHightOnlineNum`, // 历史最高同时在线数
+  historyHightOnlineNum: `${PROJECT_NAME}-${PROJECT_ENV}-historyHightOnlineNum`, // 历史最高同时在线数
+  currDayHightOnlineNum: `${PROJECT_NAME}-${PROJECT_ENV}-currDayHightOnlineNum`, // 当前最高同时在线数
   onlineUser: `${PROJECT_NAME}-${PROJECT_ENV}-onlineUser`, // 当前在线用户
   onlineVisitor: `${PROJECT_NAME}-${PROJECT_ENV}-onlineVisitor`, // 当前在线游客
   onlineList: `${PROJECT_NAME}-${PROJECT_ENV}-onlineList`, // 当前在线游客+用户
+  live: `${PROJECT_NAME}-${PROJECT_ENV}-live`, // 在线游客+用户
 };
 
 // 平台类型

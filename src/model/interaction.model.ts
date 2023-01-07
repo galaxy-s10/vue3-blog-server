@@ -5,7 +5,7 @@ import {
   Model,
 } from 'sequelize';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { IInteraction } from '@/interface';
 import { initTable } from '@/utils';
 

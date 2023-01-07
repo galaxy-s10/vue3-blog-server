@@ -6,7 +6,7 @@ import {
   Model,
 } from 'sequelize';
 
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 // import userService from '@/service/user.service';
 import { IUser } from '@/interface';
 import { initTable } from '@/utils';

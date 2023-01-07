@@ -1,26 +1,50 @@
+import { IData, liveExp } from './constant';
+
 import { REDIS_PREFIX } from '@/constant';
 import redisController from '@/controller/redis.controller';
 
 const chooseSongListKey = '-';
 const setHistoryHightOnlineNum = '-';
+const currDayHightOnlineNum = '-';
 
 class WSController {
+  live(id: string, data: IData) {
+    redisController.setExVal({
+      prefix: REDIS_PREFIX.live,
+      key: id,
+      exp: liveExp,
+      value: JSON.stringify(data),
+    });
+  }
+
+  die(id: string) {
+    redisController.setExVal({
+      prefix: REDIS_PREFIX.live,
+      key: id,
+      exp: 1,
+      value: JSON.stringify({}),
+    });
+  }
+
   /** 新增一个在线用户 */
-  addOnlineUser = async (field, value) => {
-    await redisController.setHashVal(REDIS_PREFIX.onlineUser, field, value);
+  addOnlineUser = async (id: string, data: IData) => {
+    const res = await redisController.setHashVal(
+      REDIS_PREFIX.onlineUser,
+      id,
+      data
+    );
+    return res;
   };
 
   /** 删除一个在线用户 */
-  deleteOnlineUser = async (field) => {
-    await redisController.delHashVal(REDIS_PREFIX.onlineUser, field);
+  deleteOnlineUser = async (id: string) => {
+    const res = await redisController.delHashVal(REDIS_PREFIX.onlineUser, id);
+    return res;
   };
 
   /** 获取一个在线用户 */
-  getOnlineUser = async (field) => {
-    const res = await redisController.getHashVal(
-      REDIS_PREFIX.onlineUser,
-      field
-    );
+  getOnlineUser = async (id: string) => {
+    const res = await redisController.getHashVal(REDIS_PREFIX.onlineUser, id);
     return res;
   };
 
@@ -37,20 +61,29 @@ class WSController {
   };
 
   /** 新增一个在线游客 */
-  addOnlineVisitor = async (field, value) => {
-    await redisController.setHashVal(REDIS_PREFIX.onlineVisitor, field, value);
+  addOnlineVisitor = async (id: string, data: IData) => {
+    const res = await redisController.setHashVal(
+      REDIS_PREFIX.onlineVisitor,
+      id,
+      data
+    );
+    return res;
   };
 
   /** 删除一个在线游客 */
-  deleteOnlineVisitor = async (field) => {
-    await redisController.delHashVal(REDIS_PREFIX.onlineVisitor, field);
+  deleteOnlineVisitor = async (id) => {
+    const res = await redisController.delHashVal(
+      REDIS_PREFIX.onlineVisitor,
+      id
+    );
+    return res;
   };
 
   /** 获取一个在线游客 */
-  getOnlineVisitor = async (field) => {
+  getOnlineVisitor = async (id) => {
     const res = await redisController.getHashVal(
       REDIS_PREFIX.onlineVisitor,
-      field
+      id
     );
     return res;
   };
@@ -68,21 +101,24 @@ class WSController {
   };
 
   /** 新增一个在线人 */
-  addOnlineList = async (field, value) => {
-    await redisController.setHashVal(REDIS_PREFIX.onlineList, field, value);
+  addOnlineList = async (id: string, data: IData) => {
+    const res = await redisController.setHashVal(
+      REDIS_PREFIX.onlineList,
+      id,
+      data
+    );
+    return res;
   };
 
   /** 删除一个在线人 */
-  deleteOnlineList = async (field) => {
-    await redisController.delHashVal(REDIS_PREFIX.onlineList, field);
+  deleteOnlineList = async (id) => {
+    const res = await redisController.delHashVal(REDIS_PREFIX.onlineList, id);
+    return res;
   };
 
   /** 获取一个在线人 */
-  getOnlineList = async (field) => {
-    const res = await redisController.getHashVal(
-      REDIS_PREFIX.onlineList,
-      field
-    );
+  getOnlineList = async (id) => {
+    const res = await redisController.getHashVal(REDIS_PREFIX.onlineList, id);
     return res;
   };
 
@@ -105,7 +141,7 @@ class WSController {
     created_at: string;
   }) => {
     const oldData = await redisController.getVal({
-      prefix: REDIS_PREFIX.setHistoryHightOnlineNum,
+      prefix: REDIS_PREFIX.historyHightOnlineNum,
       key: setHistoryHightOnlineNum,
     });
     let res: any[] = [];
@@ -115,10 +151,29 @@ class WSController {
       res.push(...JSON.parse(oldData), value);
     }
     await redisController.setVal({
-      prefix: REDIS_PREFIX.setHistoryHightOnlineNum,
+      prefix: REDIS_PREFIX.historyHightOnlineNum,
       key: setHistoryHightOnlineNum,
       value: JSON.stringify(res),
     });
+  };
+
+  /** 获取当天最高同时在线数 */
+  getCurrDayHightOnlineNum = async () => {
+    const res = await redisController.getVal({
+      prefix: REDIS_PREFIX.currDayHightOnlineNum,
+      key: currDayHightOnlineNum,
+    });
+    return res;
+  };
+
+  /** 设置当天最高同时在线数 */
+  setCurrDayHightOnlineNum = async (data: IData) => {
+    const res = await redisController.setVal({
+      prefix: REDIS_PREFIX.currDayHightOnlineNum,
+      key: currDayHightOnlineNum,
+      value: JSON.stringify(data),
+    });
+    return res;
   };
 
   /** 设置点歌列表 */

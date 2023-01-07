@@ -1,15 +1,14 @@
 import Sequelize from 'sequelize';
 
-import { IBlacklist, IList } from '@/interface';
-import blacklistModel from '@/model/blacklist.model';
+import { IInteractionStatis, IList } from '@/interface';
+import interactionStatisModel from '@/model/interactionStatis.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-class LinkService {
-  /** 黑名单是否存在 */
+class InteractionStatisService {
   async isExist(ids: number[]) {
-    const res = await blacklistModel.count({
+    const res = await interactionStatisModel.count({
       where: {
         id: {
           [Op.in]: ids,
@@ -19,7 +18,6 @@ class LinkService {
     return res === ids.length;
   }
 
-  /** 获取黑名单列表 */
   async getList({
     id,
     orderBy,
@@ -27,7 +25,11 @@ class LinkService {
     nowPage,
     pageSize,
     keyWord,
-  }: IList<IBlacklist>) {
+    type,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
+  }: IList<IInteractionStatis>) {
     let offset;
     let limit;
     if (nowPage && pageSize) {
@@ -38,28 +40,33 @@ class LinkService {
     if (id) {
       allWhere.id = +id;
     }
+    if (type) {
+      allWhere.type = type;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: rangTimeStart,
+        [Op.lt]: rangTimeEnd,
+      };
+    }
     if (keyWord) {
       const keyWordWhere = [
         {
-          ip: {
+          name: {
             [Op.like]: `%${keyWord}%`,
           },
         },
         {
-          user_id: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
-        {
-          msg: {
+          author: {
             [Op.like]: `%${keyWord}%`,
           },
         },
       ];
       allWhere[Op.or] = keyWordWhere;
     }
+
     // @ts-ignore
-    const result = await blacklistModel.findAndCountAll({
+    const result = await interactionStatisModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
@@ -70,41 +77,31 @@ class LinkService {
     return handlePaging(result, nowPage, pageSize);
   }
 
-  /** 查找黑名单 */
   async find(id: number) {
-    const result = await blacklistModel.findOne({ where: { id } });
+    const result = await interactionStatisModel.findOne({ where: { id } });
     return result;
   }
 
-  /** 根据ip查找黑名单 */
-  async findByIp(ip: string) {
-    const result = await blacklistModel.findOne({ where: { ip } });
-    return result;
-  }
-
-  /** 修改黑名单 */
-  async update({ id, user_id, ip, msg, type }: IBlacklist) {
-    const result = await blacklistModel.update(
-      { user_id, ip, msg, type },
+  async update({ id, key, value, desc, type }: IInteractionStatis) {
+    const result = await interactionStatisModel.update(
+      { key, value, desc, type },
       { where: { id } }
     );
     return result;
   }
 
-  /** 创建黑名单 */
-  async create({ user_id, ip, msg, type }: IBlacklist) {
-    const result = await blacklistModel.create({
-      user_id,
-      ip,
-      msg,
+  async create({ key, value, desc, type }: IInteractionStatis) {
+    const result = await interactionStatisModel.create({
+      key,
+      value,
+      desc,
       type,
     });
     return result;
   }
 
-  /** 删除黑名单 */
   async delete(id: number) {
-    const result = await blacklistModel.destroy({
+    const result = await interactionStatisModel.destroy({
       where: { id },
       individualHooks: true,
     });
@@ -112,4 +109,4 @@ class LinkService {
   }
 }
 
-export default new LinkService();
+export default new InteractionStatisService();

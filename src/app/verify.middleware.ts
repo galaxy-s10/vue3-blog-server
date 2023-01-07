@@ -2,9 +2,15 @@ import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import { ALLOW_HTTP_CODE, COMMON_ERR_MSG, ERROR_HTTP_CODE } from '@/constant';
+import {
+  ALLOW_HTTP_CODE,
+  BLACKLIST_TYPE,
+  COMMON_ERR_MSG,
+  ERROR_HTTP_CODE,
+} from '@/constant';
+import blacklistController from '@/controller/blacklist.controller';
+import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
-import blacklistService from '@/service/blacklist.service';
 import { isAdmin } from '@/utils';
 import { chalkINFO } from '@/utils/chalkTip';
 
@@ -62,18 +68,19 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   console.log(chalk.blueBright('referer:'), ctx.request.header.referer);
   console.log(chalk.blueBright('cookie:'), ctx.request.header.cookie);
   console.log(chalk.blueBright('token:'), ctx.request.headers.authorization);
-  // 判断黑名单
-  const inBlacklist = await blacklistService.findByIp(ip);
 
-  if (inBlacklist?.type === 1) {
-    // 1是频繁操作
+  // 判断黑名单
+  const inBlacklist = await blacklistController.findByIp(ip);
+
+  if (inBlacklist?.type === BLACKLIST_TYPE.banIp) {
+    // 频繁操作
     throw new CustomError(
       COMMON_ERR_MSG.banIp,
       ALLOW_HTTP_CODE.forbidden,
       ERROR_HTTP_CODE.banIp
     );
-  } else if (inBlacklist?.type === 2) {
-    // 2是管理员手动禁用
+  } else if (inBlacklist?.type === BLACKLIST_TYPE.adminDisableUser) {
+    // 管理员手动禁用
     throw new CustomError(
       COMMON_ERR_MSG.adminDisableUser,
       ALLOW_HTTP_CODE.forbidden,
@@ -81,6 +88,22 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
     );
   } else {
     console.log('不在黑名单里');
+  }
+
+  const isPass = await logController.isPass(ctx);
+  if (!isPass) {
+    const { userInfo } = await authJwt(ctx);
+    blacklistController.common.create({
+      user_id: userInfo?.id,
+      ip,
+      type: BLACKLIST_TYPE.banIp,
+      msg: COMMON_ERR_MSG.banIp,
+    });
+    throw new CustomError(
+      COMMON_ERR_MSG.banIp,
+      ALLOW_HTTP_CODE.forbidden,
+      ALLOW_HTTP_CODE.forbidden
+    );
   }
 
   const consoleEnd = () => {

@@ -1,7 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
 import successHandler from '@/app/handler/success-handle';
-import sequelize from '@/config/db';
+import sequelize from '@/config/mysql';
 import { ALLOW_HTTP_CODE } from '@/constant';
 import {
   bulkCreateAuth,

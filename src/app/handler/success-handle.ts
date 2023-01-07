@@ -1,8 +1,7 @@
 import { ParameterizedContext } from 'koa';
 
-import { chalkSUCCESS } from '../../utils/chalkTip';
-
 import { ALLOW_HTTP_CODE, HTTP_SUCCESS_MSG } from '@/constant';
+import { chalkSUCCESS } from '@/utils/chalkTip';
 
 const successHandler = ({
   statusCode = ALLOW_HTTP_CODE.ok,

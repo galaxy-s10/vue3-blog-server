@@ -186,21 +186,6 @@ class VisitorLogService {
     return handlePaging(result, nowPage, pageSize);
   }
 
-  /** 获取一秒内ip的访问次数 */
-  async getOneSecondApiNums(ip: string) {
-    const nowDate = new Date().getTime();
-    const beforeDate = nowDate - 1000;
-    const apiNum = await visitorLogModel.count({
-      where: {
-        ip,
-        created_at: {
-          [Op.between]: [formatDate(beforeDate), formatDate(nowDate)],
-        },
-      },
-    });
-    return apiNum;
-  }
-
   /** 新增访客日志 */
   async create({ ip, user_id, ip_data }) {
     const result = await visitorLogModel.create({

@@ -16,8 +16,9 @@ class FrontendController {
       // obj[val.key!] = JSON.stringify(item);
       obj[val.key!] = {
         value: val.value,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
+        desc: val.desc,
+        created_at: val.created_at,
+        updated_at: val.updated_at,
       };
     });
     successHandler({ ctx, data: obj });

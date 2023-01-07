@@ -1,4 +1,4 @@
-import redisClient from '@/config/redis';
+import { redisClient } from '@/config/redis';
 
 class RedisController {
   /**

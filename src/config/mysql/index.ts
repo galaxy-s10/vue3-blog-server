@@ -1,7 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-import { MYSQL_CONFIG } from './secret';
-
+import { MYSQL_CONFIG } from '@/config/secret';
 import { PROJECT_ENV } from '@/constant';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
@@ -36,14 +35,14 @@ const sequelize = new Sequelize(
 /** 连接数据库 */
 export const connectMysql = async () => {
   const msg = (flag: boolean) =>
-    `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库${
+    `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的mysql数据库${dbName}${
       flag ? '成功' : '失败'
-    }！`;
+    }!`;
 
   try {
     console.log(
       chalkINFO(
-        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库...`
+        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的mysql数据库${dbName}...`
       )
     );
     await sequelize.authenticate({ logging: false });

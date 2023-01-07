@@ -1,10 +1,9 @@
 import { ParameterizedContext } from 'koa';
 
-import { chalkERROR, chalk } from '../../utils/chalkTip';
-
 import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, HTTP_ERROE_MSG } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import { isAdmin } from '@/utils';
+import { chalkERROR, chalk } from '@/utils/chalkTip';
 
 const errorHandler = (error, ctx: ParameterizedContext) => {
   const admin = isAdmin(ctx);

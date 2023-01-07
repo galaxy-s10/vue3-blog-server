@@ -38,6 +38,7 @@ export const SSH_CONFIG = {
 };
 
 export const REDIS_CONFIG = {
+  database: 666,
   socket: {
     port: 666,
     host: '**********',

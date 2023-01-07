@@ -1,6 +1,5 @@
 // 一定要将import './init';放到最开头,因为它里面初始化了路径别名
 import './init';
-import { createServer } from 'http';
 
 import Koa from 'koa';
 import koaBody from 'koa-body';
@@ -11,8 +10,10 @@ import staticService from 'koa-static';
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
-import { connectMysql, dbName } from '@/config/db';
+import { connectMysql, dbName } from '@/config/mysql';
 import { connectRedis } from '@/config/redis';
+import { createPubSub } from '@/config/redis/pub';
+import { connectWebSocket } from '@/config/websocket';
 import {
   PROJECT_ENV,
   PROJECT_NAME,
@@ -22,7 +23,6 @@ import {
 } from '@/constant';
 import { initDb } from '@/init/initDb';
 import { initMonit } from '@/init/monit';
-import { connectWebSocket } from '@/init/websocket';
 import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
@@ -73,16 +73,15 @@ app.on('error', errorHandler); // 接收全局错误，位置必须得放在最�
 
 async function main() {
   try {
-    const [sequelizeRes, redisRes] = await Promise.all([
+    await Promise.all([
       connectMysql(), // 连接mysql
       connectRedis(), // 连接redis
+      createPubSub(), // 创建redis的发布订阅
     ]);
     initMonit(); // 初始化监控
     initDb(3); // 加载sequelize的relation表关联
     app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
     loadAllRoutes(app); // 加载所有路由
-    // const httpServer = createServer(app.callback()).listen(port);
-    // connectWebSocket(httpServer); // 初始化websocket
     await new Promise((resolve) => {
       // 语法糖, 等同于http.createServer(app.callback()).listen(3000);
       const httpServer = app.listen(port, () => {

@@ -1,4 +1,9 @@
-import { IAuth, IFrontend, IInteractionStatis } from '@/interface';
+import {
+  IAuth,
+  IFrontend,
+  IInteractionStatis,
+  InteractionStatisType,
+} from '@/interface';
 
 const initAuth = () => {
   const deafultAuth: IAuth[] = [
@@ -294,19 +299,10 @@ const initFrontend = (): IFrontend[] => [
 
 const initInteractionStatis = (): IInteractionStatis[] => [
   {
-    key: 'currOnlineUserNum',
-    value: JSON.stringify({ value: 0 }),
-    desc: '当前在线用户数',
-  },
-  {
-    key: 'currOnlineVisitorNum',
-    value: JSON.stringify({ value: 0 }),
-    desc: '当前在线游客数',
-  },
-  {
     key: 'historyHightOnlineNum',
-    value: JSON.stringify({ value: 0 }),
+    value: JSON.stringify({}),
     desc: '历史最高同时在线（游客+用户）',
+    type: InteractionStatisType.historyInfo,
   },
 ];
 

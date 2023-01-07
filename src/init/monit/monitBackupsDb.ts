@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
-import { dbName } from '@/config/db';
+import { dbName } from '@/config/mysql';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_PREFIX } from '@/constant';
 import monitService from '@/service/monit.service';
