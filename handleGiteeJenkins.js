@@ -63,6 +63,8 @@ function putFile() {
 
 findFile(dir);
 putFile();
-execSync(`git add .`);
-execSync(`git commit -m 'feat: ${new Date().toLocaleString()}'`);
-execSync(`git push`);
+execSync(`git add .`, { cwd: giteeDir });
+execSync(`git commit -m 'feat: ${new Date().toLocaleString()}'`, {
+  cwd: giteeDir,
+});
+execSync(`git push`, { cwd: giteeDir });
