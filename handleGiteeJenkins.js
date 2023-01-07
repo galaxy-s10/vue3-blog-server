@@ -1,6 +1,7 @@
 // WARN 该文件只是方便我将当前项目复制一份到我电脑的另一个位置（gitee私有仓库的位置)，其他人不需要管这个文件~
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const allFile = [];
 const ignore = ['.DS_Store', '.git', '.gitignore', 'node_modules'];
@@ -62,3 +63,6 @@ function putFile() {
 
 findFile(dir);
 putFile();
+execSync(`git add .`);
+execSync(`git commit -m 'feat: ${new Date().toLocaleString()}'`);
+execSync(`git push`);

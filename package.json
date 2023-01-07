@@ -9,7 +9,7 @@
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
     "commit": "cz",
-    "copy": "node ./copyToGiteeDir.js",
+    "copy": "node ./handleGiteeJenkins.js",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint:fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
     "prepare": "husky install",
