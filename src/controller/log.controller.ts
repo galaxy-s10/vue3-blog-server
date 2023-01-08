@@ -2,6 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
+import { IP_WHITE_LIST } from '@/config/secret';
 import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ILog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
@@ -45,6 +46,7 @@ class LogController {
 
   async isPass(ctx: ParameterizedContext) {
     const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+    if (IP_WHITE_LIST.includes(ip)) return true;
     const result = await logService.isPass(ip);
     return result;
   }

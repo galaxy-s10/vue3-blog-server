@@ -75,7 +75,7 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   if (inBlacklist?.type === BLACKLIST_TYPE.banIp) {
     // 频繁操作
     throw new CustomError(
-      COMMON_ERR_MSG.banIp,
+      `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
       ALLOW_HTTP_CODE.forbidden,
       ERROR_HTTP_CODE.banIp
     );
@@ -100,9 +100,9 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
       msg: COMMON_ERR_MSG.banIp,
     });
     throw new CustomError(
-      COMMON_ERR_MSG.banIp,
+      `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
       ALLOW_HTTP_CODE.forbidden,
-      ALLOW_HTTP_CODE.forbidden
+      ERROR_HTTP_CODE.banIp
     );
   }
 

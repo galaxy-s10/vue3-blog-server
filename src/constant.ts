@@ -16,6 +16,11 @@ export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接�
 export const SECRET_FILE = path.join(__dirname, './config/secret.ts'); // 秘钥文件
 export const SECRETTEMP_FILE = path.join(__dirname, './config/secretTemp.ts'); // 秘钥文件模板
 
+export const QQ_MAIL_CONFIG = {
+  from: '2274751790@qq.com', // sender address
+  to: '2274751790@qq.com', // list of receivers
+};
+
 export const ERROR_HTTP_CODE = {
   serverError: 10000, // 服务器错误
   banIp: 1000,
@@ -56,7 +61,7 @@ export const BLACKLIST_TYPE = {
 };
 
 export const COMMON_ERR_MSG = {
-  banIp: '检测到频繁操作，此ip已被禁用，请联系管理员处理！',
+  banIp: '此ip已被禁用，请联系管理员处理！',
   jwtExpired: '登录信息过期！',
   invalidToken: '非法token！',
   adminDisableUser: '你的账号已被管理员禁用，请联系管理员处理！',

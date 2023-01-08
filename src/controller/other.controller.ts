@@ -4,12 +4,12 @@ import nodemailer from 'nodemailer';
 import redisController from './redis.controller';
 
 import successHandler from '@/app/handler/success-handle';
+import { QQ_EMAIL_PASS, QQ_EMAIL_USER } from '@/config/secret';
 import {
-  MAIL_OPTIONS_CONFIG,
-  QQ_EMAIL_PASS,
-  QQ_EMAIL_USER,
-} from '@/config/secret';
-import { ALLOW_HTTP_CODE, VERIFY_EMAIL_RESULT_CODE } from '@/constant';
+  ALLOW_HTTP_CODE,
+  VERIFY_EMAIL_RESULT_CODE,
+  QQ_MAIL_CONFIG,
+} from '@/constant';
 import { CustomError } from '@/model/customError.model';
 import { getRandomString } from '@/utils';
 
@@ -25,7 +25,7 @@ class OtherController {
       },
     });
     const mailOptions = {
-      from: MAIL_OPTIONS_CONFIG.from, // sender address
+      from: QQ_MAIL_CONFIG.from, // sender address
       to: email, // list of receivers
       subject, // Subject line
       text: `${content}`, // plain text body

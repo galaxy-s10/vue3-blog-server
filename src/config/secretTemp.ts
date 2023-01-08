@@ -22,20 +22,22 @@ export const GAODE_WEB_IP_KEY = '**********'; // 高德地图key
 export const QQ_EMAIL_USER = '**********'; // qq邮箱auth的用户
 export const QQ_EMAIL_PASS = '**********'; // qq邮箱auth的秘钥
 
+export const IP_WHITE_LIST = ['127.0.0.1']; // ip白名单
+
 export const MYSQL_CONFIG = {
   database: '**********',
   username: '**********',
   password: '**********',
   host: '**********',
   port: 666,
-};
+}; // mysql配置
 
 export const SSH_CONFIG = {
   username: '**********',
   password: '**********',
   host: '**********',
   port: 666,
-};
+}; // ssh配置
 
 export const REDIS_CONFIG = {
   database: 666,
@@ -44,9 +46,4 @@ export const REDIS_CONFIG = {
     host: '**********',
   },
   password: '**********',
-};
-
-export const MAIL_OPTIONS_CONFIG = {
-  from: '**********', // sender address
-  to: '**********', // list of receivers
-};
+}; // redis配置
