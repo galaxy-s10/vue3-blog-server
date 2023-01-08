@@ -30,7 +30,7 @@ async function getOnline() {
 function initLog(type: string, socket: any) {
   console.log(
     // eslint-disable-next-line
-    `${type}, socket.id: ${socket.id}, x-real-ip: ${socket.request['x-real-ip']}`
+    `${type}, socket.id: ${socket.id}, x-real-ip: ${socket.request.headers['x-real-ip']}`
   );
 }
 
@@ -157,7 +157,7 @@ export const connectWebSocket = (server) => {
     socket.on(wsMsgType.live, async () => {
       initLog('用户还在线', socket);
       const { id, request } = socket;
-      const client_ip = request['x-real-ip'] || '-1';
+      const client_ip = request.headers['x-real-ip'] || '-1';
       const res = await WsRedisController.getOnlineList(id);
       if (res) {
         const { data }: IData = JSON.parse(res);
@@ -176,7 +176,7 @@ export const connectWebSocket = (server) => {
       async (data: { userInfo: IUserInfo; value: any }) => {
         initLog('用户进房间', socket);
         const { id, request } = socket;
-        const client_ip = request['x-real-ip'] || '-1';
+        const client_ip = request.headers['x-real-ip'] || '-1';
         WsRedisController.live(id, {
           client_ip,
           created_at: new Date().toLocaleString(),
@@ -226,7 +226,7 @@ export const connectWebSocket = (server) => {
       //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
       const { id, request } = socket;
-      const client_ip = request['x-real-ip'] || '-1';
+      const client_ip = request.headers['x-real-ip'] || '-1';
       io.emit(wsMsgType.userSendMsg, {
         id,
         userInfo: data.userInfo,
