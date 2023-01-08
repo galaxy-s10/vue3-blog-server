@@ -45,8 +45,8 @@ class InteractionStatisService {
     }
     if (rangTimeType) {
       allWhere[rangTimeType] = {
-        [Op.gt]: rangTimeStart,
-        [Op.lt]: rangTimeEnd,
+        [Op.gt]: new Date(rangTimeStart!),
+        [Op.lt]: new Date(rangTimeEnd!),
       };
     }
     if (keyWord) {

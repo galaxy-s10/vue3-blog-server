@@ -60,7 +60,6 @@ class GithubUserController {
     // getRepoStargazers = async ({ repo }: { repo: string }) => {
     const { repo }: { repo: string } = ctx.request.query;
     const accessToken = '666';
-    console.log(111111111, accessToken);
     const data: any = await axios.get(
       `https://api.github.com/repos/galaxy-s10/${repo}/stargazers?per_page=50`,
       {

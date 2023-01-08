@@ -44,7 +44,7 @@ export const connectWebSocket = (server) => {
 
   const io = new Server(server);
 
-  async function emitNum() {
+  async function emitNum(client_ip: string) {
     const { visitor, user } = await getOnline();
     // eslint-disable-next-line
     const currTotal = visitor + user;
@@ -53,12 +53,14 @@ export const connectWebSocket = (server) => {
     if (olddata) {
       if (oldTotal < currTotal) {
         WsRedisController.setCurrDayHightOnlineNum({
+          client_ip,
           created_at: new Date().toLocaleString(),
           data: currTotal,
         });
       }
     } else {
       WsRedisController.setCurrDayHightOnlineNum({
+        client_ip,
         created_at: new Date().toLocaleString(),
         data: 1,
       });
@@ -129,7 +131,7 @@ export const connectWebSocket = (server) => {
         const id = redisKey.replace(`${REDIS_PREFIX.live}-`, '');
         const res = await WsRedisController.getOnlineList(id);
         if (res) {
-          const { data }: IData = JSON.parse(res);
+          const { data, client_ip }: IData = JSON.parse(res);
           const { userInfo } = data;
           io.emit(wsMsgType.userOutRoom, {
             id,
@@ -142,7 +144,7 @@ export const connectWebSocket = (server) => {
             await WsRedisController.deleteOnlineVisitor(id);
           }
           await WsRedisController.deleteOnlineList(id);
-          emitNum();
+          emitNum(client_ip);
         }
       }
     }
@@ -154,11 +156,13 @@ export const connectWebSocket = (server) => {
     // 用户还在线
     socket.on(wsMsgType.live, async () => {
       initLog('用户还在线', socket);
-      const { id } = socket;
+      const { id, request } = socket;
+      const client_ip = request['x-real-ip'] || '-1';
       const res = await WsRedisController.getOnlineList(id);
       if (res) {
         const { data }: IData = JSON.parse(res);
         WsRedisController.live(id, {
+          client_ip,
           created_at: new Date().toLocaleString(),
           exp: liveExp,
           data: data.userInfo,
@@ -171,8 +175,10 @@ export const connectWebSocket = (server) => {
       wsMsgType.userInRoom,
       async (data: { userInfo: IUserInfo; value: any }) => {
         initLog('用户进房间', socket);
-        const { id } = socket;
+        const { id, request } = socket;
+        const client_ip = request['x-real-ip'] || '-1';
         WsRedisController.live(id, {
+          client_ip,
           created_at: new Date().toLocaleString(),
           exp: liveExp,
           data: data.userInfo,
@@ -180,25 +186,29 @@ export const connectWebSocket = (server) => {
         await Promise.all([
           data.userInfo.userType === wsUserType.user
             ? WsRedisController.addOnlineUser(id, {
+                client_ip,
                 created_at: new Date().toLocaleString(),
                 data,
               })
             : WsRedisController.addOnlineVisitor(id, {
+                client_ip,
                 created_at: new Date().toLocaleString(),
                 data,
               }),
           WsRedisController.addOnlineList(id, {
+            client_ip,
             created_at: new Date().toLocaleString(),
             data,
           }),
         ]);
+
         io.emit(wsMsgType.userInRoom, {
           id,
           userInfo: data.userInfo,
           value: data.value,
           created_at: new Date().toLocaleString(),
         });
-        emitNum();
+        emitNum(client_ip);
       }
     );
 
@@ -215,7 +225,8 @@ export const connectWebSocket = (server) => {
       //  socket.emit会将消息发送给发件人
       //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
-      const { id } = socket;
+      const { id, request } = socket;
+      const client_ip = request['x-real-ip'] || '-1';
       io.emit(wsMsgType.userSendMsg, {
         id,
         userInfo: data.userInfo,
@@ -223,7 +234,7 @@ export const connectWebSocket = (server) => {
         created_at: new Date().toLocaleString(),
       });
       interactionController.common.create({
-        client_ip: socket.request['x-real-ip'] || '-1',
+        client_ip,
         client: '',
         user_info: JSON.stringify(data.userInfo),
         user_type: data.userInfo.userType,

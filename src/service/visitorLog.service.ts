@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 
 import { IVisitorLog, IList } from '@/interface';
 import visitorLogModel from '@/model/visitorLog.model';
-import { formatDate, handlePaging } from '@/utils';
+import { handlePaging } from '@/utils';
 
 const { fn, Op, col } = Sequelize;
 
@@ -24,7 +24,7 @@ class VisitorLogService {
     let timeWhere: any = null;
     if (startTime && startTime) {
       timeWhere = {
-        [Op.between]: [startTime, endTime],
+        [Op.between]: [new Date(startTime), new Date(endTime)],
       };
     }
     const result = await visitorLogModel.findAll({
@@ -68,7 +68,7 @@ class VisitorLogService {
     let timeWhere: any = null;
     if (startTime && startTime) {
       timeWhere = {
-        [Op.between]: [startTime, endTime],
+        [Op.between]: [new Date(startTime), new Date(endTime)],
       };
     }
     const offset = (nowPage - 1) * pageSize;

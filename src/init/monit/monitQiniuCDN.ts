@@ -106,7 +106,7 @@ rule.second = 0;
 
 // 监控七牛云cdn流量，最近一周内，使用流量超过2g就邮件提示（TODO）/使用流量超过5g就停掉cdn服务
 export const monitQiniuCDNJob = () => {
-  console.log(chalkINFO('监控任务: 七牛云cdn定时任务启动！'));
+  console.log(chalkSUCCESS('监控任务: 七牛云cdn定时任务启动！'));
   const monitJobName = MONIT_JOB.QINIUCDN;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {

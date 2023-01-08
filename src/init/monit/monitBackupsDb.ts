@@ -7,7 +7,7 @@ import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_PREFIX } from '@/constant';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
-import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
+import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import QiniuUtils from '@/utils/qiniu';
 
 // 备份目录
@@ -170,7 +170,7 @@ rule.hour = allHourArr.filter((v) => v % 12 === 0);
 rule.minute = 0;
 
 export const monitBackupsDbJob = () => {
-  console.log(chalkINFO('监控任务: 备份数据库定时任务启动！'));
+  console.log(chalkSUCCESS('监控任务: 备份数据库定时任务启动！'));
   const monitJobName = MONIT_JOB.BACKUPSDB;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {

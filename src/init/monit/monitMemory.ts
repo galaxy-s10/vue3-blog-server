@@ -5,7 +5,7 @@ import { QQ_EMAIL_USER } from '@/config/secret';
 import { PROJECT_ENV, MONIT_JOB, MONIT_TYPE } from '@/constant';
 import otherController from '@/controller/other.controller';
 import monitService from '@/service/monit.service';
-import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
+import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
 import { formatMemorySize, replaceKeyFromValue } from '@/utils/index';
 import { emailTmp } from '@/utils/tmp';
@@ -166,7 +166,7 @@ rule.minute = allMinuteArr.filter((v) => v % 30 === 0);
 rule.second = 0;
 
 export const monitMemoryJob = () => {
-  console.log(chalkINFO('监控任务: 内存定时任务启动！'));
+  console.log(chalkSUCCESS('监控任务: 内存定时任务启动！'));
   const monitJobName = MONIT_JOB.MEMORY;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {

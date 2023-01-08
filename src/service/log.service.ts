@@ -2,7 +2,8 @@ import Sequelize from 'sequelize';
 
 import { ILog, IList } from '@/interface';
 import logModel from '@/model/log.model';
-import { formatDate, handlePaging } from '@/utils';
+import { handlePaging } from '@/utils';
+import { chalkWARN } from '@/utils/chalkTip';
 
 const { Op } = Sequelize;
 
@@ -96,7 +97,7 @@ class LogService {
             api_real_ip,
             created_at: {
               // 一秒钟内访问的次数
-              [Op.between]: [formatDate(nowDate - 1000), formatDate(nowDate)],
+              [Op.between]: [new Date(nowDate - 1000), new Date(nowDate)],
             },
           },
         }),
@@ -105,10 +106,7 @@ class LogService {
             api_real_ip,
             created_at: {
               // 一分钟内访问的次数
-              [Op.between]: [
-                formatDate(nowDate - 1000 * 60),
-                formatDate(nowDate),
-              ],
+              [Op.between]: [new Date(nowDate - 1000 * 60), new Date(nowDate)],
             },
           },
         }),
@@ -118,8 +116,8 @@ class LogService {
             created_at: {
               // 一小时内访问的次数
               [Op.between]: [
-                formatDate(nowDate - 1000 * 60 * 60),
-                formatDate(nowDate),
+                new Date(nowDate - 1000 * 60 * 60),
+                new Date(nowDate),
               ],
             },
           },
@@ -130,25 +128,26 @@ class LogService {
             created_at: {
               // 一天内访问的次数
               [Op.between]: [
-                formatDate(nowDate - 1000 * 60 * 60 * 24),
-                formatDate(nowDate),
+                new Date(nowDate - 1000 * 60 * 60 * 24),
+                new Date(nowDate),
               ],
             },
           },
         }),
       ]);
-    console.log(
-      oneSecondApiNum,
-      oneMinuteApiNum,
-      oneHourApiNum,
-      oneDayApiNum,
-      '判断该ip今天的日志记录是否合法'
-    );
 
     oneSecondApiNum > 20 && (flag = false);
     oneMinuteApiNum > 100 && (flag = false);
     oneHourApiNum > 2000 && (flag = false);
     oneDayApiNum > 5000 && (flag = false);
+    console.log(
+      flag,
+      chalkWARN(
+        `判断该ip今天的日志记录是否合法:${
+          flag ? '合法' : '不合法'
+        }; oneSecondApiNum:${oneSecondApiNum},oneMinuteApiNum:${oneMinuteApiNum},oneHourApiNum:${oneHourApiNum},oneDayApiNum:${oneDayApiNum}`
+      )
+    );
     return flag;
   }
 
@@ -243,6 +242,21 @@ class LogService {
       api_err_code,
       api_err_msg,
       api_duration,
+    });
+    return result;
+  }
+
+  /** 删除90天前的日志 */
+  async deleteRang() {
+    const nowDate = new Date().getTime();
+    const result = await logModel.destroy({
+      where: {
+        created_at: {
+          [Op.lt]: new Date(nowDate - 1000 * 60 * 60 * 24 * 90),
+        },
+      },
+      force: true, // WARN 不用软删除，直接硬性删除数据库的记录
+      individualHooks: false,
     });
     return result;
   }

@@ -108,7 +108,7 @@ export const mockAjax = (time = 1000) => {
 export const isAdmin = (ctx: ParameterizedContext) =>
   ctx.req.url!.indexOf('/admin/') !== -1;
 
-/** 转换时间格式 */
+/** 转换时间格式,datetime可以是字符串'2022-8-28 00:00:00'，也可以是数字时间戳1673171023498 */
 export const formatDate = (datetime) => {
   function addDateZero(num: number) {
     return num < 10 ? `0${num}` : num;

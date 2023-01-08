@@ -3,7 +3,7 @@ import schedule from 'node-schedule';
 
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV } from '@/constant';
 import monitService from '@/service/monit.service';
-import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
+import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { formatMemorySize } from '@/utils/index';
 
 // https://github.com/node-schedule/node-schedule#cron-style-scheduling
@@ -82,7 +82,7 @@ export const main = () => {
 };
 
 export const monitProcessJob = () => {
-  console.log(chalkINFO('监控任务: node进程定时任务启动！'));
+  console.log(chalkSUCCESS('监控任务: node进程定时任务启动！'));
   const monitJobName = MONIT_JOB.PROCESS;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {

@@ -11,6 +11,7 @@ import logService from '@/service/log.service';
 class LogController {
   common = {
     create: (data: ILog) => logService.create(data),
+    deleteRang: () => logService.deleteRang(),
   };
 
   async getList(ctx: ParameterizedContext, next) {

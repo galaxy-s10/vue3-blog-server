@@ -115,6 +115,7 @@ export const MONIT_JOB = {
   PROCESS: 'monitProcessJob', // 监控node进程任务
   BACKUPSDB: 'monitBackupsDbJob', // 监控备份数据库任务
   QINIUCDN: 'monitQiniuCDNJob', // 监控七牛云cdn任务
+  DELETELOG: 'monitDeleteLog', // 监控删除日志
 };
 
 // 监控类型

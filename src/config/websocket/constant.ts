@@ -42,6 +42,7 @@ export const liveExp = 60 * 5; // 5分钟过期
 
 export interface IData {
   created_at: string;
+  client_ip: string;
   exp?: number;
   data: any;
 }
