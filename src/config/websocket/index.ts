@@ -20,11 +20,20 @@ import { dateStartAndEnd } from '@/utils';
 import { chalkINFO } from '@/utils/chalkTip';
 
 async function getOnline() {
-  const [visitor, user] = await Promise.all([
+  const [visitor, user, historyInfo] = await Promise.all([
     WsRedisController.getAllOnlineVisitorNum(),
     WsRedisController.getAllOnlineUserNum(),
+    interactionStatisController.common.getList({
+      type: InteractionStatisType.historyInfo,
+      orderBy: 'asc',
+      orderName: 'id',
+    }),
   ]);
-  return { visitor, user };
+  return {
+    visitor,
+    user,
+    history: JSON.parse(historyInfo.rows[0].value).historyHightOnlineNum,
+  };
 }
 
 function initLog(type: string, socket: any) {
@@ -45,7 +54,7 @@ export const connectWebSocket = (server) => {
   const io = new Server(server);
 
   async function emitNum(client_ip: string) {
-    const { visitor, user } = await getOnline();
+    const { visitor, user, history } = await getOnline();
     const currTotal = visitor + user;
     const olddataJson = await WsRedisController.getCurrDayHightOnlineNum();
     const olddata = olddataJson ? JSON.parse(olddataJson) : {};
@@ -74,7 +83,7 @@ export const connectWebSocket = (server) => {
       });
     }
     io.emit(wsMsgType.getOnlineData, {
-      historyHightOnlineNum: Math.max(currTotal, oldTotal),
+      historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
       currDayHightOnlineNum: Math.max(currTotal, oldTotal),
       user,
       visitor,
@@ -92,7 +101,7 @@ export const connectWebSocket = (server) => {
       interactionStatisController.common.create({
         key: currTime,
         value: JSON.stringify({
-          historyHightOnlineNum: Math.max(currTotal, oldTotal),
+          historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
           currDayHightOnlineNum: Math.max(currTotal, oldTotal),
           user,
           visitor,
@@ -105,7 +114,7 @@ export const connectWebSocket = (server) => {
         id: res.rows[0].id,
         key: currTime,
         value: JSON.stringify({
-          historyHightOnlineNum: Math.max(currTotal, oldTotal),
+          historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
           currDayHightOnlineNum: Math.max(currTotal, oldTotal),
           user,
           visitor,
@@ -123,7 +132,7 @@ export const connectWebSocket = (server) => {
       id: historyInfoRes.rows[0].id,
       key: 'historyHightOnlineNum',
       value: JSON.stringify({
-        historyHightOnlineNum: Math.max(currTotal, oldTotal),
+        historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
         currDayHightOnlineNum: Math.max(currTotal, oldTotal),
         user,
         visitor,
