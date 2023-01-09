@@ -46,22 +46,30 @@ export const connectWebSocket = (server) => {
 
   async function emitNum(client_ip: string) {
     const { visitor, user } = await getOnline();
-    // eslint-disable-next-line
     const currTotal = visitor + user;
-    const olddata = await WsRedisController.getCurrDayHightOnlineNum();
-    const oldTotal = olddata ? JSON.parse(olddata).data : 1;
-    if (olddata) {
-      if (oldTotal < currTotal) {
+    const olddataJson = await WsRedisController.getCurrDayHightOnlineNum();
+    const olddata = olddataJson ? JSON.parse(olddataJson) : {};
+    const oldTotal = olddata.data || 1;
+    const currTime = new Date().toLocaleString();
+    if (olddataJson) {
+      // 比较时间戳大小
+      if (new Date(currTime) > new Date(olddata.created_at)) {
         WsRedisController.setCurrDayHightOnlineNum({
           client_ip,
-          created_at: new Date().toLocaleString(),
+          created_at: currTime,
+          data: 1,
+        });
+      } else if (oldTotal < currTotal) {
+        WsRedisController.setCurrDayHightOnlineNum({
+          client_ip,
+          created_at: currTime,
           data: currTotal,
         });
       }
     } else {
       WsRedisController.setCurrDayHightOnlineNum({
         client_ip,
-        created_at: new Date().toLocaleString(),
+        created_at: currTime,
         data: 1,
       });
     }
@@ -70,7 +78,7 @@ export const connectWebSocket = (server) => {
       currDayHightOnlineNum: Math.max(currTotal, oldTotal),
       user,
       visitor,
-      created_at: new Date().toLocaleString(),
+      created_at: currTime,
     });
     const res = await interactionStatisController.common.getList({
       type: InteractionStatisType.dayInfo,
@@ -82,7 +90,7 @@ export const connectWebSocket = (server) => {
     });
     if (!res.rows.length) {
       interactionStatisController.common.create({
-        key: new Date().toLocaleString(),
+        key: currTime,
         value: JSON.stringify({
           historyHightOnlineNum: Math.max(currTotal, oldTotal),
           currDayHightOnlineNum: Math.max(currTotal, oldTotal),
@@ -95,7 +103,7 @@ export const connectWebSocket = (server) => {
     } else {
       interactionStatisController.common.update({
         id: res.rows[0].id,
-        key: new Date().toLocaleString(),
+        key: currTime,
         value: JSON.stringify({
           historyHightOnlineNum: Math.max(currTotal, oldTotal),
           currDayHightOnlineNum: Math.max(currTotal, oldTotal),
