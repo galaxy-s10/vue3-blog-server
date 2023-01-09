@@ -114,8 +114,17 @@ export const connectWebSocket = (server) => {
         id: res.rows[0].id,
         key: currTime,
         value: JSON.stringify({
-          historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
-          currDayHightOnlineNum: Math.max(currTotal, oldTotal),
+          historyHightOnlineNum: Math.max(
+            history,
+            currTotal,
+            oldTotal,
+            JSON.parse(res.rows[0].value).historyHightOnlineNum
+          ),
+          currDayHightOnlineNum: Math.max(
+            currTotal,
+            oldTotal,
+            JSON.parse(res.rows[0].value).currDayHightOnlineNum
+          ),
           user,
           visitor,
         }),
@@ -132,8 +141,17 @@ export const connectWebSocket = (server) => {
       id: historyInfoRes.rows[0].id,
       key: 'historyHightOnlineNum',
       value: JSON.stringify({
-        historyHightOnlineNum: Math.max(history, currTotal, oldTotal),
-        currDayHightOnlineNum: Math.max(currTotal, oldTotal),
+        historyHightOnlineNum: Math.max(
+          history,
+          currTotal,
+          oldTotal,
+          JSON.parse(res.rows[0].value).historyHightOnlineNum
+        ),
+        currDayHightOnlineNum: Math.max(
+          currTotal,
+          oldTotal,
+          JSON.parse(res.rows[0].value).currDayHightOnlineNum
+        ),
         user,
         visitor,
       }),
