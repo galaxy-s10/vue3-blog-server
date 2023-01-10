@@ -40,11 +40,18 @@ export const wsUserType = {
 
 export const liveExp = 60 * 5; // 5分钟过期
 
-export interface IData {
+export interface IData<T = any> {
   created_at: string;
   client_ip: string;
   exp?: number;
-  data: any;
+  data: T;
+}
+
+export interface IFrontendToBackendData<T> extends IData {
+  created_at: string;
+  client_ip: string;
+  exp?: number;
+  data: T;
 }
 
 export interface IUserInfo {

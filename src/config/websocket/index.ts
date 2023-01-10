@@ -1,7 +1,8 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 import {
   IData,
+  IFrontendToBackendData,
   IUserInfo,
   liveExp,
   wsConnectStatus,
@@ -36,11 +37,20 @@ async function getOnline() {
   };
 }
 
-function initLog(type: string, socket: any) {
+function prettierLog(type: string, socket: Socket) {
   console.log(
-    // eslint-disable-next-line
-    `${type}, socket.id: ${socket.id}, x-real-ip: ${socket.request.headers['x-real-ip']}`
+    `${type}, socket.id: ${socket.id}, x-real-ip: ${
+      socket.request.headers['x-real-ip'] as string
+    }`
   );
+}
+
+function getClient(socket: Socket) {
+  const { id, request } = socket;
+  return {
+    client_ip: (request.headers['x-real-ip'] as string) || '-1',
+    id,
+  };
 }
 
 export const connectWebSocket = (server) => {
@@ -185,14 +195,13 @@ export const connectWebSocket = (server) => {
     }
   );
 
-  io.on(wsConnectStatus.connection, (socket) => {
+  io.on(wsConnectStatus.connection, (socket: Socket) => {
     console.log('connection');
 
     // 用户还在线
     socket.on(wsMsgType.live, async () => {
-      initLog('用户还在线', socket);
-      const { id, request } = socket;
-      const client_ip = request.headers['x-real-ip'] || '-1';
+      prettierLog('用户还在线', socket);
+      const { id, client_ip } = getClient(socket);
       const res = await WsRedisController.getOnlineList(id);
       if (res) {
         const { data }: IData = JSON.parse(res);
@@ -208,15 +217,14 @@ export const connectWebSocket = (server) => {
     // 用户进房间
     socket.on(
       wsMsgType.userInRoom,
-      async (data: { userInfo: IUserInfo; value: any }) => {
-        initLog('用户进房间', socket);
-        const { id, request } = socket;
-        const client_ip = request.headers['x-real-ip'] || '-1';
+      async (data: IFrontendToBackendData<IUserInfo>) => {
+        prettierLog('用户进房间', socket);
+        const { id, client_ip } = getClient(socket);
         WsRedisController.live(id, {
           client_ip,
           created_at: new Date().toLocaleString(),
           exp: liveExp,
-          data: data.userInfo,
+          data,
         });
         await Promise.all([
           data.userInfo.userType === wsUserType.user
@@ -249,19 +257,17 @@ export const connectWebSocket = (server) => {
 
     // 用户退出房间
     socket.on(wsMsgType.userOutRoom, () => {
-      initLog('用户退出房间', socket);
-      const { id } = socket;
-      WsRedisController.die(id);
+      prettierLog('用户退出房间', socket);
+      WsRedisController.die(socket.id);
     });
 
     // 用户发送消息
     socket.on(wsMsgType.userSendMsg, (data) => {
-      initLog('用户发送消息', socket);
+      prettierLog('用户发送消息', socket);
       //  socket.emit会将消息发送给发件人
       //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
-      const { id, request } = socket;
-      const client_ip = request.headers['x-real-ip'] || '-1';
+      const { id, client_ip } = getClient(socket);
       io.emit(wsMsgType.userSendMsg, {
         id,
         userInfo: data.userInfo,
@@ -280,7 +286,7 @@ export const connectWebSocket = (server) => {
 
     // 游客切换头像
     socket.on(wsMsgType.visitorSwitchAvatar, (data) => {
-      initLog('游客切换头像', socket);
+      prettierLog('游客切换头像', socket);
       const { avatar } = data;
       io.emit(wsMsgType.visitorSwitchAvatar, {
         code: 200,
@@ -291,16 +297,15 @@ export const connectWebSocket = (server) => {
 
     // 断开连接中
     socket.on(wsConnectStatus.disconnecting, (reason) => {
-      initLog('断开连接中', socket);
+      prettierLog('断开连接中', socket);
       console.log(reason);
     });
 
     // 已断开连接
     socket.on(wsConnectStatus.disconnect, (reason) => {
-      initLog('已断开连接', socket);
+      prettierLog('已断开连接', socket);
       console.log(reason);
-      const { id } = socket;
-      WsRedisController.die(id);
+      WsRedisController.die(socket.id);
     });
   });
 };

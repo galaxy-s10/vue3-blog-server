@@ -90,53 +90,42 @@ class LogService {
   async isPass(api_real_ip: ILog['api_real_ip']) {
     let flag = true;
     const nowDate = new Date().getTime();
-    const [oneSecondApiNum, oneMinuteApiNum, oneHourApiNum, oneDayApiNum] =
-      await Promise.all([
-        logModel.count({
-          where: {
-            api_real_ip,
-            created_at: {
-              // 一秒钟内访问的次数
-              [Op.between]: [new Date(nowDate - 1000), new Date(nowDate)],
-            },
+    const [oneMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
+      logModel.count({
+        where: {
+          api_real_ip,
+          created_at: {
+            // 一分钟内访问的次数
+            [Op.between]: [new Date(nowDate - 1000 * 60), new Date(nowDate)],
           },
-        }),
-        logModel.count({
-          where: {
-            api_real_ip,
-            created_at: {
-              // 一分钟内访问的次数
-              [Op.between]: [new Date(nowDate - 1000 * 60), new Date(nowDate)],
-            },
+        },
+      }),
+      logModel.count({
+        where: {
+          api_real_ip,
+          created_at: {
+            // 一小时内访问的次数
+            [Op.between]: [
+              new Date(nowDate - 1000 * 60 * 60),
+              new Date(nowDate),
+            ],
           },
-        }),
-        logModel.count({
-          where: {
-            api_real_ip,
-            created_at: {
-              // 一小时内访问的次数
-              [Op.between]: [
-                new Date(nowDate - 1000 * 60 * 60),
-                new Date(nowDate),
-              ],
-            },
+        },
+      }),
+      logModel.count({
+        where: {
+          api_real_ip,
+          created_at: {
+            // 一天内访问的次数
+            [Op.between]: [
+              new Date(nowDate - 1000 * 60 * 60 * 24),
+              new Date(nowDate),
+            ],
           },
-        }),
-        logModel.count({
-          where: {
-            api_real_ip,
-            created_at: {
-              // 一天内访问的次数
-              [Op.between]: [
-                new Date(nowDate - 1000 * 60 * 60 * 24),
-                new Date(nowDate),
-              ],
-            },
-          },
-        }),
-      ]);
+        },
+      }),
+    ]);
 
-    oneSecondApiNum > 20 && (flag = false);
     oneMinuteApiNum > 100 && (flag = false);
     oneHourApiNum > 2000 && (flag = false);
     oneDayApiNum > 5000 && (flag = false);
@@ -145,7 +134,7 @@ class LogService {
       chalkWARN(
         `判断该ip今天的日志记录是否合法:${
           flag ? '合法' : '不合法'
-        }; oneSecondApiNum:${oneSecondApiNum},oneMinuteApiNum:${oneMinuteApiNum},oneHourApiNum:${oneHourApiNum},oneDayApiNum:${oneDayApiNum}`
+        };  oneMinuteApiNum:${oneMinuteApiNum},oneHourApiNum:${oneHourApiNum},oneDayApiNum:${oneDayApiNum}`
       )
     );
     return flag;
