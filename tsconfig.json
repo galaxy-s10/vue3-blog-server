@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext", // 指定生成什么模块代码。
+    "target": "ESNext",
+    "module": "CommonJS", // 指定生成什么模块代码。
     "lib": ["esnext"],
     "strict": true, // 启用所有严格的类型检查选项。默认:false
     "noImplicitAny": false, // 为具有隐含“any”类型的表达式和声明启用错误报告。
@@ -13,7 +13,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "outDir": "./dist"
   },
 
   // ts-node的时候会读取这里的配置

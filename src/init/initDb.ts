@@ -8,7 +8,8 @@ import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 export const loadAllModel = () => {
   const modelDir = `${process.cwd()}/src/model`;
   fs.readdirSync(modelDir).forEach((file: string) => {
-    if (file.indexOf('.model.ts') === -1) return;
+    if (file.indexOf('.model.ts') === -1 || file.indexOf('.model.js') === -1)
+      return;
     // eslint-disable-next-line
     require(`${modelDir}/${file}`).default;
   });

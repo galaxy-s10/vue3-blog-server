@@ -18,7 +18,7 @@ export function loadAllRoutes(app) {
 
   fs.readdirSync(__dirname).forEach((file) => {
     try {
-      if (file === 'index.ts') return;
+      if (file === 'index.ts' || file === 'index.js') return;
       const allRouter = require(`./${file}`).default;
       app.use(allRouter.routes()).use(allRouter.allowedMethods()); // allRouter也要配置routes()和allowedMethods()
       // router.use('/front', allRouter.routes()).use(allRouter.allowedMethods());
