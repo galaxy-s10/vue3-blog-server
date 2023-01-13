@@ -86,58 +86,16 @@ class LogService {
     return handlePaging(result, nowPage, pageSize);
   }
 
-  /** 判断该ip今天的日志记录是否合法 */
-  async isPass(api_real_ip: ILog['api_real_ip']) {
-    let flag = true;
-    const nowDate = new Date().getTime();
-    const [oneMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
-      logModel.count({
-        where: {
-          api_real_ip,
-          created_at: {
-            // 一分钟内访问的次数
-            [Op.between]: [new Date(nowDate - 1000 * 60), new Date(nowDate)],
-          },
+  async getCount({ api_real_ip, startTime, endTime }) {
+    const count = await logModel.count({
+      where: {
+        api_real_ip,
+        created_at: {
+          [Op.between]: [startTime, endTime],
         },
-      }),
-      logModel.count({
-        where: {
-          api_real_ip,
-          created_at: {
-            // 一小时内访问的次数
-            [Op.between]: [
-              new Date(nowDate - 1000 * 60 * 60),
-              new Date(nowDate),
-            ],
-          },
-        },
-      }),
-      logModel.count({
-        where: {
-          api_real_ip,
-          created_at: {
-            // 一天内访问的次数
-            [Op.between]: [
-              new Date(nowDate - 1000 * 60 * 60 * 24),
-              new Date(nowDate),
-            ],
-          },
-        },
-      }),
-    ]);
-
-    oneMinuteApiNum > 100 && (flag = false);
-    oneHourApiNum > 2000 && (flag = false);
-    oneDayApiNum > 5000 && (flag = false);
-    console.log(
-      flag,
-      chalkWARN(
-        `判断该ip今天的日志记录是否合法:${
-          flag ? '合法' : '不合法'
-        };  oneMinuteApiNum:${oneMinuteApiNum},oneHourApiNum:${oneHourApiNum},oneDayApiNum:${oneDayApiNum}`
-      )
-    );
-    return flag;
+      },
+    });
+    return count;
   }
 
   /** 查找日志 */

@@ -50,6 +50,38 @@ const backendWhiteList = [
 
 const globalWhiteList = ['/init/'];
 
+// 允许频繁请求的路径白名单
+const frequentlyWhiteList = [
+  '/admin/qiniu_data/upload_chunk',
+  '/admin/qiniu_data/progress',
+];
+
+async function isPass(ip: string) {
+  const nowDate = +new Date();
+  let flag = true;
+  const [oneMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
+    logController.common.getCount({
+      startTime: new Date(nowDate - 1000 * 60), // 一分钟内访问的次数
+      endTime: new Date(nowDate),
+      api_real_ip: ip,
+    }),
+    logController.common.getCount({
+      startTime: new Date(nowDate - 1000 * 60 * 60), // 一小时内访问的次数
+      endTime: new Date(nowDate),
+      api_real_ip: ip,
+    }),
+    logController.common.getCount({
+      startTime: new Date(nowDate - 1000 * 60 * 60 * 24), // 一天内访问的次数
+      endTime: new Date(nowDate),
+      api_real_ip: ip,
+    }),
+  ]);
+  oneMinuteApiNum > 100 && (flag = false);
+  oneHourApiNum > 2000 && (flag = false);
+  oneDayApiNum > 5000 && (flag = false);
+  return flag;
+}
+
 export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   console.log('apiBeforeVerify中间件');
   const url = ctx.request.path;
@@ -90,20 +122,23 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
     console.log('不在黑名单里');
   }
 
-  const isPass = await logController.isPass(ctx);
-  if (!isPass) {
-    const { userInfo } = await authJwt(ctx);
-    blacklistController.common.create({
-      user_id: userInfo?.id,
-      ip,
-      type: BLACKLIST_TYPE.banIp,
-      msg: COMMON_ERR_MSG.banIp,
-    });
-    throw new CustomError(
-      `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
-      ALLOW_HTTP_CODE.forbidden,
-      ERROR_HTTP_CODE.banIp
-    );
+  // 验证是否频繁请求
+  if (frequentlyWhiteList.indexOf(url) === -1) {
+    const res = await isPass(ip);
+    if (!res) {
+      const { userInfo } = await authJwt(ctx);
+      blacklistController.common.create({
+        user_id: userInfo?.id,
+        ip,
+        type: BLACKLIST_TYPE.banIp,
+        msg: COMMON_ERR_MSG.banIp,
+      });
+      throw new CustomError(
+        `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
+        ALLOW_HTTP_CODE.forbidden,
+        ERROR_HTTP_CODE.banIp
+      );
+    }
   }
 
   const consoleEnd = () => {

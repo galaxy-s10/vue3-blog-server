@@ -23,15 +23,15 @@
 pnpm install
 ```
 
-## 启动项目
+## 本地启动项目
 
 ```bash
-# pnpm run start，运行在3300端口
-pnpm run start
-# 或者pnpm run start:beta，运行在3300端口
-pnpm run start:beta
-# 或者pnpm run start:prod，运行在3200端口
-pnpm run start:prod
+# pnpm run dev，运行在3300端口
+pnpm run dev
+# 或者pnpm run dev:beta，运行在3300端口
+pnpm run dev:beta
+# 或者pnpm run dev:prod，运行在3200端口
+pnpm run dev:prod
 ```
 
 # 服务器环境

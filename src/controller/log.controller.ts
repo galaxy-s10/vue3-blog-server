@@ -12,6 +12,8 @@ class LogController {
   common = {
     create: (data: ILog) => logService.create(data),
     deleteRang: () => logService.deleteRang(),
+    getCount: ({ api_real_ip, startTime, endTime }) =>
+      logService.getCount({ api_real_ip, startTime, endTime }),
   };
 
   async getList(ctx: ParameterizedContext, next) {
@@ -43,13 +45,6 @@ class LogController {
     successHandler({ ctx, data: result });
 
     await next();
-  }
-
-  async isPass(ctx: ParameterizedContext) {
-    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
-    if (IP_WHITE_LIST.includes(ip)) return true;
-    const result = await logService.isPass(ip);
-    return result;
   }
 
   async find(ctx: ParameterizedContext, next) {

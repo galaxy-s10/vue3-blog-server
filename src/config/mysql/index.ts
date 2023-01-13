@@ -1,11 +1,11 @@
 import { Sequelize } from 'sequelize';
 
 import { MYSQL_CONFIG } from '@/config/secret';
-import { PROJECT_ENV } from '@/constant';
+import { PROJECT_ENV, PROJECT_ENV_ENUM } from '@/constant';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 export const dbName =
-  PROJECT_ENV !== 'prod'
+  PROJECT_ENV !== PROJECT_ENV_ENUM.prod
     ? `${MYSQL_CONFIG.database}_test`
     : MYSQL_CONFIG.database;
 
