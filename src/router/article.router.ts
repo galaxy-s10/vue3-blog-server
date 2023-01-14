@@ -5,6 +5,9 @@ import { verifyProp } from '@/middleware/article.middleware';
 
 const articleRouter = new Router({ prefix: '/article' });
 
+// 压力测试
+articleRouter.get('/test', articleController.test);
+
 // 文章列表
 articleRouter.get('/list', articleController.getList);
 

@@ -54,6 +54,8 @@ const globalWhiteList = ['/init/'];
 const frequentlyWhiteList = [
   '/admin/qiniu_data/upload_chunk',
   '/admin/qiniu_data/progress',
+  '/article/test',
+  '/admin/article/test',
 ];
 
 async function isPass(ip: string) {

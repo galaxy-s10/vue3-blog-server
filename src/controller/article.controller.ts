@@ -124,6 +124,17 @@ class ArticleController {
     await next();
   }
 
+  async test(ctx: ParameterizedContext, next) {
+    // for (let i = 0; i < 1000000000; i += 1) {}
+    await new Promise((res) => {
+      setTimeout(() => {
+        res(1);
+      }, 1000);
+    });
+    successHandler({ ctx, data: {} });
+    await next();
+  }
+
   async find(ctx: ParameterizedContext, next) {
     const id = +ctx.params.id;
     let from_user_id = -1;

@@ -6,7 +6,7 @@
 # Email: 2274751790@qq.com
 # FilePath: /vue3-blog-server/pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2023-01-13 13:34:16
+# LastEditTime: 2023-01-14 23:48:16
 # LastEditors: shuisheng
 ###
 
@@ -64,6 +64,9 @@ pnpm config get @billd:registry
 echo 开始安装依赖:
 pnpm install
 
+echo 开始打包:
+pnpm run build
+
 if ! type pm2 >/dev/null 2>&1; then
   echo 'pm2未安装,先全局安装pm2'
   npm install pm2 -g
@@ -85,10 +88,11 @@ pm2 del $JOBNAME-$ENV-$PORT
 echo 使用pm2维护:
 # pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/nodemon
 
-npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 pm2 start ./dist/index.js --name JOBNAME-beta-3300
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 pm2 start ./dist/index.js --name vue3-blog-server-beta-3300
+npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./dist/index.js --name $JOBNAME-$ENV-$PORT
 
 # yarn和pnpm都能用
-npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./src/index.ts --name $JOBNAME-$ENV-$PORT --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json'
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./src/index.ts --name $JOBNAME-$ENV-$PORT --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json'
 
 # 在使用yarn时，下面的命令报错：[PM2][ERROR] Script not found: /Users/huangshuisheng/Desktop/hss/github/vue3-blog-server/ts-node
 # cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start --name $JOBNAME-$ENV-$PORT ts-node -- -P tsconfig.json ./src/index.ts

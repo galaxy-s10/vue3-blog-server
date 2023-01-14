@@ -149,7 +149,6 @@ export const connectWebSocket = (server) => {
     });
     interactionStatisController.common.update({
       id: historyInfoRes.rows[0].id,
-      key: 'historyHightOnlineNum',
       value: JSON.stringify({
         historyHightOnlineNum: Math.max(
           history,

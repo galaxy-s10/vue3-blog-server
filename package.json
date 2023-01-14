@@ -21,7 +21,8 @@
     "push": "cz && standard-version",
     "release": "standard-version",
     "release:first": "standard-version --first-release",
-    "start": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./dist/index.js",
+    "start:beta": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./dist/index.js",
+    "start:prod": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./dist/index.js",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "config": {
