@@ -6,7 +6,7 @@
 # Email: 2274751790@qq.com
 # FilePath: /vue3-blog-server/pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2023-01-14 23:48:16
+# LastEditTime: 2023-01-15 20:39:05
 # LastEditors: shuisheng
 ###
 
@@ -61,12 +61,6 @@ echo 查看当前pnpm镜像:
 pnpm config get registry
 pnpm config get @billd:registry
 
-echo 开始安装依赖:
-pnpm install
-
-echo 开始打包:
-pnpm run build
-
 if ! type pm2 >/dev/null 2>&1; then
   echo 'pm2未安装,先全局安装pm2'
   npm install pm2 -g
@@ -81,6 +75,12 @@ pm2 -v
 # 注意：要先进入项目所在的目录，然后再执行pm2命令!!!
 # 否则的话约等于在其他目录执行npm run dev,如果所在的目录没有package.json文件就会报错！
 cd $PUBLICDIR/$JOBNAME/$ENV
+
+echo 开始安装依赖:
+pnpm install
+
+echo 开始打包:
+pnpm run build
 
 echo 删除旧的pm2服务:
 pm2 del $JOBNAME-$ENV-$PORT
