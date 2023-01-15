@@ -27,6 +27,9 @@ class ThemeService {
     nowPage,
     pageSize,
     keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<ITheme>) {
     let offset;
     let limit;
@@ -62,6 +65,12 @@ class ThemeService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await themeModel.findAndCountAll({

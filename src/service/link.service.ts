@@ -28,6 +28,9 @@ class LinkService {
     pageSize,
     keyWord,
     status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<ILink>) {
     let offset;
     let limit;
@@ -61,6 +64,12 @@ class LinkService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await linkModel.findAndCountAll({

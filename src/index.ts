@@ -31,9 +31,7 @@ import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 
 function runServer() {
-  console.log(`Worker ${process.pid} started`);
   const port = +PROJECT_PORT; // 端口
-
   const app = new Koa();
   // app.proxyIpHeader 代理 ip 消息头, 默认为 X-Forwarded-For
   // app.proxyIpHeader = 'X-Real-IP';
@@ -104,9 +102,7 @@ function runServer() {
       console.log(error);
     }
   }
-
   main();
-  // process.send?.('ddd');
 }
 
 runServer();

@@ -27,6 +27,9 @@ class TypeService {
     nowPage,
     pageSize,
     keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IType>) {
     let offset;
     let limit;
@@ -48,7 +51,12 @@ class TypeService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
-
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
+    }
     // @ts-ignore
     const result = await typeModel.findAndCountAll({
       order: [[orderName, orderBy]],

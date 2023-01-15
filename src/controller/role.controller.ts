@@ -13,18 +13,24 @@ import { arrayUnique, arrayToTree, arrayGetDifference } from '@/utils';
 class RoleController {
   async getAllList(ctx: ParameterizedContext, next) {
     const {
+      id,
+      type,
       orderBy = 'asc',
       orderName = 'id',
-      id,
-      type,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IRole> = ctx.request.query;
     const result = await roleService.getAllList({
-      orderBy,
-      orderName,
       id,
       type,
+      orderBy,
+      orderName,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 
@@ -34,21 +40,27 @@ class RoleController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      type,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      type,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IRole> = ctx.request.query;
     const result = await roleService.getList({
+      id,
+      type,
       nowPage,
       pageSize,
       orderBy,
       orderName,
-      id,
-      type,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 
@@ -61,6 +73,9 @@ class RoleController {
       id = 0,
       orderBy = 'asc',
       orderName = 'id',
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IRole> = ctx.request.query;
     if (Number.isNaN(+id)) {
       throw new CustomError(
@@ -69,7 +84,13 @@ class RoleController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    const { rows } = await roleService.getAllList({ orderBy, orderName });
+    const { rows } = await roleService.getAllList({
+      orderBy,
+      orderName,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
+    });
     const result = arrayToTree({
       originArr: rows as any,
       originPid: +id,

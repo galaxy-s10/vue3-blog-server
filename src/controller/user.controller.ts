@@ -164,6 +164,9 @@ class UserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IUser> = ctx.request.query;
     const result = await userService.getList({
       id,
@@ -172,6 +175,9 @@ class UserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

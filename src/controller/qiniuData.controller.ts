@@ -63,7 +63,6 @@ class QiniuController {
           Authorization: token,
         },
       });
-      console.log(res, '文件渔区');
       return res;
     } catch (error) {
       console.log('prefetchQiniu失败', error);
@@ -620,6 +619,9 @@ class QiniuController {
       qiniu_putTime,
       qiniu_status,
       qiniu_type,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IQiniuData> = ctx.request.query;
     const result = await qiniuDataService.getList({
       nowPage,
@@ -639,6 +641,9 @@ class QiniuController {
       qiniu_putTime,
       qiniu_status,
       qiniu_type,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

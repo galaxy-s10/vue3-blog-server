@@ -22,12 +22,15 @@ class MonitService {
   /** 获取监控列表 */
   async getList({
     id,
+    type,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    type,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IMonit>) {
     let offset;
     let limit;
@@ -51,6 +54,12 @@ class MonitService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await monitModel.findAndCountAll({

@@ -10,21 +10,27 @@ class MonitController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      type,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      type,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IMonit> = ctx.request.query;
     const result = await monitService.getList({
+      id,
+      type,
       nowPage,
       pageSize,
       orderBy,
       orderName,
       keyWord,
-      type,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

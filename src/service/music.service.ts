@@ -21,12 +21,15 @@ class MusicService {
   /** 获取音乐列表 */
   async getList({
     id,
+    status,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IMusic>) {
     let offset;
     let limit;
@@ -55,6 +58,12 @@ class MusicService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await musicModel.findAndCountAll({

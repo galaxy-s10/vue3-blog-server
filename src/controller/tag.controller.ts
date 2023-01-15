@@ -16,14 +16,20 @@ class TagController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<ITag> = ctx.request.query;
     const result = await tagService.getList({
+      id,
       nowPage,
       pageSize,
       orderBy,
       orderName,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

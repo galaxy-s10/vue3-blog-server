@@ -14,21 +14,27 @@ class LinkController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      status,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<ILink> = ctx.request.query;
     const result = await linkService.getList({
+      id,
+      status: isAdmin(ctx) ? status : 1,
       nowPage,
       pageSize,
       orderBy,
       orderName,
-      status: isAdmin(ctx) ? status : 1,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

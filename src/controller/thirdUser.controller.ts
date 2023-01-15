@@ -15,6 +15,9 @@ class ThirdUserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IThirdUser> = ctx.request.query;
     const result = await thirdUserService.getList({
       id,
@@ -23,6 +26,9 @@ class ThirdUserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

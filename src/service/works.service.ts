@@ -22,12 +22,15 @@ class WorksService {
   /** 获取作品列表 */
   async getList({
     id,
+    status,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IWorks>) {
     let offset;
     let limit;
@@ -62,6 +65,12 @@ class WorksService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await worksModel.findAndCountAll({

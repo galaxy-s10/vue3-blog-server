@@ -3,7 +3,6 @@ import Sequelize from 'sequelize';
 import { ILog, IList } from '@/interface';
 import logModel from '@/model/log.model';
 import { handlePaging } from '@/utils';
-import { chalkWARN } from '@/utils/chalkTip';
 
 const { Op } = Sequelize;
 
@@ -28,6 +27,9 @@ class LogService {
     nowPage,
     pageSize,
     keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<ILog>) {
     let offset;
     let limit;
@@ -73,6 +75,12 @@ class LogService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await logModel.findAndCountAll({

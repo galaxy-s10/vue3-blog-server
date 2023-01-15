@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
+import { IP_WHITE_LIST } from '@/config/secret';
 import {
   ALLOW_HTTP_CODE,
   BLACKLIST_TYPE,
@@ -20,17 +21,17 @@ const frontendWhiteList = [
   '/init/auth',
   '/init/roleAuth',
   '/init/dayData',
+  '/link/create', // 申请友链，这个接口是post的
   '/visitor_log/create', // 访客记录，这个接口是post的
   '/user/login', // 登录，这个接口是post的
-  '/link/create', // 申请友链，这个接口是post的
-  '/qq_user/login', // 登录
-  '/github_user/login', // 登录
-  '/email_user/send_login_code', // 发送登录验证码
-  '/email_user/send_register_code', // 发送注册验证码
-  '/email_user/send_bind_code', // 发送绑定邮箱验证码
-  '/email_user/send_cancel_bind_code', // 发送解绑邮箱验证码
-  '/email_user/login', // 登录
-  '/email_user/register', // 注册
+  '/qq_user/login', // 登录，这个接口是post的
+  '/email_user/login', // 登录，这个接口是post的
+  '/github_user/login', // 登录，这个接口是post的
+  '/email_user/send_login_code', // 发送登录验证码，这个接口是post的
+  '/email_user/send_register_code', // 发送注册验证码，这个接口是post的
+  '/email_user/send_bind_code', // 发送绑定邮箱验证码，这个接口是post的
+  '/email_user/send_cancel_bind_code', // 发送解绑邮箱验证码，这个接口是post的
+  '/email_user/register', // 注册，这个接口是post的
 ];
 
 // 后台的所有接口都需要判断token，除了白名单内的不需要token
@@ -61,6 +62,7 @@ const frequentlyWhiteList = [
 async function isPass(ip: string) {
   const nowDate = +new Date();
   let flag = true;
+  if (IP_WHITE_LIST.includes(ip)) return flag;
   const [oneMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
     logController.common.getCount({
       startTime: new Date(nowDate - 1000 * 60), // 一分钟内访问的次数
@@ -120,8 +122,6 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
       ALLOW_HTTP_CODE.forbidden,
       ERROR_HTTP_CODE.adminDisableUser
     );
-  } else {
-    console.log('不在黑名单里');
   }
 
   // 验证是否频繁请求

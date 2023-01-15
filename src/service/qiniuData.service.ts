@@ -30,13 +30,16 @@ class QiniuDataService {
   /** 获取文件列表 */
   async getList({
     id,
+    user_id,
+    prefix,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    user_id,
-    prefix,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IQiniuData>) {
     let offset;
     let limit;
@@ -63,6 +66,12 @@ class QiniuDataService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     let orderNameRes = orderName;
     if (orderNameRes === 'qiniu_fsize') {

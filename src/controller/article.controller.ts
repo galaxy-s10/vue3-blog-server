@@ -160,6 +160,9 @@ class ArticleController {
       tags = [],
       types = [],
       users = [],
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IArticle> = ctx.request.query;
     const result = await articleService.getList({
       id,
@@ -172,6 +175,9 @@ class ArticleController {
       tags,
       types,
       users,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();
@@ -186,6 +192,9 @@ class ArticleController {
       pageSize,
       keyWord,
       status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IArticle> = ctx.request.query;
     const result = await articleService.getKeyWordList({
       id,
@@ -195,6 +204,9 @@ class ArticleController {
       nowPage,
       pageSize,
       status: isAdmin(ctx) ? status : 1,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();

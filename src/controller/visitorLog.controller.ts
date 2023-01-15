@@ -68,6 +68,9 @@ class VisitorLogController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IVisitorLog> = ctx.request.query;
     const result = await visitorLogService.getList({
       id,
@@ -76,6 +79,9 @@ class VisitorLogController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 
@@ -90,6 +96,9 @@ class VisitorLogController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IVisitorLog> = ctx.request.query;
     const result = await visitorLogService.getList2({
       id,
@@ -98,6 +107,9 @@ class VisitorLogController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();

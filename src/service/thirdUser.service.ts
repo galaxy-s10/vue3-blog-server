@@ -27,6 +27,9 @@ class TagService {
     nowPage,
     pageSize,
     keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IThirdUser>) {
     let offset;
     let limit;
@@ -41,6 +44,12 @@ class TagService {
     if (keyWord) {
       const keyWordWhere = [];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await thirdUserModel.findAndCountAll({

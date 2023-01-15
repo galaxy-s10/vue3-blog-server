@@ -12,21 +12,27 @@ class MusicController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      status,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IMusic> = ctx.request.query;
     const result = await musicService.getList({
+      id,
+      status: isAdmin(ctx) ? status : 1,
       nowPage,
       pageSize,
       orderBy,
       orderName,
-      status: isAdmin(ctx) ? status : 1,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

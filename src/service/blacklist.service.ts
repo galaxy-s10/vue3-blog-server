@@ -27,6 +27,9 @@ class LinkService {
     nowPage,
     pageSize,
     keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IBlacklist>) {
     let offset;
     let limit;
@@ -57,6 +60,12 @@ class LinkService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await blacklistModel.findAndCountAll({

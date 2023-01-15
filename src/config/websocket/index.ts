@@ -154,12 +154,12 @@ export const connectWebSocket = (server) => {
           history,
           currTotal,
           oldTotal,
-          JSON.parse(res.rows[0].value).historyHightOnlineNum
+          res.rows[0] ? JSON.parse(res.rows[0].value).historyHightOnlineNum : 0
         ),
         currDayHightOnlineNum: Math.max(
           currTotal,
           oldTotal,
-          JSON.parse(res.rows[0].value).currDayHightOnlineNum
+          res.rows[0] ? JSON.parse(res.rows[0].value).historyHightOnlineNum : 0
         ),
         user,
         visitor,

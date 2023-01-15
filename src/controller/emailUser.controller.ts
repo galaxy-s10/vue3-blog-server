@@ -316,6 +316,9 @@ class EmailUserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IEmailUser> = ctx.request.query;
     const result = await emailUserService.getList({
       id,
@@ -324,6 +327,9 @@ class EmailUserController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

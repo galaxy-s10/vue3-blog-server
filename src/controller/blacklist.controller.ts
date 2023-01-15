@@ -20,14 +20,20 @@ class BlacklistController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IBlacklist> = ctx.request.query;
     const result = await blacklistService.getList({
+      id,
       orderBy,
       orderName,
       nowPage,
       pageSize,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();

@@ -16,6 +16,9 @@ class ThemeController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<ITheme> = ctx.request.query;
     const result = await themeService.getList({
       id,
@@ -24,6 +27,9 @@ class ThemeController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

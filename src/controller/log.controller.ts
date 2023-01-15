@@ -2,7 +2,6 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import { IP_WHITE_LIST } from '@/config/secret';
 import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ILog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
@@ -24,6 +23,9 @@ class LogController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<ILog> = ctx.request.query;
     const { userInfo } = await authJwt(ctx);
     if (userInfo?.id !== 1) {
@@ -34,12 +36,15 @@ class LogController {
       );
     }
     const result = await logService.getList({
+      id,
       nowPage,
       pageSize,
       orderBy,
       orderName,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
 
     successHandler({ ctx, data: result });

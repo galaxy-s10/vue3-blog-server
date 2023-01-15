@@ -359,6 +359,9 @@ class GithubUserController {
       keyWord,
       created_at,
       updated_at,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IGithubUser> = ctx.request.query;
     const result = await githubUserService.getList({
       id,
@@ -369,6 +372,9 @@ class GithubUserController {
       keyWord,
       created_at,
       updated_at,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

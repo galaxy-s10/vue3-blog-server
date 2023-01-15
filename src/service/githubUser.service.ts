@@ -27,8 +27,11 @@ class UserService {
     nowPage,
     pageSize,
     keyWord,
-    created_at,
-    updated_at,
+    // created_at,
+    // updated_at,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IGithubUser>) {
     let offset;
     let limit;
@@ -50,16 +53,22 @@ class UserService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
-    if (created_at) {
-      allWhere.created_at = {
-        [Op.between]: [created_at, `${created_at} 23:59:59`],
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
       };
     }
-    if (updated_at) {
-      allWhere.updated_at = {
-        [Op.between]: [updated_at, `${updated_at} 23:59:59`],
-      };
-    }
+    // if (created_at) {
+    //   allWhere.created_at = {
+    //     [Op.between]: [created_at, `${created_at} 23:59:59`],
+    //   };
+    // }
+    // if (updated_at) {
+    //   allWhere.updated_at = {
+    //     [Op.between]: [updated_at, `${updated_at} 23:59:59`],
+    //   };
+    // }
     // @ts-ignore
     const result = await githubUserModel.findAndCountAll({
       attributes: {

@@ -52,6 +52,9 @@ class FrontendController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IFrontend> = ctx.request.query;
     const result = await frontendService.getList({
       id,
@@ -60,6 +63,9 @@ class FrontendController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();

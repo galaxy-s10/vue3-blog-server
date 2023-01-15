@@ -16,21 +16,27 @@ class CommentController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      status,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IComment> = ctx.request.query;
     const result = await commentService.getList({
       id,
+      status: isAdmin(ctx) ? status : 1,
       orderBy,
       orderName,
       nowPage,
       pageSize,
       keyWord,
-      status: isAdmin(ctx) ? status : 1,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 
@@ -42,12 +48,15 @@ class CommentController {
     const article_id = +ctx.params.article_id;
     const {
       id,
+      status,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IComment> = ctx.request.query;
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
@@ -57,14 +66,17 @@ class CommentController {
     }
     const result = await commentService.getArticleCommentList({
       id,
+      status: isAdmin(ctx) ? status : 1,
+      from_user_id,
+      article_id,
       orderBy,
       orderName,
       nowPage,
       pageSize,
       keyWord,
-      status: isAdmin(ctx) ? status : 1,
-      from_user_id,
-      article_id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

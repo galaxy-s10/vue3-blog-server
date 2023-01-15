@@ -31,6 +31,9 @@ class CommentService {
     pageSize,
     keyWord,
     status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IComment>) {
     let offset;
     let limit;
@@ -54,6 +57,12 @@ class CommentService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await commentModel.findAndCountAll({
@@ -88,6 +97,9 @@ class CommentService {
     status,
     from_user_id,
     article_id,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IComment>) {
     let offset;
     let limit;
@@ -111,6 +123,12 @@ class CommentService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await commentModel.findAndCountAll({

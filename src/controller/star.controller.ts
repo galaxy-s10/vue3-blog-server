@@ -19,6 +19,9 @@ class StarController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IStar> = ctx.request.query;
     const result = await starService.getList({
       id,
@@ -27,6 +30,9 @@ class StarController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

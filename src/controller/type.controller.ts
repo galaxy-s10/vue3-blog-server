@@ -16,6 +16,9 @@ class TypeController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IType> = ctx.request.query;
     const result = await typeService.getList({
       id,
@@ -24,6 +27,9 @@ class TypeController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

@@ -22,12 +22,15 @@ class RoleService {
   /** 获取角色列表(分页) */
   async getList({
     id,
+    type,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    type,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IRole>) {
     let offset;
     let limit;
@@ -57,7 +60,12 @@ class RoleService {
       ];
       allWhere[Op.or] = keyWordWhere;
     }
-
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
+    }
     // @ts-ignore
     const result = await roleModel.findAndCountAll({
       order: [[orderName, orderBy]],
@@ -72,7 +80,16 @@ class RoleService {
   }
 
   /** 获取角色列表(不分页) */
-  async getAllList({ orderBy, orderName, id, type, keyWord }: IList<IRole>) {
+  async getAllList({
+    id,
+    type,
+    orderBy,
+    orderName,
+    keyWord,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
+  }: IList<IRole>) {
     const allWhere: any = {};
     if (id) {
       allWhere.id = id;
@@ -94,6 +111,12 @@ class RoleService {
         },
       ];
       allWhere[Op.or] = keyWordWhere;
+    }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
     }
     // @ts-ignore
     const result = await roleModel.findAndCountAll({

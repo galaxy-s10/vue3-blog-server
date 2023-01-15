@@ -32,14 +32,14 @@ const errorHandler = (error, ctx: ParameterizedContext) => {
         code: ALLOW_HTTP_CODE.serverError,
         errorCode: ERROR_HTTP_CODE.serverError,
         error: error.message,
-        message: '服务器错误！',
+        message: HTTP_ERROE_MSG.serverError,
       };
       ctx.status = defaultError.code;
       ctx.body = {
         code: defaultError.errorCode,
         errorCode: defaultError.errorCode,
         error: defaultError.error,
-        message: HTTP_ERROE_MSG[500],
+        message: defaultError.message,
       };
       errorLog(error);
       console.log(

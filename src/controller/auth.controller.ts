@@ -35,6 +35,9 @@ class AuthController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IAuth> = ctx.request.query;
     const result = await authService.getList({
       id,
@@ -43,6 +46,9 @@ class AuthController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
     await next();

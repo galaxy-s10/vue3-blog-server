@@ -20,14 +20,20 @@ class InteractionController {
       nowPage,
       pageSize,
       keyWord,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IInteraction> = ctx.request.query;
     const result = await interactionService.getList({
+      id,
       nowPage,
       pageSize,
       orderBy,
       orderName,
       keyWord,
-      id,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

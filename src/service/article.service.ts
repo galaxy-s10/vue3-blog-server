@@ -143,6 +143,9 @@ class ArticleService {
     types,
     users,
     status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IArticle>) {
     let offset;
     let limit;
@@ -155,7 +158,7 @@ class ArticleService {
     let tagWhere: any;
     let userWhere: any;
     let statusWhere: any;
-    const keyWordWhere: any = {};
+    const allWhere: any = {};
     if (status) {
       statusWhere = {};
       statusWhere.status = status;
@@ -164,20 +167,8 @@ class ArticleService {
       idWhere = {};
       idWhere.id = id;
     }
-    if (types?.length) {
-      typeWhere = {};
-      typeWhere.id = types;
-    }
-    if (tags?.length) {
-      tagWhere = {};
-      tagWhere.id = tags;
-    }
-    if (users?.length) {
-      userWhere = {};
-      userWhere.id = users;
-    }
     if (keyWord) {
-      keyWordWhere[Op.or] = [
+      allWhere[Op.or] = [
         {
           title: {
             [Op.like]: `%${keyWord}%`,
@@ -195,6 +186,25 @@ class ArticleService {
         },
       ];
     }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(+rangTimeStart!),
+        [Op.lt]: new Date(+rangTimeEnd!),
+      };
+    }
+    if (types?.length) {
+      typeWhere = {};
+      typeWhere.id = types;
+    }
+    if (tags?.length) {
+      tagWhere = {};
+      tagWhere.id = tags;
+    }
+    if (users?.length) {
+      userWhere = {};
+      userWhere.id = users;
+    }
+
     // @ts-ignore
     const result = await articleModel.findAndCountAll({
       include: [
@@ -255,7 +265,7 @@ class ArticleService {
           // ],
         ],
       },
-      where: { ...statusWhere, ...idWhere, ...keyWordWhere },
+      where: { ...statusWhere, ...idWhere, ...allWhere },
       distinct: true,
       order: [
         ['priority', 'desc'],
@@ -282,6 +292,9 @@ class ArticleService {
     nowPage,
     pageSize,
     status,
+    rangTimeType,
+    rangTimeStart,
+    rangTimeEnd,
   }: IList<IArticle>) {
     let offset;
     let limit;
@@ -289,9 +302,12 @@ class ArticleService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    let keyWordWhere: any = null;
+    const allWhere: any = {};
+    if (status) {
+      allWhere.status = status;
+    }
     if (keyWord) {
-      keyWordWhere = [
+      allWhere[Op.or] = [
         {
           title: {
             [Op.like]: `%${keyWord}%`,
@@ -309,8 +325,14 @@ class ArticleService {
         },
       ];
     }
+    if (rangTimeType) {
+      allWhere[rangTimeType] = {
+        [Op.gt]: new Date(rangTimeStart!),
+        [Op.lt]: new Date(rangTimeEnd!),
+      };
+    }
     const result = await articleModel.findAndCountAll({
-      where: { [Op.or]: keyWordWhere, status },
+      where: { ...allWhere },
       distinct: true,
       limit,
       offset,

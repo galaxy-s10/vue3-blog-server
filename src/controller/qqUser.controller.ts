@@ -312,6 +312,9 @@ class QqUserController {
       gender,
       created_at,
       updated_at,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IQqUser> = ctx.request.query;
     const result = await qqUserService.getList({
       id,
@@ -324,6 +327,9 @@ class QqUserController {
       gender,
       created_at,
       updated_at,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 

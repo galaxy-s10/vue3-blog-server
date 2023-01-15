@@ -12,21 +12,27 @@ class WorksController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      status,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     }: IList<IWorks> = ctx.request.query;
     const result = await worksService.getList({
       id,
+      status: isAdmin(ctx) ? status : 1,
       orderBy,
       orderName,
       nowPage,
       pageSize,
       keyWord,
-      status: isAdmin(ctx) ? status : 1,
+      rangTimeType,
+      rangTimeStart,
+      rangTimeEnd,
     });
     successHandler({ ctx, data: result });
 
