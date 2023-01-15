@@ -4,15 +4,15 @@
 # Date: 2022-04-26 01:54:48
 # Description: https://github.com/galaxy-s10/sh/blob/master/build.sh
 # Email: 2274751790@qq.com
-# FilePath: /github/vue3-blog-server/build.sh
+# FilePath: /vue3-blog-server/build.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2022-10-16 11:15:42
+# LastEditTime: 2023-01-15 20:04:20
 # LastEditors: shuisheng
 ###
 
 # 生成头部文件快捷键：ctrl+cmd+i
 
-# 静态部署的项目，一般流程是在jenkins里面执行build.sh进行构建，
+# 静态部署的项目，一般流程是在jenkins里面执行build.sh进行构建
 # 构建完成后会连接ssh，执行/node/sh/frontend.sh，frontend.sh会将构建的完成资源复制到/node/xxx。
 # 复制完成后，frontend.sh会执行清除buff/cache操作
 

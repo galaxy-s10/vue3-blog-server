@@ -8,7 +8,7 @@
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
-    "build": "tsc -P ./tsconfig.json",
+    "build": "rimraf dist && tsc -P ./tsconfig.json",
     "commit": "cz",
     "copy": "node ./handleGiteeJenkins.js",
     "dev": "cross-env NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
@@ -56,6 +56,7 @@
     "nodemailer": "^6.7.2",
     "qiniu": "^7.4.0",
     "redis": "^4.0.4",
+    "rimraf": "^4.0.5",
     "sequelize": "^6.12.0-alpha.1",
     "socket.io": "^4.4.1",
     "ssh2": "^1.7.0",
