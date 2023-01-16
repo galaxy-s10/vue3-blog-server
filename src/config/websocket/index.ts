@@ -294,6 +294,16 @@ export const connectWebSocket = (server) => {
       });
     });
 
+    // 点歌
+    socket.on(wsMsgType.chooseSong, (data) => {
+      prettierLog('点歌', socket);
+      io.emit(wsMsgType.chooseSong, {
+        code: 200,
+        data,
+        created_at: new Date().toLocaleString(),
+      });
+    });
+
     // 断开连接中
     socket.on(wsConnectStatus.disconnecting, (reason) => {
       prettierLog('断开连接中', socket);

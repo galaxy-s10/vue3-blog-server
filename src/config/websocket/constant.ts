@@ -14,6 +14,8 @@ export const wsMsgType = {
   getOnlineData: 'getOnlineData',
   /** 用户存活 */
   live: 'live',
+  /** 用户点歌 */
+  chooseSong: 'chooseSong',
 };
 
 // websocket连接状态
@@ -48,6 +50,13 @@ export interface IData<T = any> {
 }
 
 export interface IFrontendToBackendData<T> extends IData {
+  created_at: string;
+  client_ip: string;
+  exp?: number;
+  data: T;
+}
+
+export interface IBackendToFrontendData<T> extends IData {
   created_at: string;
   client_ip: string;
   exp?: number;
