@@ -82,7 +82,7 @@ const model = sequelize.define<UserModel>(
       defaultValue: '这个人很懒，什么也没有留下',
     },
     token: {
-      type: DataTypes.TEXT('long'),
+      type: DataTypes.TEXT,
     },
   },
   {

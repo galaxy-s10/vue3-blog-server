@@ -57,7 +57,7 @@ const model = sequelize.define<ArticleModel>(
       allowNull: true,
     },
     content: {
-      type: DataTypes.TEXT('long'),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     click: {

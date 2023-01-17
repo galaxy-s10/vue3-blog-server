@@ -30,7 +30,7 @@ const model = sequelize.define<LogModel>(
       type: DataTypes.INTEGER,
     },
     api_user_agent: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT, // qq浏览器的user_agent能达到四百多字符。。。。
     },
     api_from: {
       type: DataTypes.INTEGER, // 1:前台 2:后台
@@ -60,7 +60,7 @@ const model = sequelize.define<LogModel>(
       type: DataTypes.STRING,
     },
     api_body: {
-      type: DataTypes.TEXT('long'),
+      type: DataTypes.TEXT,
     },
     api_status_code: {
       type: DataTypes.INTEGER,

@@ -46,7 +46,7 @@ const model = sequelize.define<CommentModel>(
       defaultValue: -1, // -1:楼主 非-1:在楼主下回复的用户
     },
     content: {
-      type: DataTypes.TEXT('long'),
+      type: DataTypes.TEXT,
     },
     children_comment_total: {
       type: DataTypes.INTEGER,

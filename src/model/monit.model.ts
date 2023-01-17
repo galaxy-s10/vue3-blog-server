@@ -29,7 +29,7 @@ const model = sequelize.define<MonitModel>(
       type: DataTypes.INTEGER,
     },
     info: {
-      type: DataTypes.TEXT('long'),
+      type: DataTypes.TEXT,
     },
   },
   {
