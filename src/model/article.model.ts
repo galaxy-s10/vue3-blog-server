@@ -33,7 +33,7 @@ const model = sequelize.define<ArticleModel>(
       autoIncrement: true,
     },
     title: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(60),
       allowNull: false,
     },
     desc: {
