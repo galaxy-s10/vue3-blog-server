@@ -7,7 +7,7 @@ import { chalkERROR, chalkINFO } from '@/utils/chalkTip';
 
 // 重启pm2进程命令
 const restartPm2Cmd = () => {
-  return `pm2 restart all`;
+  return `pm2 stop all && pm2 restart all`;
 };
 
 // 清除buff/cache命令

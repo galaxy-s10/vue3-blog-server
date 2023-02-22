@@ -63,6 +63,7 @@ const handleRestartPm2 = async ({ total, free, currBuffCacheUsed, emial }) => {
       type: MONIT_TYPE.RESTART_PM2,
       info: emialContent,
     });
+    await clearCache();
     restartPm2();
   }
 };
