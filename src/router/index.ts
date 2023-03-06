@@ -18,8 +18,7 @@ export function loadAllRoutes(app) {
 
   fs.readdirSync(__dirname).forEach((file) => {
     try {
-      if (PROJECT_ENV === PROJECT_ENV_ENUM.development && file === 'index.ts')
-        return;
+      if (PROJECT_ENV !== PROJECT_ENV_ENUM.prod && file === 'index.ts') return;
       if (file === 'index.js') return;
 
       const allRouter = require(`./${file}`).default;

@@ -13,7 +13,7 @@ import WsRedisController from './redis.controller';
 
 import { pubClient } from '@/config/redis/pub';
 import { REDIS_CONFIG } from '@/config/secret';
-import { PROJECT_ENV, REDIS_PREFIX } from '@/constant';
+import { PROJECT_ENV, PROJECT_ENV_ENUM, REDIS_PREFIX } from '@/constant';
 import interactionController from '@/controller/interaction.controller';
 import interactionStatisController from '@/controller/interactionStatis.controller';
 import { InteractionStatisType } from '@/interface';
@@ -54,11 +54,6 @@ function getClient(socket: Socket) {
 }
 
 export const connectWebSocket = (server) => {
-  if (PROJECT_ENV === 'beta') {
-    console.log(chalkINFO('当前是beta环境，不初始化websocket'));
-    return;
-  }
-
   console.log(chalkINFO('当前非beta环境，初始化websocket'));
 
   const io = new Server(server);

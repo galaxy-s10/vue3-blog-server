@@ -19,6 +19,7 @@ import { createPubSub } from '@/config/redis/pub';
 import { connectWebSocket } from '@/config/websocket';
 import {
   PROJECT_ENV,
+  PROJECT_ENV_ENUM,
   PROJECT_NAME,
   PROJECT_PORT,
   STATIC_DIR,
@@ -28,7 +29,12 @@ import { initDb } from '@/init/initDb';
 import { initMonit } from '@/init/monit';
 import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
-import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
+import {
+  chalkERROR,
+  chalkINFO,
+  chalkSUCCESS,
+  chalkWARN,
+} from '@/utils/chalkTip';
 
 function runServer() {
   const port = +PROJECT_PORT; // 端口
@@ -90,7 +96,10 @@ function runServer() {
         const httpServer = app.listen(port, () => {
           resolve('ok');
         });
-        connectWebSocket(httpServer); // 初始化websocket
+        if (PROJECT_ENV !== PROJECT_ENV_ENUM.beta) {
+          console.log(chalkINFO('当前是beta环境，不初始化websocket'));
+          connectWebSocket(httpServer); // 初始化websocket
+        }
       }); // http接口服务
       console.log(chalkSUCCESS(`项目启动成功！`));
       console.log(chalkWARN(`当前连接的数据库: ${dbName}`));

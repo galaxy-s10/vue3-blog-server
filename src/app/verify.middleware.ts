@@ -91,13 +91,24 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   const url = ctx.request.path;
   const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
   const admin = isAdmin(ctx);
+  const consoleEnd = () => {
+    console.log(
+      chalkINFO(
+        `日期：${new Date().toLocaleString()}，ip：${ip}，响应${
+          admin ? '后' : '前'
+        }台接口 ${ctx.request.method} ${url}`
+      )
+    );
+  };
+
   console.log(
     chalkINFO(
-      `日期：${new Date().toLocaleString()}，ip：${ip}，请求${
+      `日期：${new Date().toLocaleString()}，ip：${ip}，收到${
         admin ? '后' : '前'
-      }台接口 ${ctx.request.method} ${url}`
+      }台接口 ${ctx.request.method} ${url}请求`
     )
   );
+
   console.log(chalk.blueBright('query:'), { ...ctx.request.query });
   console.log(chalk.blueBright('params:'), ctx.params);
   console.log(chalk.blueBright('body:'), ctx.request.body);
@@ -142,16 +153,6 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
       );
     }
   }
-
-  const consoleEnd = () => {
-    console.log(
-      chalkINFO(
-        `日期：${new Date().toLocaleString()}，ip：${ip}，响应${
-          admin ? '后' : '前'
-        }台接口 ${ctx.request.method} ${url}`
-      )
-    );
-  };
 
   let allowNext = false;
   globalWhiteList.forEach((item) => {

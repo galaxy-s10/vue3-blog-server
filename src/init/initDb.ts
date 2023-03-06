@@ -10,7 +10,7 @@ export const loadAllModel = () => {
   const modelDir = `${process.cwd()}/src/model`;
   fs.readdirSync(modelDir).forEach((file: string) => {
     if (
-      PROJECT_ENV === PROJECT_ENV_ENUM.development &&
+      PROJECT_ENV !== PROJECT_ENV_ENUM.prod &&
       file.indexOf('.model.ts') === -1
     )
       return;

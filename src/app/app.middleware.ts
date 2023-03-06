@@ -57,6 +57,16 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     console.log(
       chalkINFO(`catchErrorMiddle中间件通过！http状态码：${ctx.status}`)
     );
+    const whiteList = [
+      '/qiniu_data/upload_chunk',
+      '/qiniu_data/upload',
+      '/qiniu_data/mulit_upload',
+      '/qiniu_data/progress',
+    ];
+    if (whiteList.includes(ctx.request.path)) {
+      console.log('白名单，不插入日志');
+      return;
+    }
     const statusCode = ctx.status;
     /**
      * 如果通过了catchErrorMiddle中间件，但是返回的状态不是200，
@@ -113,6 +123,10 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     }
   } catch (error: any) {
     console.log('catchErrorMiddle中间件捕获到错误！');
+    if (ctx.request.path.indexOf('/socket.io/') !== -1) {
+      console.log('socket.io错误，return');
+      return;
+    }
     ctx.app.emit('error', error, ctx);
     if (!(error instanceof CustomError)) {
       const defaultError = {
