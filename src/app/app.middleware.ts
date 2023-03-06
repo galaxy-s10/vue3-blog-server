@@ -58,10 +58,10 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       chalkINFO(`catchErrorMiddle中间件通过！http状态码：${ctx.status}`)
     );
     const whiteList = [
-      '/qiniu_data/upload_chunk',
-      '/qiniu_data/upload',
-      '/qiniu_data/mulit_upload',
-      '/qiniu_data/progress',
+      '/admin/qiniu_data/upload_chunk',
+      '/admin/qiniu_data/upload',
+      '/admin/qiniu_data/mulit_upload',
+      '/admin/qiniu_data/progress',
     ];
     if (whiteList.includes(ctx.request.path)) {
       console.log('白名单，不插入日志');
