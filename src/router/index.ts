@@ -2,7 +2,12 @@ import fs from 'fs';
 
 import Router from 'koa-router';
 
-import { PROJECT_ENV, PROJECT_ENV_ENUM, PROJECT_NAME } from '@/constant';
+import {
+  PROJECT_ENV,
+  PROJECT_ENV_ENUM,
+  PROJECT_NAME,
+  PROJECT_NODE_ENV,
+} from '@/constant';
 import { chalkINFO, chalkERROR } from '@/utils/chalkTip';
 
 const router = new Router();
@@ -18,8 +23,9 @@ export function loadAllRoutes(app) {
 
   fs.readdirSync(__dirname).forEach((file) => {
     try {
-      if (PROJECT_ENV !== PROJECT_ENV_ENUM.prod && file === 'index.ts') return;
-      if (file === 'index.js') return;
+      if (PROJECT_NODE_ENV === 'development') {
+        if (file === 'index.ts') return;
+      } else if (file === 'index.js') return;
 
       const allRouter = require(`./${file}`).default;
       app.use(allRouter.routes()).use(allRouter.allowedMethods()); // allRouter也要配置routes()和allowedMethods()

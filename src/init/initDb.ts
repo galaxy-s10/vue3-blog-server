@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import sequelize from '@/config/mysql';
-import { PROJECT_ENV, PROJECT_ENV_ENUM } from '@/constant';
+import { PROJECT_ENV, PROJECT_ENV_ENUM, PROJECT_NODE_ENV } from '@/constant';
 import { chalkERROR, chalkSUCCESS } from '@/utils/chalkTip';
 import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 
@@ -9,12 +9,9 @@ import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 export const loadAllModel = () => {
   const modelDir = `${process.cwd()}/src/model`;
   fs.readdirSync(modelDir).forEach((file: string) => {
-    if (
-      PROJECT_ENV !== PROJECT_ENV_ENUM.prod &&
-      file.indexOf('.model.ts') === -1
-    )
-      return;
-    if (file.indexOf('.model.js') === -1) return;
+    if (PROJECT_NODE_ENV === 'development') {
+      if (file.indexOf('.model.ts') === -1) return;
+    } else if (file.indexOf('.model.js') === -1) return;
 
     // eslint-disable-next-line
     require(`${modelDir}/${file}`).default;
