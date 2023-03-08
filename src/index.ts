@@ -97,7 +97,7 @@ function runServer() {
           resolve('ok');
         });
         if (PROJECT_ENV !== PROJECT_ENV_ENUM.beta) {
-          console.log(chalkINFO('当前是beta环境，不初始化websocket'));
+          console.log(chalkINFO('当前是非beta环境，初始化websocket'));
           connectWebSocket(httpServer); // 初始化websocket
         }
       }); // http接口服务
