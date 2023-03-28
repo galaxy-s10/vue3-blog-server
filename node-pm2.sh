@@ -6,7 +6,7 @@
 # Email: 2274751790@qq.com
 # FilePath: /vue3-blog-server/pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2023-03-08 19:43:04
+# LastEditTime: 2023-03-21 12:44:20
 # LastEditors: shuisheng
 ###
 
@@ -92,8 +92,9 @@ pm2 del $JOBNAME-$ENV-$PORT
 echo 使用pm2维护:
 # pm2 start ./src/index.ts --name $JOBNAME-$ENV --interpreter ./node_modules/.bin/nodemon
 
+# npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 pm2 start ./dist/index.js --name vue3-blog-server-beta-3200
 # npx cross-env NODE_APP_RELEASE_PROJECT_NAME=JOBNAME NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 pm2 start ./dist/index.js --name vue3-blog-server-beta-3300
-npx cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./dist/index.js --name $JOBNAME-$ENV-$PORT
+npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./dist/index.js --name $JOBNAME-$ENV-$PORT
 
 # yarn和pnpm都能用
 # npx cross-env NODE_APP_RELEASE_PROJECT_NAME=$JOBNAME NODE_APP_RELEASE_PROJECT_ENV=$ENV NODE_APP_RELEASE_PROJECT_PORT=$PORT pm2 start ./src/index.ts --name $JOBNAME-$ENV-$PORT --interpreter ./node_modules/.bin/ts-node --interpreter-args '-P tsconfig.json'
