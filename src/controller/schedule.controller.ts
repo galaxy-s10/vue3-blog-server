@@ -6,7 +6,7 @@ import successHandler from '@/app/handler/success-handle';
 import { ALLOW_HTTP_CODE, MONIT_JOB } from '@/constant';
 import { main } from '@/init/monit/monitBackupsDb';
 import { CustomError } from '@/model/customError.model';
-import { showMemory, clearCache, restartPm2 } from '@/utils/clearCache';
+import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
 
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
@@ -31,81 +31,38 @@ class ScheduleController {
     if (code !== ALLOW_HTTP_CODE.ok) {
       throw new CustomError(message, code, code);
     }
-    if (userInfo!.id !== 1) {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
-    main(userInfo!.id);
+    main(userInfo?.id);
     successHandler({
       ctx,
       data: '开始执行备份任务，大约5分钟执行完成',
     });
-
     await next();
   }
 
   async invokeClearCacheJob(ctx: ParameterizedContext, next) {
-    const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== ALLOW_HTTP_CODE.ok) {
-      throw new CustomError(message, code, code);
-    }
-    if (userInfo!.id !== 1) {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
     await clearCache();
     successHandler({
       ctx,
       message: '开始执行清除buff/cache任务',
     });
-
     await next();
   }
 
   async restartPm2(ctx: ParameterizedContext, next) {
-    const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== ALLOW_HTTP_CODE.ok) {
-      throw new CustomError(message, code, code);
-    }
-    if (userInfo!.id !== 1) {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
+    restartPm2();
     successHandler({
       ctx,
       message: '开始执行重启pm2任务',
     });
-    restartPm2();
     await next();
   }
 
   async invokeShowMemoryJob(ctx: ParameterizedContext, next) {
-    const { code, userInfo, message } = await authJwt(ctx);
-    if (code !== ALLOW_HTTP_CODE.ok) {
-      throw new CustomError(message, code, code);
-    }
-    if (userInfo!.id !== 1) {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
     const data = await showMemory();
     successHandler({
       ctx,
       data,
     });
-
     await next();
   }
 }

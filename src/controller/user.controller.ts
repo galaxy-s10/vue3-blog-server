@@ -5,12 +5,7 @@ import redisController from './redis.controller';
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import {
-  ALLOW_HTTP_CODE,
-  REDIS_PREFIX,
-  THIRD_PLATFORM,
-  PROJECT_ENV,
-} from '@/constant';
+import { ALLOW_HTTP_CODE, REDIS_PREFIX, THIRD_PLATFORM } from '@/constant';
 import { IEmail, IList, IUser } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import User from '@/model/user.model';
@@ -18,7 +13,7 @@ import emailUserService from '@/service/emailUser.service';
 import roleService from '@/service/role.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
-import { arrayUnique, randomNumber, getRandomString } from '@/utils';
+import { arrayUnique, getRandomString, randomNumber } from '@/utils';
 
 class UserController {
   register = async (ctx: ParameterizedContext, next) => {
@@ -260,13 +255,6 @@ class UserController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
       throw new CustomError(
@@ -304,13 +292,6 @@ class UserController {
   }
 
   async updateUserRole(ctx: ParameterizedContext, next) {
-    if (PROJECT_ENV === 'beta') {
-      throw new CustomError(
-        `权限不足！`,
-        ALLOW_HTTP_CODE.forbidden,
-        ALLOW_HTTP_CODE.forbidden
-      );
-    }
     const hasAuth = await verifyUserAuth(ctx);
     if (!hasAuth) {
       throw new CustomError(

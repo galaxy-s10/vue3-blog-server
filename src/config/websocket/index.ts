@@ -258,8 +258,8 @@ export const connectWebSocket = (server) => {
     // 用户发送消息
     socket.on(wsMsgType.userSendMsg, (data) => {
       prettierLog('用户发送消息', socket);
-      //  socket.emit会将消息发送给发件人
-      //  socket.broadcast.emit会将消息发送给除了发件人以外的所有人
+      // socket.emit会将消息发送给发件人
+      // socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
       const { id, client_ip } = getClient(socket);
       io.emit(wsMsgType.userSendMsg, {

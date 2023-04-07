@@ -70,6 +70,16 @@ export interface IFrontend {
   updated_at?: string;
   deleted_at?: string;
 }
+export interface IBackend {
+  id?: number;
+  key?: string;
+  value?: string;
+  desc?: string;
+  type?: IFormType;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
 
 export interface IIpdata {
   city: string;

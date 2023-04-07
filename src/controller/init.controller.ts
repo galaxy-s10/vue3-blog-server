@@ -153,15 +153,15 @@ class InitController {
     await next();
   }
 
-  // 初始化前端设置
+  // 初始化前台设置
   async initFrontend(ctx: ParameterizedContext, next) {
     const count = await frontendModel.count();
     if (count === 0) {
       await frontendModel.bulkCreate(bulkFrontend);
-      successHandler({ ctx, data: '初始化初始化前端设置成功！' });
+      successHandler({ ctx, data: '初始化初始化前台设置成功！' });
     } else {
       throw new CustomError(
-        '已经初始化过前端设置，不能再初始化了！',
+        '已经初始化过前台设置，不能再初始化了！',
         ALLOW_HTTP_CODE.paramsError,
         ALLOW_HTTP_CODE.paramsError
       );

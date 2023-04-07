@@ -1,16 +1,16 @@
 import Sequelize from 'sequelize';
 
-import { IFrontend, IList } from '@/interface';
+import { IBackend, IList } from '@/interface';
 import articleModel from '@/model/article.model';
+import backendModel from '@/model/backend.model';
 import commentModel from '@/model/comment.model';
-import frontendModel from '@/model/frontend.model';
 import userModel from '@/model/user.model';
 import visitorLogModel from '@/model/visitorLog.model';
 import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-class FrontendService {
+class BackendService {
   /** 统计 */
   async static() {
     const [
@@ -44,7 +44,7 @@ class FrontendService {
   }
 
   async isExist(ids: number[]) {
-    const res = await frontendModel.count({
+    const res = await backendModel.count({
       where: {
         id: {
           [Op.in]: ids,
@@ -55,7 +55,7 @@ class FrontendService {
   }
 
   async find(id: number) {
-    const result = await frontendModel.findOne({ where: { id } });
+    const result = await backendModel.findOne({ where: { id } });
     return result;
   }
 
@@ -69,7 +69,7 @@ class FrontendService {
     rangTimeType,
     rangTimeStart,
     rangTimeEnd,
-  }: IList<IFrontend>) {
+  }: IList<IBackend>) {
     let offset;
     let limit;
     if (nowPage && pageSize) {
@@ -97,7 +97,7 @@ class FrontendService {
       };
     }
     // @ts-ignore
-    const result = await frontendModel.findAndCountAll({
+    const result = await backendModel.findAndCountAll({
       order: [[orderName, orderBy]],
       limit,
       offset,
@@ -109,12 +109,12 @@ class FrontendService {
   }
 
   async findAll() {
-    const result = await frontendModel.findAll();
+    const result = await backendModel.findAll();
     return result;
   }
 
-  async create({ type, key, value, desc }: IFrontend) {
-    const result = await frontendModel.create({
+  async create({ type, key, value, desc }: IBackend) {
+    const result = await backendModel.create({
       type,
       key,
       value,
@@ -123,8 +123,8 @@ class FrontendService {
     return result;
   }
 
-  async update({ id, key, value, desc }: IFrontend) {
-    const result = await frontendModel.update(
+  async update({ id, key, value, desc }: IBackend) {
+    const result = await backendModel.update(
       {
         key,
         value,
@@ -136,7 +136,7 @@ class FrontendService {
   }
 
   async delete(id: number) {
-    const result = await frontendModel.destroy({
+    const result = await backendModel.destroy({
       where: { id },
       individualHooks: true,
     });
@@ -144,4 +144,4 @@ class FrontendService {
   }
 }
 
-export default new FrontendService();
+export default new BackendService();

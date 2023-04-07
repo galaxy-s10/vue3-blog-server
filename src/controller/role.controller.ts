@@ -3,12 +3,12 @@ import { ParameterizedContext } from 'koa';
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import { ALLOW_HTTP_CODE, PROJECT_ENV } from '@/constant';
+import { ALLOW_HTTP_CODE, PROJECT_ENV, PROJECT_ENV_ENUM } from '@/constant';
 import { IList, IRole } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import authService from '@/service/auth.service';
 import roleService from '@/service/role.service';
-import { arrayUnique, arrayToTree, arrayGetDifference } from '@/utils';
+import { arrayGetDifference, arrayToTree, arrayUnique } from '@/utils';
 
 class RoleController {
   async getAllList(ctx: ParameterizedContext, next) {
@@ -278,11 +278,11 @@ class RoleController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `权限不足！`,
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -345,11 +345,11 @@ class RoleController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `权限不足！`,
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -450,11 +450,11 @@ class RoleController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `权限不足！`,
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -527,11 +527,11 @@ class RoleController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `权限不足！`,
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -592,11 +592,11 @@ class RoleController {
 
   delete = async (ctx: ParameterizedContext, next) => {
     const id = +ctx.params.id;
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await roleService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `权限不足！`,
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );

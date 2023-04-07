@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import { PROJECT_ENV, ALLOW_HTTP_CODE } from '@/constant';
+import { ALLOW_HTTP_CODE, PROJECT_ENV, PROJECT_ENV_ENUM } from '@/constant';
 import { IAuth, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import authService from '@/service/auth.service';
@@ -184,11 +184,11 @@ class AuthController {
   // 更新权限
   async update(ctx: ParameterizedContext, next) {
     const id = +ctx.params.id;
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await authService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          '测试环境不能操作默认权限！',
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -269,11 +269,11 @@ class AuthController {
   // 删除权限
   delete = async (ctx: ParameterizedContext, next) => {
     const id = +ctx.params.id;
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await authService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          '测试环境不能操作默认权限！',
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -313,11 +313,11 @@ class AuthController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await authService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          '测试环境不能操作默认权限！',
+          'beta环境不能操作默认权限！',
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );
@@ -365,11 +365,11 @@ class AuthController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    if (PROJECT_ENV === 'beta') {
+    if (PROJECT_ENV === PROJECT_ENV_ENUM.beta) {
       const role: any = await authService.find(id);
       if (role.type === 1) {
         throw new CustomError(
-          `测试环境不能操作默认权限！`,
+          `beta环境不能操作默认权限！`,
           ALLOW_HTTP_CODE.forbidden,
           ALLOW_HTTP_CODE.forbidden
         );

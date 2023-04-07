@@ -1,9 +1,6 @@
 // 一定要将import './init';放到最开头,因为它里面初始化了路径别名
 import './init';
 
-import cluster from 'cluster';
-import { cpus } from 'os';
-
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import conditional from 'koa-conditional-get';

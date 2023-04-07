@@ -1,7 +1,7 @@
 import Router from 'koa-router';
 
+import { betaError } from '@/app/auth/verifyEnv';
 import qiniuController from '@/controller/qiniuData.controller';
-import { verifyEnv } from '@/middleware/qiniuData.middleware';
 
 const qiniuRouter = new Router({ prefix: '/qiniu_data' });
 
@@ -21,32 +21,32 @@ qiniuRouter.post('/prefetch', qiniuController.prefetch);
 qiniuRouter.get('/diff', qiniuController.getDiff);
 
 // 上传文件，只支持一次性上传一个文件
-qiniuRouter.post('/upload', verifyEnv, qiniuController.upload);
+qiniuRouter.post('/upload', betaError, qiniuController.upload);
 
 // 上传chunk
-qiniuRouter.post('/upload_chunk', verifyEnv, qiniuController.uploadChunk);
+qiniuRouter.post('/upload_chunk', betaError, qiniuController.uploadChunk);
 
 // 合并chunk
-qiniuRouter.post('/merge_chunk', verifyEnv, qiniuController.mergeChunk);
+qiniuRouter.post('/merge_chunk', betaError, qiniuController.mergeChunk);
 
 // 上传文件，只支持一次性上传多个文件
-qiniuRouter.post('/mulit_upload', verifyEnv, qiniuController.upload);
+qiniuRouter.post('/mulit_upload', betaError, qiniuController.upload);
 
 // 文件进度
-qiniuRouter.get('/progress', verifyEnv, qiniuController.getProgress);
+qiniuRouter.get('/progress', betaError, qiniuController.getProgress);
 
-qiniuRouter.get('/batch_list', verifyEnv, qiniuController.getBatchFileInfo);
+qiniuRouter.get('/batch_list', betaError, qiniuController.getBatchFileInfo);
 
-qiniuRouter.delete('/delete/:id', verifyEnv, qiniuController.delete);
+qiniuRouter.delete('/delete/:id', betaError, qiniuController.delete);
 
 qiniuRouter.delete(
   '/delete_by_qiniukey',
-  verifyEnv,
+  betaError,
   qiniuController.deleteByQiniuKey
 );
 
-qiniuRouter.put('/update/:id', verifyEnv, qiniuController.update);
+qiniuRouter.put('/update/:id', betaError, qiniuController.update);
 
-qiniuRouter.post('/sync_qiniu_data', verifyEnv, qiniuController.syncQiniuData);
+qiniuRouter.post('/sync_qiniu_data', betaError, qiniuController.syncQiniuData);
 
 export default qiniuRouter;

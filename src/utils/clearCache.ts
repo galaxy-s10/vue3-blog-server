@@ -20,6 +20,42 @@ const freeCmd = () => {
   return `free -b`;
 };
 
+// 执行命令
+export const execCmd = (cmd: string) => {
+  return new Promise((resolve, reject) => {
+    const conn = new Client();
+    conn
+      .on('ready', () => {
+        conn.exec(cmd, (error, stream) => {
+          if (error) {
+            console.log(error);
+            reject(error);
+            return;
+          }
+          stream
+            .on('close', () => {
+              console.log('close');
+            })
+            .on('data', (data) => {
+              // eslint-disable-next-line
+              console.log(`STDOUT: ${data}`);
+              resolve(data.toString());
+            })
+            .stderr.on('data', (data) => {
+              // eslint-disable-next-line
+              console.log(`STDERR: ${data}`);
+              reject(data.toString());
+            });
+        });
+      })
+      .connect({
+        host: SSH_CONFIG.host,
+        port: SSH_CONFIG.port,
+        username: SSH_CONFIG.username,
+        password: SSH_CONFIG.password,
+      });
+  });
+};
 export const restartPm2 = () => {
   const conn = new Client();
   conn
