@@ -2,17 +2,15 @@ import fs from 'fs';
 
 import dayjs from 'dayjs';
 import {
-  remove,
   copySync,
-  readdirSync,
-  readFileSync,
-  removeSync,
-  existsSync,
   ensureDirSync,
+  existsSync,
+  readFileSync,
+  readdirSync,
+  remove,
+  removeSync,
 } from 'fs-extra';
 import { ParameterizedContext } from 'koa';
-
-import redisController from './redis.controller';
 
 import { authJwt } from '@/app/auth/authJwt';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
@@ -27,18 +25,19 @@ import {
   REDIS_PREFIX,
   UPLOAD_DIR,
 } from '@/constant';
+import redisController from '@/controller/redis.controller';
 import { IList, IQiniuData } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
-import qiniu, { IQiniuKey } from '@/utils/qiniu';
+import QiniuUtils, { IQiniuKey } from '@/utils/qiniu';
 import axios from '@/utils/request';
 
 class QiniuController {
   async getToken(ctx: ParameterizedContext, next) {
-    const token = qiniu.getQiniuToken();
+    const token = QiniuUtils.getQiniuToken();
     successHandler({
       ctx,
       data: token,
@@ -56,7 +55,12 @@ class QiniuController {
       const reqBody = {
         urls,
       };
-      const token = qiniu.getAccessToken(reqUrl, 'POST', contentType, reqBody);
+      const token = QiniuUtils.getAccessToken(
+        reqUrl,
+        'POST',
+        contentType,
+        reqBody
+      );
       const res = await axios.post(reqUrl, reqBody, {
         headers: {
           'Content-Type': contentType,
@@ -205,7 +209,7 @@ class QiniuController {
       chunkTotal: string;
     } = ctx.request.body;
     const key = `${prefix + hash}.${ext}`;
-    const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
+    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BUCKET, key);
     if (flag) {
       successHandler({
         code: 3,
@@ -294,7 +298,7 @@ class QiniuController {
       );
     }
     const { hash, ext, prefix }: IQiniuKey = ctx.request.body;
-    const result = await qiniu.upload({
+    const result = await QiniuUtils.upload({
       ext,
       prefix,
       hash,
@@ -360,7 +364,7 @@ class QiniuController {
       });
       const queue: Promise<any>[] = [];
       fileArr.forEach((v: any) => {
-        queue.push(qiniu.upload(v));
+        queue.push(QiniuUtils.upload(v));
       });
       const queueRes = await Promise.all(queue);
       const uploadRes: { success: any[]; error: any[] } = {
@@ -471,7 +475,7 @@ class QiniuController {
       });
       const queue: Promise<any>[] = [];
       fileArr.forEach((v: any) => {
-        queue.push(qiniu.upload(v));
+        queue.push(QiniuUtils.upload(v));
       });
       const queueRes = await Promise.all(queue);
       const uploadRes: { success: any[]; error: any[] } = {
@@ -561,7 +565,7 @@ class QiniuController {
       );
     }
     const main = async () => {
-      let list = [];
+      let list: any[] = [];
       list = await this.getQiniuListPrefix(prefix);
       list.forEach((v: any) => {
         const obj = { ...v };
@@ -652,7 +656,7 @@ class QiniuController {
 
   // 批量获取文件信息
   async batchFileInfo(fileList: { srcBucket: string; key: string }[]) {
-    const result = await qiniu.batchGetFileInfo(fileList);
+    const result = await QiniuUtils.batchGetFileInfo(fileList);
     return result;
   }
 
@@ -661,7 +665,7 @@ class QiniuController {
     // @ts-ignore
     const { prefix, hash, ext }: IQiniuKey = ctx.request.query;
     const key = `${prefix + hash}.${ext}`;
-    const { flag } = await qiniu.getQiniuStat(QINIU_BUCKET, key);
+    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BUCKET, key);
     if (flag) {
       successHandler({
         code: 3,
@@ -724,7 +728,7 @@ class QiniuController {
       );
     }
     const qiniudataRes = await qiniuDataService.delete(id);
-    const qiniuOfficialRes = await qiniu.delete(
+    const qiniuOfficialRes = await QiniuUtils.delete(
       result.qiniu_key,
       result.bucket
     );
@@ -760,7 +764,7 @@ class QiniuController {
     const { qiniu_key } = ctx.request.query as {
       qiniu_key: string;
     };
-    const qiniuOfficialRes = await qiniu.delete(qiniu_key, QINIU_BUCKET);
+    const qiniuOfficialRes = await QiniuUtils.delete(qiniu_key, QINIU_BUCKET);
     const result = await qiniuDataService.findByQiniuKey(qiniu_key);
     const cdnUrl = QINIU_CDN_URL + qiniu_key;
 
@@ -797,7 +801,7 @@ class QiniuController {
   getQiniuListPrefix = async (prefix: string): Promise<any[]> => {
     const list: any = [];
     const limit = 1000;
-    const { respInfo, respBody }: any = await qiniu.getListPrefix({
+    const { respInfo, respBody }: any = await QiniuUtils.getListPrefix({
       limit,
       prefix,
     });
@@ -806,7 +810,7 @@ class QiniuController {
     list.push(...items);
     while (marker) {
       // eslint-disable-next-line no-await-in-loop
-      const res: any = await qiniu.getListPrefix({
+      const res: any = await QiniuUtils.getListPrefix({
         marker,
         limit,
       });
@@ -897,14 +901,15 @@ class QiniuController {
       );
     }
     // eslint-disable-next-line
-    const { flag, respErr, respBody, respInfo } = await qiniu.updateQiniuFile(
-      bucket,
-      file.qiniu_key,
-      QINIU_BUCKET,
-      qiniu_key
-    );
+    const { flag, respErr, respBody, respInfo } =
+      await QiniuUtils.updateQiniuFile(
+        bucket,
+        file.qiniu_key,
+        QINIU_BUCKET,
+        qiniu_key
+      );
     if (flag) {
-      const result = await qiniu.getQiniuStat(bucket, qiniu_key);
+      const result = await QiniuUtils.getQiniuStat(bucket, qiniu_key);
       await qiniuDataService.update({
         id,
         qiniu_key,
@@ -931,13 +936,9 @@ class QiniuController {
    * 监控cdn流量
    */
   monitCDN() {
-    const cdnManager = qiniu.getQiniuCdnManager();
+    const cdnManager = QiniuUtils.getQiniuCdnManager();
     // 域名列表
-    const domains = [
-      'img.cdn.hsslive.cn',
-      'resoure.cdn.hsslive.cn',
-      QINIU_CDN_DOMAIN,
-    ];
+    const domains = [QINIU_CDN_DOMAIN];
     const { startDate, endDate } = getLastestWeek();
     const granularity = 'day'; // 粒度，取值：5min ／ hour ／day
     return new Promise((resolve, reject) => {

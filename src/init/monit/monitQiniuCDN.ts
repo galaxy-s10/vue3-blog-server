@@ -18,14 +18,14 @@ import {
   chalkSUCCESS,
   chalkWARN,
 } from '@/utils/chalkTip';
-import qiniuModel from '@/utils/qiniu';
+import QiniuUtils from '@/utils/qiniu';
 import axios from '@/utils/request';
 
 const oneByte = 1;
 const oneKb = oneByte * 1024;
 const oneMb = oneKb * 1024;
 const oneGb = oneMb * 1024;
-const threshold = oneGb * 5; // 七牛云阈值，达到5gb就报错
+const threshold = oneGb * 8; // 七牛云阈值，达到8gb就报错
 
 export const main = () => {
   qiniuController
@@ -49,7 +49,14 @@ export const main = () => {
           const domain = QINIU_CDN_DOMAIN;
           try {
             const reqUrl = `https://api.qiniu.com/domain/${domain}/offline`;
-            const token = qiniuModel.getAccessToken(reqUrl);
+            const contentType = 'application/json';
+            const reqBody = {};
+            const token = QiniuUtils.getAccessToken(
+              reqUrl,
+              'POST',
+              contentType,
+              reqBody
+            );
             await axios.post(
               reqUrl,
               {},
@@ -99,6 +106,10 @@ for (let i = 0; i < allMinute; i += 1) {
 for (let i = 0; i < allSecond; i += 1) {
   allSecondArr.push(i);
 }
+
+// 每10秒执行
+// rule.minute = allMinuteArr.filter((v) => v % 1 === 0);
+// rule.second = allSecondArr.filter((v) => v % 10 === 0);
 
 // 每30分钟执行
 rule.minute = allMinuteArr.filter((v) => v % 30 === 0);

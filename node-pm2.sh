@@ -4,9 +4,9 @@
 # Date: 2022-04-26 01:54:48
 # Description: https://github.com/galaxy-s10/sh/blob/master/pm2.sh
 # Email: 2274751790@qq.com
-# FilePath: /vue3-blog-server/pm2.sh
+# FilePath: /vue3-blog-server/node-pm2.sh
 # Github: https://github.com/galaxy-s10
-# LastEditTime: 2023-03-21 12:44:20
+# LastEditTime: 2023-04-08 03:38:59
 # LastEditors: shuisheng
 ###
 
@@ -74,7 +74,14 @@ pm2 -v
 
 # 注意：要先进入项目所在的目录，然后再执行pm2命令!!!
 # 否则的话约等于在其他目录执行npm run dev,如果所在的目录没有package.json文件就会报错！
-cd $PUBLICDIR/$JOBNAME/$ENV
+
+if [ $ENV != 'null' ]; then
+  echo 当前环境:$ENV
+  cd $PUBLICDIR/$JOBNAME/$ENV
+else
+  echo 当前环境是null
+  cd $PUBLICDIR/$JOBNAME
+fi
 
 echo 开始安装依赖:
 pnpm install

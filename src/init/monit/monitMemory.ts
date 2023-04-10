@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
 import { QQ_EMAIL_USER } from '@/config/secret';
-import { PROJECT_ENV, MONIT_JOB, MONIT_TYPE } from '@/constant';
+import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV } from '@/constant';
 import otherController from '@/controller/other.controller';
 import monitService from '@/service/monit.service';
 import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
@@ -117,6 +117,7 @@ export const main = async () => {
     await handleOverBuff({ currBuffCacheUsed, emial });
 
     if (memoryThreshold < currMemoryUsed) {
+      console.log('超过内存限制', memoryThreshold, currMemoryUsed);
       const str = `服务器内存使用率超过${currMemoryRate}`;
       const emialContent = replaceKeyFromValue(emailTmp, {
         title: str,
@@ -128,6 +129,7 @@ export const main = async () => {
         info: emialContent,
       });
     } else {
+      console.log('没超过内存限制', memoryThreshold, currMemoryUsed);
       const str = `服务器内存使用率阈值：${memoryRate}，当前使用率：${currMemoryRate}（总内存：${
         formatRes['Mem:total'] as ''
       }，已使用：${formatRes['Mem:used'] as ''}，可用：${
@@ -165,6 +167,10 @@ for (let i = 0; i < allSecond; i += 1) {
 // 每30分钟执行
 rule.minute = allMinuteArr.filter((v) => v % 30 === 0);
 rule.second = 0;
+
+// 每10秒执行
+// rule.minute = allMinuteArr.filter((v) => v % 1 === 0);
+// rule.second = allSecondArr.filter((v) => v % 10 === 0);
 
 export const monitMemoryJob = () => {
   console.log(chalkSUCCESS('监控任务: 内存定时任务启动！'));
