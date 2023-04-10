@@ -933,7 +933,7 @@ class QiniuController {
   }
 
   /**
-   * 监控cdn流量
+   * 监控cdn流量（最近一周的cdn流量）
    */
   monitCDN() {
     const cdnManager = QiniuUtils.getQiniuCdnManager();

@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
@@ -25,7 +26,7 @@ const oneByte = 1;
 const oneKb = oneByte * 1024;
 const oneMb = oneKb * 1024;
 const oneGb = oneMb * 1024;
-const threshold = oneGb * 8; // 七牛云阈值，达到8gb就报错
+const threshold = oneGb * 20; // 七牛云阈值，达到20gb就报错
 
 export const main = () => {
   qiniuController
@@ -72,11 +73,27 @@ export const main = () => {
             monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: str });
             otherController.sendEmail(QQ_EMAIL_USER, str, str);
           } catch (error) {
-            const err = '下线域名报错！（达到阈值，停掉cdn）';
-            console.log(chalkERROR(err));
-            console.log(error);
-            monitService.create({ type: MONIT_TYPE.QINIU_CDN, info: err });
-            otherController.sendEmail(QQ_EMAIL_USER, err, err);
+            // @ts-ignore
+            const err: AxiosError = error;
+            const subject = `${info}，下线域名报错！`;
+            let content = subject;
+            if (err.isAxiosError) {
+              console.log(chalkERROR('axios错误'));
+              console.log('err.code', err.code);
+              console.log('err.message', err.message);
+              console.log('err.response', err.response);
+              console.log('err.response.data', err.response?.data);
+              content = `${subject}，报错信息：${JSON.stringify(
+                err.response?.data || {}
+              )}`;
+            } else {
+              console.log(chalkERROR(content));
+            }
+            monitService.create({
+              type: MONIT_TYPE.QINIU_CDN,
+              info: content,
+            });
+            otherController.sendEmail(QQ_EMAIL_USER, subject, content);
           }
         } else {
           monitService.create({ type: MONIT_TYPE.QINIU_CDN, info });
