@@ -2,8 +2,6 @@ import { Server, Socket } from 'socket.io';
 
 import {
   IData,
-  IFrontendToBackendData,
-  IUserInfo,
   liveExp,
   wsConnectStatus,
   wsMsgType,
@@ -13,7 +11,7 @@ import WsRedisController from './redis.controller';
 
 import { pubClient } from '@/config/redis/pub';
 import { REDIS_CONFIG } from '@/config/secret';
-import { PROJECT_ENV, PROJECT_ENV_ENUM, REDIS_PREFIX } from '@/constant';
+import { REDIS_PREFIX } from '@/constant';
 import interactionController from '@/controller/interaction.controller';
 import interactionStatisController from '@/controller/interactionStatis.controller';
 import { InteractionStatisType } from '@/interface';
@@ -209,45 +207,42 @@ export const connectWebSocket = (server) => {
     });
 
     // 用户进房间
-    socket.on(
-      wsMsgType.userInRoom,
-      async (data: IFrontendToBackendData<IUserInfo>) => {
-        prettierLog('用户进房间', socket);
-        const { id, client_ip } = getClient(socket);
-        WsRedisController.live(id, {
+    socket.on(wsMsgType.userInRoom, async (data: any) => {
+      prettierLog('用户进房间', socket);
+      const { id, client_ip } = getClient(socket);
+      WsRedisController.live(id, {
+        client_ip,
+        created_at: new Date().toLocaleString(),
+        exp: liveExp,
+        data,
+      });
+      await Promise.all([
+        data.userInfo.userType === wsUserType.user
+          ? WsRedisController.addOnlineUser(id, {
+              client_ip,
+              created_at: new Date().toLocaleString(),
+              data,
+            })
+          : WsRedisController.addOnlineVisitor(id, {
+              client_ip,
+              created_at: new Date().toLocaleString(),
+              data,
+            }),
+        WsRedisController.addOnlineList(id, {
           client_ip,
           created_at: new Date().toLocaleString(),
-          exp: liveExp,
           data,
-        });
-        await Promise.all([
-          data.userInfo.userType === wsUserType.user
-            ? WsRedisController.addOnlineUser(id, {
-                client_ip,
-                created_at: new Date().toLocaleString(),
-                data,
-              })
-            : WsRedisController.addOnlineVisitor(id, {
-                client_ip,
-                created_at: new Date().toLocaleString(),
-                data,
-              }),
-          WsRedisController.addOnlineList(id, {
-            client_ip,
-            created_at: new Date().toLocaleString(),
-            data,
-          }),
-        ]);
+        }),
+      ]);
 
-        io.emit(wsMsgType.userInRoom, {
-          id,
-          userInfo: data.userInfo,
-          value: data.value,
-          created_at: new Date().toLocaleString(),
-        });
-        emitNum(client_ip);
-      }
-    );
+      io.emit(wsMsgType.userInRoom, {
+        id,
+        userInfo: data.userInfo,
+        value: data.value,
+        created_at: new Date().toLocaleString(),
+      });
+      emitNum(client_ip);
+    });
 
     // 用户退出房间
     socket.on(wsMsgType.userOutRoom, () => {

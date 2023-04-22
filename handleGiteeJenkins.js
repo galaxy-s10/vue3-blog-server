@@ -4,7 +4,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const allFile = [];
-const ignore = ['.DS_Store', '.git', '.gitignore', 'node_modules', 'dist'];
+const ignore = ['.DS_Store', '.git', 'node_modules', 'dist'];
 const localDir = path.resolve(__filename, '../');
 const giteeDir = path.resolve(
   __filename,

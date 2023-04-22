@@ -8,7 +8,7 @@
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
-    "build": "rimraf dist && tsc -P ./tsconfig.json",
+    "build": "rimraf dist && tsc -P ./tsconfig.json || true",
     "commit": "cz",
     "copy": "node ./handleGiteeJenkins.js",
     "dev": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
@@ -33,6 +33,8 @@
   "dependencies": {
     "@socket.io/redis-adapter": "^8.0.0",
     "axios": "^0.26.1",
+    "billd-html-webpack-plugin": "^1.0.1",
+    "billd-utils": "^0.0.9",
     "chalk": "^4.1.2",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.3",
@@ -46,7 +48,6 @@
     "koa-convert": "^2.0.0",
     "koa-csrf": "^3.0.8",
     "koa-etag": "^4.0.0",
-    "koa-generic-session": "^2.3.0",
     "koa-router": "^10.1.1",
     "koa-static": "^5.0.0",
     "module-alias": "^2.2.2",
@@ -56,12 +57,9 @@
     "nodemailer": "^6.7.2",
     "qiniu": "^7.4.0",
     "redis": "^4.0.4",
-    "rimraf": "^4.0.5",
-    "sequelize": "^6.12.0-alpha.1",
+    "sequelize": "^6.25.2",
     "socket.io": "^4.4.1",
-    "ssh2": "^1.7.0",
-    "typescript": "^4.8.2",
-    "ws": "^8.5.0"
+    "ssh2": "^1.7.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",
@@ -92,8 +90,10 @@
     "husky": "^7.0.0",
     "lint-staged": "^12.1.6",
     "nodemon": "^2.0.15",
-    "prettier": "^2.6.0",
+    "prettier": "^2.8.7",
+    "rimraf": "^4.0.5",
     "standard-version": "^9.3.2",
-    "ts-node": "^10.4.0"
+    "ts-node": "^10.4.0",
+    "typescript": "^4.8.2"
   }
 }

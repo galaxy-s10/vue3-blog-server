@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import sequelize from '@/config/mysql';
-import { PROJECT_ENV, PROJECT_ENV_ENUM, PROJECT_NODE_ENV } from '@/constant';
+import { PROJECT_NODE_ENV } from '@/constant';
 import { chalkERROR, chalkSUCCESS } from '@/utils/chalkTip';
 import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 
@@ -16,7 +16,7 @@ export const loadAllModel = () => {
     // eslint-disable-next-line
     require(`${modelDir}/${file}`).default;
   });
-  console.log(chalkSUCCESS(`加载所有model成功~`));
+  console.log(chalkSUCCESS(`加载所有model完成~`));
 };
 
 /** 删除所有表 */

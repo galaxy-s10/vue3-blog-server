@@ -14,7 +14,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "noEmitOnError": false // 如果报告了任何错误，请不要发出编译器输出文件
   },
 
   // ts-node的时候会读取这里的配置

@@ -26,12 +26,7 @@ import { initDb } from '@/init/initDb';
 import { initMonit } from '@/init/monit';
 import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
-import {
-  chalkERROR,
-  chalkINFO,
-  chalkSUCCESS,
-  chalkWARN,
-} from '@/utils/chalkTip';
+import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 
 function runServer() {
   const port = +PROJECT_PORT; // 端口
@@ -94,7 +89,6 @@ function runServer() {
           resolve('ok');
         });
         if (PROJECT_ENV !== PROJECT_ENV_ENUM.beta) {
-          console.log(chalkINFO('当前是非beta环境，初始化websocket'));
           connectWebSocket(httpServer); // 初始化websocket
         }
       }); // http接口服务

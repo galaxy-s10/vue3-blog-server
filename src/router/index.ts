@@ -2,23 +2,19 @@ import fs from 'fs';
 
 import Router from 'koa-router';
 
-import {
-  PROJECT_ENV,
-  PROJECT_ENV_ENUM,
-  PROJECT_NAME,
-  PROJECT_NODE_ENV,
-} from '@/constant';
-import { chalkINFO, chalkERROR } from '@/utils/chalkTip';
+import { PROJECT_ENV, PROJECT_NAME, PROJECT_NODE_ENV } from '@/constant';
+import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 const router = new Router();
 
 export function loadAllRoutes(app) {
   router.get('/', async (ctx, next) => {
     ctx.body = {
-      message: `欢迎访问${PROJECT_NAME},当前环境是:${PROJECT_ENV},当前时间:${new Date().toLocaleString()}`,
+      message: `欢迎访问${PROJECT_NAME},当前环境:${PROJECT_ENV},当前时间:${new Date().toLocaleString()}`,
     };
     await next();
   });
+
   app.use(router.routes()).use(router.allowedMethods()); // 每一个router都要配置routes()和allowedMethods()
 
   fs.readdirSync(__dirname).forEach((file) => {
@@ -37,4 +33,5 @@ export function loadAllRoutes(app) {
       console.log(error);
     }
   });
+  console.log(chalkSUCCESS('加载所有路由完成~'));
 }

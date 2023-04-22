@@ -20,11 +20,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     message: string;
   }) => {
     if (PROJECT_ENV !== 'beta') {
-      console.log(
-        chalkINFO(
-          `当前不是beta环境，写入日志，api_status_code：${info.statusCode}`
-        )
-      );
+      console.log(chalkINFO(`当前不是beta环境，写入日志`));
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
       logController.common.create({
@@ -68,6 +64,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       return;
     }
     const statusCode = ctx.status;
+    const msg = `【ERROR】客户端请求：${ctx.request.method} ${ctx.request.path}，服务端响应http状态码：${statusCode}`;
     /**
      * 如果通过了catchErrorMiddle中间件，但是返回的状态不是200，
      * 代表了在next前面没有设置ctx状态码，因此默认就是返回404！
@@ -79,38 +76,36 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       statusCode !== ALLOW_HTTP_CODE.ok &&
       statusCode !== ALLOW_HTTP_CODE.apiCache
     ) {
-      if (statusCode === ALLOW_HTTP_CODE.notFound) {
+      if (
+        [ALLOW_HTTP_CODE.notFound, ALLOW_HTTP_CODE.methodNotAllowed].includes(
+          statusCode
+        )
+      ) {
         const defaultSuccess = {
           statusCode,
-          errorCode: ERROR_HTTP_CODE.notFound,
-          error: '这个返回了404的http状态码，请排查问题！',
-          message: '这个返回了404的http状态码，请排查问题！',
+          errorCode: statusCode,
+          error: msg,
+          message: msg,
         };
-        // 404接口写入日志表
+        // 服务端返回http状态码200、304、404、405，写入日志表
         console.log(
-          chalkINFO(`404接口写入日志表，api_status_code：${statusCode}`)
+          chalkINFO(`服务端返回http状态码200、304、404、405，写入日志表`)
         );
         insertLog(defaultSuccess);
       } else {
         const defaultSuccess = {
           statusCode,
           errorCode: ERROR_HTTP_CODE.errStatusCode,
-          error: '返回了即不是200也不是404的http状态码，请排查问题！',
-          message: '返回了即不是200也不是404的http状态码，请排查问题！',
+          error: msg,
+          message: msg,
         };
-        // 既不是200也不是404，写入日志表
+        // 服务端返回http状态码不是200、304、404、405，写入日志表
         console.log(
-          chalkINFO(
-            `既不是200也不是404，写入日志表，api_status_code：${statusCode}`
-          )
+          chalkINFO(`服务端返回http状态码不是200、304、404、405，写入日志表，`)
         );
         insertLog(defaultSuccess);
       }
-      throw new CustomError(
-        '返回了即不是200也不是404的http状态码，请排查问题！',
-        ALLOW_HTTP_CODE.notFound,
-        ALLOW_HTTP_CODE.notFound
-      );
+      throw new CustomError(msg, statusCode, statusCode);
     } else {
       const defaultSuccess = {
         statusCode,
