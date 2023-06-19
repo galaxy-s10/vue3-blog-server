@@ -1,5 +1,5 @@
 export interface ITheme {
-  id?: number;
+  id?: string;
   model?: number;
   key?: string;
   value?: string;
@@ -25,6 +25,7 @@ export type IFormType =
   | 'input'
   | 'password'
   | 'number'
+  | 'input'
   | 'select'
   | 'radio'
   | 'checkbox'
@@ -299,7 +300,7 @@ export interface IMonit {
   deleted_at?: string;
 }
 export interface IUser {
-  id?: number;
+  id?: string;
   username?: string;
   password?: string;
   email?: string;

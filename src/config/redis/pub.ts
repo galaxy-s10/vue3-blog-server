@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-
+// const mysql = require('mysql2');
 import { REDIS_CONFIG } from '@/config/secret';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 

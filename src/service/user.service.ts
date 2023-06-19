@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 
-import { THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
-import { IUser, IList } from '@/interface';
+import { PROJECT_ENV, THIRD_PLATFORM } from '@/constant';
+import { IList, IUser } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import emailModel from '@/model/emailUser.model';
@@ -13,7 +13,6 @@ import userModel from '@/model/user.model';
 import { handlePaging } from '@/utils';
 
 const { Op, where, literal } = Sequelize;
-
 class UserService {
   /** 用户是否存在 */
   async isExist(ids: number[]) {

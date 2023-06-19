@@ -11,8 +11,6 @@ import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
 import { connectMysql, dbName } from '@/config/mysql';
-import { connectRedis } from '@/config/redis';
-import { createPubSub } from '@/config/redis/pub';
 import { connectWebSocket } from '@/config/websocket';
 import {
   PROJECT_ENV,
@@ -76,8 +74,8 @@ function runServer() {
     try {
       await Promise.all([
         connectMysql(), // 连接mysql
-        connectRedis(), // 连接redis
-        createPubSub(), // 创建redis的发布订阅
+        // connectRedis(), // 连接redis
+        // createPubSub(), // 创建redis的发布订阅
       ]);
       initMonit(); // 初始化监控
       initDb(3); // 加载sequelize的relation表关联

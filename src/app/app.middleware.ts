@@ -160,7 +160,7 @@ export const corsMiddle = async (ctx: ParameterizedContext, next) => {
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS'); // 允许的方法
 
   // 如果是本地环境
-  if (ctx.header.origin?.indexOf('http://localhost') !== -1) {
+  if (ctx.header.origin?.indexOf('http://127.0.0.1') !== -1) {
     ctx.set('Access-Control-Allow-Credentials', 'true'); // 允许携带cookie，Access-Control-Allow-Origin为*的时候不能设置Access-Control-Allow-Credentials:true！
     ctx.set('Access-Control-Allow-Origin', ctx.header.origin!); // 允许的源
   } else {
