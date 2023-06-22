@@ -39,12 +39,18 @@ export const SSH_CONFIG = {
   port: 666,
 }; // ssh配置
 
+export enum REDIS_DATABASE {
+  blog,
+  live,
+}
+
 export const REDIS_CONFIG = {
-  database: 666,
+  database: REDIS_DATABASE.blog,
   socket: {
     port: 666,
     host: '**********',
   },
+  username: '**********',
   password: '**********',
 }; // redis配置
 

@@ -4,11 +4,12 @@ import { REDIS_CONFIG } from '@/config/secret';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 export const pubClient = createClient({
-  database: 0,
+  database: REDIS_CONFIG.database,
   socket: {
     port: REDIS_CONFIG.socket.port,
     host: REDIS_CONFIG.socket.host,
   },
+  username: REDIS_CONFIG.username,
   password: REDIS_CONFIG.password,
 });
 
