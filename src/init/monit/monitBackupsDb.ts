@@ -3,11 +3,11 @@ import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
-import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_PREFIX } from '@/constant';
+import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_BACKUP } from '@/constant';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
+import QiniuBackupUtils from '@/utils/backup-qiniu';
 import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
-import QiniuBackupUtils from '@/utils/qiniu';
 
 // 备份目录
 const backupDirectory = '/node/backup/mysql/';
@@ -70,7 +70,8 @@ export const main = (user_id?: number) => {
                 handleError(errMsg);
                 return;
               }
-              const prefix = QINIU_PREFIX['backupsDatabase/'];
+              console.log('开始上传到七牛云');
+              const prefix = QINIU_BACKUP.prefix['mysql/'];
               const filepath = `${backupDirectory + fileName}`;
               QiniuBackupUtils.uploadForm({
                 prefix,
@@ -108,6 +109,7 @@ export const main = (user_id?: number) => {
                   handleError(err);
                 })
                 .finally(() => {
+                  console.log('关闭ssh连接');
                   conn.end();
                 });
             })

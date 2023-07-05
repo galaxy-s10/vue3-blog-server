@@ -10,7 +10,6 @@ import { getRandomString } from './index';
 import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/config/secret';
 import {
   QINIU_BLOG,
-  QINIU_PREFIX,
   QINIU_UPLOAD_PROGRESS_TYPE,
   REDIS_PREFIX,
   UPLOAD_DIR,
@@ -247,7 +246,7 @@ class QiniuUtils {
     filepath,
     originalFilename,
   }: {
-    prefix: QINIU_PREFIX;
+    prefix: string;
     filepath: string;
     originalFilename: string;
   }) {

@@ -7,7 +7,7 @@
 # FilePath: /vue3-blog-server/docker-run.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2023-04-22 19:16:01
+# LastEditTime: 2023-07-05 15:40:33
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -46,6 +46,10 @@ echo 启动新的容器$JOBNAME-$ENV-$PORT:
 # sh docker-run.sh vue3-blog-server beta /var/lib/jenkins/workspace/vue3-blog-server 3300 v0.0.1
 
 # 不使用volume
-docker run --name $JOBNAME-$ENV-$PORT -d -p $PORT:$PORT $JOBNAME-$ENV-$PORT
+# docker run --name $JOBNAME-$ENV-$PORT -d -p $PORT:$PORT $JOBNAME-$ENV-$PORT
 # 使用volume
-# docker run --name $JOBNAME-$ENV-$PORT -d -p $PORT:$PORT -v $PUBLICDIR/$JOBNAME/$ENV/:$PUBLICDIR/$JOBNAME/$ENV/ $JOBNAME-$ENV-$PORT
+docker run --name $JOBNAME-$ENV-$PORT -d \
+  -p $PORT:$PORT \
+  -v $PUBLICDIR/$JOBNAME/$ENV/:$PUBLICDIR/$JOBNAME/$ENV/ \
+  -v /node/backup/:/node/backup/ \
+  $JOBNAME-$ENV-$PORT

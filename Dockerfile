@@ -55,6 +55,7 @@ RUN echo 开始打包:
 RUN npm run build
 
 VOLUME [ ${BILLD_PUBLICDIR}/${BILLD_JOBNAME}/${BILLD_ENV} ]
+VOLUME [ /node/backup/ ]
 
 # pm2环境变量管理:https://pm2.io/docs/runtime/best-practices/environment-variables/
 CMD pm2 -v && \
