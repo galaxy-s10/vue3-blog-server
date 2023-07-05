@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IQiniuData, IList } from '@/interface';
+import { IList, IQiniuData } from '@/interface';
 import qiniuDataModel from '@/model/qiniuData.model';
 import { handlePaging } from '@/utils';
 
@@ -18,8 +18,62 @@ class QiniuDataService {
     return res === ids.length;
   }
 
+  async createByPrefix({
+    user_id,
+    prefix,
+    bucket,
+    qiniu_fsize,
+    qiniu_hash,
+    qiniu_key,
+    qiniu_md5,
+    qiniu_mimeType,
+    qiniu_putTime,
+    qiniu_status,
+    qiniu_type,
+  }: IQiniuData) {
+    console.log({
+      user_id,
+      prefix,
+      bucket,
+      qiniu_fsize,
+      qiniu_hash,
+      qiniu_key,
+      qiniu_md5,
+      qiniu_mimeType,
+      qiniu_putTime,
+      qiniu_status,
+      qiniu_type,
+    });
+    const [id, created] = await qiniuDataModel.findOrCreate({
+      where: {
+        qiniu_key,
+      },
+      defaults: {
+        user_id,
+        prefix,
+        bucket,
+        qiniu_fsize,
+        qiniu_hash,
+        qiniu_key,
+        qiniu_md5,
+        qiniu_mimeType,
+        qiniu_putTime,
+        qiniu_status,
+        qiniu_type,
+      },
+    });
+    console.log('111111111111111111111111111111');
+
+    console.log(id, created);
+    if (created) {
+      console.log('创建成功');
+      return created;
+    }
+    return '数据库已有';
+  }
+
   async getPrefixList(prefix) {
-    const result = await qiniuDataModel.findAndCountAll({
+    const result = await qiniuDataModel.findAll({
       where: {
         prefix,
       },
@@ -98,7 +152,9 @@ class QiniuDataService {
 
   /** 查找文件 */
   async findByQiniuKey(qiniu_key: string) {
-    const result = await qiniuDataModel.findOne({ where: { qiniu_key } });
+    const result = await qiniuDataModel.findAll({
+      where: { qiniu_key },
+    });
     return result;
   }
 
@@ -180,6 +236,13 @@ class QiniuDataService {
     const result = await qiniuDataModel.destroy({
       where: { id },
       individualHooks: true,
+    });
+    return result;
+  }
+
+  async existName(qiniu_key: string) {
+    const result = await qiniuDataModel.count({
+      where: { qiniu_key },
     });
     return result;
   }

@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IType, IList } from '@/interface';
+import { IList, IType } from '@/interface';
 import typeModel from '@/model/type.model';
 import { handlePaging } from '@/utils';
 
@@ -94,6 +94,12 @@ class TypeService {
       individualHooks: true,
     });
     return result;
+  }
+
+  /** 查找分类 */
+  async findid(name: string) {
+    const result = await typeModel.findOne({ where: { name } });
+    return result?.getDataValue('id');
   }
 }
 

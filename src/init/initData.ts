@@ -305,9 +305,35 @@ const initInteractionStatis = (): IInteractionStatis[] => [
     type: InteractionStatisType.historyInfo,
   },
 ];
+const initType = () => {
+  const defaultRole = [
+    {
+      id: 1,
+      name: '产品中心',
+    },
+    {
+      id: 2,
+      name: '关于我们',
+    },
+    {
+      id: 3,
+      name: '工厂环境',
+    },
+    {
+      id: 4,
+      name: '合作伙伴',
+    },
+    {
+      id: 5,
+      name: '联系我们',
+    },
+  ];
+  return defaultRole;
+};
 
 export const bulkCreateAuth = initAuth();
 export const bulkCreateRole = initRole();
 export const bulkCreateRoleAuth = initRoleAuth();
 export const bulkFrontend = initFrontend();
 export const bulkInteractionStatis = initInteractionStatis();
+export const bulkinitType = initType();

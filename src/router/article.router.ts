@@ -26,4 +26,7 @@ articleRouter.put('/update/:id', verifyProp, articleController.update);
 // 删除文章
 articleRouter.delete('/delete/:id', verifyProp, articleController.delete);
 
+// 根据type获取文章id
+articleRouter.get('/type', articleController.type);
+
 export default articleRouter;

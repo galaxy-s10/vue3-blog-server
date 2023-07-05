@@ -79,8 +79,13 @@ class TagController {
       );
     }
     const { name, color }: ITag = ctx.request.body;
-    await tagService.create({ name, color });
-    successHandler({ ctx });
+    const result = await tagService.findByName(name as string);
+    if (result) {
+      successHandler({ ctx, message: '已经存在了' });
+      return;
+    }
+    const id = await tagService.create({ name, color });
+    successHandler({ ctx, data: id.id });
 
     await next();
   }

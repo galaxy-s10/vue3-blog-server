@@ -20,8 +20,7 @@ import {
   STATIC_DIR,
   UPLOAD_DIR,
 } from '@/constant';
-import { initDb } from '@/init/initDb';
-import { initMonit } from '@/init/monit';
+import InitFirst from '@/init/initfirst';
 import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
@@ -69,7 +68,6 @@ function runServer() {
   app.use(corsMiddle); // 设置允许跨域
 
   app.on('error', errorHandler); // 接收全局错误，位置必须得放在最开头？
-
   async function main() {
     try {
       await Promise.all([
@@ -77,8 +75,20 @@ function runServer() {
         // connectRedis(), // 连接redis
         // createPubSub(), // 创建redis的发布订阅
       ]);
-      initMonit(); // 初始化监控
-      initDb(3); // 加载sequelize的relation表关联
+      // initMonit(); // 初始化监控
+
+      await InitFirst.initDatabase();
+      // await InitFirst.initDayData();
+
+      await InitFirst.initRole();
+
+      await InitFirst.initAuth();
+      await InitFirst.initRoleAuth();
+      await InitFirst.initNavInfo();
+      await InitFirst.initFrontend();
+      await InitFirst.initInteractionStatis();
+      await InitFirst.initAdminUser();
+
       app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
       loadAllRoutes(app); // 加载所有路由
       await new Promise((resolve) => {

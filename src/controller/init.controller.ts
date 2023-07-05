@@ -9,6 +9,7 @@ import {
   bulkCreateRoleAuth,
   bulkFrontend,
   bulkInteractionStatis,
+  bulkinitType,
 } from '@/init/initData';
 import { initDb } from '@/init/initDb';
 import AuthModel from '@/model/auth.model';
@@ -18,6 +19,7 @@ import frontendModel from '@/model/frontend.model';
 import interactionStatisModel from '@/model/interactionStatis.model';
 import RoleModel from '@/model/role.model';
 import RoleAuthModel from '@/model/roleAuth.model';
+import typeModel from '@/model/type.model';
 import userModel from '@/model/user.model';
 
 const sql1 = `
@@ -99,6 +101,7 @@ class InitController {
   async initDatabase(ctx: ParameterizedContext, next) {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
+
     if (!allTables.length) {
       await initDb(1);
       successHandler({ ctx, data: '初始化数据库成功！' });
@@ -132,7 +135,24 @@ class InitController {
     await next();
   }
 
+  // 初始化nav分类数据
+  async initNavInfo(ctx: ParameterizedContext, next) {
+    const count = await typeModel.count();
+    if (count === 0) {
+      await typeModel.bulkCreate(bulkinitType);
+      successHandler({ ctx, data: '初始化分类成功！' });
+    } else {
+      throw new CustomError(
+        '已经初始化过分类了，不能再初始化了！',
+        ALLOW_HTTP_CODE.paramsError,
+        ALLOW_HTTP_CODE.paramsError
+      );
+    }
+    await next();
+  }
+
   // 初始化管理员
+
   async initAdminUser(ctx: ParameterizedContext, next) {
     const count = await userModel.count();
     if (count === 0) {
@@ -149,7 +169,6 @@ class InitController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-
     await next();
   }
 

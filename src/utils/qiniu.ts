@@ -153,6 +153,7 @@ class QiniuUtils {
     const filepath = UPLOAD_DIR + filename;
     const key = prefix + filename;
     const { flag, respBody } = await this.getQiniuStat(QINIU_BUCKET, key);
+
     if (flag) {
       const destKey = `${prefix + hash}__${getRandomString(6)}.${ext}`;
       // 理论上任何存在重名或者需要确保唯一的操作都需要查数据库
@@ -213,6 +214,11 @@ class QiniuUtils {
           putExtra,
           // eslint-disable-next-line @typescript-eslint/no-shadow
           (respErr, respBody, respInfo) => {
+            console.log('11111111111111111111111');
+
+            console.log(respErr);
+            console.log(respInfo);
+
             if (respErr) {
               console.log('upload上传失败', respErr, respBody, respInfo);
               resolve({ flag: false, respErr, respBody, respInfo });
@@ -225,7 +231,7 @@ class QiniuUtils {
                 flag: true,
                 resultUrl: QINIU_CDN_URL + key,
                 respErr,
-                respBody,
+                respBody: { ...respBody, bucket: QINIU_BUCKET },
                 respInfo,
                 putTime: `${+new Date()}0000`,
               });
@@ -284,7 +290,7 @@ class QiniuUtils {
               flag: true,
               resultUrl: QINIU_CDN_URL + key,
               respErr,
-              respBody,
+              respBody: { ...respBody, bucket: QINIU_BUCKET },
               respInfo,
               putTime: `${+new Date()}0000`,
             });

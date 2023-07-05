@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { ITag, IList } from '@/interface';
+import { IList, ITag } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import starModel from '@/model/star.model';
@@ -143,6 +143,12 @@ class TagService {
   /** 查找标签 */
   async find(id: number) {
     const result = await tagModel.findOne({ where: { id } });
+    return result;
+  }
+
+  /** 查找标签 */
+  async findByName(name: string) {
+    const result = await tagModel.findOne({ where: { name } });
     return result;
   }
 

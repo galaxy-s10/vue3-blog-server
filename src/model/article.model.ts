@@ -46,7 +46,7 @@ const model = sequelize.define<ArticleModel>(
     },
     priority: {
       type: DataTypes.INTEGER, // 权重
-      allowNull: true,
+      // allowNull: true,
     },
     status: {
       type: DataTypes.INTEGER,
@@ -58,7 +58,7 @@ const model = sequelize.define<ArticleModel>(
     },
     content: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     click: {
       type: DataTypes.INTEGER,

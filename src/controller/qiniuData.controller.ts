@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import fs from 'fs';
 
 import dayjs from 'dayjs';
@@ -28,7 +29,6 @@ import {
 import redisController from '@/controller/redis.controller';
 import { IList, IQiniuData } from '@/interface';
 import { CustomError } from '@/model/customError.model';
-import qiniuDataModel from '@/model/qiniuData.model';
 import qiniuDataService from '@/service/qiniuData.service';
 import { formatMemorySize, getFileExt, getLastestWeek } from '@/utils';
 import { chalkWARN } from '@/utils/chalkTip';
@@ -69,7 +69,6 @@ class QiniuController {
       });
       return res;
     } catch (error) {
-      console.log('prefetchQiniu失败', error);
       throw new CustomError(
         '预取失败！',
         ALLOW_HTTP_CODE.paramsError,
@@ -91,7 +90,6 @@ class QiniuController {
       );
     }
     const { prefix } = ctx.request.body;
-    console.log(prefix, 'prefix');
     const qiniuOfficialRes = await this.getQiniuListPrefix(prefix);
     const prefetch: string[][] = [];
     const list = qiniuOfficialRes.map((item) => {
@@ -105,7 +103,6 @@ class QiniuController {
       return this.prefetchQiniu(item);
     });
     const prefetchRes = await Promise.all([promise]);
-    console.log('prefetchRes', prefetchRes);
     successHandler({
       ctx,
       code: 1,
@@ -419,8 +416,6 @@ class QiniuController {
 
       await next();
     } catch (error) {
-      console.log(uploadFiles);
-      console.log(error);
       fileArr.forEach((v) => {
         // 删除临时文件
         remove(v.filepath);
@@ -530,8 +525,6 @@ class QiniuController {
 
       await next();
     } catch (error) {
-      console.log(uploadFiles);
-      console.log(error);
       fileArr.forEach((v) => {
         // 删除临时文件
         remove(v.filepath);
@@ -565,35 +558,36 @@ class QiniuController {
       );
     }
     const main = async () => {
-      let list: any[] = [];
-      list = await this.getQiniuListPrefix(prefix);
-      list.forEach((v: any) => {
+      const list = await this.getQiniuListPrefix(prefix);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const v of list) {
         const obj = { ...v };
         Object.keys(obj).forEach((key) => {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           obj[`qiniu_${key}`] = `${obj[key]}`;
           delete obj[key];
         });
+        // eslint-disable-next-line no-await-in-loop
+        const count = await qiniuDataService.existName(obj.qiniu_key);
+        if (count) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        // 查找后判断数据库有没有，存在则删除（记得把原同步函数也改改）
+        // eslint-disable-next-line no-await-in-loop
         qiniuDataService.create({
           ...obj,
           bucket: QINIU_BUCKET,
           prefix,
           user_id: userInfo!.id,
         });
-      });
+      }
     };
+
     if (force === 1) {
       await qiniuDataService.batchDelete(prefix);
       await main();
     } else {
-      const count = await qiniuDataModel.count({ where: { prefix } });
-      if (count) {
-        successHandler({
-          ctx,
-          message: `已经同步过七牛云${prefix}前缀数据了！`,
-        });
-        return;
-      }
       await main();
     }
     successHandler({
@@ -651,6 +645,16 @@ class QiniuController {
     });
     successHandler({ ctx, data: result });
 
+    await next();
+  }
+
+  // 根据前缀获取data
+  async getListByprefix(ctx: ParameterizedContext, next) {
+    console.log(ctx.request.query);
+    const { prefix } = ctx.request.query;
+    const result = await qiniuDataService.getPrefixList(`${prefix}`);
+    // console.log(result);
+    successHandler({ ctx, data: result });
     await next();
   }
 
@@ -761,6 +765,7 @@ class QiniuController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
+
     const { qiniu_key } = ctx.request.query as {
       qiniu_key: string;
     };
@@ -779,7 +784,7 @@ class QiniuController {
       });
     } else {
       const { id } = result;
-      const qiniudataRes = await qiniuDataService.delete(id!);
+      const qiniudataRes = await qiniuDataService.delete(id);
 
       successHandler({
         ctx,
@@ -805,6 +810,7 @@ class QiniuController {
       limit,
       prefix,
     });
+
     let { marker } = respBody;
     const { items } = respInfo.data;
     list.push(...items);
@@ -962,7 +968,6 @@ class QiniuController {
           domains.forEach((domain) => {
             const fluxDataOfDomain = fluxData[domain];
             if (fluxDataOfDomain != null) {
-              // console.log(`域名: ${domain} 使用的流量情况:`);
               const fluxChina: number = (fluxDataOfDomain.china || []).reduce(
                 (pre: number, val: number) => pre + val,
                 0
@@ -970,8 +975,7 @@ class QiniuController {
               const fluxOversea: number = (
                 fluxDataOfDomain.oversea || []
               ).reduce((pre: number, val: number) => pre + val, 0);
-              // console.log(`域名: ${domain}使用的国内流量:`, fluxChina);
-              // console.log(`域名: ${domain}使用的海外流量:`, fluxOversea);
+
               console.log(
                 chalkWARN(
                   `域名:${domain}最近一周使用的总流量:${formatMemorySize(

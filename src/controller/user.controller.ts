@@ -123,10 +123,10 @@ class UserController {
   };
 
   login = async (ctx: ParameterizedContext, next) => {
-    const { id, password, exp = 24 } = ctx.request.body;
+    const { username, password, exp = 24 } = ctx.request.body;
     const userInfo: any = await User.findOne({
       attributes: { exclude: ['password', 'token'] },
-      where: { id, password },
+      where: { username, password },
     });
     if (!userInfo) {
       throw new CustomError(

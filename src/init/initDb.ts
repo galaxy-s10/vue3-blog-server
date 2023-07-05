@@ -44,6 +44,8 @@ export const initDb = async (v) => {
         await deleteAllIndexs();
         await deleteAllTable();
         loadAllModel();
+        require('@/model/relation');
+
         await sequelize.sync({ force: true }); // 将创建表,如果表已经存在,则将其首先删除
         console.log(chalkSUCCESS('初始化数据库所有表完成！'));
         break;

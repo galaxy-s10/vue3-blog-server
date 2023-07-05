@@ -6,13 +6,13 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   id: Joi.number(),
-  title: Joi.string().min(3).max(50),
-  desc: [Joi.string().min(2).max(80), null],
+  title: Joi.string().min(1).max(50),
+  desc: Joi.string(),
   content: Joi.string(),
   priority: [Joi.number(), null],
   is_comment: [1, 2],
   status: [1, 2],
-  head_img: [Joi.string().min(3).max(100), null],
+  head_img: Joi.string(),
   click: Joi.number(),
   tags: Joi.array().items(Joi.number()),
   types: Joi.array().items(Joi.number()),

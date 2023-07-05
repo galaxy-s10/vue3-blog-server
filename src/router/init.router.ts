@@ -21,7 +21,8 @@ initRouter.post('/day_data', initController.initDayData);
 
 // 初始化管理员
 initRouter.post('/admin_user', initController.initAdminUser);
-
+// 初始化nav分类数据
+initRouter.post('/navInfo', initController.initNavInfo);
 // 初始化前台设置
 initRouter.post('/frontend', initController.initFrontend);
 
