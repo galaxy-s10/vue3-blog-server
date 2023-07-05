@@ -17,9 +17,8 @@ import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import {
   ALLOW_HTTP_CODE,
-  QINIU_BUCKET,
-  QINIU_CDN_DOMAIN,
-  QINIU_CDN_URL,
+  QINIU_BACKUP,
+  QINIU_BLOG,
   QINIU_PREFIX,
   QINIU_UPLOAD_PROGRESS_TYPE,
   REDIS_PREFIX,
@@ -96,7 +95,7 @@ class QiniuController {
     const prefetch: string[][] = [];
     const list = qiniuOfficialRes.map((item) => {
       // eslint-disable-next-line
-      return `${QINIU_CDN_URL}${item.key}`;
+      return `${QINIU_BLOG.url}${item.key}`;
     });
     for (let i = 0; i < list.length; i += 60) {
       prefetch.push(list.slice(i, i + 60));
@@ -209,7 +208,7 @@ class QiniuController {
       chunkTotal: string;
     } = ctx.request.body;
     const key = `${prefix + hash}.${ext}`;
-    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BUCKET, key);
+    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BLOG.bucket, key);
     if (flag) {
       successHandler({
         code: 3,
@@ -376,7 +375,7 @@ class QiniuController {
           uploadRes.success.push({
             respBody: v.respBody,
             original: v.original,
-            url: QINIU_CDN_URL + (v.respBody.key as string),
+            url: QINIU_BLOG.url + (v.respBody.key as string),
             hash: v.hash,
           });
         } else {
@@ -388,7 +387,7 @@ class QiniuController {
       // WARN七牛云官方的接口不完善，先用妥协的办法
       // const res = await this.batchFileInfo(
       //   uploadRes.success.map((item) => {
-      //     return { srcBucket: QINIU_BUCKET, key: item.key };
+      //     return { srcBucket: QINIU_BLOG.bucket, key: item.key };
       //   })
       // );
       const queue1: any = [];
@@ -487,7 +486,7 @@ class QiniuController {
           uploadRes.success.push({
             respBody: v.respBody,
             original: v.original,
-            url: QINIU_CDN_URL + (v.respBody.key as string),
+            url: QINIU_BLOG.url + (v.respBody.key as string),
             hash: v.hash,
           });
         } else {
@@ -499,7 +498,7 @@ class QiniuController {
       // WARN七牛云官方的接口不完善，先用妥协的办法
       // const res = await this.batchFileInfo(
       //   uploadRes.success.map((item) => {
-      //     return { srcBucket: QINIU_BUCKET, key: item.key };
+      //     return { srcBucket: QINIU_BLOG.bucket, key: item.key };
       //   })
       // );
       const queue1: any = [];
@@ -576,7 +575,7 @@ class QiniuController {
         });
         qiniuDataService.create({
           ...obj,
-          bucket: QINIU_BUCKET,
+          bucket: QINIU_BLOG.bucket,
           prefix,
           user_id: userInfo!.id,
         });
@@ -665,7 +664,7 @@ class QiniuController {
     // @ts-ignore
     const { prefix, hash, ext }: IQiniuKey = ctx.request.query;
     const key = `${prefix + hash}.${ext}`;
-    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BUCKET, key);
+    const { flag } = await QiniuUtils.getQiniuStat(QINIU_BLOG.bucket, key);
     if (flag) {
       successHandler({
         code: 3,
@@ -732,7 +731,7 @@ class QiniuController {
       result.qiniu_key,
       result.bucket
     );
-    const cdnUrl = QINIU_CDN_URL + result.qiniu_key!;
+    const cdnUrl = QINIU_BLOG.url + result.qiniu_key!;
     successHandler({
       ctx,
       data: `${
@@ -764,9 +763,12 @@ class QiniuController {
     const { qiniu_key } = ctx.request.query as {
       qiniu_key: string;
     };
-    const qiniuOfficialRes = await QiniuUtils.delete(qiniu_key, QINIU_BUCKET);
+    const qiniuOfficialRes = await QiniuUtils.delete(
+      qiniu_key,
+      QINIU_BLOG.bucket
+    );
     const result = await qiniuDataService.findByQiniuKey(qiniu_key);
-    const cdnUrl = QINIU_CDN_URL + qiniu_key;
+    const cdnUrl = QINIU_BLOG.url + qiniu_key;
 
     if (!result) {
       successHandler({
@@ -905,7 +907,7 @@ class QiniuController {
       await QiniuUtils.updateQiniuFile(
         bucket,
         file.qiniu_key,
-        QINIU_BUCKET,
+        QINIU_BLOG.bucket,
         qiniu_key
       );
     if (flag) {
@@ -938,7 +940,7 @@ class QiniuController {
   monitCDN() {
     const cdnManager = QiniuUtils.getQiniuCdnManager();
     // 域名列表
-    const domains = [QINIU_CDN_DOMAIN];
+    const domains = [QINIU_BLOG.domain, QINIU_BACKUP.domain];
     const { startDate, endDate } = getLastestWeek();
     const granularity = 'day'; // 粒度，取值：5min ／ hour ／day
     return new Promise((resolve, reject) => {

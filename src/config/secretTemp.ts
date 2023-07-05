@@ -1,3 +1,5 @@
+import { PROJECT_ENV, PROJECT_ENV_ENUM } from '@/constant';
+
 export const JWT_SECRET = '**********'; // jwt秘钥
 
 export const QINIU_ACCESSKEY = '**********'; // 七牛云秘钥
@@ -25,7 +27,15 @@ export const QQ_EMAIL_PASS = '**********'; // qq邮箱auth的秘钥
 export const IP_WHITE_LIST = ['127.0.0.1']; // ip白名单
 
 export const MYSQL_CONFIG = {
-  database: '**********',
+  docker: {
+    container: '**********',
+    image: '**********',
+    port: { 3306: 3306 },
+    MYSQL_ROOT_PASSWORD: '**********',
+    volume: '**********',
+  },
+  database:
+    PROJECT_ENV !== PROJECT_ENV_ENUM.prod ? `************` : '************',
   username: '**********',
   password: '**********',
   host: '**********',

@@ -10,7 +10,7 @@ import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
 
 class ScheduleController {
   async getDbJob(ctx: ParameterizedContext, next) {
-    const dbJob = schedule.scheduledJobs[MONIT_JOB.BACKUPSDB];
+    const dbJob = schedule.scheduledJobs[MONIT_JOB.BACKUPDB];
     if (dbJob) {
       successHandler({
         ctx,

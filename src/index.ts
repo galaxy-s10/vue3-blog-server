@@ -10,9 +10,10 @@ import staticService from 'koa-static';
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
-import { connectMysql, dbName } from '@/config/mysql';
+import { connectMysql } from '@/config/mysql';
 import { connectRedis } from '@/config/redis';
 import { createPubSub } from '@/config/redis/pub';
+import { MYSQL_CONFIG } from '@/config/secret';
 import { connectWebSocket } from '@/config/websocket';
 import {
   PROJECT_ENV,
@@ -93,10 +94,10 @@ function runServer() {
         }
       }); // http接口服务
       console.log(chalkSUCCESS(`项目启动成功！`));
-      console.log(chalkWARN(`当前连接的数据库: ${dbName}`));
       console.log(chalkWARN(`当前监听的端口: ${port}`));
       console.log(chalkWARN(`当前的项目名称: ${PROJECT_NAME}`));
       console.log(chalkWARN(`当前的项目环境: ${PROJECT_ENV}`));
+      console.log(chalkWARN(`当前连接的数据库: ${MYSQL_CONFIG.database}`));
     } catch (error) {
       console.log(chalkERROR(`项目启动失败！`));
       console.log(error);

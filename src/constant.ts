@@ -124,7 +124,7 @@ export const THIRD_PLATFORM = {
 export const MONIT_JOB = {
   MEMORY: 'monitMemoryJob', // 监控内存任务
   PROCESS: 'monitProcessJob', // 监控node进程任务
-  BACKUPSDB: 'monitBackupsDbJob', // 监控备份数据库任务
+  BACKUPDB: 'monitBackupDbJob', // 监控备份数据库任务
   QINIUCDN: 'monitQiniuCDNJob', // 监控七牛云cdn任务
   DELETELOG: 'monitDeleteLog', // 监控删除日志
 };
@@ -137,8 +137,8 @@ export const MONIT_TYPE = {
   VUE3_BLOG_SERVER_NODE_PROCESS: 4, // 监控node进程
   RESTART_PM2: 5, // 重启pm2
   CLEAR_CACHE: 6, // 清除buff/cache
-  BACKUPS_DB_OK: 7, // 备份数据库成功
-  BACKUPS_DB_ERR: 8, // 备份数据库失败
+  BACKUP_DB_OK: 7, // 备份数据库成功
+  BACKUP_DB_ERR: 8, // 备份数据库失败
 };
 
 // 七牛云文件上传进度类型
@@ -148,12 +148,28 @@ export enum QINIU_UPLOAD_PROGRESS_TYPE {
 }
 export const QINIU_PROGRESS_LOG_V1 = path.join(UPLOAD_DIR, 'progressv1.log'); // 上传文件接口接收到的文件存放的目录
 export const QINIU_PROGRESS_LOG_V2 = path.join(UPLOAD_DIR, 'progressv2.log'); // 上传文件接口接收到的文件存放的目录
-export const QINIU_CDN_DOMAIN = 'resource.hsslive.cn';
-export const QINIU_CDN_URL = 'https://resource.hsslive.cn/';
-export const QINIU_BUCKET = 'hssblog'; // 七牛云bucket
 export enum QINIU_PREFIX {
   'image/' = 'image/',
   'backupsDatabase/' = 'backupsDatabase/',
   'media/' = 'media/',
   'nuxt-blog-client/' = 'nuxt-blog-client/',
 }
+export const QINIU_BLOG = {
+  domain: 'resource.hsslive.cn',
+  url: 'https://resource.hsslive.cn/',
+  bucket: 'hssblog',
+  prefix: {
+    'image/': 'image/',
+    'backupsDatabase/': 'backupsDatabase/',
+    'media/': 'media/',
+    'nuxt-blog-client/': 'nuxt-blog-client/',
+  },
+};
+export const QINIU_BACKUP = {
+  domain: 'backup.hsslive.cn',
+  url: 'http://backup.hsslive.cn/',
+  bucket: 'hss-backup',
+  prefix: {
+    'mysql/': 'mysql/',
+  },
+};

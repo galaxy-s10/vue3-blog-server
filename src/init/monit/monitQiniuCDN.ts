@@ -3,12 +3,7 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
 import { QQ_EMAIL_USER } from '@/config/secret';
-import {
-  MONIT_JOB,
-  MONIT_TYPE,
-  PROJECT_ENV,
-  QINIU_CDN_DOMAIN,
-} from '@/constant';
+import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_BLOG } from '@/constant';
 import otherController from '@/controller/other.controller';
 import qiniuController from '@/controller/qiniuData.controller';
 import monitService from '@/service/monit.service';
@@ -47,9 +42,8 @@ export const main = () => {
         )}，阈值：${formatMemorySize(threshold)}`;
         if (allDomainNameFlux > threshold) {
           console.log(chalkWARN('七牛云cdn流量达到阈值，停掉cdn'));
-          const domain = QINIU_CDN_DOMAIN;
           try {
-            const reqUrl = `https://api.qiniu.com/domain/${domain}/offline`;
+            const reqUrl = `https://api.qiniu.com/domain/${QINIU_BLOG.domain}/offline`;
             const contentType = 'application/json';
             const reqBody = {};
             const token = QiniuUtils.getAccessToken(

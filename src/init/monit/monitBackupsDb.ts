@@ -2,28 +2,29 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
-import { dbName } from '@/config/mysql';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/config/secret';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_PREFIX } from '@/constant';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
 import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
-import QiniuUtils from '@/utils/qiniu';
+import QiniuBackupUtils from '@/utils/qiniu';
 
 // 备份目录
-const backupsDirectory = '/node/backups/mysql/';
+const backupDirectory = '/node/backup/mysql/';
 
 // 备份的文件名
 const backupsFileName = () => {
-  const res = `${MYSQL_CONFIG.database}__${dayjs().format('YYYYMMDDHHmmss')}`;
+  const res = `${MYSQL_CONFIG.database}___${dayjs().format(
+    'YYYYMMDDHHmmss'
+  )}.sql`;
   return res;
 };
 
 // 备份目录是否存在
 const backupsDirectoryIsExistCmd = `
-if [ ! -d "${backupsDirectory}" ];then
-echo "备份目录不存在，先创建备份目录${backupsDirectory}"
-mkdir -p ${backupsDirectory}
+if [ ! -d "${backupDirectory}" ];then
+echo "备份目录不存在，先创建备份目录${backupDirectory}"
+mkdir -p ${backupDirectory}
 echo "创建备份目录完成，开始备份"
 else
 echo "备份目录已存在，开始备份"
@@ -32,7 +33,12 @@ fi
 
 // 备份数据库命令
 const backupsCmd = (fileName: string) => {
-  return `mysqldump -h${MYSQL_CONFIG.host} -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${MYSQL_CONFIG.database} > ${backupsDirectory}${fileName}.sql`;
+  // ssh操作时，不能使用docker exec -it，否则报错：the input device is not a TTY
+  return `docker exec -i ${MYSQL_CONFIG.docker.container} mysqldump -h${
+    MYSQL_CONFIG.host
+  } -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${
+    MYSQL_CONFIG.database
+  } > ${backupDirectory + fileName}`;
 };
 
 export const main = (user_id?: number) => {
@@ -41,6 +47,15 @@ export const main = (user_id?: number) => {
   conn
     .on('ready', () => {
       const fileName = backupsFileName();
+      let errMsg = '';
+      function handleError(err) {
+        const info = `备份${MYSQL_CONFIG.database}数据库失败！`;
+        console.log(info, err);
+        monitService.create({
+          type: MONIT_TYPE.BACKUP_DB_ERR,
+          info: JSON.stringify(err),
+        });
+      }
       conn.exec(
         `
         ${backupsDirectoryIsExistCmd}
@@ -49,22 +64,25 @@ export const main = (user_id?: number) => {
         (error, stream) => {
           if (error) throw error;
           stream
-            .on('close', () => {
-              console.log('close');
+            .on('close', (data) => {
+              console.log('close', data);
+              if (errMsg !== '') {
+                handleError(errMsg);
+                return;
+              }
               const prefix = QINIU_PREFIX['backupsDatabase/'];
-              const filepath = `${backupsDirectory + fileName}.sql`;
-              const originalFilename = `${fileName}.sql`;
-              QiniuUtils.uploadForm({
+              const filepath = `${backupDirectory + fileName}`;
+              QiniuBackupUtils.uploadForm({
                 prefix,
                 filepath,
-                originalFilename,
+                originalFilename: fileName,
               })
                 .then(({ flag, respBody, respErr, respInfo, putTime }) => {
                   if (flag) {
-                    const info = `备份${dbName}数据库成功！`;
+                    const info = `备份${MYSQL_CONFIG.database}数据库成功！`;
                     console.log(info);
                     monitService.create({
-                      type: MONIT_TYPE.BACKUPS_DB_OK,
+                      type: MONIT_TYPE.BACKUP_DB_OK,
                       info,
                     });
                     qiniuDataService.create({
@@ -78,21 +96,16 @@ export const main = (user_id?: number) => {
                       qiniu_putTime: putTime,
                     });
                   } else {
-                    const info = `备份${dbName}数据库失败！`;
+                    const info = `备份${MYSQL_CONFIG.database}数据库失败！`;
                     console.log(info);
                     monitService.create({
-                      type: MONIT_TYPE.BACKUPS_DB_ERR,
+                      type: MONIT_TYPE.BACKUP_DB_ERR,
                       info: JSON.stringify({ respBody, respErr, respInfo }),
                     });
                   }
                 })
                 .catch((err) => {
-                  const info = `备份${dbName}数据库失败！`;
-                  console.log(info, err);
-                  monitService.create({
-                    type: MONIT_TYPE.BACKUPS_DB_ERR,
-                    info: JSON.stringify(err),
-                  });
+                  handleError(err);
                 })
                 .finally(() => {
                   conn.end();
@@ -104,7 +117,15 @@ export const main = (user_id?: number) => {
             })
             .stderr.on('data', (data) => {
               console.log(`==========STDERR==========`);
-              console.log(data.toString());
+              const msg: string = data.toString();
+              console.log(msg);
+              if (
+                msg.indexOf(
+                  'mysqldump: [Warning] Using a password on the command line interface can be insecure.'
+                ) === -1
+              ) {
+                errMsg = msg;
+              }
             });
         }
       );
@@ -169,9 +190,9 @@ for (let i = 0; i < allSecond; i += 1) {
 rule.hour = allHourArr.filter((v) => v % 12 === 0);
 rule.minute = 0;
 
-export const monitBackupsDbJob = () => {
+export const monitBackupDbJob = () => {
   console.log(chalkSUCCESS('监控任务: 备份数据库定时任务启动！'));
-  const monitJobName = MONIT_JOB.BACKUPSDB;
+  const monitJobName = MONIT_JOB.BACKUPDB;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
       console.log(
