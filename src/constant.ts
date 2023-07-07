@@ -148,12 +148,6 @@ export enum QINIU_UPLOAD_PROGRESS_TYPE {
 }
 export const QINIU_PROGRESS_LOG_V1 = path.join(UPLOAD_DIR, 'progressv1.log'); // 上传文件接口接收到的文件存放的目录
 export const QINIU_PROGRESS_LOG_V2 = path.join(UPLOAD_DIR, 'progressv2.log'); // 上传文件接口接收到的文件存放的目录
-export enum QINIU_PREFIX {
-  'image/' = 'image/',
-  'backupsDatabase/' = 'backupsDatabase/',
-  'media/' = 'media/',
-  'nuxt-blog-client/' = 'nuxt-blog-client/',
-}
 export const QINIU_BLOG = {
   domain: 'resource.hsslive.cn',
   url: 'https://resource.hsslive.cn/',
@@ -163,6 +157,7 @@ export const QINIU_BLOG = {
     'backupsDatabase/': 'backupsDatabase/',
     'media/': 'media/',
     'nuxt-blog-client/': 'nuxt-blog-client/',
+    'billd-live/image/': 'billd-live/image/',
   },
 };
 export const QINIU_BACKUP = {

@@ -19,7 +19,6 @@ import {
   ALLOW_HTTP_CODE,
   QINIU_BACKUP,
   QINIU_BLOG,
-  QINIU_PREFIX,
   QINIU_UPLOAD_PROGRESS_TYPE,
   REDIS_PREFIX,
   UPLOAD_DIR,
@@ -556,7 +555,7 @@ class QiniuController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    if (!QINIU_PREFIX[prefix]) {
+    if (!QINIU_BACKUP.prefix[prefix] && !QINIU_BLOG.prefix[prefix]) {
       throw new CustomError(
         '错误的prefix',
         ALLOW_HTTP_CODE.paramsError,
@@ -825,7 +824,7 @@ class QiniuController {
   // 对比差异
   getDiff = async (ctx: ParameterizedContext, next) => {
     const { prefix }: any = ctx.request.query;
-    if (!QINIU_PREFIX[prefix]) {
+    if (!QINIU_BACKUP.prefix[prefix] && !QINIU_BLOG.prefix[prefix]) {
       throw new CustomError(
         '错误的prefix',
         ALLOW_HTTP_CODE.paramsError,
@@ -878,7 +877,7 @@ class QiniuController {
       );
     }
     const { bucket, prefix, qiniu_key }: any = ctx.request.body;
-    if (!QINIU_PREFIX[prefix]) {
+    if (!QINIU_BACKUP.prefix[prefix] && !QINIU_BLOG.prefix[prefix]) {
       throw new CustomError(
         '错误的prefix',
         ALLOW_HTTP_CODE.paramsError,
