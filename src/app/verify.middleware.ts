@@ -1,3 +1,5 @@
+import { performance } from 'perf_hooks';
+
 import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
@@ -13,7 +15,7 @@ import blacklistController from '@/controller/blacklist.controller';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
 import { isAdmin } from '@/utils';
-import { chalkINFO } from '@/utils/chalkTip';
+import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 
 // 前台的所有get和白名单内的接口不需要token
 const frontendWhiteList = [
@@ -87,11 +89,15 @@ async function isPass(ip: string) {
 }
 
 export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
-  console.log('apiBeforeVerify中间件');
+  console.log(chalkINFO('apiBeforeVerify中间件开始'));
+  const startTime = performance.now();
   const url = ctx.request.path;
   const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
   const admin = isAdmin(ctx);
   const consoleEnd = () => {
+    const duration = Math.floor(performance.now() - startTime);
+    console.log(chalkINFO('apiBeforeVerify中间件通过！'));
+    console.log(chalkWARN(`apiBeforeVerify中间件耗时：${duration}ms`));
     console.log(
       chalkINFO(
         `日期：${new Date().toLocaleString()}，ip：${ip}，响应${

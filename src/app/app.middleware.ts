@@ -1,3 +1,5 @@
+import { performance } from 'perf_hooks';
+
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from './auth/authJwt';
@@ -6,16 +8,18 @@ import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
 import { isAdmin } from '@/utils';
-import { chalkINFO } from '@/utils/chalkTip';
+import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 
 // 全局错误处理中间件
 export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
+  console.log(chalkINFO('catchErrorMiddle中间件开始'));
   // 这个中间件是第一个中间件，得是异步的，否则直接就next到下一个中间件了
-  console.log('catchErrorMiddle中间件');
-  const start = Date.now();
+  const startTime = performance.now();
+  let duration = -1;
   const insertLog = async (info: {
     statusCode: number;
     errorCode: number;
+    duration: number;
     error: string;
     message: string;
   }) => {
@@ -42,17 +46,19 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         api_status_code: info.statusCode,
         api_error: info.error,
         api_err_msg: info.message,
-        api_duration: Date.now() - start,
+        api_duration: info.duration,
         api_err_code: info.errorCode,
       });
     }
   };
   try {
-    console.log('catchErrorMiddle中间件开始...');
     await next();
     console.log(
       chalkINFO(`catchErrorMiddle中间件通过！http状态码：${ctx.status}`)
     );
+    duration = Math.floor(performance.now() - startTime);
+    console.log(chalkWARN(`catchErrorMiddle中间件耗时：${duration}ms`));
+
     const whiteList = [
       '/admin/qiniu_data/upload_chunk',
       '/admin/qiniu_data/upload',
@@ -86,6 +92,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
           errorCode: statusCode,
           error: msg,
           message: msg,
+          duration,
         };
         // 服务端返回http状态码200、304、404、405，写入日志表
         console.log(
@@ -98,6 +105,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
           errorCode: ERROR_HTTP_CODE.errStatusCode,
           error: msg,
           message: msg,
+          duration,
         };
         // 服务端返回http状态码不是200、304、404、405，写入日志表
         console.log(
@@ -112,6 +120,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         errorCode: statusCode,
         error: '请求成功！',
         message: '请求成功！',
+        duration,
       };
       // 请求成功写入日志表
       insertLog(defaultSuccess);
@@ -129,6 +138,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         errorCode: ERROR_HTTP_CODE.serverError,
         error: error?.message,
         message: '服务器错误！',
+        duration,
       };
       // 不是CustomError，也写入日志表
       insertLog(defaultError);
@@ -145,6 +155,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         error: error.message,
         errorCode: error.errorCode,
         message: error.message,
+        duration,
       });
     }
   }
@@ -152,7 +163,8 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
 
 // 跨域中间件
 export const corsMiddle = async (ctx: ParameterizedContext, next) => {
-  console.log('corsMiddle跨域中间件');
+  console.log(chalkINFO('corsMiddle跨域中间件开始'), ctx.header.origin);
+  const startTime = performance.now();
   ctx.set(
     'Access-Control-Allow-Headers',
     'Content-Type, Content-Length, Authorization, Accept, X-Requested-With'
@@ -184,7 +196,9 @@ export const corsMiddle = async (ctx: ParameterizedContext, next) => {
     // 跨域请求时，浏览器会先发送options
     ctx.body = 'ok';
   } else {
+    const duration = Math.floor(performance.now() - startTime);
     await next();
-    console.log(chalkINFO(`corsMiddle中间件通过！ `));
+    console.log(chalkINFO('corsMiddle中间件通过！'), ctx.header.origin);
+    console.log(chalkWARN(`corsMiddle中间件耗时：${duration}ms`));
   }
 };
