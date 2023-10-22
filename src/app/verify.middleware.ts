@@ -65,9 +65,9 @@ async function isPass(ip: string) {
   const nowDate = +new Date();
   let flag = true;
   if (IP_WHITE_LIST.includes(ip)) return flag;
-  const [oneMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
+  const [tenMinuteApiNum, oneHourApiNum, oneDayApiNum] = await Promise.all([
     logController.common.getCount({
-      startTime: new Date(nowDate - 1000 * 60), // 一分钟内访问的次数
+      startTime: new Date(nowDate - 1000 * 60 * 10), // 十分钟内访问的次数
       endTime: new Date(nowDate),
       api_real_ip: ip,
     }),
@@ -82,9 +82,11 @@ async function isPass(ip: string) {
       api_real_ip: ip,
     }),
   ]);
-  oneMinuteApiNum > 100 && (flag = false);
-  oneHourApiNum > 2000 && (flag = false);
-  oneDayApiNum > 5000 && (flag = false);
+  const nums = 24 * 60 * 60; // 一秒请求一次，连续请求一天，总共请求的次数
+  const oneDayNums = nums * 5; // 假设一秒请求5次，连续请求一天
+  tenMinuteApiNum > oneDayNums / 24 / 6 && (flag = false);
+  oneHourApiNum > oneDayNums / 24 && (flag = false);
+  oneDayApiNum > oneDayNums && (flag = false);
   return flag;
 }
 
