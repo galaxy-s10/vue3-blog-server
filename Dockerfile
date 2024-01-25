@@ -55,11 +55,11 @@ RUN echo WORKSPACE:   ${BILLD_WORKSPACE}
 RUN echo TAG:         ${BILLD_TAG}
 RUN echo PUBLICDIR:   ${BILLD_PUBLICDIR}
 
-RUN echo 开始安装依赖:
-RUN pnpm i
+# RUN echo 开始安装依赖:
+# RUN pnpm i
 
-RUN echo 开始打包:
-RUN npm run build
+# RUN echo 开始打包:
+# RUN npm run build
 
 VOLUME [ ${BILLD_PUBLICDIR}/${BILLD_JOBNAME}/${BILLD_ENV} ]
 VOLUME [ /node/backup/ ]

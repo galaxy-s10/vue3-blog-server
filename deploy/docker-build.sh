@@ -4,10 +4,10 @@
 # Date: 2022-08-09 12:55:47
 # Description: https://github.com/galaxy-s10/sh/
 # Email: 2274751790@qq.com
-# FilePath: /vue3-blog-server/docker-build.sh
+# FilePath: /vue3-blog-server/deploy/docker-build.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2024-01-25 14:29:31
+# LastEditTime: 2024-01-25 15:11:33
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -66,17 +66,18 @@ PUBLICDIR=/node #约定公共目录为/node
 #   echo 当前环境是null
 # fi
 
-# echo 开始安装依赖:
-# pnpm install
+echo 开始安装依赖:
+pnpm install
 
-# echo 开始打包:
-# pnpm run build
+echo 开始打包:
+pnpm run build
 
 # 本机写死测试：
-# sh docker-build.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10 3300 v0.0.1
+# sh ./deploy/docker-build.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10 3300 v0.0.1
 
 # 服务器写死测试：
-# sh docker-build.sh vue3-blog-server beta /var/lib/jenkins/workspace/vue3-blog-server 3300 v0.0.1
+# sh ./deploy/docker-build.sh vue3-blog-server beta /var/lib/jenkins/workspace/vue3-blog-server 3300 v0.0.1
+# sh ./deploy/docker-build.sh vue3-blog-server prod /var/lib/jenkins/workspace/vue3-blog-server 3200 v0.0.1
 
 DOCKER_BUILDKIT=0 docker build -t $JOBNAME-$ENV-$PORT . \
   --build-arg BILLD_JOBNAME=$JOBNAME \
