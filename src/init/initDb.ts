@@ -1,13 +1,15 @@
 import fs from 'fs';
 
 import sequelize from '@/config/mysql';
-import { PROJECT_NODE_ENV } from '@/constant';
+import { PROJECT_ENV, PROJECT_ENV_ENUM, PROJECT_NODE_ENV } from '@/constant';
 import { chalkERROR, chalkSUCCESS } from '@/utils/chalkTip';
 import { deleteAllForeignKeys, deleteAllIndexs } from '@/utils/index';
 
 /** 加载所有model */
 export const loadAllModel = () => {
-  const modelDir = `${process.cwd()}/src/model`;
+  const modelDir = `${process.cwd()}/${
+    PROJECT_ENV === PROJECT_ENV_ENUM.prod ? 'dist' : 'src'
+  }/model`;
   fs.readdirSync(modelDir).forEach((file: string) => {
     if (PROJECT_NODE_ENV === 'development') {
       if (file.indexOf('.model.ts') === -1) return;

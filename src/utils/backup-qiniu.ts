@@ -7,7 +7,6 @@ import { chalkERROR } from './chalkTip';
 
 import { getRandomString } from './index';
 
-import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/config/secret';
 import {
   QINIU_BACKUP,
   QINIU_UPLOAD_PROGRESS_TYPE,
@@ -16,6 +15,7 @@ import {
 } from '@/constant';
 import redisController from '@/controller/redis.controller';
 import { IQiniuData } from '@/interface';
+import { QINIU_ACCESSKEY, QINIU_SECRETKEY } from '@/secret/secret';
 
 export interface IQiniuKey {
   prefix: string;

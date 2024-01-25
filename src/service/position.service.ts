@@ -1,5 +1,5 @@
-import { GAODE_WEB_IP_KEY, GAODE_WEB_IP_URL } from '@/config/secret';
 import { IIpdata } from '@/interface';
+import { GAODE_WEB_IP_KEY, GAODE_WEB_IP_URL } from '@/secret/secret';
 import axios from '@/utils/request';
 
 class PositionService {

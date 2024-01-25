@@ -6,6 +6,12 @@ export enum PROJECT_ENV_ENUM {
   beta = 'beta',
 }
 
+const appDir = process.cwd();
+export const resolveApp = (relativePath) => {
+  return path.join(appDir, relativePath);
+  // return path.join(__dirname, '../../', relativePath);
+};
+
 export const PROJECT_NAME = process.env.NODE_APP_RELEASE_PROJECT_NAME as string;
 export const PROJECT_ENV = process.env
   .NODE_APP_RELEASE_PROJECT_ENV as PROJECT_ENV_ENUM;
@@ -14,18 +20,30 @@ export const PROJECT_NODE_ENV = process.env.NODE_ENV as string;
 
 export const STATIC_DIR = path.join(__dirname, './public/'); // 静态文件目录
 export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接口接收到的文件存放的目录
-export const SECRET_FILE = path.join(
-  __dirname,
-  PROJECT_NODE_ENV === 'development'
-    ? './src/secret/secret.ts'
-    : './src/secret/secret.js'
-); // 秘钥文件
-export const SECRETTEMP_FILE = path.join(
-  __dirname,
-  PROJECT_NODE_ENV === 'development'
-    ? './src/secret/secretTemp.ts'
-    : './src/secret/secretTemp.js'
-); // 秘钥文件模板
+// export const SECRET_FILE = path.join(
+//   __dirname,
+//   PROJECT_NODE_ENV === 'development'
+//     ? './config/secret.ts'
+//     : './config/secret.js'
+// ); // 秘钥文件
+
+// export const SECRETTEMP_FILE = path.join(
+//   __dirname,
+//   PROJECT_NODE_ENV === 'development'
+//     ? './config/secretTemp.ts'
+//     : './config/secretTemp.js'
+// ); // 秘钥文件模板
+
+export const SECRET_FILE =
+  PROJECT_ENV === PROJECT_ENV_ENUM.prod
+    ? resolveApp('/dist/src/secret/secret.js')
+    : resolveApp('/src/secret/secret.ts'); // 秘钥文件
+
+export const SECRETTEMP_FILE =
+  PROJECT_ENV === PROJECT_ENV_ENUM.prod
+    ? resolveApp('/dist/src/secret/secretTemp.js')
+    : resolveApp('/src/secret/secretTemp.ts'); // 秘钥文件模板
+
 export const QQ_MAIL_CONFIG = {
   from: '2274751790@qq.com', // sender address
   to: '2274751790@qq.com', // list of receivers

@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
-import { MYSQL_CONFIG } from '@/config/secret';
 import { PROJECT_ENV } from '@/constant';
+import { MYSQL_CONFIG } from '@/secret/secret';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 const sequelize = new Sequelize(

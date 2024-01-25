@@ -2,11 +2,11 @@ import { ParameterizedContext } from 'koa';
 
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
-import { QQ_EMAIL_USER } from '@/config/secret';
 import { ALLOW_HTTP_CODE } from '@/constant';
 import otherController from '@/controller/other.controller';
 import { ILink, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
+import { QQ_EMAIL_USER } from '@/secret/secret';
 import linkService from '@/service/link.service';
 import { isAdmin } from '@/utils';
 

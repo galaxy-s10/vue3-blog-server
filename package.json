@@ -11,9 +11,9 @@
     "build": "rimraf dist && tsc -P ./tsconfig.json || true",
     "commit": "cz",
     "copy": "ts-node ./deploy/handleGiteeJenkins.mjs",
-    "dev": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
-    "dev:beta": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
-    "dev:prod": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./src/index.ts",
+    "dev": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./src/index.ts",
+    "dev:beta": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./src/index.ts",
+    "dev:prod": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon --exec node -r @swc-node/register ./src/index.ts",
     "lint": "eslint --config ./.eslintrc.js . --ext .js,.ts",
     "lint:fix": "eslint --config ./.eslintrc.js --fix . --ext .js,.ts",
     "prepare": "husky install",
@@ -21,8 +21,8 @@
     "push": "cz && standard-version",
     "release": "standard-version",
     "release:first": "standard-version --first-release",
-    "start:beta": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./dist/index.js",
-    "start:prod": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./dist/index.js",
+    "start:beta": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon --exec node -r @swc-node/register ./dist/index.js",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "config": {
@@ -63,6 +63,7 @@
     "trash": "^8.1.1"
   },
   "devDependencies": {
+    "@swc-node/register": "^1.6.8",
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
     "@types/crypto-js": "^4.1.0",

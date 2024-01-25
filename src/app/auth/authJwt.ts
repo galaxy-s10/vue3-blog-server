@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/config/secret';
 import { ALLOW_HTTP_CODE, COMMON_ERR_MSG } from '@/constant';
 import { IUser } from '@/interface';
+import { JWT_SECRET } from '@/secret/secret';
 import userService from '@/service/user.service';
 
 const authJwt = (

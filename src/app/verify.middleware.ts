@@ -4,7 +4,6 @@ import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import { IP_WHITE_LIST } from '@/config/secret';
 import {
   ALLOW_HTTP_CODE,
   BLACKLIST_TYPE,
@@ -14,6 +13,7 @@ import {
 import blacklistController from '@/controller/blacklist.controller';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
+import { IP_WHITE_LIST } from '@/secret/secret';
 import { isAdmin } from '@/utils';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 

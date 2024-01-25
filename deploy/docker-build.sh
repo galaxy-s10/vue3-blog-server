@@ -7,7 +7,7 @@
 # FilePath: /vue3-blog-server/deploy/docker-build.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2024-01-25 15:11:33
+# LastEditTime: 2024-01-25 15:36:23
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -66,11 +66,11 @@ PUBLICDIR=/node #约定公共目录为/node
 #   echo 当前环境是null
 # fi
 
-echo 开始安装依赖:
-pnpm install
+# echo 开始安装依赖:
+# pnpm install
 
-echo 开始打包:
-pnpm run build
+# echo 开始打包:
+# pnpm run build
 
 # 本机写死测试：
 # sh ./deploy/docker-build.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10 3300 v0.0.1

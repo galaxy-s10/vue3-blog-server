@@ -2,7 +2,7 @@ import { Client } from 'ssh2';
 
 import { handleData } from './index';
 
-import { SSH_CONFIG } from '@/config/secret';
+import { SSH_CONFIG } from '@/secret/secret';
 import { chalkERROR, chalkINFO } from '@/utils/chalkTip';
 
 // 重启pm2进程命令

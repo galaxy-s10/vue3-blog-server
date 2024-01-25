@@ -2,15 +2,15 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import {
-  GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET,
-  GITHUB_REDIRECT_URI,
-} from '@/config/secret';
 import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
 import { IGithubUser, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
+import {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_REDIRECT_URI,
+} from '@/secret/secret';
 import githubUserService from '@/service/githubUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';
@@ -58,6 +58,7 @@ class GithubUserController {
   /** https://docs.github.com/cn/rest/reference/users#get-the-authenticated-user */
   getRepoStargazers = async (ctx: ParameterizedContext, next) => {
     // getRepoStargazers = async ({ repo }: { repo: string }) => {
+    // @ts-ignore
     const { repo }: { repo: string } = ctx.request.query;
     const accessToken = '666';
     const data: any = await axios.get(

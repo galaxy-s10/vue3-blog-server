@@ -2,15 +2,15 @@ import { ParameterizedContext } from 'koa';
 
 import { authJwt, signJwt } from '@/app/auth/authJwt';
 import successHandler from '@/app/handler/success-handle';
-import {
-  ADMIN_QQ_CLIENT_ID,
-  ADMIN_QQ_CLIENT_SECRET,
-  ADMIN_QQ_REDIRECT_URI,
-} from '@/config/secret';
 import { ALLOW_HTTP_CODE, THIRD_PLATFORM } from '@/constant';
 import { IList, IQqUser } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import thirdUserModel from '@/model/thirdUser.model';
+import {
+  ADMIN_QQ_CLIENT_ID,
+  ADMIN_QQ_CLIENT_SECRET,
+  ADMIN_QQ_REDIRECT_URI,
+} from '@/secret/secret';
 import qqUserService from '@/service/qqUser.service';
 import thirdUserService from '@/service/thirdUser.service';
 import userService from '@/service/user.service';

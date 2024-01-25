@@ -2,10 +2,10 @@ import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 
-import { QQ_EMAIL_USER } from '@/config/secret';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_BLOG } from '@/constant';
 import otherController from '@/controller/other.controller';
 import qiniuController from '@/controller/qiniuData.controller';
+import { QQ_EMAIL_USER } from '@/secret/secret';
 import monitService from '@/service/monit.service';
 import { formatMemorySize } from '@/utils';
 import {

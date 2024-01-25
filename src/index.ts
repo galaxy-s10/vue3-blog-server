@@ -1,5 +1,6 @@
 // 一定要将import './init';放到最开头,因为它里面初始化了路径别名
-import './init';
+import './init/alias';
+import './init/initFile';
 
 import Koa from 'koa';
 import koaBody from 'koa-body';
@@ -13,7 +14,6 @@ import { apiBeforeVerify } from '@/app/verify.middleware';
 import { connectMysql } from '@/config/mysql';
 import { connectRedis } from '@/config/redis';
 import { createPubSub } from '@/config/redis/pub';
-import { MYSQL_CONFIG } from '@/config/secret';
 import { connectWebSocket } from '@/config/websocket';
 import {
   PROJECT_ENV,
@@ -27,6 +27,7 @@ import { initDb } from '@/init/initDb';
 import { initMonit } from '@/init/monit';
 import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
+import { MYSQL_CONFIG } from '@/secret/secret';
 import { chalkERROR, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 
 function runServer() {
