@@ -27,6 +27,13 @@ WORKDIR ${BILLD_PUBLICDIR}/${BILLD_JOBNAME}/${BILLD_ENV}
 
 COPY . .
 
+RUN echo 设置npm淘宝镜像:
+RUN npm config set registry https://registry.npmmirror.com/
+
+RUN echo 设置pnpm淘宝镜像:
+RUN pnpm config set registry https://registry.npmmirror.com/
+RUN pnpm config set @billd:registry http://registry.hsslive.cn/
+
 RUN echo 开始全局安装pnpm:
 RUN npm i pnpm -g
 
