@@ -36,12 +36,12 @@ export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接�
 
 export const SECRET_FILE =
   PROJECT_ENV === PROJECT_ENV_ENUM.prod
-    ? resolveApp('/dist/src/secret/secret.js')
+    ? resolveApp('/dist/secret/secret.js')
     : resolveApp('/src/secret/secret.ts'); // 秘钥文件
 
 export const SECRETTEMP_FILE =
   PROJECT_ENV === PROJECT_ENV_ENUM.prod
-    ? resolveApp('/dist/src/secret/secretTemp.js')
+    ? resolveApp('/dist/secret/secretTemp.js')
     : resolveApp('/src/secret/secretTemp.ts'); // 秘钥文件模板
 
 export const QQ_MAIL_CONFIG = {
