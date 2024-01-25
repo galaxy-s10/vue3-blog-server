@@ -21,12 +21,7 @@ class VisitorLogController {
   }
 
   async getDayVisitTotal(ctx: ParameterizedContext, next) {
-    const {
-      orderBy = 'asc',
-      orderName = 'ip',
-      startTime,
-      endTime,
-    } = ctx.request.query;
+    const { orderBy, orderName, startTime, endTime } = ctx.request.query;
     const result = await visitorLogService.getDayVisitTotal({
       orderBy,
       orderName,

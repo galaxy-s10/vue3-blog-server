@@ -1,10 +1,10 @@
 import Sequelize from 'sequelize';
 
-import { IVisitorLog, IList } from '@/interface';
+import { IList, IVisitorLog } from '@/interface';
 import visitorLogModel from '@/model/visitorLog.model';
-import { handlePaging } from '@/utils';
+import { formatTime, handlePaging } from '@/utils';
 
-const { fn, Op, col } = Sequelize;
+const { fn, Op, col, literal } = Sequelize;
 
 class VisitorLogService {
   /** 访客日志是否存在 */
@@ -22,15 +22,37 @@ class VisitorLogService {
   /** 获取当天访客访问数据 */
   async getDayVisitTotal({ orderBy, orderName, startTime, endTime }) {
     let timeWhere: any = null;
+    const orderRes: any[] = [];
     if (startTime && startTime) {
       timeWhere = {
-        [Op.between]: [new Date(startTime), new Date(endTime)],
+        [Op.between]: [
+          formatTime(Number(startTime)),
+          formatTime(Number(endTime)),
+        ],
       };
     }
+    if (orderName && orderBy) {
+      orderRes.push([orderName, orderBy]);
+    }
     const result = await visitorLogModel.findAll({
-      attributes: ['ip', [fn('count', col('id')), 'total']],
+      attributes: [
+        'ip',
+        [fn('count', col('id')), 'total'],
+        [
+          literal(
+            `(SELECT MIN(created_at) FROM ${
+              visitorLogModel.name
+            } AS t2 WHERE t2.created_at BETWEEN '${formatTime(
+              Number(startTime)
+            )}' AND '${formatTime(Number(endTime))}' and t2.ip = ${
+              visitorLogModel.name
+            }.ip)`
+          ),
+          'first_date',
+        ],
+      ],
       group: 'ip',
-      order: [[orderName, orderBy]],
+      order: [...orderRes, ['first_date', 'desc']],
       where: { created_at: timeWhere },
     });
     return {
