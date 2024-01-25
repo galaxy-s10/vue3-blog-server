@@ -7,7 +7,7 @@
 # FilePath: /vue3-blog-server/docker-build.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2023-04-22 17:35:18
+# LastEditTime: 2024-01-25 14:29:31
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -34,7 +34,7 @@ PUBLICDIR=/node #约定公共目录为/node
 # npm -v
 
 # echo 设置npm淘宝镜像:
-# npm config set registry https://registry.npm.taobao.org/
+# npm config set registry https://registry.npmmirror.com/
 
 # echo 查看当前npm镜像:
 # npm get registry
@@ -50,7 +50,7 @@ PUBLICDIR=/node #约定公共目录为/node
 # pnpm -v
 
 # echo 设置pnpm淘宝镜像:
-# pnpm config set registry https://registry.npm.taobao.org/
+# pnpm config set registry https://registry.npmmirror.com/
 # pnpm config set @billd:registry http://registry.hsslive.cn/
 
 # echo 查看当前pnpm镜像:

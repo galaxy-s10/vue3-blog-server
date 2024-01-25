@@ -30,12 +30,12 @@ COPY . .
 RUN echo 设置npm淘宝镜像:
 RUN npm config set registry https://registry.npmmirror.com/
 
+RUN echo 开始全局安装pnpm:
+RUN npm i pnpm -g
+
 RUN echo 设置pnpm淘宝镜像:
 RUN pnpm config set registry https://registry.npmmirror.com/
 RUN pnpm config set @billd:registry http://registry.hsslive.cn/
-
-RUN echo 开始全局安装pnpm:
-RUN npm i pnpm -g
 
 RUN echo 开始全局安装pm2:
 RUN pnpm i pm2 -g
