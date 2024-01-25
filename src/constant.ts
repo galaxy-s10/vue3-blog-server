@@ -17,14 +17,14 @@ export const UPLOAD_DIR = path.join(__dirname, './upload/'); // 上传文件接�
 export const SECRET_FILE = path.join(
   __dirname,
   PROJECT_NODE_ENV === 'development'
-    ? './config/secret.ts'
-    : './config/secret.js'
+    ? './src/secret/secret.ts'
+    : './src/secret/secret.js'
 ); // 秘钥文件
 export const SECRETTEMP_FILE = path.join(
   __dirname,
   PROJECT_NODE_ENV === 'development'
-    ? './config/secretTemp.ts'
-    : './config/secretTemp.js'
+    ? './src/secret/secretTemp.ts'
+    : './src/secret/secretTemp.js'
 ); // 秘钥文件模板
 export const QQ_MAIL_CONFIG = {
   from: '2274751790@qq.com', // sender address

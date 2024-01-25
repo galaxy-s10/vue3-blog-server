@@ -1,5 +1,5 @@
 node_modules
 .DS_Store
 dist
-src/config/secret.ts
+/src/secret/secret.ts
 src/upload/**/*

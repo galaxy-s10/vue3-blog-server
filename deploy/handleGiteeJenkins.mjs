@@ -1,16 +1,15 @@
 // WARN 该文件只是方便我将当前项目复制一份到我电脑的另一个位置（gitee私有仓库的位置)，其他人不需要管这个文件~
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+
+import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import trash from 'trash';
 
 const allFile = [];
-const ignore = ['.DS_Store', '.git', 'node_modules', 'dist'];
-const localDir = path.resolve(__filename, '../');
-const giteeDir = path.resolve(
-  __filename,
-  '../',
-  './../../jenkins/vue3-blog-server'
-);
+const ignore = ['.DS_Store', '.git', '.gitignore', 'node_modules', 'dist'];
+const localDir =
+  '/Users/huangshuisheng/Desktop/hss/galaxy-s10/vue3-blog-server';
+const giteeDir = '/Users/huangshuisheng/Desktop/hss/jenkins/vue3-blog-server';
 
 const dir = fs.readdirSync(localDir).filter((item) => {
   if (ignore.includes(item)) {
@@ -61,10 +60,29 @@ function putFile() {
   }
 }
 
-if (path.resolve(__dirname) === giteeDir) {
-  // eslint-disable-next-line
-  console.log('当前在gitee文件目录，直接退出！');
-} else {
+async function clearOld() {
+  const giteeDirAllFile = fs.readdirSync(giteeDir);
+  const queue = [];
+  giteeDirAllFile.forEach((url) => {
+    const fullurl = `${giteeDir}/${url}`;
+    if (!['node_modules', 'src', '.git'].includes(url)) {
+      queue.push(trash(fullurl));
+    }
+  });
+  await Promise.all(queue);
+  const queue1 = [];
+  const giteeDirSrcAllFile = fs.readdirSync(path.resolve(giteeDir, './src'));
+  giteeDirSrcAllFile.forEach((url) => {
+    const fullurl = `${giteeDir}/${url}`;
+    if (!['secret'].includes(url)) {
+      queue1.push(trash(fullurl));
+    }
+  });
+}
+
+clearOld().then(() => {
+  const gitignoreTxt = 'node_modules\n.DS_Store\ndist\nsrc/upload/**/*\n';
+  fs.writeFileSync(path.resolve(giteeDir, './.gitignore'), gitignoreTxt);
   findFile(dir);
   putFile();
   execSync(`pnpm i`, { cwd: giteeDir });
@@ -73,4 +91,4 @@ if (path.resolve(__dirname) === giteeDir) {
     cwd: giteeDir,
   });
   execSync(`git push`, { cwd: giteeDir });
-}
+});

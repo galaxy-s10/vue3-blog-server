@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rimraf dist && tsc -P ./tsconfig.json || true",
     "commit": "cz",
-    "copy": "node ./handleGiteeJenkins.js",
+    "copy": "ts-node ./handleGiteeJenkins.mjs",
     "dev": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
     "dev:beta": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon ./src/index.ts",
     "dev:prod": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon ./src/index.ts",
@@ -59,7 +59,8 @@
     "redis": "^4.0.4",
     "sequelize": "^6.25.2",
     "socket.io": "^4.4.1",
-    "ssh2": "^1.7.0"
+    "ssh2": "^1.7.0",
+    "trash": "^8.1.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",
