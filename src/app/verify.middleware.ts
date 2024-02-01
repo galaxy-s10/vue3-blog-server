@@ -4,13 +4,7 @@ import chalk from 'chalk';
 import { ParameterizedContext } from 'koa';
 
 import { authJwt } from '@/app/auth/authJwt';
-import {
-  ALLOW_HTTP_CODE,
-  BLACKLIST_TYPE,
-  COMMON_ERR_MSG,
-  ERROR_HTTP_CODE,
-} from '@/constant';
-import blacklistController from '@/controller/blacklist.controller';
+import { ALLOW_HTTP_CODE } from '@/constant';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
 import { IP_WHITE_LIST } from '@/secret/secret';
@@ -125,42 +119,43 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   console.log(chalk.blueBright('token:'), ctx.request.headers.authorization);
 
   // 判断黑名单
-  const inBlacklist = await blacklistController.findByIp(ip);
+  // const inBlacklist = await blacklistController.findByIp(ip);
 
-  if (inBlacklist?.type === BLACKLIST_TYPE.banIp) {
-    // 频繁操作
-    throw new CustomError(
-      `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
-      ALLOW_HTTP_CODE.forbidden,
-      ERROR_HTTP_CODE.banIp
-    );
-  } else if (inBlacklist?.type === BLACKLIST_TYPE.adminDisableUser) {
-    // 管理员手动禁用
-    throw new CustomError(
-      COMMON_ERR_MSG.adminDisableUser,
-      ALLOW_HTTP_CODE.forbidden,
-      ERROR_HTTP_CODE.adminDisableUser
-    );
-  }
+  // if (inBlacklist?.type === BLACKLIST_TYPE.banIp) {
+  //   // 频繁操作
+  //   throw new CustomError(
+  //     `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
+  //     ALLOW_HTTP_CODE.forbidden,
+  //     ERROR_HTTP_CODE.banIp
+  //   );
+  // } else if (inBlacklist?.type === BLACKLIST_TYPE.adminDisableUser) {
+  //   // 管理员手动禁用
+  //   throw new CustomError(
+  //     COMMON_ERR_MSG.adminDisableUser,
+  //     ALLOW_HTTP_CODE.forbidden,
+  //     ERROR_HTTP_CODE.adminDisableUser
+  //   );
+  // }
 
   // 验证是否频繁请求
-  if (frequentlyWhiteList.indexOf(url) === -1) {
-    const res = await isPass(ip);
-    if (!res) {
-      const { userInfo } = await authJwt(ctx);
-      blacklistController.common.create({
-        user_id: userInfo?.id,
-        ip,
-        type: BLACKLIST_TYPE.banIp,
-        msg: COMMON_ERR_MSG.banIp,
-      });
-      throw new CustomError(
-        `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
-        ALLOW_HTTP_CODE.forbidden,
-        ERROR_HTTP_CODE.banIp
-      );
-    }
-  }
+  // if (frequentlyWhiteList.indexOf(url) === -1) {
+  //   console.log('验证是否频繁请求');
+  //   const res = await isPass(ip);
+  //   if (!res) {
+  //     const { userInfo } = await authJwt(ctx);
+  //     blacklistController.common.create({
+  //       user_id: userInfo?.id,
+  //       ip,
+  //       type: BLACKLIST_TYPE.banIp,
+  //       msg: COMMON_ERR_MSG.banIp,
+  //     });
+  //     throw new CustomError(
+  //       `当前ip:${ip}调用api频繁,${COMMON_ERR_MSG.banIp}`,
+  //       ALLOW_HTTP_CODE.forbidden,
+  //       ERROR_HTTP_CODE.banIp
+  //     );
+  //   }
+  // }
 
   let allowNext = false;
   globalWhiteList.forEach((item) => {

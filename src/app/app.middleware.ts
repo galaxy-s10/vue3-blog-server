@@ -24,6 +24,9 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     message: string;
   }) => {
     if (PROJECT_ENV !== 'beta') {
+      if ([200, 304].includes(info.statusCode)) {
+        return;
+      }
       console.log(chalkINFO(`当前不是beta环境，写入日志`));
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);

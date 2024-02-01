@@ -128,6 +128,11 @@ Tag.belongsToMany(Article, {
   },
 });
 
+ArticleTag.belongsTo(Tag, {
+  foreignKey: 'tag_id',
+  constraints: false,
+});
+
 Comment.belongsTo(User, {
   as: 'from_user',
   foreignKey: 'from_user_id',

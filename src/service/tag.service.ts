@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { ITag, IList } from '@/interface';
+import { IList, ITag } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import starModel from '@/model/star.model';
@@ -138,6 +138,17 @@ class TagService {
       delete v.comments;
     });
     return handlePaging({ rows: result, count }, nowPage, pageSize);
+  }
+
+  async findRangTag(ids: number[]) {
+    const res = await tagModel.findAll({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+      },
+    });
+    return res;
   }
 
   /** 查找标签 */

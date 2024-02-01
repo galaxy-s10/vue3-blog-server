@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import sequelize from '@/config/mysql';
 import { IArticle, IList } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
@@ -7,7 +8,9 @@ import starModel from '@/model/star.model';
 import tagModel from '@/model/tag.model';
 import typeModel from '@/model/type.model';
 import userModel from '@/model/user.model';
-import { handlePaging } from '@/utils';
+import articleTagService from '@/service/articleTag.service';
+import tagService from '@/service/tag.service';
+import { arrayUnique, handlePaging } from '@/utils';
 
 const { Op, literal } = Sequelize;
 
@@ -204,21 +207,28 @@ class ArticleService {
       userWhere = {};
       userWhere.id = users;
     }
-
     // @ts-ignore
     const result = await articleModel.findAndCountAll({
       include: [
+        // {
+        //   model: commentModel,
+        //   attributes: ['id'],
+        //   required: false,
+        // },
+        // {
+        //   model: starModel,
+        //   attributes: ['id'],
+        //   where: {
+        //     comment_id: -1,
+        //   },
+        //   // 这个required: false不能省，否则article/list?orderName=click&orderBy=desc&nowPage=1&pageSize=5时，缺失数据
+        //   required: false,
+        // },
         {
-          model: commentModel,
-          attributes: ['id'],
-        },
-        {
-          model: starModel,
-          attributes: ['id'],
-          where: {
-            comment_id: -1,
-          },
-          required: false, // 加了where条件后，需要添加required: false
+          attributes: { exclude: ['password', 'token'] },
+          model: userModel,
+          where: userWhere,
+          through: { attributes: [] },
         },
         {
           model: typeModel,
@@ -229,19 +239,12 @@ class ArticleService {
           //   include: [[fn('GROUP_CONCAT', col('types.name')), 'dddd']],
           // },
           through: { attributes: [] },
-          // required: false, // false:left join; true:inner join
         },
-        {
-          attributes: { exclude: ['password', 'token'] },
-          model: userModel,
-          where: userWhere,
-          through: { attributes: [] },
-        },
-        {
-          model: tagModel,
-          where: tagWhere,
-          through: { attributes: [] },
-        },
+        // {
+        //   model: tagModel,
+        //   where: tagWhere,
+        //   through: { attributes: [] },
+        // },
       ],
       // attributes: ['title'],
       // attributes: [[fn('count', col('comments.id')), 'comment_total']],
@@ -276,10 +279,58 @@ class ArticleService {
       offset,
       // subQuery: false, // 非常关键！！！
     });
+    const article_ids: number[] = [];
+    result.rows.forEach((item) => {
+      article_ids.push(item.id!);
+    });
+    const [commentNumsRes] = await sequelize.query(
+      `SELECT article_id, COUNT(*) as count FROM ${
+        commentModel.name
+      } WHERE article_id IN (${article_ids.join()}) GROUP BY article_id`
+    );
+    const commentNumsMap: any = {};
+    commentNumsRes.forEach((item: any) => {
+      commentNumsMap[item.article_id] = item.count;
+    });
+    const [starNumsRes] = await sequelize.query(
+      `SELECT article_id, COUNT(*) as count FROM ${
+        starModel.name
+      } WHERE article_id IN (${article_ids.join()}) AND comment_id = -1 GROUP BY article_id`
+    );
+    const starNumsMap: any = {};
+    starNumsRes.forEach((item: any) => {
+      starNumsMap[item.article_id] = item.count;
+    });
+
+    // 找到文章对应的标签
+    const res1 = await articleTagService.findArticleTag(article_ids);
+    let tagids: number[] = []; // 存起来所有标签id
+    res1.forEach((item) => {
+      tagids.push(item.tag_id!);
+    });
+    tagids = arrayUnique(tagids);
+    // 找到所有标签信息
+    const res2 = await tagService.findRangTag(tagids);
+    const tagMap = {};
+    res2.forEach((item) => {
+      tagMap[item.id!] = item;
+    });
+    const articleTagRes = {};
+    res1.forEach((item) => {
+      const old = articleTagRes[item.article_id!];
+      if (old) {
+        old.push(tagMap[item.tag_id!]);
+      } else {
+        articleTagRes[item.article_id!] = [tagMap[item.tag_id!]];
+      }
+    });
     result.rows.forEach((item) => {
       const v: any = item.get();
-      v.star_total = v.stars.length;
-      v.comment_total = v.comments.length;
+      v.tags = articleTagRes[item.id!];
+      v.star_total = starNumsMap[item.id!] || 0;
+      v.comment_total = commentNumsMap[item.id!] || 0;
+      // v.comment_total = v.comments.length;
+      // v.star_total = v.stars.length;
       delete v.stars;
       delete v.comments;
     });

@@ -70,4 +70,4 @@ CMD pm2 -v && \
   NODE_APP_RELEASE_PROJECT_NAME=${BILLD_JOBNAME} \
   NODE_APP_RELEASE_PROJECT_ENV=${BILLD_ENV} \
   NODE_APP_RELEASE_PROJECT_PORT=${BILLD_PORT} \
-  pm2-runtime start './dist/index.js' --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}
+  pm2-runtime start './dist/index.js' -i max --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}
