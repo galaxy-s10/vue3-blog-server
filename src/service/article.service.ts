@@ -1,5 +1,8 @@
 import Sequelize from 'sequelize';
 
+import articleTagService from './articleTag.service';
+import tagService from './tag.service';
+
 import sequelize from '@/config/mysql';
 import { IArticle, IList } from '@/interface';
 import articleModel from '@/model/article.model';
@@ -8,8 +11,6 @@ import starModel from '@/model/star.model';
 import tagModel from '@/model/tag.model';
 import typeModel from '@/model/type.model';
 import userModel from '@/model/user.model';
-import articleTagService from '@/service/articleTag.service';
-import tagService from '@/service/tag.service';
 import { arrayUnique, handlePaging } from '@/utils';
 
 const { Op, literal } = Sequelize;
@@ -233,11 +234,6 @@ class ArticleService {
         {
           model: typeModel,
           where: typeWhere,
-          // attributes: [[fn('GROUP_CONCAT', col('types.name')), 'dddd']],
-          // attributes: {
-          //   // exclude: ['types.id'],
-          //   include: [[fn('GROUP_CONCAT', col('types.name')), 'dddd']],
-          // },
           through: { attributes: [] },
         },
         // {
@@ -246,10 +242,7 @@ class ArticleService {
         //   through: { attributes: [] },
         // },
       ],
-      // attributes: ['title'],
-      // attributes: [[fn('count', col('comments.id')), 'comment_total']],
       attributes: {
-        // include: [[literal(`(select count(comments.id))`), 'comment_total']],
         exclude: ['content'],
         include: [
           // [fn('count', col('comments.id')), 'comment_total'],
@@ -274,7 +267,6 @@ class ArticleService {
         ['priority', 'desc'],
         [orderName, orderBy],
       ],
-      // group: ['article.id'],
       limit,
       offset,
       // subQuery: false, // 非常关键！！！
@@ -302,14 +294,12 @@ class ArticleService {
       starNumsMap[item.article_id] = item.count;
     });
 
-    // 找到文章对应的标签
     const res1 = await articleTagService.findArticleTag(article_ids);
-    let tagids: number[] = []; // 存起来所有标签id
+    let tagids: number[] = [];
     res1.forEach((item) => {
       tagids.push(item.tag_id!);
     });
     tagids = arrayUnique(tagids);
-    // 找到所有标签信息
     const res2 = await tagService.findRangTag(tagids);
     const tagMap = {};
     res2.forEach((item) => {
