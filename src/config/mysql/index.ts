@@ -4,11 +4,13 @@ import { PROJECT_ENV } from '@/constant';
 import { MYSQL_CONFIG } from '@/secret/secret';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
-const sequelize = new Sequelize(
-  MYSQL_CONFIG.database,
-  MYSQL_CONFIG.username,
-  MYSQL_CONFIG.password,
-  {
+export const dbName = MYSQL_CONFIG.database;
+
+export function newSequelize(db?) {
+  return new Sequelize({
+    database: db,
+    username: MYSQL_CONFIG.username,
+    password: MYSQL_CONFIG.password,
     host: MYSQL_CONFIG.host,
     port: MYSQL_CONFIG.port,
     dialect: 'mysql',
@@ -25,8 +27,10 @@ const sequelize = new Sequelize(
     },
     timezone: '+08:00',
     logging: false,
-  }
-);
+  });
+}
+
+const sequelize = newSequelize(dbName);
 
 /** 连接数据库 */
 export const connectMysql = async () => {

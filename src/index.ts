@@ -11,7 +11,7 @@ import staticService from 'koa-static';
 import { catchErrorMiddle, corsMiddle } from '@/app/app.middleware';
 import errorHandler from '@/app/handler/error-handle';
 import { apiBeforeVerify } from '@/app/verify.middleware';
-import { connectMysql } from '@/config/mysql';
+import sequelize, { connectMysql } from '@/config/mysql';
 import { connectRedis } from '@/config/redis';
 import { createPubSub } from '@/config/redis/pub';
 import { connectWebSocket } from '@/config/websocket';
@@ -82,7 +82,7 @@ function runServer() {
         createPubSub(), // 创建redis的发布订阅
       ]);
       initMonit(); // 初始化监控
-      initDb(3); // 加载sequelize的relation表关联
+      initDb('load', sequelize); // 加载sequelize的relation表关联
       app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
       loadAllRoutes(app); // 加载所有路由
       await new Promise((resolve) => {

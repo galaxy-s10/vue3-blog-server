@@ -100,7 +100,7 @@ class InitController {
     const queryInterface = sequelize.getQueryInterface();
     const allTables = await queryInterface.showAllTables();
     if (!allTables.length) {
-      await initDb(1);
+      await initDb('force', sequelize);
       successHandler({ ctx, data: '初始化数据库成功！' });
     } else {
       throw new CustomError(
