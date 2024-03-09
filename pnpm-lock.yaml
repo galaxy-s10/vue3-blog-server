@@ -12,11 +12,11 @@ dependencies:
     specifier: ^0.26.1
     version: 0.26.1
   billd-html-webpack-plugin:
-    specifier: ^1.0.1
-    version: 1.0.1(@swc/core@1.3.106)(@types/node@16.11.9)(esbuild@0.15.18)
+    specifier: ^1.0.6
+    version: 1.0.6(@swc/core@1.3.106)(@types/node@16.11.9)(esbuild@0.15.18)
   billd-utils:
-    specifier: ^0.0.9
-    version: 0.0.9(typescript@4.8.2)
+    specifier: ^0.0.22
+    version: 0.0.22(typescript@4.8.2)
   chalk:
     specifier: ^4.1.2
     version: 4.1.2
@@ -3188,8 +3188,8 @@ packages:
     resolution: {integrity: sha512-1J5SWbkoVJH9DTALN8igB4p+nPKZzPrJ/HomqBDLpfUvDXCdjdBmBUcH5McZfur0lftVssVU6BZug5NYh87zTw==}
     dev: false
 
-  /billd-html-webpack-plugin@1.0.1(@swc/core@1.3.106)(@types/node@16.11.9)(esbuild@0.15.18):
-    resolution: {integrity: sha512-ktyHU31TP6VUvCYjy/HdzA6PlYs72VGTHx6Zd8p+cQba7M+pdR5y8lZKQe1JDYf/h1R7TnxrmmiU/tSsC6nLOg==}
+  /billd-html-webpack-plugin@1.0.6(@swc/core@1.3.106)(@types/node@16.11.9)(esbuild@0.15.18):
+    resolution: {integrity: sha512-zM294oAMqRD1rlqoyC1E9QbFsBgMPYStODmQKwUjI+xd02Rwo+3iZhmlQ8q0EuF2KnyhwDwhxyZfDGSo6Ow8Tw==}
     requiresBuild: true
     dependencies:
       vite: 4.5.2(@types/node@16.11.9)
@@ -3208,8 +3208,8 @@ packages:
       - webpack-cli
     dev: false
 
-  /billd-utils@0.0.9(typescript@4.8.2):
-    resolution: {integrity: sha512-vPGUOtKG725KKK7laSI0oXsfIuZpQsh2z3JSLMW/+V/eKXjQnj99n4ks4Jhh4/u+ub2g4h87+idrN2wmw9D5Cw==}
+  /billd-utils@0.0.22(typescript@4.8.2):
+    resolution: {integrity: sha512-koOfFzbzSkw6gMYyOKNMzAJHYMhUWHr3swPW48rT7PwZMvBkAtH93bHEVuDCwariWrSwxCGIqozOzp5YaeePqQ==}
     requiresBuild: true
     dependencies:
       '@babel/core': 7.23.7
@@ -6664,6 +6664,7 @@ packages:
 
   /nan@2.18.0:
     resolution: {integrity: sha512-W7tfG7vMOGtD30sHoZSSc/JVYiyDPEyQVso/Zz+/uQd0B0L46gtC+pHha5FFMRpil6fm/AoEcRWyOVi4+E/f8w==}
+    requiresBuild: true
     dev: false
     optional: true
 
