@@ -1,6 +1,8 @@
 import { ParameterizedContext } from 'koa';
 import { Model, ModelStatic } from 'sequelize/types';
 
+import sequelize from '@/config/mysql';
+import { deleteAllForeignKeys, deleteAllIndexs } from '@/init/initDb';
 import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
 
 export const formatTime = (timestamp: number) => {
@@ -187,11 +189,13 @@ export const initTable = (
     methodArg: 'force' | 'alter'
   ) {
     if (methodArg === 'force') {
-      await deleteAllForeignKeys();
+      await deleteAllForeignKeys({ sequelizeInst: sequelize });
+      await deleteAllIndexs({ sequelizeInst: sequelize });
       await modelArg.sync({ force: true });
       console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建！`));
     } else if (methodArg === 'alter') {
-      await deleteAllForeignKeys();
+      await deleteAllForeignKeys({ sequelizeInst: sequelize });
+      await deleteAllIndexs({ sequelizeInst: sequelize });
       await modelArg.sync({ alter: true });
       console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚同步成功！`));
     } else {

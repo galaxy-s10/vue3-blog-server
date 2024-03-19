@@ -39,7 +39,7 @@ export const deleteAllTable = async (sequelizeInst: Sequelize) => {
 };
 
 /** 删除外键 */
-export const deleteForeignKeys = async (data: {
+export const deleteAllForeignKeys = async (data: {
   sequelizeInst: Sequelize;
   model?: ModelStatic<Model>;
 }) => {
@@ -79,7 +79,7 @@ export const deleteForeignKeys = async (data: {
 };
 
 /** 删除索引（除了PRIMARY） */
-export const deleteIndexs = async (data: {
+export const deleteAllIndexs = async (data: {
   sequelizeInst: Sequelize;
   model?: ModelStatic<Model>;
 }) => {
@@ -130,8 +130,8 @@ export const initDb = async (
   switch (type) {
     case 'force':
       console.log(chalkWARN('开始初始化数据库所有表'));
-      await deleteForeignKeys({ sequelizeInst });
-      await deleteIndexs({ sequelizeInst });
+      await deleteAllForeignKeys({ sequelizeInst });
+      await deleteAllIndexs({ sequelizeInst });
       await deleteAllTable(sequelizeInst);
       await sequelizeInst.sync({ force: true }); // 将创建表,如果表已经存在,则将其首先删除
       console.log(chalkSUCCESS('初始化数据库所有表完成！'));

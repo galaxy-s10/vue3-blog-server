@@ -82,7 +82,7 @@ function runServer() {
         createPubSub(), // 创建redis的发布订阅
       ]);
       initMonit(); // 初始化监控
-      initDb('load', sequelize); // 加载sequelize的relation表关联
+      initDb('alert', sequelize); // 加载sequelize的relation表关联
       app.use(apiBeforeVerify); // 注意：需要在所有路由加载前使用这个中间件
       loadAllRoutes(app); // 加载所有路由
       await new Promise((resolve) => {

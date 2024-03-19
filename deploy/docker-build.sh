@@ -4,10 +4,10 @@
 # Date: 2022-08-09 12:55:47
 # Description: https://github.com/galaxy-s10/sh/
 # Email: 2274751790@qq.com
-# FilePath: /vue3-blog-server/deploy/docker-build.sh
+# FilePath: /galaxy-s10/vue3-blog-server/deploy/docker-build.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2024-01-25 15:36:23
+# LastEditTime: 2024-03-14 14:16:10
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -51,7 +51,7 @@ PUBLICDIR=/node #约定公共目录为/node
 
 # echo 设置pnpm淘宝镜像:
 # pnpm config set registry https://registry.npmmirror.com/
-# pnpm config set @billd:registry http://registry.hsslive.cn/
+# pnpm config set @billd:registry https://registry.hsslive.cn/
 
 # echo 查看当前pnpm镜像:
 # pnpm config get registry
