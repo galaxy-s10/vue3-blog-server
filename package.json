@@ -8,9 +8,9 @@
   "license": "MIT",
   "author": "shuisheng <2274751790@qq.com>",
   "scripts": {
-    "build": "rimraf dist && tsc -P ./tsconfig.json || true",
-    "cz": "cz",
+    "build": "rimraf dist && tsc -P ./tsconfig.prod.json || true",
     "copy": "ts-node ./deploy/handleGiteeJenkins.mjs",
+    "cz": "cz",
     "dev": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=development NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./src/index.ts",
     "dev:beta": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./src/index.ts",
     "dev:prod": "cross-env NODE_ENV=development NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon --exec node -r @swc-node/register ./src/index.ts",
@@ -21,8 +21,7 @@
     "push": "cz && standard-version",
     "release": "standard-version",
     "release:first": "standard-version --first-release",
-    "start:beta": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=beta NODE_APP_RELEASE_PROJECT_PORT=3300 nodemon --exec node -r @swc-node/register ./dist/index.js",
-    "start:prod": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3200 nodemon --exec node -r @swc-node/register ./dist/index.js",
+    "start": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3300 node ./dist/index.js",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "config": {

@@ -65,5 +65,5 @@ const model = sequelize.define<StarModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

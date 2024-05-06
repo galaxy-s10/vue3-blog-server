@@ -101,5 +101,5 @@ const model = sequelize.define<CommentModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

@@ -58,11 +58,11 @@ RUN echo PUBLICDIR:   ${BILLD_PUBLICDIR}
 RUN echo 开始安装依赖:
 RUN pnpm i
 
-RUN echo 开始打包:
+# RUN echo 开始打包:
 RUN npm run build
 
 VOLUME [ ${BILLD_PUBLICDIR}/${BILLD_JOBNAME}/${BILLD_ENV} ]
-VOLUME [ /node/backup/ ]
+VOLUME [ ${BILLD_PUBLICDIR}/backup/ ]
 
 # pm2环境变量管理:https://pm2.io/docs/runtime/best-practices/environment-variables/
 CMD pm2 -v && \
@@ -70,4 +70,4 @@ CMD pm2 -v && \
   NODE_APP_RELEASE_PROJECT_NAME=${BILLD_JOBNAME} \
   NODE_APP_RELEASE_PROJECT_ENV=${BILLD_ENV} \
   NODE_APP_RELEASE_PROJECT_PORT=${BILLD_PORT} \
-  pm2-runtime start './dist/index.js' -i max --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}
+  pm2-runtime start './dist/index.js' -i 1 --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}

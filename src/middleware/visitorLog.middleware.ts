@@ -8,6 +8,7 @@ const schema = Joi.object({
   user_id: Joi.number(),
   ip: Joi.string().min(3).max(100),
   ip_data: Joi.string().min(3).max(150),
+  page_url: Joi.string().min(0).max(450),
   status: [1, 2],
 });
 

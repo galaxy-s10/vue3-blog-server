@@ -59,5 +59,5 @@ const model = sequelize.define<ThirdUserModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

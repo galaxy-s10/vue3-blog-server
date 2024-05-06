@@ -54,5 +54,5 @@ const model = sequelize.define<WorksModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

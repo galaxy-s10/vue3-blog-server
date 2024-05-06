@@ -35,5 +35,5 @@ const model = sequelize.define<TypeModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

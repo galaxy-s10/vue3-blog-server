@@ -53,5 +53,5 @@ const model = sequelize.define<ArticleTypeModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

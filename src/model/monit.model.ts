@@ -41,5 +41,5 @@ const model = sequelize.define<MonitModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

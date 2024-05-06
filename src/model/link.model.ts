@@ -51,5 +51,5 @@ const model = sequelize.define<LinkModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

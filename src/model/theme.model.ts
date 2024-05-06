@@ -73,5 +73,5 @@ const model = sequelize.define<ThemeModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

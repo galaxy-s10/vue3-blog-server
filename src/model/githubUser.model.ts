@@ -134,5 +134,5 @@ const model = sequelize.define<GithubUserModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

@@ -38,5 +38,5 @@ const model = sequelize.define<TagModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

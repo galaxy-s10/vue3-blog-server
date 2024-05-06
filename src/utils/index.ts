@@ -1,9 +1,13 @@
 import { ParameterizedContext } from 'koa';
+import { Sequelize } from 'sequelize';
 import { Model, ModelStatic } from 'sequelize/types';
 
-import sequelize from '@/config/mysql';
-import { deleteAllForeignKeys, deleteAllIndexs } from '@/init/initDb';
-import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
+import {
+  chalkERROR,
+  chalkINFO,
+  chalkSUCCESS,
+  chalkWARN,
+} from '@/utils/chalkTip';
 
 export const formatTime = (timestamp: number) => {
   function addZero(num: number) {
@@ -175,34 +179,122 @@ export const handlePaging = (
   return obj;
 };
 
+/** 删除外键 */
+export const deleteForeignKeys = async (data: {
+  sequelizeInst: Sequelize;
+  model?: ModelStatic<Model>;
+}) => {
+  try {
+    const { sequelizeInst, model } = data;
+    const queryInterface = sequelizeInst.getQueryInterface();
+    let allTables: string[] = [];
+    if (model) {
+      allTables = [model.name];
+    } else {
+      allTables = await queryInterface.showAllTables();
+    }
+    console.log(chalkWARN(`需要删除外键的表:${allTables.toString()}`));
+    const allIndexs: any = [];
+    allTables.forEach((v) => {
+      allIndexs.push(queryInterface.showIndex(v));
+    });
+    const allConstraint: any = [];
+    allTables.forEach((v) => {
+      allConstraint.push(queryInterface.getForeignKeysForTables([v]));
+    });
+    const res1 = await Promise.all(allConstraint);
+    const allConstraint1: any = [];
+    res1.forEach((v) => {
+      const tableName = Object.keys(v)[0];
+      const constraint: string[] = v[tableName];
+      constraint.forEach((item) => {
+        allConstraint1.push(queryInterface.removeConstraint(tableName, item));
+      });
+      console.log(chalkINFO(`${tableName}表的外键: ${constraint.toString()}`));
+    });
+    await Promise.all(allConstraint1);
+    console.log(chalkSUCCESS(`删除${allTables.toString()}表的外键成功！`));
+  } catch (err) {
+    console.log(chalkERROR(`删除外键失败！`), err);
+  }
+};
+
+/** 删除索引（除了PRIMARY） */
+export const deleteIndexs = async (data: {
+  sequelizeInst: Sequelize;
+  model?: ModelStatic<Model>;
+}) => {
+  try {
+    const { sequelizeInst, model } = data;
+    const queryInterface = sequelizeInst.getQueryInterface();
+    let allTables: string[] = [];
+    if (model) {
+      allTables = [model.name];
+    } else {
+      allTables = await queryInterface.showAllTables();
+    }
+    console.log(chalkWARN(`需要删除索引的表:${allTables.toString()}`));
+    const allIndexs: any = [];
+    allTables.forEach((v) => {
+      allIndexs.push(queryInterface.showIndex(v));
+    });
+    const res1 = await Promise.all(allIndexs);
+    const allIndexs1: any = [];
+    res1.forEach((v: any[]) => {
+      const { tableName }: { tableName: string } = v[0];
+      const indexStrArr: string[] = [];
+      v.forEach((x) => {
+        indexStrArr.push(x.name);
+        if (x.name !== 'PRIMARY') {
+          allIndexs1.push(queryInterface.removeIndex(tableName, x.name));
+        }
+      });
+      console.log(chalkINFO(`${tableName}表的索引: ${indexStrArr.toString()}`));
+    });
+    await Promise.all(allIndexs1);
+    console.log(chalkSUCCESS(`删除${allTables.toString()}表的索引成功！`));
+  } catch (err) {
+    console.log(chalkERROR(`删除索引失败！`), err);
+  }
+};
+
 /**
  * 初始化表
  * @param model
  * @param method
  */
-export const initTable = (
-  model: ModelStatic<Model>,
-  method?: 'force' | 'alter'
-) => {
+export const initTable = (data: {
+  model: ModelStatic<Model>;
+  method?: 'force' | 'alter';
+  sequelize: Sequelize;
+}) => {
   async function main(
     modelArg: ModelStatic<Model>,
-    methodArg: 'force' | 'alter'
+    methodArg?: 'force' | 'alter'
   ) {
     if (methodArg === 'force') {
-      await deleteAllForeignKeys({ sequelizeInst: sequelize });
-      await deleteAllIndexs({ sequelizeInst: sequelize });
+      console.log(chalkWARN(`开始(重新)创建${modelArg.tableName}表`));
+      await deleteIndexs({ sequelizeInst: data.sequelize, model: data.model });
+      await deleteForeignKeys({
+        sequelizeInst: data.sequelize,
+        model: data.model,
+      });
       await modelArg.sync({ force: true });
       console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建！`));
     } else if (methodArg === 'alter') {
-      await deleteAllForeignKeys({ sequelizeInst: sequelize });
-      await deleteAllIndexs({ sequelizeInst: sequelize });
+      console.log(chalkWARN(`开始同步${modelArg.tableName}表`));
+      await deleteIndexs({ sequelizeInst: data.sequelize, model: data.model });
+      await deleteForeignKeys({
+        sequelizeInst: data.sequelize,
+        model: data.model,
+      });
       await modelArg.sync({ alter: true });
       console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚同步成功！`));
     } else {
       console.log(chalkINFO(`加载数据库表: ${modelArg.tableName}`));
     }
   }
-  main(model, method!).catch((err) => {
+  main(data.model, data.method).catch((err) => {
     console.log(chalkERROR(`initTable失败`), err.message);
     console.log(err);
   });

@@ -362,6 +362,7 @@ export interface IVisitorLog {
   ip?: string;
   status?: number;
   ip_data?: string;
+  page_url?: string;
   total?: number; // 获取当天访客访问数据的时候添加了一个total字段
   created_at?: string;
   updated_at?: string;

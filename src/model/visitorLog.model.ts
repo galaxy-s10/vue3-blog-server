@@ -30,10 +30,13 @@ const model = sequelize.define<VisitorLogModel>(
       defaultValue: -1, // -1:游客 非-1:用户
     },
     ip: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(500),
     },
     ip_data: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
+    },
+    page_url: {
+      type: DataTypes.STRING(500),
     },
   },
   {
@@ -51,5 +54,5 @@ const model = sequelize.define<VisitorLogModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

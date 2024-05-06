@@ -227,11 +227,12 @@ class VisitorLogService {
   }
 
   /** 新增访客日志 */
-  async create({ ip, user_id, ip_data }) {
+  async create({ ip, user_id, ip_data, page_url }) {
     const result = await visitorLogModel.create({
       ip,
       ip_data: JSON.stringify(ip_data),
       user_id,
+      page_url,
     });
     return result;
   }

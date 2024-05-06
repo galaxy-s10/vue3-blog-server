@@ -1,8 +1,13 @@
 import { Sequelize } from 'sequelize';
 
-import { PROJECT_ENV } from '@/constant';
+import { initDb } from '@/init/initDb';
 import { MYSQL_CONFIG } from '@/secret/secret';
-import { chalkERROR, chalkINFO, chalkSUCCESS } from '@/utils/chalkTip';
+import {
+  chalkERROR,
+  chalkINFO,
+  chalkSUCCESS,
+  chalkWARN,
+} from '@/utils/chalkTip';
 
 export const dbName = MYSQL_CONFIG.database;
 
@@ -32,28 +37,49 @@ export function newSequelize(db?) {
 
 const sequelize = newSequelize(dbName);
 
+const msg = (flag: boolean) =>
+  `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的${dbName}数据库${
+    flag ? '成功' : '失败'
+  }!`;
+
+async function handleMysqlInit() {
+  const initSequelize = newSequelize();
+  try {
+    await initSequelize.query(`USE ${dbName}`, { logging: false });
+    // await initDb('alert', sequelize);
+  } catch (error: any) {
+    if (error.message.indexOf('Access') !== -1) {
+      console.log(chalkERROR(msg(false)));
+      await initSequelize.close();
+      return;
+    }
+    if (error.message.indexOf('ECONNREFUSED') !== -1) {
+      console.log(chalkERROR(msg(false)));
+      await initSequelize.close();
+      return;
+    }
+    console.log(chalkWARN(`${dbName}数据库不存在，开始新建${dbName}数据库！`));
+    await initSequelize.query(
+      `CREATE DATABASE ${dbName} CHARACTER SET = 'utf8mb4';`,
+      { logging: false }
+    );
+    console.log(chalkSUCCESS(`新建${dbName}数据库成功！`));
+    await initDb('force', sequelize);
+  }
+  await initSequelize.close();
+}
+
 /** 连接数据库 */
 export const connectMysql = async () => {
-  const msg = (flag: boolean) =>
-    `连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的mysql数据库${
-      MYSQL_CONFIG.database
-    }${flag ? '成功' : '失败'}!`;
-
-  try {
-    console.log(
-      chalkINFO(
-        `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的mysql数据库${MYSQL_CONFIG.database}...`
-      )
-    );
-    await sequelize.authenticate({
-      logging: PROJECT_ENV !== 'prod',
-    });
-    console.log(chalkSUCCESS(msg(true)));
-  } catch (error) {
-    console.log(chalkERROR(msg(false)));
-    console.log(error);
-    throw new Error(msg(false));
-  }
+  console.log(
+    chalkINFO(
+      `开始连接${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}服务器的mysql数据库${MYSQL_CONFIG.database}...`
+    )
+  );
+  await handleMysqlInit();
+  await sequelize.authenticate({ logging: false });
+  await initDb('load', sequelize);
+  console.log(chalkSUCCESS(msg(true)));
 };
 
 export default sequelize;

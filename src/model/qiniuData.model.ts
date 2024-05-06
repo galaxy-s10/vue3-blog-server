@@ -69,5 +69,5 @@ const model = sequelize.define<QiniuDataModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;

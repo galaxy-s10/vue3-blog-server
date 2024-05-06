@@ -53,5 +53,5 @@ const model = sequelize.define<ArticleTagModel>(
   }
 );
 
-initTable(model);
+initTable({ model, sequelize });
 export default model;
