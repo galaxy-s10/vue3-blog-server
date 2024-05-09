@@ -19,7 +19,7 @@ export const loadAllModel = () => {
     // eslint-disable-next-line
     require(`${modelDir}/${file}`).default;
   });
-  console.log(chalkSUCCESS(`加载所有model完成~`));
+  console.log(chalkSUCCESS(`加载所有数据库表成功!`));
 };
 
 /** 删除所有表 */

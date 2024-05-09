@@ -38,23 +38,20 @@ const model = sequelize.define<ArticleModel>(
     },
     desc: {
       type: DataTypes.STRING(100),
-      allowNull: true,
     },
     is_comment: {
       type: DataTypes.INTEGER,
       defaultValue: 1, // 1:开启评论 2:关闭评论
     },
     priority: {
-      type: DataTypes.INTEGER, // 权重
-      allowNull: true,
+      type: DataTypes.INTEGER,
     },
     status: {
       type: DataTypes.INTEGER,
       defaultValue: 2, // 1:已审核 2:未审核
     },
     head_img: {
-      type: DataTypes.STRING(150),
-      allowNull: true,
+      type: DataTypes.STRING(300),
     },
     content: {
       type: DataTypes.TEXT,

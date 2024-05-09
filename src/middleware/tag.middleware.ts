@@ -6,8 +6,9 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   id: Joi.number(),
-  name: Joi.string().min(3).max(30),
-  color: Joi.string().min(3).max(30),
+  name: Joi.string().min(2).max(30),
+  color: Joi.string().min(2).max(30),
+  priority: Joi.number(),
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {

@@ -40,13 +40,13 @@ npm run dev:prod
 1.执行 docker-build.sh：
 
 ```bash
-sh docker-build.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10 3300 v0.0.1
+sh ./deploy/docker-build.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10 3300 v0.0.1
 ```
 
 2.执行 docker-run.sh：
 
 ```bash
-sh docker-run.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10/vue3-blog-server 3300 v0.0.1
+sh ./deploy/docker-run.sh vue3-blog-server beta /Users/huangshuisheng/Desktop/hss/galaxy-s10/vue3-blog-server 3300 v0.0.1
 ```
 
 # 服务器环境

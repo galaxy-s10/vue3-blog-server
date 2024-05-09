@@ -18,9 +18,10 @@ import User from './user.model';
 import UserArticle from './userArticle.model';
 import UserRole from './userRole.model';
 
-import { chalkINFO } from '@/utils/chalkTip';
+import { loadAllModel } from '@/init/initDb';
 
-console.log(chalkINFO('加载了relation'));
+loadAllModel();
+
 /**
  * https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html
  * A 称为 源 模型,而 B 称为 目标 模型.

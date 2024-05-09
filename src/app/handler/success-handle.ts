@@ -16,7 +16,7 @@ const successHandler = ({
   data?: any;
   message?: string;
 }) => {
-  console.log(chalkSUCCESS(`👇👇👇👇 success-handle 👇👇👇👇`));
+  console.log(chalkSUCCESS(`=========== success-handle ===========`));
   const methods = ctx.request.method;
 
   ctx.status = statusCode; // 不手动设置状态的话，koa默认方法返回404，delete方法返回400
@@ -26,7 +26,7 @@ const successHandler = ({
     message: message || HTTP_SUCCESS_MSG[methods],
   };
 
-  console.log(chalkSUCCESS(`👆👆👆👆 success-handle 👆👆👆👆`));
+  console.log(chalkSUCCESS(`=========== success-handle ===========`));
 };
 
 export default successHandler;

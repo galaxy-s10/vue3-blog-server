@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { ITheme, IList } from '@/interface';
+import { IList, ITheme } from '@/interface';
 import themeModel from '@/model/theme.model';
 import { handlePaging } from '@/utils';
 

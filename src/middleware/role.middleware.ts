@@ -8,7 +8,7 @@ const schema = Joi.object({
   id: Joi.number(),
   p_id: Joi.number(),
   role_name: Joi.string().min(2).max(30),
-  role_value: Joi.string().min(3).max(30),
+  role_value: Joi.string().min(2).max(30),
   type: [1, 2],
   priority: Joi.number(),
   role_auths: Joi.array().items(Joi.number()),

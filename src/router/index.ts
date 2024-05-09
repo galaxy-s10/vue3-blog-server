@@ -33,5 +33,5 @@ export function loadAllRoutes(app) {
       console.log(error);
     }
   });
-  console.log(chalkSUCCESS('加载所有路由完成~'));
+  console.log(chalkSUCCESS('加载所有路由成功！'));
 }

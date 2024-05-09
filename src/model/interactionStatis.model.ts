@@ -35,11 +35,9 @@ const model = sequelize.define<IInteractionStatisModel>(
     },
     desc: {
       type: DataTypes.STRING,
-      allowNull: true,
     },
     type: {
       type: DataTypes.STRING,
-      allowNull: true,
     },
   },
   {

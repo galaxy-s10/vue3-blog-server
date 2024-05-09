@@ -6,9 +6,9 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   user_id: Joi.number(),
-  ip: Joi.string().min(3).max(100),
-  ip_data: Joi.string().min(3).max(150),
-  page_url: Joi.string().min(0).max(450),
+  ip: Joi.string().min(1).max(100),
+  ip_data: Joi.string().min(1).max(200),
+  page_url: Joi.string().min(0).max(400),
   status: [1, 2],
 });
 

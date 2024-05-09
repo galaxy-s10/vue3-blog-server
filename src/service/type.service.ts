@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IType, IList } from '@/interface';
+import { IList, IType } from '@/interface';
 import typeModel from '@/model/type.model';
 import { handlePaging } from '@/utils';
 
@@ -76,14 +76,17 @@ class TypeService {
   }
 
   /** 修改分类 */
-  async update({ id, name }: IType) {
-    const result = await typeModel.update({ name }, { where: { id } });
+  async update({ id, name, priority }: IType) {
+    const result = await typeModel.update(
+      { name, priority },
+      { where: { id } }
+    );
     return result;
   }
 
   /** 创建分类 */
-  async create({ name }: IType) {
-    const result = await typeModel.create({ name });
+  async create({ name, priority }: IType) {
+    const result = await typeModel.create({ name, priority });
     return result;
   }
 

@@ -54,7 +54,7 @@ class TypeController {
       );
     }
     const id = +ctx.params.id;
-    const { name }: IType = ctx.request.body;
+    const { name, priority }: IType = ctx.request.body;
     const isExist = await typeService.isExist([id]);
     if (!isExist) {
       throw new CustomError(
@@ -63,7 +63,7 @@ class TypeController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    await typeService.update({ id, name });
+    await typeService.update({ id, name, priority });
     successHandler({ ctx });
 
     await next();
@@ -78,7 +78,7 @@ class TypeController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { name }: IType = ctx.request.body;
+    const { name, priority }: IType = ctx.request.body;
     if (!name) {
       throw new CustomError(
         `请输入分类名称！`,
@@ -86,7 +86,7 @@ class TypeController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    await typeService.create({ name });
+    await typeService.create({ name, priority });
     successHandler({ ctx });
 
     await next();

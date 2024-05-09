@@ -7,7 +7,7 @@
 # FilePath: /vue3-blog-server/deploy/docker-build.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2024-03-19 15:02:28
+# LastEditTime: 2024-05-06 14:27:03
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -78,6 +78,11 @@ PUBLICDIR=/node #约定公共目录为/node
 # 服务器写死测试：
 # sh ./deploy/docker-build.sh vue3-blog-server beta /var/lib/jenkins/workspace/vue3-blog-server 3300 v0.0.1
 # sh ./deploy/docker-build.sh vue3-blog-server prod /var/lib/jenkins/workspace/vue3-blog-server 3200 v0.0.1
+
+echo 当前目录
+echo $(pwd)
+
+echo 执行docker-build.sh
 
 DOCKER_BUILDKIT=0 docker build -t $JOBNAME-$ENV-$PORT . \
   --build-arg BILLD_JOBNAME=$JOBNAME \

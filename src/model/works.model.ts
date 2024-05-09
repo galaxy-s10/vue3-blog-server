@@ -32,13 +32,13 @@ const model = sequelize.define<WorksModel>(
       type: DataTypes.STRING(100),
     },
     bg_url: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(300),
     },
     url: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(300),
     },
     priority: {
-      type: DataTypes.INTEGER, // 权重
+      type: DataTypes.INTEGER,
     },
     status: {
       type: DataTypes.INTEGER,

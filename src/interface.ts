@@ -172,6 +172,7 @@ export interface IGithubUser {
 export interface IType {
   id?: number;
   name?: string;
+  priority?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -184,6 +185,7 @@ export interface IMusic {
   author?: string;
   audio_url?: string;
   status?: number;
+  priority?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -240,6 +242,7 @@ export interface ILink {
   desc?: string;
   url?: string;
   status?: number;
+  priority?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -261,6 +264,7 @@ export interface ITag {
   id?: number;
   name?: string;
   color?: string;
+  priority?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;

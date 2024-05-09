@@ -54,7 +54,7 @@ class TagController {
       );
     }
     const id = +ctx.params.id;
-    const { name, color }: ITag = ctx.request.body;
+    const { name, color, priority }: ITag = ctx.request.body;
     const isExist = await tagService.isExist([id]);
     if (!isExist) {
       throw new CustomError(
@@ -63,7 +63,7 @@ class TagController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    await tagService.update({ id, name, color });
+    await tagService.update({ id, name, color, priority });
     successHandler({ ctx });
 
     await next();
@@ -78,8 +78,8 @@ class TagController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { name, color }: ITag = ctx.request.body;
-    await tagService.create({ name, color });
+    const { name, color, priority }: ITag = ctx.request.body;
+    await tagService.create({ name, color, priority });
     successHandler({ ctx });
 
     await next();

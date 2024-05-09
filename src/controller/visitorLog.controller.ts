@@ -114,7 +114,7 @@ class VisitorLogController {
     const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
     // 这个接口的userInfo不是必须的
     const { userInfo } = await authJwt(ctx);
-    if (ip !== '127.0.0.1') {
+    if (ip === '127.0.0.1') {
       successHandler({ ctx, data: '开发环境下调用' });
     } else {
       const { page_url }: IVisitorLog = ctx.request.body;

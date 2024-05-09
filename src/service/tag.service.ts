@@ -158,14 +158,17 @@ class TagService {
   }
 
   /** 修改标签 */
-  async update({ id, name, color }: ITag) {
-    const result = await tagModel.update({ name, color }, { where: { id } });
+  async update({ id, name, color, priority }: ITag) {
+    const result = await tagModel.update(
+      { name, color, priority },
+      { where: { id } }
+    );
     return result;
   }
 
   /** 创建标签 */
-  async create({ name, color }: ITag) {
-    const result = await tagModel.create({ name, color });
+  async create({ name, color, priority }: ITag) {
+    const result = await tagModel.create({ name, color, priority });
     return result;
   }
 

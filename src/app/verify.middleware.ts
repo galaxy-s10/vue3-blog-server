@@ -96,18 +96,18 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
     console.log(chalkWARN(`apiBeforeVerify中间件耗时：${duration}ms`));
     console.log(
       chalkINFO(
-        `日期：${new Date().toLocaleString()}，ip：${ip}，响应${
-          admin ? '后' : '前'
-        }台接口 ${ctx.request.method} ${url}`
+        `ip：${ip}，响应${admin ? '后' : '前'}台接口 ${
+          ctx.request.method
+        } ${url}`
       )
     );
   };
 
   console.log(
     chalkINFO(
-      `日期：${new Date().toLocaleString()}，ip：${ip}，收到${
-        admin ? '后' : '前'
-      }台接口 ${ctx.request.method} ${url}请求`
+      `ip：${ip}，收到${admin ? '后' : '前'}台接口 ${
+        ctx.request.method
+      } ${url}请求`
     )
   );
 

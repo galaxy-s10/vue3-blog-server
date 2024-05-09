@@ -41,6 +41,9 @@ const model = sequelize.define<LinkModel>(
       type: DataTypes.INTEGER,
       defaultValue: 2, // 1:已审核 2:未审核
     },
+    priority: {
+      type: DataTypes.INTEGER,
+    },
   },
   {
     paranoid: true,

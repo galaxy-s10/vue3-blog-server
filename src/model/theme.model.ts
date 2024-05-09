@@ -57,7 +57,6 @@ const model = sequelize.define<ThemeModel>(
     },
     desc: {
       type: DataTypes.STRING(100),
-      allowNull: true,
       comment: '简介',
       // validate: {
       //   max: 50,

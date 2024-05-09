@@ -1,4 +1,4 @@
-FROM node:16.19.0
+FROM node:18.19.0
 
 ARG BILLD_JOBNAME
 ARG BILLD_ENV
@@ -58,7 +58,7 @@ RUN echo PUBLICDIR:   ${BILLD_PUBLICDIR}
 RUN echo 开始安装依赖:
 RUN pnpm i
 
-# RUN echo 开始打包:
+RUN echo 开始打包:
 RUN npm run build
 
 VOLUME [ ${BILLD_PUBLICDIR}/${BILLD_JOBNAME}/${BILLD_ENV} ]

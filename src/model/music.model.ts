@@ -26,20 +26,23 @@ const model = sequelize.define<MusicModel>(
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
     },
     cover_pic: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(300),
     },
     author: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
     },
     audio_url: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(300),
     },
     status: {
       type: DataTypes.INTEGER,
       defaultValue: 2, // 1:已审核 2:未审核
+    },
+    priority: {
+      type: DataTypes.INTEGER,
     },
   },
   {

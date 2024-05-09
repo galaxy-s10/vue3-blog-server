@@ -57,7 +57,7 @@ class MusicController {
       );
     }
     const id = +ctx.params.id;
-    const { name, cover_pic, audio_url, author, status }: IMusic =
+    const { name, cover_pic, audio_url, author, status, priority }: IMusic =
       ctx.request.body;
     const isExist = await musicService.isExist([id]);
     if (!isExist) {
@@ -74,6 +74,7 @@ class MusicController {
       audio_url,
       author,
       status,
+      priority,
     });
     successHandler({ ctx });
 
@@ -89,7 +90,7 @@ class MusicController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const { name, cover_pic, audio_url, author, status }: IMusic =
+    const { name, cover_pic, audio_url, author, status, priority }: IMusic =
       ctx.request.body;
     await musicService.create({
       name,
@@ -97,6 +98,7 @@ class MusicController {
       audio_url,
       author,
       status,
+      priority,
     });
     successHandler({ ctx });
 

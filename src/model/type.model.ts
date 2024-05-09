@@ -25,6 +25,9 @@ const model = sequelize.define<TypeModel>(
     name: {
       type: DataTypes.STRING(50),
     },
+    priority: {
+      type: DataTypes.INTEGER,
+    },
   },
   {
     paranoid: true,

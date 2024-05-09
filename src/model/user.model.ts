@@ -30,7 +30,7 @@ const model = sequelize.define<UserModel>(
     //   defaultValue: DataTypes.UUIDV4, // 或 Sequelize.UUIDV1
     // },
     username: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(50),
       allowNull: false,
       // unique: true,
       // unique: {
@@ -75,10 +75,10 @@ const model = sequelize.define<UserModel>(
       defaultValue: 1, // 1:正常 2:禁用
     },
     avatar: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(300),
     },
     desc: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       defaultValue: '这个人很懒，什么也没有留下',
     },
     token: {

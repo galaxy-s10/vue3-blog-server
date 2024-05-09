@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import { IMusic, IList } from '@/interface';
+import { IList, IMusic } from '@/interface';
 import musicModel from '@/model/music.model';
 import { handlePaging } from '@/utils';
 
@@ -84,22 +84,38 @@ class MusicService {
   }
 
   /** 修改音乐 */
-  async update({ id, name, cover_pic, audio_url, author, status }: IMusic) {
+  async update({
+    id,
+    name,
+    cover_pic,
+    audio_url,
+    author,
+    status,
+    priority,
+  }: IMusic) {
     const result = await musicModel.update(
-      { name, cover_pic, audio_url, author, status },
+      { name, cover_pic, audio_url, author, status, priority },
       { where: { id } }
     );
     return result;
   }
 
   /** 创建音乐 */
-  async create({ name, cover_pic, audio_url, author, status }: IMusic) {
+  async create({
+    name,
+    cover_pic,
+    audio_url,
+    author,
+    status,
+    priority,
+  }: IMusic) {
     const result = await musicModel.create({
       name,
       cover_pic,
       audio_url,
       author,
       status,
+      priority,
     });
     return result;
   }

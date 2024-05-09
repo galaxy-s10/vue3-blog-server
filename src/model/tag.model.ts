@@ -28,6 +28,9 @@ const model = sequelize.define<TagModel>(
     color: {
       type: DataTypes.STRING(50),
     },
+    priority: {
+      type: DataTypes.INTEGER, // 权重
+    },
   },
   {
     paranoid: true,
