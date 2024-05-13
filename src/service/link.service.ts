@@ -90,16 +90,25 @@ class LinkService {
   }
 
   /** 修改友链 */
-  async update({ id, email, name, avatar, desc, url, status }: ILink) {
+  async update({
+    id,
+    email,
+    name,
+    avatar,
+    desc,
+    url,
+    status,
+    priority,
+  }: ILink) {
     const result = await linkModel.update(
-      { email, name, avatar, desc, url, status },
+      { email, name, avatar, desc, url, status, priority },
       { where: { id } }
     );
     return result;
   }
 
   /** 创建友链 */
-  async create({ email, name, avatar, desc, url, status }: ILink) {
+  async create({ email, name, avatar, desc, url, status, priority }: ILink) {
     const result = await linkModel.create({
       email,
       name,
@@ -107,6 +116,7 @@ class LinkService {
       desc,
       url,
       status,
+      priority,
     });
     return result;
   }

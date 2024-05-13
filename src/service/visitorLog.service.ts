@@ -145,6 +145,11 @@ class VisitorLogService {
             [Op.like]: `%${keyWord}%`,
           },
         },
+        {
+          page_url: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
       ];
       allWhere[Op.or] = keyWordWhere;
     }
@@ -202,6 +207,11 @@ class VisitorLogService {
         },
         {
           ip_data: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          page_url: {
             [Op.like]: `%${keyWord}%`,
           },
         },

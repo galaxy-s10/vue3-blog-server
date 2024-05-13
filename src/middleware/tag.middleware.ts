@@ -8,7 +8,7 @@ const schema = Joi.object({
   id: Joi.number(),
   name: Joi.string().min(2).max(30),
   color: Joi.string().min(2).max(30),
-  priority: Joi.number(),
+  priority: [Joi.number(), null],
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {

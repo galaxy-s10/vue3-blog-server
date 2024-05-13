@@ -11,7 +11,7 @@ const schema = Joi.object({
   author: Joi.string().min(1).max(50),
   audio_url: Joi.string().min(3).max(200),
   status: [1, 2],
-  priority: Joi.number(),
+  priority: [Joi.number(), null],
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {

@@ -10,7 +10,7 @@ const schema = Joi.object({
   role_name: Joi.string().min(2).max(30),
   role_value: Joi.string().min(2).max(30),
   type: [1, 2],
-  priority: Joi.number(),
+  priority: [Joi.number(), null],
   role_auths: Joi.array().items(Joi.number()),
   c_roles: Joi.array().items(Joi.number()),
 });

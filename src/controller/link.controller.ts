@@ -59,7 +59,8 @@ class LinkController {
       );
     }
     const id = +ctx.params.id;
-    const { email, name, avatar, desc, url, status }: ILink = ctx.request.body;
+    const { email, name, avatar, desc, url, status, priority }: ILink =
+      ctx.request.body;
     const isExist = await linkService.isExist([id]);
     if (!isExist) {
       throw new CustomError(
@@ -76,6 +77,7 @@ class LinkController {
       desc,
       url,
       status,
+      priority,
     });
     if (status === 1 && email) {
       await otherController.sendEmail(
@@ -90,7 +92,8 @@ class LinkController {
   }
 
   async create(ctx: ParameterizedContext, next) {
-    const { email, name, avatar, desc, url, status }: ILink = ctx.request.body;
+    const { email, name, avatar, desc, url, status, priority }: ILink =
+      ctx.request.body;
     await linkService.create({
       email,
       name,
@@ -98,6 +101,7 @@ class LinkController {
       desc,
       url,
       status: isAdmin(ctx) ? status : 2,
+      priority,
     });
     await otherController.sendEmail(
       QQ_EMAIL_USER,

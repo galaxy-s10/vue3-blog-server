@@ -12,6 +12,7 @@ const schema = Joi.object({
   desc: Joi.string().min(2).max(50),
   url: Joi.string().min(2).max(80),
   status: [1, 2],
+  priority: [Joi.number(), null],
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {
