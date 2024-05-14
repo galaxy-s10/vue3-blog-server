@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IGithubUser, IList } from '@/interface';
@@ -90,18 +91,6 @@ class UserService {
     return result;
   }
 
-  /** 修改github用户 */
-  async update(props: IGithubUser) {
-    const result = await githubUserModel.update(
-      {
-        ...props,
-        id: undefined,
-      },
-      { where: { id: props.id } }
-    );
-    return result;
-  }
-
   /** 根据github_id修改github用户 */
   async updateByGithubId(props: IGithubUser) {
     const result = await githubUserModel.update(
@@ -115,8 +104,16 @@ class UserService {
   }
 
   /** 创建github用户 */
-  async create(props) {
-    const result = await githubUserModel.create(props);
+  async create(data: IGithubUser) {
+    const result = await githubUserModel.create(data);
+    return result;
+  }
+
+  /** 修改github用户 */
+  async update(data: IGithubUser) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await githubUserModel.update(data2, { where: { id } });
     return result;
   }
 

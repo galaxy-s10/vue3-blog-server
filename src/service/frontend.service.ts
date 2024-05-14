@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IFrontend, IList } from '@/interface';
@@ -113,25 +114,15 @@ class FrontendService {
     return result;
   }
 
-  async create({ type, key, value, desc }: IFrontend) {
-    const result = await frontendModel.create({
-      type,
-      key,
-      value,
-      desc,
-    });
+  async create(data: IFrontend) {
+    const result = await frontendModel.create(data);
     return result;
   }
 
-  async update({ id, key, value, desc }: IFrontend) {
-    const result = await frontendModel.update(
-      {
-        key,
-        value,
-        desc,
-      },
-      { where: { id } }
-    );
+  async update(data: IFrontend) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await frontendModel.update(data2, { where: { id } });
     return result;
   }
 

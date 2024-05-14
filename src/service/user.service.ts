@@ -1,7 +1,8 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
-import { THIRD_PLATFORM, PROJECT_ENV } from '@/constant';
-import { IUser, IList } from '@/interface';
+import { PROJECT_ENV, THIRD_PLATFORM } from '@/constant';
+import { IList, IUser } from '@/interface';
 import articleModel from '@/model/article.model';
 import commentModel from '@/model/comment.model';
 import emailModel from '@/model/emailUser.model';
@@ -285,15 +286,6 @@ class UserService {
     return result || false;
   }
 
-  /** 根据id修改用户 */
-  async update({ id, username, desc, status, avatar, token }: IUser) {
-    const result = await userModel.update(
-      { username, desc, status, avatar, token },
-      { where: { id } }
-    );
-    return result;
-  }
-
   /** 创建用户 */
   async create(props: IUser) {
     // @ts-ignore
@@ -305,6 +297,16 @@ class UserService {
       // 非生产环境注册用户权限就是SUPER_ADMIN管理员
       await result.setRoles([2, 3]);
     }
+    return result;
+  }
+
+  /** 根据id修改用户 */
+  async update(data: IUser) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await userModel.update(data2, {
+      where: { id },
+    });
     return result;
   }
 

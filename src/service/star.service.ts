@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IStar } from '@/interface';
@@ -110,17 +111,12 @@ class StarService {
   }
 
   /** 修改star */
-  async update({
-    id,
-    article_id,
-    to_user_id,
-    from_user_id,
-    comment_id,
-  }: IStar) {
-    const result = await starModel.update(
-      { article_id, to_user_id, from_user_id, comment_id },
-      { where: { id } }
-    );
+  async update(data: IStar) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await starModel.update(data2, {
+      where: { id },
+    });
     return result;
   }
 

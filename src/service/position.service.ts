@@ -19,15 +19,16 @@ class PositionService {
    */
 
   async get(ip?: string) {
-    if (!ip || ip === '127.0.0.1') {
+    if (['127.0.0.1', 'localhost', undefined].includes(ip)) {
+      const ipStr = String(ip);
       return {
-        info: 'OK',
-        infocode: '10000',
-        status: '1',
-        province: 'localhost',
-        city: 'localhost',
-        adcode: 'localhost',
-        rectangle: 'localhost',
+        info: ipStr,
+        infocode: ipStr,
+        status: ipStr,
+        province: ipStr,
+        city: ipStr,
+        adcode: ipStr,
+        rectangle: ipStr,
       };
     }
     const data: IIpdata = await axios.get(GAODE_WEB_IP_URL, {

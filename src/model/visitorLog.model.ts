@@ -38,6 +38,9 @@ const model = sequelize.define<VisitorLogModel>(
     page_url: {
       type: DataTypes.STRING(500),
     },
+    user_agent: {
+      type: DataTypes.STRING(500),
+    },
   },
   {
     indexes: [

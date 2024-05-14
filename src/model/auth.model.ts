@@ -23,11 +23,11 @@ const model = sequelize.define<AuthModel>(
       autoIncrement: true,
     },
     auth_name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     auth_value: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     type: {

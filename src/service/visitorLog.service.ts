@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IVisitorLog } from '@/interface';
@@ -237,24 +238,16 @@ class VisitorLogService {
   }
 
   /** 新增访客日志 */
-  async create({ ip, user_id, ip_data, page_url }) {
-    const result = await visitorLogModel.create({
-      ip,
-      ip_data: JSON.stringify(ip_data),
-      user_id,
-      page_url,
-    });
+  async create(data: IVisitorLog) {
+    const result = await visitorLogModel.create(data);
     return result;
   }
 
   /** 修改访客日志 */
-  async update({ ip, user_id, status }) {
-    const result = await visitorLogModel.update(
-      { user_id, status },
-      {
-        where: { ip },
-      }
-    );
+  async update(data: IVisitorLog) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await visitorLogModel.update(data2, { where: { id } });
     return result;
   }
 

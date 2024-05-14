@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, ITag } from '@/interface';
@@ -157,18 +158,19 @@ class TagService {
     return result;
   }
 
-  /** 修改标签 */
-  async update({ id, name, color, priority }: ITag) {
-    const result = await tagModel.update(
-      { name, color, priority },
-      { where: { id } }
-    );
+  /** 创建标签 */
+  async create(data: ITag) {
+    const result = await tagModel.create(data);
     return result;
   }
 
-  /** 创建标签 */
-  async create({ name, color, priority }: ITag) {
-    const result = await tagModel.create({ name, color, priority });
+  /** 修改标签 */
+  async update(data: ITag) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await tagModel.update(data2, {
+      where: { id },
+    });
     return result;
   }
 

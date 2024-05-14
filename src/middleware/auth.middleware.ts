@@ -7,8 +7,8 @@ import { CustomError } from '@/model/customError.model';
 const schema = Joi.object({
   id: Joi.number(),
   p_id: Joi.number(),
-  auth_name: Joi.string().min(2).max(30),
-  auth_value: Joi.string().min(2).max(30),
+  auth_name: Joi.string().min(2).max(80),
+  auth_value: Joi.string().min(2).max(80),
   type: [1, 2],
   priority: [Joi.number(), null],
   c_auths: Joi.array().items(Joi.number()),

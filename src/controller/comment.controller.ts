@@ -9,7 +9,7 @@ import articleService from '@/service/article.service';
 import commentService from '@/service/comment.service';
 import positionService from '@/service/position.service';
 import userService from '@/service/user.service';
-import { arrayUnique, isAdmin } from '@/utils';
+import { arrayUnique, isAdmin, strSlice } from '@/utils';
 
 class CommentController {
   // 评论列表
@@ -201,8 +201,7 @@ class CommentController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    const ua = ctx.request.headers['user-agent'];
-    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+    const ip = String(ctx.request.headers['x-real-ip']);
     const ip_data = await positionService.get(ip);
     await commentService.create({
       article_id,
@@ -211,9 +210,9 @@ class CommentController {
       parent_comment_id,
       reply_comment_id,
       content,
-      ua,
+      user_agent: strSlice(String(ctx.request.headers['user-agent']), 400),
       ip,
-      ip_data: JSON.stringify(ip_data),
+      ip_data: strSlice(JSON.stringify(ip_data), 400),
     });
     successHandler({ ctx });
 

@@ -23,10 +23,10 @@ const model = sequelize.define<TagModel>(
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
     },
     color: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
     },
     priority: {
       type: DataTypes.INTEGER, // 权重

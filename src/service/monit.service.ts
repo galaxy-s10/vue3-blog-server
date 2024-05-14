@@ -1,6 +1,7 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
-import { IMonit, IList } from '@/interface';
+import { IList, IMonit } from '@/interface';
 import monitModel from '@/model/monit.model';
 import { handlePaging } from '@/utils';
 
@@ -79,16 +80,18 @@ class MonitService {
     return result;
   }
 
-  /** 修改监控 */
-  async update({ id, type, info }: IMonit) {
-    const result = await monitModel.update({ type, info }, { where: { id } });
+  /** 创建监控 */
+  async create(data: IMonit) {
+    const result = await monitModel.create(data);
     return result;
   }
 
-  /** 创建监控 */
-  async create(props: IMonit) {
-    const result = await monitModel.create({
-      ...props,
+  /** 修改监控 */
+  async update(data: IMonit) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await monitModel.update(data2, {
+      where: { id },
     });
     return result;
   }

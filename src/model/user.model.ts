@@ -30,7 +30,7 @@ const model = sequelize.define<UserModel>(
     //   defaultValue: DataTypes.UUIDV4, // 或 Sequelize.UUIDV1
     // },
     username: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       // unique: true,
       // unique: {
@@ -51,7 +51,7 @@ const model = sequelize.define<UserModel>(
       },
     },
     password: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       // validate: {
       //   /**
@@ -78,7 +78,7 @@ const model = sequelize.define<UserModel>(
       type: DataTypes.STRING(300),
     },
     desc: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(300),
       defaultValue: '这个人很懒，什么也没有留下',
     },
     token: {

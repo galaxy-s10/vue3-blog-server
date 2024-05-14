@@ -33,7 +33,7 @@ const model = sequelize.define<ArticleModel>(
       autoIncrement: true,
     },
     title: {
-      type: DataTypes.STRING(60),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     desc: {
@@ -51,7 +51,7 @@ const model = sequelize.define<ArticleModel>(
       defaultValue: 2, // 1:已审核 2:未审核
     },
     head_img: {
-      type: DataTypes.STRING(300),
+      type: DataTypes.STRING(500),
     },
     content: {
       type: DataTypes.TEXT,

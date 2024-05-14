@@ -31,12 +31,12 @@ const model = sequelize.define<ThemeModel>(
       autoIncrement: true,
     },
     model: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       comment: '模块名',
       // unique: true, // 唯一约束,如果尝试插入已存在的model,将抛出 SequelizeUniqueConstraintError.
     },
     key: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       comment: '变量key',
     },
@@ -49,7 +49,7 @@ const model = sequelize.define<ThemeModel>(
       // },
     },
     lang: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       comment: '语言',
       // validate: {
       //   max: 50,

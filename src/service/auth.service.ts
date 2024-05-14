@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IAuth, IList } from '@/interface';
@@ -127,21 +128,10 @@ class AuthService {
   }
 
   /** 修改权限 */
-  async update({ id, p_id, auth_name, auth_value, type, priority }: IAuth) {
-    const result = await authModel.update(
-      {
-        p_id,
-        auth_name,
-        auth_value,
-        type,
-        priority,
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+  async update(data: IAuth) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await authModel.update(data2, { where: { id } });
     return result;
   }
 
@@ -172,14 +162,8 @@ class AuthService {
   }
 
   /** 创建权限 */
-  async create({ p_id, auth_name, auth_value, type, priority }: IAuth) {
-    const result = await authModel.create({
-      p_id,
-      auth_name,
-      auth_value,
-      type,
-      priority,
-    });
+  async create(data: IAuth) {
+    const result = await authModel.create(data);
     return result;
   }
 

@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IThirdUser } from '@/interface';
@@ -93,21 +94,18 @@ class TagService {
     return result;
   }
 
-  /** 修改第三方用户记录 */
-  async update({ id, user_id, third_platform, third_user_id }: IThirdUser) {
-    const result = await thirdUserModel.update(
-      { user_id, third_platform, third_user_id },
-      { where: { id } }
-    );
+  /** 创建第三方用户记录 */
+  async create(data: IThirdUser) {
+    const result = await thirdUserModel.create(data);
     return result;
   }
 
-  /** 创建第三方用户记录 */
-  async create({ user_id, third_platform, third_user_id }: IThirdUser) {
-    const result = await thirdUserModel.create({
-      user_id,
-      third_platform,
-      third_user_id,
+  /** 修改第三方用户记录 */
+  async update(data: IThirdUser) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await thirdUserModel.update(data2, {
+      where: { id },
     });
     return result;
   }

@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IComment, IList } from '@/interface';
@@ -484,15 +485,6 @@ class CommentService {
     return result;
   }
 
-  /** 修改评论 */
-  async update(props: IComment) {
-    const result = await commentModel.update(
-      { ...props, id: undefined },
-      { where: { id: props.id } }
-    );
-    return result;
-  }
-
   /** 创建评论 */
   async create({
     article_id,
@@ -501,7 +493,7 @@ class CommentService {
     parent_comment_id,
     reply_comment_id,
     content,
-    ua,
+    user_agent,
     ip,
     ip_data,
   }: IComment) {
@@ -512,7 +504,7 @@ class CommentService {
       parent_comment_id,
       reply_comment_id,
       content,
-      ua,
+      user_agent,
       ip,
       ip_data,
     });
@@ -531,6 +523,14 @@ class CommentService {
       );
     }
 
+    return result;
+  }
+
+  /** 修改评论 */
+  async update(data: IComment) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await commentModel.update(data2, { where: { id } });
     return result;
   }
 

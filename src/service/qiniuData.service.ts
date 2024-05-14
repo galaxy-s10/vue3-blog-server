@@ -1,6 +1,7 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
-import { IQiniuData, IList } from '@/interface';
+import { IList, IQiniuData } from '@/interface';
 import qiniuDataModel from '@/model/qiniuData.model';
 import { handlePaging } from '@/utils';
 
@@ -102,66 +103,18 @@ class QiniuDataService {
     return result;
   }
 
-  /** 修改文件 */
-  async update({
-    id,
-    user_id,
-    prefix,
-    bucket,
-    qiniu_fsize,
-    qiniu_hash,
-    qiniu_key,
-    qiniu_md5,
-    qiniu_mimeType,
-    qiniu_putTime,
-    qiniu_status,
-    qiniu_type,
-  }: IQiniuData) {
-    const result = await qiniuDataModel.update(
-      {
-        user_id,
-        prefix,
-        bucket,
-        qiniu_fsize,
-        qiniu_hash,
-        qiniu_key,
-        qiniu_md5,
-        qiniu_mimeType,
-        qiniu_putTime,
-        qiniu_status,
-        qiniu_type,
-      },
-      { where: { id } }
-    );
+  /** 创建文件 */
+  async create(data: IQiniuData) {
+    const result = await qiniuDataModel.create(data);
     return result;
   }
 
-  /** 创建文件 */
-  async create({
-    user_id,
-    prefix,
-    bucket,
-    qiniu_fsize,
-    qiniu_hash,
-    qiniu_key,
-    qiniu_md5,
-    qiniu_mimeType,
-    qiniu_putTime,
-    qiniu_status,
-    qiniu_type,
-  }: IQiniuData) {
-    const result = await qiniuDataModel.create({
-      user_id,
-      prefix,
-      bucket,
-      qiniu_fsize,
-      qiniu_hash,
-      qiniu_key,
-      qiniu_md5,
-      qiniu_mimeType,
-      qiniu_putTime,
-      qiniu_status,
-      qiniu_type,
+  /** 修改文件 */
+  async update(data: IQiniuData) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await qiniuDataModel.update(data2, {
+      where: { id },
     });
     return result;
   }

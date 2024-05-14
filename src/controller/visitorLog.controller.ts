@@ -7,6 +7,7 @@ import { IList, IVisitorLog } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import positionService from '@/service/position.service';
 import visitorLogService from '@/service/visitorLog.service';
+import { strSlice } from '@/utils';
 
 class VisitorLogController {
   async getHistoryVisitTotal(ctx: ParameterizedContext, next) {
@@ -111,26 +112,23 @@ class VisitorLogController {
   }
 
   async create(ctx: ParameterizedContext, next) {
-    const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+    const ip = String(ctx.request.headers['x-real-ip']);
     // 这个接口的userInfo不是必须的
     const { userInfo } = await authJwt(ctx);
-    if (ip === '127.0.0.1') {
-      successHandler({ ctx, data: '开发环境下调用' });
+    if (['127.0.0.1', 'localhost', 'undefined'].includes(ip)) {
+      successHandler({ ctx, data: `${ip}环境下调用` });
     } else {
       const { page_url }: IVisitorLog = ctx.request.body;
       const ip_data = await positionService.get(ip);
-      const url = page_url?.slice(0, 300) || '';
-      const ip_res = ip.slice(0, 300) || '';
-      const ip_data_res = JSON.stringify(ip_data).slice(0, 400) || '';
       const result = await visitorLogService.create({
-        ip: ip_res,
+        ip: strSlice(ip, 400),
         user_id: userInfo?.id || -1,
-        ip_data: ip_data_res,
-        page_url: url,
+        ip_data: strSlice(JSON.stringify(ip_data), 400),
+        page_url: strSlice(page_url || '', 400),
+        user_agent: strSlice(String(ctx.request.headers['user-agent']), 400),
       });
       successHandler({ ctx, data: result });
     }
-
     await next();
   }
 

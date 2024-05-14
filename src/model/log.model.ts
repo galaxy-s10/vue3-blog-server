@@ -30,34 +30,34 @@ const model = sequelize.define<LogModel>(
       type: DataTypes.INTEGER,
     },
     api_user_agent: {
-      type: DataTypes.TEXT, // qq浏览器的user_agent能达到四百多字符。。。。
+      type: DataTypes.STRING(500),
     },
     api_from: {
       type: DataTypes.INTEGER, // 1:前台 2:后台
     },
     api_forwarded_for: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
     },
     api_referer: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
     },
     api_real_ip: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(500),
     },
     api_host: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(500),
     },
     api_hostname: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(500),
     },
     api_method: {
-      type: DataTypes.STRING(20),
-    },
-    api_path: {
       type: DataTypes.STRING(100),
     },
+    api_path: {
+      type: DataTypes.STRING(500),
+    },
     api_query: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
     },
     api_body: {
       type: DataTypes.TEXT,
@@ -66,10 +66,10 @@ const model = sequelize.define<LogModel>(
       type: DataTypes.INTEGER,
     },
     api_error: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     api_err_msg: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     api_err_code: {
       type: DataTypes.INTEGER,

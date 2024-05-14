@@ -6,16 +6,16 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   id: Joi.number(),
-  username: Joi.string().min(2).max(20),
-  password: Joi.string().min(6).max(18),
+  username: Joi.string().min(2).max(50),
+  password: Joi.string().min(6).max(50),
   // username: Joi.string()
   //   .pattern(/[0-9a-zA-Z_]{6,12}$/)
   //   .required(),
   // password: Joi.string()
   //   .pattern(/(?![0-9]+$)(?![a-zA-Z]+$)(?![_]+$)[0-9a-zA-A_]{8,16}/)
   //   .required(),
-  desc: Joi.string().min(2).max(50),
-  avatar: Joi.string().min(2).max(100),
+  desc: Joi.string().min(2).max(100),
+  avatar: Joi.string().min(2).max(300),
   email: Joi.string().min(2).max(100),
   code: Joi.string(),
   status: [1, 2],

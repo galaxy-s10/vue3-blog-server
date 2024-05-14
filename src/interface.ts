@@ -16,6 +16,7 @@ export interface IBlacklist {
   user_id?: number;
   type?: number;
   msg?: string;
+  user_agent?: string;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -82,16 +83,18 @@ export interface IBackend {
 }
 
 export interface IIpdata {
-  city: string;
-  country: string;
-  district: string;
   info: string;
   infocode: string;
-  ip: string;
-  isp: string;
-  location: string;
-  province: string;
   status: string;
+  province: string;
+  city: string;
+  adcode: string;
+  rectangle: string;
+  // country: string;
+  // district: string;
+  // ip: string;
+  // isp: string;
+  // location: string;
 }
 
 export interface IEmailUser {
@@ -342,7 +345,6 @@ export interface IComment {
   from_user_id?: number;
   content?: string;
   children_comment_total?: number;
-  ua?: string;
   ip?: string;
   ip_data?: string;
   parent_comment_id?: number;
@@ -355,6 +357,7 @@ export interface IComment {
   stars?: any[];
   star_total?: number;
   status?: number;
+  user_agent?: string;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -364,9 +367,9 @@ export interface IVisitorLog {
   id?: number;
   user_id?: number;
   ip?: string;
-  status?: number;
   ip_data?: string;
   page_url?: string;
+  user_agent?: string;
   total?: number; // 获取当天访客访问数据的时候添加了一个total字段
   created_at?: string;
   updated_at?: string;

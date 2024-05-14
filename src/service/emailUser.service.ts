@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { THIRD_PLATFORM } from '@/constant';
@@ -118,15 +119,17 @@ class EmailService {
     return result;
   }
 
-  /** 修改邮箱用户 */
-  async update({ id, email }: IEmail) {
-    const result = await emailModel.update({ email }, { where: { id } });
+  /** 创建邮箱用户 */
+  async create(data: IEmail) {
+    const result = await emailModel.create(data);
     return result;
   }
 
-  /** 创建邮箱用户 */
-  async create({ email }: IEmail) {
-    const result = await emailModel.create({ email });
+  /** 修改邮箱用户 */
+  async update(data: IEmail) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await emailModel.update(data2, { where: { id } });
     return result;
   }
 

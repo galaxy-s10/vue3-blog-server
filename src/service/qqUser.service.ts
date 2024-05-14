@@ -155,38 +155,8 @@ class UserService {
   }
 
   /** 创建qq用户 */
-  async create({
-    nickname,
-    client_id,
-    openid,
-    unionid,
-    figureurl,
-    figureurl_1,
-    figureurl_2,
-    figureurl_qq_1,
-    figureurl_qq_2,
-    gender,
-    year,
-    city,
-    province,
-    constellation,
-  }: IQqUser) {
-    const result = await qqUserModel.create({
-      nickname,
-      client_id,
-      openid,
-      unionid,
-      figureurl,
-      figureurl_1,
-      figureurl_2,
-      figureurl_qq_1,
-      figureurl_qq_2,
-      gender,
-      year,
-      city,
-      province,
-      constellation,
-    });
+  async create(data: IQqUser) {
+    const result = await qqUserModel.create(data);
     return result;
   }
 

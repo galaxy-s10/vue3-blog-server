@@ -11,7 +11,7 @@ const schema = Joi.object({
   reply_comment_id: Joi.number(),
   from_user_id: Joi.number(),
   to_user_id: Joi.number(),
-  content: Joi.string().min(2).max(300).required(),
+  content: Joi.string().min(2).max(400).required(),
 });
 
 export const verifyProp = async (ctx: ParameterizedContext, next) => {

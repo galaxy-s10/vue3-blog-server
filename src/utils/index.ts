@@ -11,6 +11,11 @@ import {
   chalkWARN,
 } from '@/utils/chalkTip';
 
+/** 字符串截取 */
+export function strSlice(str: string, length: number) {
+  return str.slice(0, length);
+}
+
 /**
  * 获取当前机器的ip地址
  */

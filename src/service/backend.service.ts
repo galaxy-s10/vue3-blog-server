@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IBackend, IList } from '@/interface';
@@ -113,25 +114,15 @@ class BackendService {
     return result;
   }
 
-  async create({ type, key, value, desc }: IBackend) {
-    const result = await backendModel.create({
-      type,
-      key,
-      value,
-      desc,
-    });
+  async create(data: IBackend) {
+    const result = await backendModel.create(data);
     return result;
   }
 
-  async update({ id, key, value, desc }: IBackend) {
-    const result = await backendModel.update(
-      {
-        key,
-        value,
-        desc,
-      },
-      { where: { id } }
-    );
+  async update(data: IBackend) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await backendModel.update(data2, { where: { id } });
     return result;
   }
 

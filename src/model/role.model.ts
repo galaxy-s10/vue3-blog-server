@@ -23,10 +23,10 @@ const model = sequelize.define<RoleModel>(
       autoIncrement: true,
     },
     role_name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(300),
     },
     role_value: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(300),
     },
     type: {
       type: DataTypes.INTEGER, // 1：默认，2：自定义

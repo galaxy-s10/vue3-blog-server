@@ -26,18 +26,18 @@ const model = sequelize.define<IInteractionStatisModel>(
       autoIncrement: true,
     },
     key: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     value: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     desc: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
     },
   },
   {

@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IMusic } from '@/interface';
@@ -83,39 +84,18 @@ class MusicService {
     return result;
   }
 
-  /** 修改音乐 */
-  async update({
-    id,
-    name,
-    cover_pic,
-    audio_url,
-    author,
-    status,
-    priority,
-  }: IMusic) {
-    const result = await musicModel.update(
-      { name, cover_pic, audio_url, author, status, priority },
-      { where: { id } }
-    );
+  /** 创建音乐 */
+  async create(data: IMusic) {
+    const result = await musicModel.create(data);
     return result;
   }
 
-  /** 创建音乐 */
-  async create({
-    name,
-    cover_pic,
-    audio_url,
-    author,
-    status,
-    priority,
-  }: IMusic) {
-    const result = await musicModel.create({
-      name,
-      cover_pic,
-      audio_url,
-      author,
-      status,
-      priority,
+  /** 修改音乐 */
+  async update(data: IMusic) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await musicModel.update(data2, {
+      where: { id },
     });
     return result;
   }

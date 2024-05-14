@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import articleTagService from './articleTag.service';
@@ -111,28 +112,6 @@ class ArticleService {
       star_info,
       comment_total,
     };
-  }
-
-  /** 创建文章 */
-  async create({
-    title,
-    desc,
-    head_img,
-    is_comment,
-    status,
-    content,
-    priority,
-  }: IArticle) {
-    const result = await articleModel.create({
-      title,
-      desc,
-      head_img,
-      is_comment,
-      status,
-      content,
-      priority,
-    });
-    return result;
   }
 
   /** 获取文章列表 */
@@ -381,28 +360,16 @@ class ArticleService {
     return handlePaging(result, nowPage, pageSize);
   }
 
-  async update({
-    id,
-    title,
-    desc,
-    is_comment,
-    priority,
-    status,
-    head_img,
-    content,
-  }: IArticle) {
-    const result = await articleModel.update(
-      {
-        title,
-        desc,
-        is_comment,
-        priority,
-        status,
-        head_img,
-        content,
-      },
-      { where: { id } }
-    );
+  /** 创建文章 */
+  async create(data: IArticle) {
+    const result = await articleModel.create(data);
+    return result;
+  }
+
+  async update(data: IArticle) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await articleModel.update(data2, { where: { id } });
     return result;
   }
 

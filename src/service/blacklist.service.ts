@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IBlacklist, IList } from '@/interface';
@@ -92,22 +93,16 @@ class LinkService {
   }
 
   /** 修改黑名单 */
-  async update({ id, user_id, ip, msg, type }: IBlacklist) {
-    const result = await blacklistModel.update(
-      { user_id, ip, msg, type },
-      { where: { id } }
-    );
+  async update(data: IBlacklist) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await blacklistModel.update(data2, { where: { id } });
     return result;
   }
 
   /** 创建黑名单 */
-  async create({ user_id, ip, msg, type }: IBlacklist) {
-    const result = await blacklistModel.create({
-      user_id,
-      ip,
-      msg,
-      type,
-    });
+  async create(data: IBlacklist) {
+    const result = await blacklistModel.create(data);
     return result;
   }
 

@@ -7,7 +7,7 @@ import { authJwt } from './auth/authJwt';
 import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
-import { isAdmin } from '@/utils';
+import { isAdmin, strSlice } from '@/utils';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 
 // 全局错误处理中间件
@@ -32,7 +32,10 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       const { userInfo } = await authJwt(ctx);
       logController.common.create({
         user_id: userInfo?.id || -1,
-        api_user_agent: ctx.request.headers['user-agent'],
+        api_user_agent: strSlice(
+          String(ctx.request.headers['user-agent']),
+          400
+        ),
         api_from: isAdmin(ctx) ? 2 : 1,
         api_body: JSON.stringify(ctx.request.body || {}),
         api_query: JSON.stringify(ctx.query),

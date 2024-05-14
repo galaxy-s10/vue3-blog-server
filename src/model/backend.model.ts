@@ -26,7 +26,7 @@ const model = sequelize.define<BackendModel>(
       autoIncrement: true,
     },
     key: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     value: {
@@ -34,10 +34,10 @@ const model = sequelize.define<BackendModel>(
       allowNull: false,
     },
     desc: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
   },

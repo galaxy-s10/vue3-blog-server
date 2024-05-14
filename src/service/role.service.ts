@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IRole } from '@/interface';
@@ -206,25 +207,6 @@ class RoleService {
   }
 
   /** 修改角色 */
-  async update({ id, p_id, role_name, role_value, type, priority }: IRole) {
-    const result = await roleModel.update(
-      {
-        p_id,
-        role_name,
-        role_value,
-        type,
-        priority,
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
-    return result;
-  }
-
-  /** 修改角色 */
   async updateMany(ids: number[], p_id: number) {
     const result = await roleModel.update(
       {
@@ -284,13 +266,17 @@ class RoleService {
   }
 
   /** 创建角色 */
-  async create({ p_id, role_name, role_value, type, priority }: IRole) {
-    const result = await roleModel.create({
-      p_id,
-      role_name,
-      role_value,
-      type,
-      priority,
+  async create(data: IRole) {
+    const result = await roleModel.create(data);
+    return result;
+  }
+
+  /** 修改角色 */
+  async update(data: IRole) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await roleModel.update(data2, {
+      where: { id },
     });
     return result;
   }

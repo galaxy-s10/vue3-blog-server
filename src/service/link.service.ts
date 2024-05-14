@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { ILink, IList } from '@/interface';
@@ -89,34 +90,18 @@ class LinkService {
     return result;
   }
 
-  /** 修改友链 */
-  async update({
-    id,
-    email,
-    name,
-    avatar,
-    desc,
-    url,
-    status,
-    priority,
-  }: ILink) {
-    const result = await linkModel.update(
-      { email, name, avatar, desc, url, status, priority },
-      { where: { id } }
-    );
+  /** 创建友链 */
+  async create(data: ILink) {
+    const result = await linkModel.create(data);
     return result;
   }
 
-  /** 创建友链 */
-  async create({ email, name, avatar, desc, url, status, priority }: ILink) {
-    const result = await linkModel.create({
-      email,
-      name,
-      avatar,
-      desc,
-      url,
-      status,
-      priority,
+  /** 修改友链 */
+  async update(data: ILink) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await linkModel.update(data2, {
+      where: { id },
     });
     return result;
   }

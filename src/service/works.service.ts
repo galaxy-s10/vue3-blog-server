@@ -1,6 +1,7 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
-import { IWorks, IList } from '@/interface';
+import { IList, IWorks } from '@/interface';
 import worksModel from '@/model/works.model';
 import { handlePaging } from '@/utils';
 
@@ -91,24 +92,16 @@ class WorksService {
   }
 
   /** 修改作品 */
-  async update({ id, name, desc, url, bg_url, priority, status }: IWorks) {
-    const result = await worksModel.update(
-      { name, desc, url, bg_url, priority, status },
-      { where: { id } }
-    );
+  async update(data: IWorks) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await worksModel.update(data2, { where: { id } });
     return result;
   }
 
   /** 创建作品 */
-  async create({ name, desc, url, bg_url, priority, status }: IWorks) {
-    const result = await worksModel.create({
-      name,
-      desc,
-      url,
-      bg_url,
-      priority,
-      status,
-    });
+  async create(data: IWorks) {
+    const result = await worksModel.create(data);
     return result;
   }
 

@@ -36,7 +36,7 @@ const model = sequelize.define<FrontendModel>(
     //   defaultValue: 1, // 1:关闭站内注册 2:开启站内注册
     // },
     key: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(300),
       allowNull: false,
     },
     value: {
@@ -44,10 +44,10 @@ const model = sequelize.define<FrontendModel>(
       allowNull: false,
     },
     desc: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(300),
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(300),
       allowNull: false,
     },
   },

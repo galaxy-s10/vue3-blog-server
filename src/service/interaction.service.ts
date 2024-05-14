@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IInteraction, IList } from '@/interface';
@@ -77,38 +78,15 @@ class InteractionService {
     return result;
   }
 
-  async update({
-    id,
-    user_type,
-    user_info,
-    client,
-    client_ip,
-    type,
-    value,
-  }: IInteraction) {
-    const result = await interactionModel.update(
-      { user_type, user_info, client, client_ip, type, value },
-      { where: { id } }
-    );
+  async create(data: IInteraction) {
+    const result = await interactionModel.create(data);
     return result;
   }
 
-  async create({
-    user_type,
-    user_info,
-    client,
-    client_ip,
-    type,
-    value,
-  }: IInteraction) {
-    const result = await interactionModel.create({
-      user_type,
-      user_info,
-      client,
-      client_ip,
-      type,
-      value,
-    });
+  async update(data: IInteraction) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await interactionModel.update(data2, { where: { id } });
     return result;
   }
 

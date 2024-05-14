@@ -5,10 +5,10 @@ import { ALLOW_HTTP_CODE } from '@/constant';
 import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
-  model: Joi.string().min(2).max(50),
-  key: Joi.string().min(2).max(50),
+  model: Joi.string().min(2).max(100),
+  key: Joi.string().min(2).max(100),
   value: Joi.string().min(2).max(100),
-  lang: Joi.string().min(2).max(50),
+  lang: Joi.string().min(2).max(100),
   desc: Joi.string().min(2).max(100),
 });
 // .required();

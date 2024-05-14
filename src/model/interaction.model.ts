@@ -27,12 +27,12 @@ const model = sequelize.define<IInteractionModel>(
     },
     // 客户端ip
     client_ip: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     // 客户端信息
     client: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     // 用户类型
@@ -42,17 +42,17 @@ const model = sequelize.define<IInteractionModel>(
     },
     // 用户信息
     user_info: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     // 消息类型
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
     // 消息内容
     value: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
   },

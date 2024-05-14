@@ -1,6 +1,7 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
-import { ILog, IList } from '@/interface';
+import { IList, ILog } from '@/interface';
 import logModel from '@/model/log.model';
 import { handlePaging } from '@/utils';
 
@@ -112,91 +113,18 @@ class LogService {
     return result;
   }
 
-  /** 修改日志 */
-  async update({
-    id,
-    user_id,
-    api_user_agent,
-    api_from,
-    api_referer,
-    api_forwarded_for,
-    api_real_ip,
-    api_host,
-    api_hostname,
-    api_method,
-    api_path,
-    api_query,
-    api_body,
-    api_status_code,
-    api_error,
-    api_err_code,
-    api_err_msg,
-    api_duration,
-  }: ILog) {
-    const result = await logModel.update(
-      {
-        id,
-        user_id,
-        api_user_agent,
-        api_from,
-        api_referer,
-        api_forwarded_for,
-        api_real_ip,
-        api_host,
-        api_hostname,
-        api_method,
-        api_path,
-        api_query,
-        api_body,
-        api_status_code,
-        api_error,
-        api_err_code,
-        api_err_msg,
-        api_duration,
-      },
-      { where: { id } }
-    );
+  /** 创建日志 */
+  async create(data: ILog) {
+    const result = await logModel.create(data);
     return result;
   }
 
-  /** 创建日志 */
-  async create({
-    user_id,
-    api_user_agent,
-    api_from,
-    api_referer,
-    api_forwarded_for,
-    api_real_ip,
-    api_host,
-    api_hostname,
-    api_method,
-    api_path,
-    api_query,
-    api_body,
-    api_status_code,
-    api_error,
-    api_err_code,
-    api_err_msg,
-    api_duration,
-  }: ILog) {
-    const result = await logModel.create({
-      user_id,
-      api_user_agent,
-      api_from,
-      api_referer,
-      api_forwarded_for,
-      api_real_ip,
-      api_host,
-      api_hostname,
-      api_method,
-      api_path,
-      api_query,
-      api_body,
-      api_status_code,
-      api_error,
-      api_err_code,
-      api_err_msg,
-      api_duration,
+  /** 修改日志 */
+  async update(data: ILog) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await logModel.update(data2, {
+      where: { id },
     });
     return result;
   }

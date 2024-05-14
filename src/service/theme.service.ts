@@ -1,3 +1,4 @@
+import { filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, ITheme } from '@/interface';
@@ -90,23 +91,18 @@ class ThemeService {
     return result;
   }
 
-  /** 修改主题 */
-  async update({ id, key, value, model, lang, desc }: ITheme) {
-    const result = await themeModel.update(
-      { key, value, model, lang, desc },
-      { where: { id } }
-    );
+  /** 创建主题 */
+  async create(data: ITheme) {
+    const result = await themeModel.create(data);
     return result;
   }
 
-  /** 创建主题 */
-  async create({ key, value, model, lang, desc }: ITheme) {
-    const result = await themeModel.create({
-      key,
-      value,
-      model,
-      lang,
-      desc,
+  /** 修改主题 */
+  async update(data: ITheme) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await themeModel.update(data2, {
+      where: { id },
     });
     return result;
   }
