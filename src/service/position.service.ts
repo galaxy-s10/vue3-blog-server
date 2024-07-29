@@ -29,6 +29,7 @@ class PositionService {
         city: ipStr,
         adcode: ipStr,
         rectangle: ipStr,
+        frontend_rec_ip: ipStr,
       };
     }
     const data: IIpdata = await axios.get(GAODE_WEB_IP_URL, {
@@ -50,7 +51,7 @@ class PositionService {
     //     }
     //   );
     // });
-    return data;
+    return { ...data, frontend_rec_ip: ip };
   }
 }
 

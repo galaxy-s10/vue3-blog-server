@@ -63,6 +63,9 @@ const model = sequelize.define<CommentModel>(
     user_agent: {
       type: DataTypes.STRING(500),
     },
+    priority: {
+      type: DataTypes.INTEGER,
+    },
     ip: {
       type: DataTypes.STRING(500),
     },

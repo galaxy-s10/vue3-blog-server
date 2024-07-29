@@ -19,20 +19,30 @@ import { dateStartAndEnd } from '@/utils';
 import { chalkINFO } from '@/utils/chalkTip';
 
 async function getOnline() {
-  const [visitor, user, historyInfo] = await Promise.all([
-    WsRedisController.getAllOnlineVisitorNum(),
-    WsRedisController.getAllOnlineUserNum(),
-    interactionStatisController.common.getList({
-      type: InteractionStatisType.historyInfo,
-      orderBy: 'asc',
-      orderName: 'id',
-    }),
-  ]);
-  return {
-    visitor,
-    user,
-    history: JSON.parse(historyInfo.rows[0].value).historyHightOnlineNum,
-  };
+  try {
+    const [visitor, user, historyInfo] = await Promise.all([
+      WsRedisController.getAllOnlineVisitorNum(),
+      WsRedisController.getAllOnlineUserNum(),
+      interactionStatisController.common.getList({
+        type: InteractionStatisType.historyInfo,
+        orderBy: 'asc',
+        orderName: 'id',
+      }),
+    ]);
+    return {
+      visitor,
+      user,
+      history: JSON.parse(historyInfo.rows[0]?.value || '{}')
+        ?.historyHightOnlineNum,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      visitor: 0,
+      user: 0,
+      history: 0,
+    };
+  }
 }
 
 function prettierLog(type: string, socket: Socket) {
@@ -113,76 +123,90 @@ export const connectWebSocket = (server) => {
         desc: '当天的数据',
       });
     } else {
-      interactionStatisController.common.update({
-        id: res.rows[0].id,
-        key: currTime,
-        value: JSON.stringify({
-          historyHightOnlineNum: Math.max(
-            history,
-            currTotal,
-            oldTotal,
-            JSON.parse(res.rows[0].value).historyHightOnlineNum
-          ),
-          currDayHightOnlineNum: Math.max(
-            currTotal,
-            oldTotal,
-            JSON.parse(res.rows[0].value).currDayHightOnlineNum
-          ),
-          user,
-          visitor,
-        }),
-        type: InteractionStatisType.dayInfo,
-        desc: '当天的数据',
-      });
+      const { id } = res.rows[0];
+      if (id) {
+        interactionStatisController.common.update({
+          id,
+          key: currTime,
+          value: JSON.stringify({
+            historyHightOnlineNum: Math.max(
+              history,
+              currTotal,
+              oldTotal,
+              JSON.parse(res.rows[0]?.value || '{}')?.historyHightOnlineNum
+            ),
+            currDayHightOnlineNum: Math.max(
+              currTotal,
+              oldTotal,
+              JSON.parse(res.rows[0]?.value || '{}')?.currDayHightOnlineNum
+            ),
+            user,
+            visitor,
+          }),
+          type: InteractionStatisType.dayInfo,
+          desc: '当天的数据',
+        });
+      }
     }
     const historyInfoRes = await interactionStatisController.common.getList({
       type: InteractionStatisType.historyInfo,
       orderBy: 'asc',
       orderName: 'id',
     });
-    interactionStatisController.common.update({
-      id: historyInfoRes.rows[0].id,
-      value: JSON.stringify({
-        historyHightOnlineNum: Math.max(
-          history,
-          currTotal,
-          oldTotal,
-          res.rows[0] ? JSON.parse(res.rows[0].value).historyHightOnlineNum : 0
-        ),
-        currDayHightOnlineNum: Math.max(
-          currTotal,
-          oldTotal,
-          res.rows[0] ? JSON.parse(res.rows[0].value).historyHightOnlineNum : 0
-        ),
-        user,
-        visitor,
-      }),
-    });
+    const id = historyInfoRes.rows?.[0]?.id;
+    if (id) {
+      interactionStatisController.common.update({
+        id,
+        value: JSON.stringify({
+          historyHightOnlineNum: Math.max(
+            history,
+            currTotal,
+            oldTotal,
+            res.rows[0]
+              ? JSON.parse(res.rows[0]?.value || '{}')?.historyHightOnlineNum
+              : 0
+          ),
+          currDayHightOnlineNum: Math.max(
+            currTotal,
+            oldTotal,
+            res.rows[0]
+              ? JSON.parse(res.rows[0]?.value || '{}')?.historyHightOnlineNum
+              : 0
+          ),
+          user,
+          visitor,
+        }),
+      });
+    }
   }
 
   pubClient.subscribe(
     `__keyevent@${REDIS_CONFIG.database}__:expired`,
     async (redisKey, subscribeName) => {
       console.log('过期key监听', redisKey, subscribeName);
-      if (redisKey.match(REDIS_PREFIX.live)) {
-        const id = redisKey.replace(`${REDIS_PREFIX.live}-`, '');
-        const res = await WsRedisController.getOnlineList(id);
-        if (res) {
-          const { data, client_ip }: IData = JSON.parse(res);
-          const { userInfo } = data;
-          io.emit(wsMsgType.userOutRoom, {
-            id,
-            userInfo,
-            created_at: new Date().toLocaleString(),
-          });
-          if (userInfo.userType === wsUserType.user) {
-            await WsRedisController.deleteOnlineUser(id);
-          } else if (userInfo.userType === wsUserType.visitor) {
-            await WsRedisController.deleteOnlineVisitor(id);
+      try {
+        if (redisKey.match(REDIS_PREFIX.live)) {
+          const id = redisKey.replace(`${REDIS_PREFIX.live}-`, '');
+          const res = await WsRedisController.getOnlineList(id);
+          if (res) {
+            const { data, client_ip }: IData = JSON.parse(res);
+            const { userInfo } = data;
+            io.emit(wsMsgType.userOutRoom, {
+              id,
+              userInfo,
+              created_at: new Date().toLocaleString(),
+            });
+            if (userInfo.userType === wsUserType.user) {
+              await WsRedisController.deleteOnlineUser(id);
+            } else if (userInfo.userType === wsUserType.visitor) {
+              await WsRedisController.deleteOnlineVisitor(id);
+            }
+            await WsRedisController.deleteOnlineList(id);
+            emitNum(client_ip);
           }
-          await WsRedisController.deleteOnlineList(id);
-          emitNum(client_ip);
         }
+      } catch (error) {
+        console.log(error);
       }
     }
   );
@@ -208,40 +232,44 @@ export const connectWebSocket = (server) => {
 
     // 用户进房间
     socket.on(wsMsgType.userInRoom, async (data: any) => {
-      prettierLog('用户进房间', socket);
-      const { id, client_ip } = getClient(socket);
-      WsRedisController.live(id, {
-        client_ip,
-        created_at: new Date().toLocaleString(),
-        exp: liveExp,
-        data,
-      });
-      await Promise.all([
-        data.userInfo.userType === wsUserType.user
-          ? WsRedisController.addOnlineUser(id, {
-              client_ip,
-              created_at: new Date().toLocaleString(),
-              data,
-            })
-          : WsRedisController.addOnlineVisitor(id, {
-              client_ip,
-              created_at: new Date().toLocaleString(),
-              data,
-            }),
-        WsRedisController.addOnlineList(id, {
+      try {
+        prettierLog('用户进房间', socket);
+        const { id, client_ip } = getClient(socket);
+        WsRedisController.live(id, {
           client_ip,
           created_at: new Date().toLocaleString(),
+          exp: liveExp,
           data,
-        }),
-      ]);
+        });
+        await Promise.all([
+          data.userInfo.userType === wsUserType.user
+            ? WsRedisController.addOnlineUser(id, {
+                client_ip,
+                created_at: new Date().toLocaleString(),
+                data,
+              })
+            : WsRedisController.addOnlineVisitor(id, {
+                client_ip,
+                created_at: new Date().toLocaleString(),
+                data,
+              }),
+          WsRedisController.addOnlineList(id, {
+            client_ip,
+            created_at: new Date().toLocaleString(),
+            data,
+          }),
+        ]);
 
-      io.emit(wsMsgType.userInRoom, {
-        id,
-        userInfo: data.userInfo,
-        value: data.value,
-        created_at: new Date().toLocaleString(),
-      });
-      emitNum(client_ip);
+        io.emit(wsMsgType.userInRoom, {
+          id,
+          userInfo: data.userInfo,
+          value: data.value,
+          created_at: new Date().toLocaleString(),
+        });
+        emitNum(client_ip);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     // 用户退出房间

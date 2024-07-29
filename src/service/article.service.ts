@@ -248,26 +248,33 @@ class ArticleService {
       ],
       limit,
       offset,
-      // subQuery: false, // 非常关键！！！
+      subQuery: false, // 非常关键！！！
     });
     const article_ids: number[] = [];
     result.rows.forEach((item) => {
       article_ids.push(item.id!);
     });
-    const [commentNumsRes] = await sequelize.query(
-      `SELECT article_id, COUNT(*) as count FROM ${
-        commentModel.name
-      } WHERE article_id IN (${article_ids.join()}) GROUP BY article_id`
-    );
+    let commentNumsRes: any[] = [];
+    let starNumsRes: any[] = [];
+    if (article_ids.length) {
+      const [res1] = await sequelize.query(
+        `SELECT article_id, COUNT(*) as count FROM ${
+          commentModel.name
+        } WHERE article_id IN (${article_ids.join()}) AND deleted_at = NULL GROUP BY article_id`
+      );
+      commentNumsRes = res1;
+      const [res2] = await sequelize.query(
+        `SELECT article_id, COUNT(*) as count FROM ${
+          starModel.name
+        } WHERE article_id IN (${article_ids.join()}) AND comment_id = -1 AND deleted_at = NULL GROUP BY article_id`
+      );
+      starNumsRes = res2;
+    }
     const commentNumsMap: any = {};
     commentNumsRes.forEach((item: any) => {
       commentNumsMap[item.article_id] = item.count;
     });
-    const [starNumsRes] = await sequelize.query(
-      `SELECT article_id, COUNT(*) as count FROM ${
-        starModel.name
-      } WHERE article_id IN (${article_ids.join()}) AND comment_id = -1 GROUP BY article_id`
-    );
+
     const starNumsMap: any = {};
     starNumsRes.forEach((item: any) => {
       starNumsMap[item.article_id] = item.count;

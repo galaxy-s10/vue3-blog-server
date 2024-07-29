@@ -90,11 +90,12 @@ export interface IIpdata {
   city: string;
   adcode: string;
   rectangle: string;
-  // country: string;
-  // district: string;
-  // ip: string;
-  // isp: string;
-  // location: string;
+  country?: string;
+  district?: string;
+  ip?: string;
+  isp?: string;
+  location?: string;
+  frontend_rec_ip?: string;
 }
 
 export interface IEmailUser {
@@ -358,6 +359,7 @@ export interface IComment {
   star_total?: number;
   status?: number;
   user_agent?: string;
+  priority?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;

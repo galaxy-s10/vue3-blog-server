@@ -32,6 +32,7 @@ export function newSequelize(db?) {
     },
     timezone: '+08:00',
     logging: false,
+    // logging: true,
   });
 }
 

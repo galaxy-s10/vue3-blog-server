@@ -2,7 +2,9 @@ import dayjs from 'dayjs';
 import schedule from 'node-schedule';
 import { Client } from 'ssh2';
 
+import sequelize from '@/config/mysql';
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV, QINIU_BACKUP } from '@/constant';
+import monitModel from '@/model/monit.model';
 import { MYSQL_CONFIG, SSH_CONFIG } from '@/secret/secret';
 import monitService from '@/service/monit.service';
 import qiniuDataService from '@/service/qiniuData.service';
@@ -31,17 +33,27 @@ echo "备份目录已存在，开始备份"
 fi
 `;
 
+let backupsTabels = '';
+
+async function getAllTables() {
+  const queryInterface = sequelize.getQueryInterface();
+  let allTables = await queryInterface.showAllTables();
+  allTables = allTables.filter((v) => ![monitModel.name].includes(v));
+  backupsTabels = allTables.join(' ');
+}
+
 // 备份数据库命令
 const backupsCmd = (fileName: string) => {
   // ssh操作时，不能使用docker exec -it，否则报错：the input device is not a TTY
   return `docker exec -i ${MYSQL_CONFIG.docker.container} mysqldump -h${
     MYSQL_CONFIG.host
-  } -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} --databases ${
+  } -u${MYSQL_CONFIG.username} -p${MYSQL_CONFIG.password} ${
     MYSQL_CONFIG.database
-  } > ${backupDirectory + fileName}`;
+  } ${backupsTabels} > ${backupDirectory + fileName}`;
 };
 
-export const main = (user_id?: number) => {
+export const main = async (user_id?: number) => {
+  await getAllTables();
   const conn = new Client();
 
   conn
@@ -188,8 +200,8 @@ for (let i = 0; i < allSecond; i += 1) {
   allSecondArr.push(i);
 }
 
-// 每12小时执行
-rule.hour = allHourArr.filter((v) => v % 12 === 0);
+// 每4小时执行
+rule.hour = allHourArr.filter((v) => v % 4 === 0);
 rule.minute = 0;
 
 export const monitBackupDbJob = () => {
@@ -197,22 +209,10 @@ export const monitBackupDbJob = () => {
   const monitJobName = MONIT_JOB.BACKUPDB;
   schedule.scheduleJob(monitJobName, rule, () => {
     if (PROJECT_ENV === 'prod') {
-      console.log(
-        chalkINFO(
-          `${dayjs().format(
-            'YYYY-MM-DD HH:mm:ss'
-          )}，执行${monitJobName}定时任务`
-        )
-      );
+      console.log(chalkINFO(`执行${monitJobName}定时任务`));
       main();
     } else {
-      console.log(
-        chalkWARN(
-          `${dayjs().format(
-            'YYYY-MM-DD HH:mm:ss'
-          )}，当前非生产环境，不执行${monitJobName}定时任务`
-        )
-      );
+      console.log(chalkWARN(`当前非生产环境，不执行${monitJobName}定时任务`));
     }
   });
 };

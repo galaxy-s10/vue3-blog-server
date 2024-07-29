@@ -246,27 +246,8 @@ class QqUserController {
         id: userInfo?.id,
         token,
       });
-      if (ctx.header.origin?.indexOf('localhost') !== -1) {
-        ctx.cookies.set('token', token, {
-          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
-          /**
-           * secure
-           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
-           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
-           * true，因为线上是https://admin.hsslive.cn
-           */
-          secure: false,
-          /**
-           * domain
-           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
-           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
-           */
-          domain:
-            ctx.header.origin?.indexOf('localhost') !== -1
-              ? 'localhost'
-              : 'hsslive.cn',
-        });
-      } else {
+      if (ctx.header.origin?.indexOf('hsslive.cn') !== -1) {
+        console.log('token-线上正式');
         ctx.cookies.set('token', token, {
           httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
           sameSite: 'none', // 跨站点cookie需要设置sameSite: 'none'，设置sameSite: 'none'后，secure也要跟着设置true！
@@ -282,10 +263,25 @@ class QqUserController {
            * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
            * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
            */
-          domain:
-            ctx.header.origin?.indexOf('localhost') !== -1
-              ? 'localhost'
-              : 'hsslive.cn',
+          domain: 'hsslive.cn',
+        });
+      } else {
+        console.log('token-本地开发');
+        ctx.cookies.set('token', token, {
+          httpOnly: false, // 设置httpOnly为true后，document.cookie就拿不到key为token的cookie了，因此设置false
+          /**
+           * secure
+           * 一个布尔值，指示是否仅发送 cookie 通过 HTTPS（对于 HTTP，默认为 false，对于 HTTPS 默认为 true）。
+           * 这里判断如果是本地开发，就设置false，因为本地是http://localhost，不是https，如果是线上，就设置
+           * true，因为线上是https://admin.hsslive.cn
+           */
+          secure: false,
+          /**
+           * domain
+           * 设置域名为hsslive.cn，因为接口服务部署在api.hsslive.cn，在admin.hsslive.cn请求api.hsslive.cn，默认api.hsslive.cn的Set-Cookie
+           * 设置的domain是api.hsslive.cn，不会设置到admin.hsslive.cn站点下，因此手动设置domain为hsslive.cn
+           */
+          domain: ctx.header.origin,
         });
       }
       successHandler({ ctx, data: token, message: 'qq登录成功！' });
