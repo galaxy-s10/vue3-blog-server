@@ -17,9 +17,8 @@ class PositionService {
    * infocode 返回状态说明,10000代表正确,详情参阅info状态表。
    * status 值为0或1,0表示失败；1表示成功。
    */
-
   async get(ip?: string) {
-    if (['127.0.0.1', 'localhost', undefined].includes(ip)) {
+    if (['127.0.0.1', 'localhost', '', undefined].includes(ip)) {
       const ipStr = String(ip);
       return {
         info: ipStr,
@@ -32,26 +31,12 @@ class PositionService {
         frontend_rec_ip: ipStr,
       };
     }
+    // https://lbs.amap.com/api/webservice/guide/api/ipconfig
     const data: IIpdata = await axios.get(GAODE_WEB_IP_URL, {
       headers: { Accept: 'application/json' },
       params: { key: GAODE_WEB_IP_KEY, ip },
     });
-    // const data: IIpdata = await new Promise((resolve) => {
-    //   request(
-    //     {
-    //       url: GAODE_WEB_IP_URL,
-    //       method: 'GET',
-    //       qs: {
-    //         key: GAODE_WEB_IP_KEY,
-    //         ip,
-    //       },
-    //     },
-    //     (error, response, body) => {
-    //       resolve({ ...JSON.parse(body), ip });
-    //     }
-    //   );
-    // });
-    return { ...data, frontend_rec_ip: ip };
+    return { ...data, frontend_rec_ip: ip || '' };
   }
 }
 

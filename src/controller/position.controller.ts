@@ -5,12 +5,11 @@ import positionService from '@/service/position.service';
 
 class PositionController {
   async get(ctx: ParameterizedContext, next) {
-    const result = await positionService.get(
-      ctx.request.headers['x-real-ip'] as string
-    );
+    const realIp = ctx.request.headers['x-real-ip'] as string;
+    const result = await positionService.get(realIp);
     successHandler({
       ctx,
-      data: { gaode: result, ip: ctx.request.headers['x-real-ip'] || 'ip错误' },
+      data: { gaode: result, ip: realIp || 'ip错误' },
     });
     await next();
   }

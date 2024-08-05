@@ -260,13 +260,13 @@ class ArticleService {
       const [res1] = await sequelize.query(
         `SELECT article_id, COUNT(*) as count FROM ${
           commentModel.name
-        } WHERE article_id IN (${article_ids.join()}) AND deleted_at = NULL GROUP BY article_id`
+        } WHERE article_id IN (${article_ids.join()}) AND deleted_at IS NULL GROUP BY article_id`
       );
       commentNumsRes = res1;
       const [res2] = await sequelize.query(
         `SELECT article_id, COUNT(*) as count FROM ${
           starModel.name
-        } WHERE article_id IN (${article_ids.join()}) AND comment_id = -1 AND deleted_at = NULL GROUP BY article_id`
+        } WHERE article_id IN (${article_ids.join()}) AND comment_id = -1 AND deleted_at IS NULL GROUP BY article_id`
       );
       starNumsRes = res2;
     }

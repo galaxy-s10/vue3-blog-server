@@ -56,6 +56,11 @@ class CommentService {
             [Op.like]: `%${keyWord}%`,
           },
         },
+        {
+          user_agent: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
       ];
       allWhere[Op.or] = keyWordWhere;
     }
@@ -119,6 +124,11 @@ class CommentService {
       const keyWordWhere = [
         {
           content: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          user_agent: {
             [Op.like]: `%${keyWord}%`,
           },
         },
