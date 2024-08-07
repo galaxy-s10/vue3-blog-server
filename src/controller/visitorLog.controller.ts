@@ -112,7 +112,7 @@ class VisitorLogController {
   }
 
   async create(ctx: ParameterizedContext, next) {
-    const ip = String(ctx.request.headers['x-real-ip']);
+    const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
     // 这个接口的userInfo不是必须的
     const { userInfo } = await authJwt(ctx);
     if (['127.0.0.1', 'localhost', 'undefined'].includes(ip)) {

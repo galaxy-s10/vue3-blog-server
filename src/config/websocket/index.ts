@@ -15,7 +15,7 @@ import interactionController from '@/controller/interaction.controller';
 import interactionStatisController from '@/controller/interactionStatis.controller';
 import { InteractionStatisType } from '@/interface';
 import { REDIS_CONFIG } from '@/secret/secret';
-import { dateStartAndEnd } from '@/utils';
+import { dateStartAndEnd, strSlice } from '@/utils';
 import { chalkINFO } from '@/utils/chalkTip';
 
 async function getOnline() {
@@ -55,8 +55,9 @@ function prettierLog(type: string, socket: Socket) {
 
 function getClient(socket: Socket) {
   const { id, request } = socket;
+  const ip = strSlice(String(request.headers['x-real-ip']), 490);
   return {
-    client_ip: (request.headers['x-real-ip'] as string) || '-1',
+    client_ip: ip,
     id,
   };
 }

@@ -61,6 +61,7 @@ const model = sequelize.define<CommentModel>(
       defaultValue: 1, // 状态：1显示；2不显示
     },
     user_agent: {
+      // qq浏览器的user_agent能达到四百多字符
       type: DataTypes.STRING(500),
     },
     priority: {

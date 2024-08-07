@@ -30,19 +30,23 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       console.log(chalkINFO(`当前不是beta环境，写入日志`));
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
+      const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
+      const ua = strSlice(String(ctx.request.headers['user-agent']), 490);
+      const forwarded = strSlice(
+        String(ctx.request.headers['x-forwarded-for']),
+        490
+      );
+      const referer = strSlice(String(ctx.request.headers.referer), 490);
+
       logController.common.create({
         user_id: userInfo?.id || -1,
-        api_user_agent: strSlice(
-          String(ctx.request.headers['user-agent']),
-          400
-        ),
+        api_user_agent: ua,
         api_from: isAdmin(ctx) ? 2 : 1,
         api_body: JSON.stringify(ctx.request.body || {}),
         api_query: JSON.stringify(ctx.query),
-        api_real_ip:
-          (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1',
-        api_forwarded_for: ctx.request.headers['x-forwarded-for'] as string,
-        api_referer: ctx.request.headers.referer,
+        api_real_ip: ip,
+        api_forwarded_for: forwarded,
+        api_referer: referer,
         api_method: ctx.request.method,
         // ctx.request.host存在时获取主机（hostname:port）。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
         api_host: ctx.request.host, // ctx.request.hostname不带端口号;ctx.request.host带端口号

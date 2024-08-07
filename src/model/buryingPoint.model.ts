@@ -6,15 +6,18 @@ import {
 } from 'sequelize';
 
 import sequelize from '@/config/mysql';
-import { ILog } from '@/interface';
+import { IBuryingPoint } from '@/interface';
 import { initTable } from '@/utils';
 
-interface LogModel
-  extends Model<InferAttributes<LogModel>, InferCreationAttributes<LogModel>>,
-    ILog {}
+interface BuryingPointModel
+  extends Model<
+      InferAttributes<BuryingPointModel>,
+      InferCreationAttributes<BuryingPointModel>
+    >,
+    IBuryingPoint {}
 
-const model = sequelize.define<LogModel>(
-  'log',
+const model = sequelize.define<BuryingPointModel>(
+  'burying_point',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -22,67 +25,45 @@ const model = sequelize.define<LogModel>(
       allowNull: false,
       autoIncrement: true,
     },
+    ip: {
+      type: DataTypes.STRING(500),
+    },
+    article_id: {
+      type: DataTypes.INTEGER,
+    },
     user_id: {
       type: DataTypes.INTEGER,
-      defaultValue: -1, // -1:游客 非-1:用户
     },
-    api_duration: {
-      type: DataTypes.INTEGER,
-    },
-    api_user_agent: {
+    user_agent: {
       // qq浏览器的user_agent能达到四百多字符
       type: DataTypes.STRING(500),
     },
-    api_from: {
-      type: DataTypes.INTEGER, // 1:前台 2:后台
-    },
-    api_forwarded_for: {
+    extend_field_a: {
       type: DataTypes.STRING(500),
     },
-    api_referer: {
+    extend_field_b: {
       type: DataTypes.STRING(500),
     },
-    api_real_ip: {
+    extend_field_c: {
       type: DataTypes.STRING(500),
     },
-    api_host: {
+    extend_field_d: {
       type: DataTypes.STRING(500),
     },
-    api_hostname: {
+    extend_field_e: {
       type: DataTypes.STRING(500),
     },
-    api_method: {
-      type: DataTypes.STRING(100),
-    },
-    api_path: {
+    extend_field_f: {
       type: DataTypes.STRING(500),
     },
-    api_query: {
+    extend_field_g: {
       type: DataTypes.STRING(500),
     },
-    api_body: {
-      type: DataTypes.TEXT,
-    },
-    api_status_code: {
-      type: DataTypes.INTEGER,
-    },
-    api_error: {
-      type: DataTypes.TEXT,
-    },
-    api_err_msg: {
-      type: DataTypes.TEXT,
-    },
-    api_err_code: {
-      type: DataTypes.INTEGER,
+    remark: {
+      type: DataTypes.STRING,
     },
   },
   {
-    indexes: [
-      {
-        name: 'user_id',
-        fields: ['user_id'],
-      },
-    ],
     paranoid: true,
     freezeTableName: true,
     createdAt: 'created_at',
@@ -92,4 +73,5 @@ const model = sequelize.define<LogModel>(
 );
 
 initTable({ model, sequelize });
+
 export default model;

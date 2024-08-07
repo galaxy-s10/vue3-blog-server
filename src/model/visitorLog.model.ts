@@ -39,6 +39,7 @@ const model = sequelize.define<VisitorLogModel>(
       type: DataTypes.STRING(500),
     },
     user_agent: {
+      // qq浏览器的user_agent能达到四百多字符
       type: DataTypes.STRING(500),
     },
   },

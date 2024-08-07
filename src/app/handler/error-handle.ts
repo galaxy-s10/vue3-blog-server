@@ -2,14 +2,14 @@ import { ParameterizedContext } from 'koa';
 
 import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, HTTP_ERROE_MSG } from '@/constant';
 import { CustomError } from '@/model/customError.model';
-import { isAdmin } from '@/utils';
+import { isAdmin, strSlice } from '@/utils';
 import { chalk, chalkERROR } from '@/utils/chalkTip';
 
 const errorHandler = (error, ctx: ParameterizedContext) => {
   const admin = isAdmin(ctx);
   const { path, method } = ctx.request;
   const time = new Date().toLocaleString();
-  const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+  const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
   // eslint-disable-next-line
   const errorLog = (error) => {
     console.log(chalk.redBright('statusCode:'), error.statusCode);

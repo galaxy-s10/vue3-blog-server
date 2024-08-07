@@ -10,6 +10,26 @@ export interface ITheme {
   deleted_at?: string;
 }
 
+export interface IBuryingPoint {
+  id?: number;
+  ip?: string;
+  article_id?: number;
+  user_id?: number;
+  user_agent?: string;
+  extend_field_a?: string;
+  extend_field_b?: string;
+  extend_field_c?: string;
+  extend_field_d?: string;
+  extend_field_e?: string;
+  extend_field_f?: string;
+  extend_field_g?: string;
+  remark?: string;
+
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+
 export interface IBlacklist {
   id?: number;
   ip?: string;

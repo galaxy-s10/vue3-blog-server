@@ -8,7 +8,7 @@ import { ALLOW_HTTP_CODE } from '@/constant';
 import logController from '@/controller/log.controller';
 import { CustomError } from '@/model/customError.model';
 import { IP_WHITE_LIST } from '@/secret/secret';
-import { isAdmin } from '@/utils';
+import { isAdmin, strSlice } from '@/utils';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 
 // 前台的所有get和白名单内的接口不需要token
@@ -17,6 +17,7 @@ const frontendWhiteList = [
   '/init/auth',
   '/init/roleAuth',
   '/init/dayData',
+  '/burying_point/create',
   '/link/create', // 申请友链，这个接口是post的
   '/visitor_log/create', // 访客记录，这个接口是post的
   '/user/login', // 登录，这个接口是post的
@@ -88,7 +89,7 @@ export const apiBeforeVerify = async (ctx: ParameterizedContext, next) => {
   console.log(chalkINFO('apiBeforeVerify中间件开始'));
   const startTime = performance.now();
   const url = ctx.request.path;
-  const ip = (ctx.request.headers['x-real-ip'] as string) || '127.0.0.1';
+  const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
   const admin = isAdmin(ctx);
   const consoleEnd = () => {
     const duration = Math.floor(performance.now() - startTime);

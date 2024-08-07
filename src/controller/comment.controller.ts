@@ -201,7 +201,7 @@ class CommentController {
         ALLOW_HTTP_CODE.paramsError
       );
     }
-    const ip = String(ctx.request.headers['x-real-ip']);
+    const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
     const ip_data = await positionService.get(ip);
     await commentService.create({
       article_id,
