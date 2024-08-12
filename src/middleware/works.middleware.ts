@@ -6,10 +6,10 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   id: Joi.number(),
-  name: Joi.string().min(2).max(100),
-  desc: Joi.string().min(2).max(100),
-  url: Joi.string().min(2).max(300),
-  bg_url: Joi.string().min(2).max(300),
+  name: Joi.string().min(1).max(100),
+  desc: [Joi.string().min(1).max(100), '', null],
+  url: [Joi.string().min(1).max(300), '', null],
+  bg_url: [Joi.string().min(1).max(300), '', null],
   priority: [Joi.number(), null],
   status: [1, 2],
 });

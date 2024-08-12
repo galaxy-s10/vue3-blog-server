@@ -63,9 +63,13 @@ class BuryingPointService {
           ip: {
             [Op.like]: `%${keyWord}%`,
           },
+        },
+        {
           user_agent: {
             [Op.like]: `%${keyWord}%`,
           },
+        },
+        {
           remark: {
             [Op.like]: `%${keyWord}%`,
           },

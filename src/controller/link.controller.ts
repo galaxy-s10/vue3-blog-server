@@ -14,7 +14,7 @@ class LinkController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
-      status,
+      status: urlStatus,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -24,9 +24,15 @@ class LinkController {
       rangTimeStart,
       rangTimeEnd,
     }: IList<ILink> = ctx.request.query;
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     const result = await linkService.getList({
       id,
-      status: isAdmin(ctx) ? status : 1,
+      status,
       nowPage,
       pageSize,
       orderBy,
@@ -92,15 +98,30 @@ class LinkController {
   }
 
   async create(ctx: ParameterizedContext, next) {
-    const { email, name, avatar, desc, url, status, priority }: ILink =
-      ctx.request.body;
+    const {
+      email,
+      name,
+      avatar,
+      desc,
+      url,
+      status: urlStatus,
+      priority,
+    }: ILink = ctx.request.body;
+    let status = 2;
+    if (!isAdmin(ctx)) {
+      status = 2;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    } else {
+      status = 2;
+    }
     await linkService.create({
       email,
       name,
       avatar,
       desc,
       url,
-      status: isAdmin(ctx) ? status : 2,
+      status,
       priority,
     });
     await otherController.sendEmail(

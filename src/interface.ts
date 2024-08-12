@@ -296,6 +296,9 @@ export interface ITag {
   name?: string;
   color?: string;
   priority?: number;
+
+  article_status?: number;
+
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;

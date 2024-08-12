@@ -137,13 +137,24 @@ class ArticleController {
 
   async find(ctx: ParameterizedContext, next) {
     const id = +ctx.params.id;
+    const urlStatus = +(ctx.query.status as string);
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     let from_user_id = -1;
     // 这个接口的userInfo不是必须的
     const { code, userInfo } = await authJwt(ctx);
     if (code === ALLOW_HTTP_CODE.ok) {
       from_user_id = userInfo!.id!;
     }
-    const result = await articleService.findArticleDetail(id, from_user_id);
+    const result = await articleService.findArticleDetail({
+      id,
+      status,
+      from_user_id,
+    });
     successHandler({ ctx, data: result });
     await next();
   }
@@ -156,7 +167,7 @@ class ArticleController {
       nowPage,
       pageSize,
       keyWord,
-      status,
+      status: urlStatus,
       tags = [],
       types = [],
       users = [],
@@ -164,6 +175,12 @@ class ArticleController {
       rangTimeStart,
       rangTimeEnd,
     }: IList<IArticle> = ctx.request.query;
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     const result = await articleService.getList({
       id,
       orderBy,
@@ -171,7 +188,7 @@ class ArticleController {
       nowPage,
       pageSize,
       keyWord,
-      status: isAdmin(ctx) ? status : 1,
+      status,
       tags,
       types,
       users,
@@ -186,16 +203,22 @@ class ArticleController {
   async getKeyWordList(ctx: ParameterizedContext, next) {
     const {
       id,
+      status: urlStatus,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
       pageSize,
       keyWord,
-      status,
       rangTimeType,
       rangTimeStart,
       rangTimeEnd,
     }: IList<IArticle> = ctx.request.query;
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     const result = await articleService.getKeyWordList({
       id,
       orderBy,
@@ -203,7 +226,7 @@ class ArticleController {
       keyWord,
       nowPage,
       pageSize,
-      status: isAdmin(ctx) ? status : 1,
+      status,
       rangTimeType,
       rangTimeStart,
       rangTimeEnd,

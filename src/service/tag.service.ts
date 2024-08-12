@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, ITag } from '@/interface';
@@ -27,6 +27,7 @@ class TagService {
   /** 获取标签列表 */
   async getList({
     id,
+    article_status,
     orderBy,
     orderName,
     nowPage,
@@ -42,16 +43,15 @@ class TagService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
+    const allWhere = deleteUseLessObjectKey({ id });
     if (keyWord) {
       const keyWordWhere = [
         {
           name: {
             [Op.like]: `%${keyWord}%`,
           },
+        },
+        {
           color: {
             [Op.like]: `%${keyWord}%`,
           },
@@ -75,6 +75,7 @@ class TagService {
             attributes: [],
           },
           attributes: ['id'],
+          where: deleteUseLessObjectKey({ status: article_status }),
         },
       ],
       limit,
@@ -93,14 +94,14 @@ class TagService {
   }
 
   /** 获取标签文章列表 */
-  async getArticleList({ tag_id, nowPage, pageSize }) {
+  async getArticleList({ id, article_status, nowPage, pageSize }: IList<ITag>) {
     let offset;
     let limit;
     if (nowPage && pageSize) {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const inst = await tagModel.findOne({ where: { id: tag_id } });
+    const inst = await tagModel.findOne({ where: { id } });
     // @ts-ignore
     const count = await inst.countArticles();
     // @ts-ignore
@@ -130,6 +131,7 @@ class TagService {
       attributes: {
         exclude: ['content'],
       },
+      where: deleteUseLessObjectKey({ status: article_status }),
     });
     result.forEach((item) => {
       const v = item.get();

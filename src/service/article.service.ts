@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import articleTagService from './articleTag.service';
@@ -36,14 +36,15 @@ class ArticleService {
   }
 
   /** 查找文章详情 */
-  async findArticleDetail(id: number, from_user_id = -1) {
-    await articleModel.update(
-      { click: literal('`click` +1') },
-      {
-        where: { id },
-        silent: true, // silent如果为true，则不会更新updateAt时间戳。
-      }
-    );
+  async findArticleDetail({
+    id,
+    status,
+    from_user_id,
+  }: {
+    id: number;
+    status?: number;
+    from_user_id: number;
+  }) {
     const result = await articleModel.findOne({
       include: [
         {
@@ -66,9 +67,16 @@ class ArticleService {
           },
         },
       ],
-      where: { id },
+      where: deleteUseLessObjectKey({ id, status }),
     });
     if (!result) return null;
+    await articleModel.update(
+      { click: literal('`click` +1') },
+      {
+        where: deleteUseLessObjectKey({ id }),
+        silent: true, // silent如果为true，则不会更新updateAt时间戳。
+      }
+    );
     const starPromise = starModel.findAndCountAll({
       attributes: [
         [Sequelize.col('star.id'), 'star_id'],
@@ -136,20 +144,12 @@ class ArticleService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    let idWhere: any;
+    const idWhere = deleteUseLessObjectKey({ id });
     let typeWhere: any;
     let tagWhere: any;
     let userWhere: any;
-    let statusWhere: any;
+    const statusWhere = deleteUseLessObjectKey({ status });
     const allWhere: any = {};
-    if (status) {
-      statusWhere = {};
-      statusWhere.status = status;
-    }
-    if (id) {
-      idWhere = {};
-      idWhere.id = id;
-    }
     if (keyWord) {
       allWhere[Op.or] = [
         {
@@ -329,10 +329,7 @@ class ArticleService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (status) {
-      allWhere.status = status;
-    }
+    const allWhere = deleteUseLessObjectKey({ status });
     if (keyWord) {
       allWhere[Op.or] = [
         {

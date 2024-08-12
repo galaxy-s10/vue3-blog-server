@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { ILink, IList } from '@/interface';
@@ -39,13 +39,7 @@ class LinkService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
-    if (status) {
-      allWhere.status = +status;
-    }
+    const allWhere = deleteUseLessObjectKey({ id, status });
     if (keyWord) {
       const keyWordWhere = [
         {

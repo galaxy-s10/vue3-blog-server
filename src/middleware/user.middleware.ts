@@ -14,10 +14,10 @@ const schema = Joi.object({
   // password: Joi.string()
   //   .pattern(/(?![0-9]+$)(?![a-zA-Z]+$)(?![_]+$)[0-9a-zA-A_]{8,16}/)
   //   .required(),
-  desc: Joi.string().min(2).max(100),
-  avatar: Joi.string().min(2).max(300),
-  email: Joi.string().min(2).max(100),
-  code: Joi.string(),
+  desc: [Joi.string().min(1).max(100), '', null],
+  avatar: [Joi.string().min(1).max(300), '', null],
+  email: [Joi.string().min(1).max(100), '', null],
+  code: [Joi.string(), '', null],
   status: [1, 2],
   exp: Joi.number(),
   user_roles: Joi.array().items(Joi.number()),

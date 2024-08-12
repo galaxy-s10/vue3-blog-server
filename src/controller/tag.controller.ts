@@ -6,11 +6,13 @@ import { ALLOW_HTTP_CODE } from '@/constant';
 import { IList, ITag } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import tagService from '@/service/tag.service';
+import { isAdmin } from '@/utils';
 
 class TagController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      article_status: urlArticleStatus,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -20,8 +22,15 @@ class TagController {
       rangTimeStart,
       rangTimeEnd,
     }: IList<ITag> = ctx.request.query;
+    let articleStatus: undefined | number;
+    if (!isAdmin(ctx)) {
+      articleStatus = 1;
+    } else if (urlArticleStatus !== undefined) {
+      articleStatus = urlArticleStatus;
+    }
     const result = await tagService.getList({
       id,
+      article_status: articleStatus,
       nowPage,
       pageSize,
       orderBy,
@@ -86,10 +95,21 @@ class TagController {
   }
 
   async getArticleList(ctx: ParameterizedContext, next) {
-    const tag_id = +ctx.params.tag_id;
-    const { nowPage, pageSize } = ctx.request.query;
+    const id = +ctx.params.tag_id;
+    const {
+      nowPage,
+      pageSize,
+      article_status: urlArticleStatus,
+    }: IList<ITag> = ctx.request.query;
+    let articleStatus: undefined | number;
+    if (!isAdmin(ctx)) {
+      articleStatus = 1;
+    } else if (urlArticleStatus !== undefined) {
+      articleStatus = urlArticleStatus;
+    }
     const result = await tagService.getArticleList({
-      tag_id,
+      id,
+      article_status: articleStatus,
       nowPage,
       pageSize,
     });

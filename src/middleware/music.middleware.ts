@@ -7,9 +7,9 @@ import { CustomError } from '@/model/customError.model';
 const schema = Joi.object({
   id: Joi.number(),
   name: Joi.string().min(1).max(100),
-  cover_pic: Joi.string().min(3).max(300),
+  cover_pic: Joi.string().min(1).max(300),
   author: Joi.string().min(1).max(100),
-  audio_url: Joi.string().min(3).max(300),
+  audio_url: Joi.string().min(1).max(300),
   status: [1, 2],
   priority: [Joi.number(), null],
 });

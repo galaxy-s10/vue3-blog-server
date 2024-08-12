@@ -6,8 +6,8 @@ import { CustomError } from '@/model/customError.model';
 
 const schema = Joi.object({
   id: Joi.number(),
-  name: Joi.string().min(2).max(80),
-  color: Joi.string().min(2).max(80),
+  name: Joi.string().min(1).max(80),
+  color: Joi.string().min(1).max(80),
   priority: [Joi.number(), null],
 });
 

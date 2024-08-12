@@ -8,7 +8,6 @@ import { chalk, chalkERROR } from '@/utils/chalkTip';
 const errorHandler = (error, ctx: ParameterizedContext) => {
   const admin = isAdmin(ctx);
   const { path, method } = ctx.request;
-  const time = new Date().toLocaleString();
   const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
   // eslint-disable-next-line
   const errorLog = (error) => {

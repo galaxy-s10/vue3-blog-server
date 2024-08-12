@@ -12,7 +12,7 @@ class WorksController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
-      status,
+      status: urlStatus,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -22,9 +22,15 @@ class WorksController {
       rangTimeStart,
       rangTimeEnd,
     }: IList<IWorks> = ctx.request.query;
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     const result = await worksService.getList({
       id,
-      status: isAdmin(ctx) ? status : 1,
+      status,
       orderBy,
       orderName,
       nowPage,
