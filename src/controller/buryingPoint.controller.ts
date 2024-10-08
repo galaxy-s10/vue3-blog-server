@@ -8,9 +8,9 @@ import { strSlice } from '@/utils';
 class BuryingPointController {
   async create(ctx: ParameterizedContext, next) {
     const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
-    const ua = strSlice(String(ctx.request.headers['user-agent']), 490);
+    const user_agent = strSlice(String(ctx.request.headers['user-agent']), 490);
     const data: IBuryingPoint = ctx.request.body;
-    await buryingPointService.create({ ...data, ip, user_agent: ua });
+    await buryingPointService.create({ ...data, ip, user_agent });
     successHandler({ ctx });
     await next();
   }
@@ -20,13 +20,13 @@ class BuryingPointController {
       id,
       user_id,
       article_id,
-      extend_field_a,
-      extend_field_b,
-      extend_field_c,
-      extend_field_d,
-      extend_field_e,
-      extend_field_f,
-      extend_field_g,
+      field_a,
+      field_b,
+      field_c,
+      field_d,
+      field_e,
+      field_f,
+      field_g,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -40,13 +40,13 @@ class BuryingPointController {
       id,
       user_id,
       article_id,
-      extend_field_a,
-      extend_field_b,
-      extend_field_c,
-      extend_field_d,
-      extend_field_e,
-      extend_field_f,
-      extend_field_g,
+      field_a,
+      field_b,
+      field_c,
+      field_d,
+      field_e,
+      field_f,
+      field_g,
       orderBy,
       orderName,
       nowPage,

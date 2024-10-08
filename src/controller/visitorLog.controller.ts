@@ -59,6 +59,7 @@ class VisitorLogController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      user_id,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -70,6 +71,7 @@ class VisitorLogController {
     }: IList<IVisitorLog> = ctx.request.query;
     const result = await visitorLogService.getList({
       id,
+      user_id,
       orderBy,
       orderName,
       nowPage,
@@ -120,12 +122,16 @@ class VisitorLogController {
     } else {
       const { page_url }: IVisitorLog = ctx.request.body;
       const ip_data = await positionService.get(ip);
+      const user_agent = strSlice(
+        String(ctx.request.headers['user-agent']),
+        490
+      );
       const result = await visitorLogService.create({
         ip: strSlice(ip, 400),
         user_id: userInfo?.id || -1,
-        ip_data: strSlice(JSON.stringify(ip_data), 400),
-        page_url: strSlice(page_url || '', 400),
-        user_agent: strSlice(String(ctx.request.headers['user-agent']), 400),
+        ip_data: strSlice(JSON.stringify(ip_data), 490),
+        page_url: strSlice(page_url || '', 490),
+        user_agent,
       });
       successHandler({ ctx, data: result });
     }

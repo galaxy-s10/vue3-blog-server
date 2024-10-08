@@ -23,12 +23,13 @@ for (let i = 0; i < allSecond; i += 1) {
   allSecondArr.push(i);
 }
 
-// 每23小时执行
-rule.hour = allHourArr.filter((v) => v % 23 === 0);
-rule.minute = 0;
+// 每12小时执行
+rule.hour = allHourArr.filter((v) => v % 12 === 0);
+// 每12小时10分执行
+rule.minute = 10;
 
 export const main = () => {
-  logController.common.deleteRang();
+  logController.common.deleteRang(90);
 };
 
 export const monitDeleteLogJob = () => {

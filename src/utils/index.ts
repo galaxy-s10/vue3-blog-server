@@ -13,7 +13,13 @@ import {
 
 /** 字符串截取 */
 export function strSlice(str: string, length: number) {
-  return str.slice(0, length);
+  let res = '';
+  try {
+    res = str.slice(0, length);
+  } catch (error) {
+    console.log(error);
+  }
+  return res;
 }
 
 /**
@@ -290,7 +296,7 @@ export const deleteIndexs = async (data: {
  * @param model
  * @param method
  */
-export const initTable = (data: {
+export const initTable = async (data: {
   model: ModelStatic<Model>;
   method?: 'force' | 'alter';
   sequelize: Sequelize;
@@ -301,7 +307,10 @@ export const initTable = (data: {
   ) {
     if (methodArg === 'force') {
       console.log(chalkWARN(`开始(重新)创建${modelArg.tableName}表`));
-      await deleteIndexs({ sequelizeInst: data.sequelize, model: data.model });
+      await deleteIndexs({
+        sequelizeInst: data.sequelize,
+        model: data.model,
+      });
       await deleteForeignKeys({
         sequelizeInst: data.sequelize,
         model: data.model,
@@ -310,7 +319,10 @@ export const initTable = (data: {
       console.log(chalkSUCCESS(`${modelArg.tableName}表刚刚(重新)创建！`));
     } else if (methodArg === 'alter') {
       console.log(chalkWARN(`开始同步${modelArg.tableName}表`));
-      await deleteIndexs({ sequelizeInst: data.sequelize, model: data.model });
+      await deleteIndexs({
+        sequelizeInst: data.sequelize,
+        model: data.model,
+      });
       await deleteForeignKeys({
         sequelizeInst: data.sequelize,
         model: data.model,
@@ -321,10 +333,12 @@ export const initTable = (data: {
       console.log(chalkINFO(`加载数据库表: ${modelArg.tableName}`));
     }
   }
-  main(data.model, data.method).catch((err) => {
-    console.log(chalkERROR(`initTable失败`), err.message);
-    console.log(err);
-  });
+  try {
+    await main(data.model, data.method);
+  } catch (error: any) {
+    console.log(chalkERROR(`initTable失败`), error.message);
+    console.log(error);
+  }
 };
 
 /**

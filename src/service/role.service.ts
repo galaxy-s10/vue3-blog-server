@@ -277,6 +277,7 @@ class RoleService {
     const data2 = filterObj(data, ['id']);
     const result = await roleModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }

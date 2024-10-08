@@ -6,7 +6,13 @@ import { verifyProp } from '@/middleware/article.middleware';
 const articleRouter = new Router({ prefix: '/article' });
 
 // 压力测试
-articleRouter.get('/test', articleController.test);
+// articleRouter.get('/test', articleController.test);
+
+// 点击了文章
+articleRouter.post('/click', articleController.click);
+
+// 访问了文章
+articleRouter.post('/visit', articleController.visit);
 
 // 文章列表
 articleRouter.get('/list', articleController.getList);

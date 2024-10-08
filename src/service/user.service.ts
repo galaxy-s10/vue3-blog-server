@@ -306,6 +306,7 @@ class UserService {
     const data2 = filterObj(data, ['id']);
     const result = await userModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }
@@ -314,6 +315,7 @@ class UserService {
   async delete(id: number) {
     const result = await userModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

@@ -18,12 +18,21 @@ const frontendWhiteList = [
   '/init/roleAuth',
   '/init/dayData',
   '/burying_point/create',
+
+  '/article/click',
+  '/article/visit',
+
   '/link/create', // 申请友链，这个接口是post的
+
   '/visitor_log/create', // 访客记录，这个接口是post的
+
   '/user/login', // 登录，这个接口是post的
+
   '/qq_user/login', // 登录，这个接口是post的
-  '/email_user/login', // 登录，这个接口是post的
+
   '/github_user/login', // 登录，这个接口是post的
+
+  '/email_user/login', // 登录，这个接口是post的
   '/email_user/send_login_code', // 发送登录验证码，这个接口是post的
   '/email_user/send_register_code', // 发送注册验证码，这个接口是post的
   '/email_user/send_bind_code', // 发送绑定邮箱验证码，这个接口是post的

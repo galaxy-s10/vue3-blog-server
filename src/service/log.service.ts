@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, ILog } from '@/interface';
@@ -23,6 +23,7 @@ class LogService {
   /** 获取日志列表 */
   async getList({
     id,
+    user_id,
     orderBy,
     orderName,
     nowPage,
@@ -38,10 +39,7 @@ class LogService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
+    const allWhere = deleteUseLessObjectKey({ id, user_id });
     if (keyWord) {
       const keyWordWhere = [
         {
@@ -125,17 +123,19 @@ class LogService {
     const data2 = filterObj(data, ['id']);
     const result = await logModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }
 
-  /** 删除90天前的日志 */
-  async deleteRang() {
+  /** 删除n天前的日志 */
+  async deleteRang(day: number) {
     const nowDate = new Date().getTime();
     const result = await logModel.destroy({
       where: {
+        status: 1,
         created_at: {
-          [Op.lt]: new Date(nowDate - 1000 * 60 * 60 * 24 * 90),
+          [Op.lt]: new Date(nowDate - 1000 * 60 * 60 * 24 * Number(day || 1)),
         },
       },
       force: true, // WARN 不用软删除，直接硬性删除数据库的记录
@@ -148,6 +148,7 @@ class LogService {
   async delete(id: number) {
     const result = await logModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

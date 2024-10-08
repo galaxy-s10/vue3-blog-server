@@ -16,13 +16,13 @@ export interface IBuryingPoint {
   article_id?: number;
   user_id?: number;
   user_agent?: string;
-  extend_field_a?: string;
-  extend_field_b?: string;
-  extend_field_c?: string;
-  extend_field_d?: string;
-  extend_field_e?: string;
-  extend_field_f?: string;
-  extend_field_g?: string;
+  field_a?: string;
+  field_b?: string;
+  field_c?: string;
+  field_d?: string;
+  field_e?: string;
+  field_f?: string;
+  field_g?: string;
   remark?: string;
 
   created_at?: string;
@@ -73,8 +73,8 @@ export interface IInteraction {
   id?: number;
   user_type?: number;
   user_info?: string;
-  client_ip?: string;
-  client?: string;
+  ip?: string;
+  ip_data?: string;
   type?: string;
   value?: string;
   created_at?: string;
@@ -307,6 +307,7 @@ export interface ITag {
 export interface ILog {
   id?: number;
   user_id?: number;
+  status?: number;
   api_user_agent?: string;
   api_duration?: number;
   api_from?: number;
@@ -362,6 +363,7 @@ export interface IArticle {
   head_img?: string;
   is_comment?: number;
   status?: number;
+  visit?: number;
   click?: number;
   tags?: number[];
   types?: number[];

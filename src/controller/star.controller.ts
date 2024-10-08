@@ -14,6 +14,9 @@ class StarController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      article_id,
+      from_user_id,
+      to_user_id,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -25,6 +28,9 @@ class StarController {
     }: IList<IStar> = ctx.request.query;
     const result = await starService.getList({
       id,
+      article_id,
+      from_user_id,
+      to_user_id,
       orderBy,
       orderName,
       nowPage,

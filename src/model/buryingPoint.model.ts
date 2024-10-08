@@ -38,25 +38,25 @@ const model = sequelize.define<BuryingPointModel>(
       // qq浏览器的user_agent能达到四百多字符
       type: DataTypes.STRING(500),
     },
-    extend_field_a: {
+    field_a: {
       type: DataTypes.STRING(500),
     },
-    extend_field_b: {
+    field_b: {
       type: DataTypes.STRING(500),
     },
-    extend_field_c: {
+    field_c: {
       type: DataTypes.STRING(500),
     },
-    extend_field_d: {
+    field_d: {
       type: DataTypes.STRING(500),
     },
-    extend_field_e: {
+    field_e: {
       type: DataTypes.STRING(500),
     },
-    extend_field_f: {
+    field_f: {
       type: DataTypes.STRING(500),
     },
-    extend_field_g: {
+    field_g: {
       type: DataTypes.STRING(500),
     },
     remark: {
@@ -72,6 +72,32 @@ const model = sequelize.define<BuryingPointModel>(
   }
 );
 
-initTable({ model, sequelize });
+function renameColumn() {
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_a TO field_a;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_b TO field_b;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_c TO field_c;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_d TO field_d;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_e TO field_e;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_f TO field_f;`
+  );
+  sequelize.query(
+    `ALTER TABLE ${model.name} RENAME COLUMN extend_field_g TO field_g;`
+  );
+}
+
+initTable({ model, sequelize }).then(() => {
+  // renameColumn();
+});
 
 export default model;

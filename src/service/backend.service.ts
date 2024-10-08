@@ -16,13 +16,15 @@ class BackendService {
   async static() {
     const [
       article_total,
-      article_read_total,
+      article_click_total,
+      article_visit_total,
       comment_total,
       user_total,
       visit_total,
     ] = await Promise.all([
       articleModel.count(),
       articleModel.sum('click'),
+      articleModel.sum('visit'),
       commentModel.count(),
       userModel.count(),
       visitorLogModel.count(),
@@ -33,7 +35,8 @@ class BackendService {
       },
       article: {
         total: article_total,
-        read: article_read_total,
+        click: article_click_total,
+        visit: article_visit_total,
       },
       comment: {
         total: comment_total,
@@ -122,13 +125,17 @@ class BackendService {
   async update(data: IBackend) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await backendModel.update(data2, { where: { id } });
+    const result = await backendModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
   async delete(id: number) {
     const result = await backendModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

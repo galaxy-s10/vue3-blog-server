@@ -25,35 +25,29 @@ const model = sequelize.define<IInteractionModel>(
       allowNull: false,
       autoIncrement: true,
     },
-    // 客户端ip
-    client_ip: {
+    // ip
+    ip: {
       type: DataTypes.STRING(500),
-      allowNull: false,
     },
-    // 客户端信息
-    client: {
+    // ip信息
+    ip_data: {
       type: DataTypes.STRING(500),
-      allowNull: false,
     },
     // 用户类型
     user_type: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     // 用户信息
     user_info: {
       type: DataTypes.STRING(500),
-      allowNull: false,
     },
     // 消息类型
     type: {
       type: DataTypes.STRING(500),
-      allowNull: false,
     },
     // 消息内容
     value: {
       type: DataTypes.STRING(500),
-      allowNull: false,
     },
   },
   {
@@ -65,5 +59,16 @@ const model = sequelize.define<IInteractionModel>(
   }
 );
 
-initTable({ model, sequelize });
+function renameColumn() {
+  // sequelize.query(
+  //   `ALTER TABLE ${model.name} RENAME COLUMN ip_info TO ip_data;`
+  // );
+  sequelize.query(`ALTER TABLE ${model.name} RENAME COLUMN client_ip TO ip;`);
+  sequelize.query(`ALTER TABLE ${model.name} RENAME COLUMN client TO ip_data;`);
+}
+
+initTable({ model, sequelize }).then(() => {
+  // renameColumn();
+});
+
 export default model;

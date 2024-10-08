@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IStar } from '@/interface';
@@ -26,6 +26,9 @@ class StarService {
   /** 获取star列表 */
   async getList({
     id,
+    article_id,
+    from_user_id,
+    to_user_id,
     orderBy,
     orderName,
     nowPage,
@@ -41,10 +44,12 @@ class StarService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = id;
-    }
+    const allWhere = deleteUseLessObjectKey({
+      id,
+      article_id,
+      from_user_id,
+      to_user_id,
+    });
     if (keyWord) {
       const keyWordWhere = [
         {
@@ -110,16 +115,6 @@ class StarService {
     return result;
   }
 
-  /** 修改star */
-  async update(data: IStar) {
-    const { id } = data;
-    const data2 = filterObj(data, ['id']);
-    const result = await starModel.update(data2, {
-      where: { id },
-    });
-    return result;
-  }
-
   /** 创建star */
   async create({
     article_id = -1,
@@ -148,12 +143,24 @@ class StarService {
     return result;
   }
 
+  /** 修改star */
+  async update(data: IStar) {
+    const { id } = data;
+    const data2 = filterObj(data, ['id']);
+    const result = await starModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
+    return result;
+  }
+
   /** 删除star */
   async delete(id: number) {
     // 注意顺序，先找到这个star的数据，然后再删数据。别删了数据再找这个star
     const res: any = await this.find(id);
     const result = await starModel.destroy({
       where: { id },
+      limit: 1,
     });
     if (res.comment_id !== -1) {
       const total = await starModel.count({

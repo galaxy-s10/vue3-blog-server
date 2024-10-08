@@ -86,13 +86,17 @@ class InteractionService {
   async update(data: IInteraction) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await interactionModel.update(data2, { where: { id } });
+    const result = await interactionModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
   async delete(id: number) {
     const result = await interactionModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

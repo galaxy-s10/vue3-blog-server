@@ -7,7 +7,7 @@ import { handlePaging } from '@/utils';
 
 const { Op } = Sequelize;
 
-class TagService {
+class ThirdUserService {
   /** 第三方用户记录是否存在 */
   async isExist(ids: number[]) {
     const res = await thirdUserModel.count({
@@ -106,6 +106,7 @@ class TagService {
     const data2 = filterObj(data, ['id']);
     const result = await thirdUserModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }
@@ -114,10 +115,11 @@ class TagService {
   async delete(id: number) {
     const result = await thirdUserModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;
   }
 }
 
-export default new TagService();
+export default new ThirdUserService();

@@ -57,7 +57,7 @@ function getClient(socket: Socket) {
   const { id, request } = socket;
   const ip = strSlice(String(request.headers['x-real-ip']), 490);
   return {
-    client_ip: ip,
+    ip,
     id,
   };
 }
@@ -218,12 +218,12 @@ export const connectWebSocket = (server) => {
     // 用户还在线
     socket.on(wsMsgType.live, async () => {
       prettierLog('用户还在线', socket);
-      const { id, client_ip } = getClient(socket);
+      const { id, ip } = getClient(socket);
       const res = await WsRedisController.getOnlineList(id);
       if (res) {
         const { data }: IData = JSON.parse(res);
         WsRedisController.live(id, {
-          client_ip,
+          client_ip: ip,
           created_at: new Date().toLocaleString(),
           exp: liveExp,
           data: data.userInfo,
@@ -235,9 +235,9 @@ export const connectWebSocket = (server) => {
     socket.on(wsMsgType.userInRoom, async (data: any) => {
       try {
         prettierLog('用户进房间', socket);
-        const { id, client_ip } = getClient(socket);
+        const { id, ip } = getClient(socket);
         WsRedisController.live(id, {
-          client_ip,
+          client_ip: ip,
           created_at: new Date().toLocaleString(),
           exp: liveExp,
           data,
@@ -245,17 +245,17 @@ export const connectWebSocket = (server) => {
         await Promise.all([
           data.userInfo.userType === wsUserType.user
             ? WsRedisController.addOnlineUser(id, {
-                client_ip,
+                client_ip: ip,
                 created_at: new Date().toLocaleString(),
                 data,
               })
             : WsRedisController.addOnlineVisitor(id, {
-                client_ip,
+                client_ip: ip,
                 created_at: new Date().toLocaleString(),
                 data,
               }),
           WsRedisController.addOnlineList(id, {
-            client_ip,
+            client_ip: ip,
             created_at: new Date().toLocaleString(),
             data,
           }),
@@ -267,7 +267,7 @@ export const connectWebSocket = (server) => {
           value: data.value,
           created_at: new Date().toLocaleString(),
         });
-        emitNum(client_ip);
+        emitNum(ip);
       } catch (error) {
         console.log(error);
       }
@@ -285,7 +285,7 @@ export const connectWebSocket = (server) => {
       // socket.emit会将消息发送给发件人
       // socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
-      const { id, client_ip } = getClient(socket);
+      const { id, ip } = getClient(socket);
       io.emit(wsMsgType.userSendMsg, {
         id,
         userInfo: data.userInfo,
@@ -293,8 +293,8 @@ export const connectWebSocket = (server) => {
         created_at: new Date().toLocaleString(),
       });
       interactionController.common.create({
-        client_ip,
-        client: '',
+        ip,
+        ip_data: '',
         user_info: JSON.stringify(data.userInfo),
         user_type: data.userInfo.userType,
         type: wsMsgType.userSendMsg,

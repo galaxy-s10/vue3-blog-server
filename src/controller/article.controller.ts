@@ -159,6 +159,20 @@ class ArticleController {
     await next();
   }
 
+  async click(ctx: ParameterizedContext, next) {
+    const { id } = ctx.request.body;
+    await articleService.click(id);
+    successHandler({ ctx });
+    await next();
+  }
+
+  async visit(ctx: ParameterizedContext, next) {
+    const { id } = ctx.request.body;
+    await articleService.visit(id);
+    successHandler({ ctx });
+    await next();
+  }
+
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,

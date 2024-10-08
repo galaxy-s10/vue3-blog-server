@@ -31,7 +31,10 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
       // 将请求写入日志表
       const { userInfo } = await authJwt(ctx);
       const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
-      const ua = strSlice(String(ctx.request.headers['user-agent']), 490);
+      const api_user_agent = strSlice(
+        String(ctx.request.headers['user-agent']),
+        490
+      );
       const forwarded = strSlice(
         String(ctx.request.headers['x-forwarded-for']),
         490
@@ -40,7 +43,7 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
 
       logController.common.create({
         user_id: userInfo?.id || -1,
-        api_user_agent: ua,
+        api_user_agent,
         api_from: isAdmin(ctx) ? 2 : 1,
         api_body: JSON.stringify(ctx.request.body || {}),
         api_query: JSON.stringify(ctx.query),
@@ -124,17 +127,16 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         insertLog(defaultSuccess);
       }
       throw new CustomError(msg, statusCode, statusCode);
-    } else {
-      const defaultSuccess = {
-        statusCode,
-        errorCode: statusCode,
-        error: '请求成功！',
-        message: '请求成功！',
-        duration,
-      };
-      // 请求成功写入日志表
-      insertLog(defaultSuccess);
     }
+    // const defaultSuccess = {
+    //   statusCode,
+    //   errorCode: statusCode,
+    //   error: '请求成功！',
+    //   message: '请求成功！',
+    //   duration,
+    // };
+    // // 请求成功写入日志表
+    // insertLog(defaultSuccess);
   } catch (error: any) {
     console.log('catchErrorMiddle中间件捕获到错误！');
     if (ctx.request.path.indexOf('/socket.io/') !== -1) {

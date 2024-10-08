@@ -15,6 +15,7 @@ class BlacklistController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      user_id,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -26,6 +27,7 @@ class BlacklistController {
     }: IList<IBlacklist> = ctx.request.query;
     const result = await blacklistService.getList({
       id,
+      user_id,
       orderBy,
       orderName,
       nowPage,

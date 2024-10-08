@@ -115,6 +115,7 @@ class QiniuDataService {
     const data2 = filterObj(data, ['id']);
     const result = await qiniuDataModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }
@@ -132,6 +133,7 @@ class QiniuDataService {
   async delete(id: number) {
     const result = await qiniuDataModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

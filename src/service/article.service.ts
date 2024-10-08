@@ -29,6 +29,32 @@ class ArticleService {
     return res === ids.length;
   }
 
+  /** 点击了文章 */
+  async click(id: number) {
+    const result = await articleModel.update(
+      { click: literal('`click` +1') },
+      {
+        where: { id },
+        limit: 1,
+        silent: true, // silent如果为true，则不会更新updateAt时间戳。
+      }
+    );
+    return result;
+  }
+
+  /** 访问了文章 */
+  async visit(id: number) {
+    const result = await articleModel.update(
+      { visit: literal('`visit` +1') },
+      {
+        where: { id },
+        limit: 1,
+        silent: true, // silent如果为true，则不会更新updateAt时间戳。
+      }
+    );
+    return result;
+  }
+
   /** 查找文章 */
   async find(id: number) {
     const result = await articleModel.findOne({ where: { id } });
@@ -70,13 +96,6 @@ class ArticleService {
       where: deleteUseLessObjectKey({ id, status }),
     });
     if (!result) return null;
-    await articleModel.update(
-      { click: literal('`click` +1') },
-      {
-        where: deleteUseLessObjectKey({ id }),
-        silent: true, // silent如果为true，则不会更新updateAt时间戳。
-      }
-    );
     const starPromise = starModel.findAndCountAll({
       attributes: [
         [Sequelize.col('star.id'), 'star_id'],
@@ -373,7 +392,10 @@ class ArticleService {
   async update(data: IArticle) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await articleModel.update(data2, { where: { id } });
+    const result = await articleModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
@@ -381,6 +403,7 @@ class ArticleService {
   async delete(id: number) {
     const result = await articleModel.destroy({
       where: { id },
+      limit: 1,
     });
     return result;
   }

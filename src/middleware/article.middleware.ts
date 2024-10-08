@@ -14,6 +14,7 @@ const schema = Joi.object({
   status: [1, 2],
   head_img: [Joi.string().min(1).max(300), '', null],
   click: Joi.number(),
+  visit: Joi.number(),
   tags: Joi.array().items(Joi.number()),
   types: Joi.array().items(Joi.number()),
   users: Joi.array().items(Joi.number()),

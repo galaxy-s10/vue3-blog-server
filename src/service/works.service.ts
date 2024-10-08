@@ -84,17 +84,17 @@ class WorksService {
     return result;
   }
 
+  /** 创建作品 */
+  async create(data: IWorks) {
+    const result = await worksModel.create(data);
+    return result;
+  }
+
   /** 修改作品 */
   async update(data: IWorks) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await worksModel.update(data2, { where: { id } });
-    return result;
-  }
-
-  /** 创建作品 */
-  async create(data: IWorks) {
-    const result = await worksModel.create(data);
+    const result = await worksModel.update(data2, { where: { id }, limit: 1 });
     return result;
   }
 
@@ -102,6 +102,7 @@ class WorksService {
   async delete(id: IWorks['id']) {
     const result = await worksModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

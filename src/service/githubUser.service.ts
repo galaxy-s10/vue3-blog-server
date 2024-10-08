@@ -109,17 +109,20 @@ class UserService {
     return result;
   }
 
+  /** 根据id查找github用户 */
+  async find(id: number) {
+    const result = await githubUserModel.findOne({ where: { id } });
+    return result;
+  }
+
   /** 修改github用户 */
   async update(data: IGithubUser) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await githubUserModel.update(data2, { where: { id } });
-    return result;
-  }
-
-  /** 根据id查找github用户 */
-  async find(id: number) {
-    const result = await githubUserModel.findOne({ where: { id } });
+    const result = await githubUserModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
@@ -127,6 +130,7 @@ class UserService {
   async delete(id: number) {
     const result = await githubUserModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

@@ -10,7 +10,7 @@ import logService from '@/service/log.service';
 class LogController {
   common = {
     create: (data: ILog) => logService.create(data),
-    deleteRang: () => logService.deleteRang(),
+    deleteRang: (day: number) => logService.deleteRang(day),
     getCount: ({ api_real_ip, startTime, endTime }) =>
       logService.getCount({ api_real_ip, startTime, endTime }),
   };
@@ -18,6 +18,7 @@ class LogController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
+      user_id,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -37,6 +38,7 @@ class LogController {
     }
     const result = await logService.getList({
       id,
+      user_id,
       nowPage,
       pageSize,
       orderBy,

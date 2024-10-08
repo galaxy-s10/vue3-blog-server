@@ -16,7 +16,10 @@ class CommentController {
   async getList(ctx: ParameterizedContext, next) {
     const {
       id,
-      status,
+      status: urlStatus,
+      article_id,
+      from_user_id,
+      to_user_id,
       orderBy = 'asc',
       orderName = 'id',
       nowPage,
@@ -26,9 +29,18 @@ class CommentController {
       rangTimeStart,
       rangTimeEnd,
     }: IList<IComment> = ctx.request.query;
+    let status: undefined | number;
+    if (!isAdmin(ctx)) {
+      status = 1;
+    } else if (urlStatus !== undefined) {
+      status = urlStatus;
+    }
     const result = await commentService.getList({
       id,
-      status: isAdmin(ctx) ? status : 1,
+      status,
+      article_id,
+      from_user_id,
+      to_user_id,
       orderBy,
       orderName,
       nowPage,
@@ -202,6 +214,7 @@ class CommentController {
       );
     }
     const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
+    const user_agent = strSlice(String(ctx.request.headers['user-agent']), 490);
     const ip_data = await positionService.get(ip);
     await commentService.create({
       article_id,
@@ -210,9 +223,9 @@ class CommentController {
       parent_comment_id,
       reply_comment_id,
       content,
-      user_agent: strSlice(String(ctx.request.headers['user-agent']), 400),
+      user_agent,
       ip,
-      ip_data: strSlice(JSON.stringify(ip_data), 400),
+      ip_data: strSlice(JSON.stringify(ip_data), 490),
     });
     successHandler({ ctx });
 

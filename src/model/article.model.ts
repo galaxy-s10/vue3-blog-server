@@ -61,6 +61,10 @@ const model = sequelize.define<ArticleModel>(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    visit: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
   {
     paranoid: true,
@@ -71,5 +75,12 @@ const model = sequelize.define<ArticleModel>(
   }
 );
 
-initTable({ model, sequelize });
+function updateVisit() {
+  sequelize.query(`UPDATE ${model.name} SET visit = click;`);
+}
+
+initTable({ model, sequelize }).then(() => {
+  // updateVisit();
+});
+
 export default model;

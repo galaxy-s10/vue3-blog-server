@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IComment, IList } from '@/interface';
@@ -26,12 +26,15 @@ class CommentService {
   /** 获取评论列表 */
   async getList({
     id,
+    status,
+    article_id,
+    from_user_id,
+    to_user_id,
     orderBy,
     orderName,
     nowPage,
     pageSize,
     keyWord,
-    status,
     rangTimeType,
     rangTimeStart,
     rangTimeEnd,
@@ -42,13 +45,13 @@ class CommentService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
-    if (status) {
-      allWhere.status = +status;
-    }
+    const allWhere = deleteUseLessObjectKey({
+      id,
+      status,
+      article_id,
+      from_user_id,
+      to_user_id,
+    });
     if (keyWord) {
       const keyWordWhere = [
         {
@@ -58,6 +61,16 @@ class CommentService {
         },
         {
           user_agent: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          ip: {
+            [Op.like]: `%${keyWord}%`,
+          },
+        },
+        {
+          ip_data: {
             [Op.like]: `%${keyWord}%`,
           },
         },
@@ -540,7 +553,10 @@ class CommentService {
   async update(data: IComment) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await commentModel.update(data2, { where: { id } });
+    const result = await commentModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
@@ -561,6 +577,7 @@ class CommentService {
     const res: any = await this.find(id);
     const result = await commentModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     if (res.parent_comment_id !== -1) {

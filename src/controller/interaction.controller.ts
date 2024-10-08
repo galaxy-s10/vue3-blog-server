@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa';
 import { verifyUserAuth } from '@/app/auth/verifyUserAuth';
 import successHandler from '@/app/handler/success-handle';
 import { ALLOW_HTTP_CODE } from '@/constant';
-import { IList, IInteraction } from '@/interface';
+import { IInteraction, IList } from '@/interface';
 import { CustomError } from '@/model/customError.model';
 import interactionService from '@/service/interaction.service';
 
@@ -58,14 +58,8 @@ class InteractionController {
       );
     }
     const id = +ctx.params.id;
-    const {
-      user_type,
-      user_info,
-      client,
-      client_ip,
-      type,
-      value,
-    }: IInteraction = ctx.request.body;
+    const { user_type, user_info, ip_data, ip, type, value }: IInteraction =
+      ctx.request.body;
     const isExist = await interactionService.isExist([id]);
     if (!isExist) {
       throw new CustomError(
@@ -78,8 +72,8 @@ class InteractionController {
       id,
       user_type,
       user_info,
-      client,
-      client_ip,
+      ip_data,
+      ip,
       type,
       value,
     });
@@ -97,19 +91,13 @@ class InteractionController {
         ALLOW_HTTP_CODE.forbidden
       );
     }
-    const {
-      user_type,
-      user_info,
-      client,
-      client_ip,
-      type,
-      value,
-    }: IInteraction = ctx.request.body;
+    const { user_type, user_info, ip_data, ip, type, value }: IInteraction =
+      ctx.request.body;
     await this.common.create({
       user_type,
       user_info,
-      client,
-      client_ip,
+      ip_data,
+      ip,
       type,
       value,
     });

@@ -88,6 +88,7 @@ class TypeService {
     const data2 = filterObj(data, ['id']);
     const result = await typeModel.update(data2, {
       where: { id },
+      limit: 1,
     });
     return result;
   }
@@ -96,6 +97,7 @@ class TypeService {
   async delete(id: number) {
     const result = await typeModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IList, IVisitorLog } from '@/interface';
@@ -110,6 +110,7 @@ class VisitorLogService {
   /** 获取访客日志列表 */
   async getList({
     id,
+    user_id,
     orderBy,
     orderName,
     nowPage,
@@ -125,17 +126,9 @@ class VisitorLogService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
+    const allWhere = deleteUseLessObjectKey({ id, user_id });
     if (keyWord) {
       const keyWordWhere = [
-        {
-          user_id: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
         {
           ip: {
             [Op.like]: `%${keyWord}%`,
@@ -252,7 +245,10 @@ class VisitorLogService {
   async update(data: IVisitorLog) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await visitorLogModel.update(data2, { where: { id } });
+    const result = await visitorLogModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
@@ -260,6 +256,7 @@ class VisitorLogService {
   async delete(id: number) {
     const result = await visitorLogModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;

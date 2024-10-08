@@ -1,4 +1,4 @@
-import { filterObj } from 'billd-utils';
+import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import Sequelize from 'sequelize';
 
 import { IBlacklist, IList } from '@/interface';
@@ -23,6 +23,7 @@ class LinkService {
   /** 获取黑名单列表 */
   async getList({
     id,
+    user_id,
     orderBy,
     orderName,
     nowPage,
@@ -38,19 +39,11 @@ class LinkService {
       offset = (+nowPage - 1) * +pageSize;
       limit = +pageSize;
     }
-    const allWhere: any = {};
-    if (id) {
-      allWhere.id = +id;
-    }
+    const allWhere = deleteUseLessObjectKey({ id, user_id });
     if (keyWord) {
       const keyWordWhere = [
         {
           ip: {
-            [Op.like]: `%${keyWord}%`,
-          },
-        },
-        {
-          user_id: {
             [Op.like]: `%${keyWord}%`,
           },
         },
@@ -92,17 +85,20 @@ class LinkService {
     return result;
   }
 
+  /** 创建黑名单 */
+  async create(data: IBlacklist) {
+    const result = await blacklistModel.create(data);
+    return result;
+  }
+
   /** 修改黑名单 */
   async update(data: IBlacklist) {
     const { id } = data;
     const data2 = filterObj(data, ['id']);
-    const result = await blacklistModel.update(data2, { where: { id } });
-    return result;
-  }
-
-  /** 创建黑名单 */
-  async create(data: IBlacklist) {
-    const result = await blacklistModel.create(data);
+    const result = await blacklistModel.update(data2, {
+      where: { id },
+      limit: 1,
+    });
     return result;
   }
 
@@ -110,6 +106,7 @@ class LinkService {
   async delete(id: number) {
     const result = await blacklistModel.destroy({
       where: { id },
+      limit: 1,
       individualHooks: true,
     });
     return result;
