@@ -1,4 +1,6 @@
-export const emailTmp = `
+export const emailTmp = () => {
+  const currentYear = new Date().getFullYear();
+  return `
 <div
   style="
     padding: 20px 0;
@@ -141,8 +143,9 @@ export const emailTmp = `
     "
   >
     <div>此为系统邮件，请勿回复。</div>
-    <div style="margin: 2px 0">Copyright © 2019 - 2022 hsslive.cn.</div>
+    <div style="margin: 2px 0">Copyright © 2019 - ${currentYear} hsslive.cn.</div>
     <div>All Rights Reserved. 自然博客 版权所有</div>
   </div>
 </div>
 `;
+};

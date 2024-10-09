@@ -76,6 +76,7 @@ class TagService {
           },
           attributes: ['id'],
           where: deleteUseLessObjectKey({ status: article_status }),
+          required: false,
         },
       ],
       limit,
