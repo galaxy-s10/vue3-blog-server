@@ -32,7 +32,7 @@ const restartPm2Rate = computedRate(restartPm2Threshold); // 重启pm2比率，�
 const handleOverBuff = async ({ currBuffCacheUsed, emial }) => {
   if (currBuffCacheUsed > buffCacheThreshold) {
     const str = `buff/cache使用超过${buffCacheRate}，开始清除buff/cache`;
-    const emialContent = replaceKeyFromValue(emailTmp, {
+    const emialContent = replaceKeyFromValue(emailTmp(), {
       title: str,
       ...emial,
     });
@@ -53,7 +53,7 @@ const handleRestartPm2 = async ({ total, free, currBuffCacheUsed, emial }) => {
     const str = `服务器可用内存小于${`${formatMemorySize(
       total * restartPm2Threshold
     )}`}，开始重启所有pm2进程`;
-    const emialContent = replaceKeyFromValue(emailTmp, {
+    const emialContent = replaceKeyFromValue(emailTmp(), {
       title: str,
       ...emial,
     });
@@ -118,7 +118,7 @@ export const main = async () => {
     if (memoryThreshold < currMemoryUsed) {
       console.log('超过内存限制', memoryThreshold, currMemoryUsed);
       const str = `服务器内存使用率超过${currMemoryRate}`;
-      const emialContent = replaceKeyFromValue(emailTmp, {
+      const emialContent = replaceKeyFromValue(emailTmp(), {
         title: str,
         ...emial,
       });
