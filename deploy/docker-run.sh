@@ -7,7 +7,7 @@
 # FilePath: /vue3-blog-server/deploy/docker-run.sh
 # Github: https://github.com/galaxy-s10
 # LastEditors: shuisheng
-# LastEditTime: 2024-05-06 14:25:27
+# LastEditTime: 2025-01-27 23:21:28
 ###
 
 # 生成头部文件快捷键: ctrl+cmd+i
@@ -51,7 +51,7 @@ echo 执行docker-run.sh
 # 使用volume
 docker run --name $JOBNAME-$ENV-$PORT -d \
   -p $PORT:$PORT \
-  -v $PUBLICDIR/backup/:/node/backup/ \
+  -v $PUBLICDIR/backup/:/$PUBLICDIR/backup/ \
   $JOBNAME-$ENV-$PORT
 
 # docker run --name $JOBNAME-$ENV-$PORT -d \
