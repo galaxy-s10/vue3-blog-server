@@ -54,7 +54,7 @@ const model = sequelize.define<ArticleModel>(
       type: DataTypes.STRING(500),
     },
     content: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT('medium'),
       allowNull: false,
     },
     click: {

@@ -10,7 +10,7 @@ const router = new Router();
 export function loadAllRoutes(app) {
   router.get('/', async (ctx, next) => {
     ctx.body = {
-      message: `欢迎访问${PROJECT_NAME},当前环境:${PROJECT_ENV},当前时间:${new Date().toLocaleString()}`,
+      msg: `欢迎访问${PROJECT_NAME},当前环境:${PROJECT_ENV},当前时间:${new Date().toLocaleString()}`,
     };
     await next();
   });
@@ -25,8 +25,6 @@ export function loadAllRoutes(app) {
 
       const allRouter = require(`./${file}`).default;
       app.use(allRouter.routes()).use(allRouter.allowedMethods()); // allRouter也要配置routes()和allowedMethods()
-      // router.use('/front', allRouter.routes()).use(allRouter.allowedMethods());
-      router.use('/admin', allRouter.routes()).use(allRouter.allowedMethods()); // admin的router也要配置routes()和allowedMethods()
       console.log(chalkINFO(`加载路由: ${file}`));
     } catch (error) {
       console.log(chalkERROR(`加载${file}路由出错:`));

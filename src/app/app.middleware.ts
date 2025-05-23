@@ -189,11 +189,19 @@ export const corsMiddle = async (ctx: ParameterizedContext, next) => {
     ctx.set('Access-Control-Allow-Origin', ctx.header.origin!); // 允许的源
   } else {
     const allowOrigin = [
+      'http://hsslive.cn',
+      'https://hsslive.cn',
+      'http://www.hsslive.cn',
       'https://www.hsslive.cn',
+      'http://admin.hsslive.cn',
       'https://admin.hsslive.cn',
+      'http://live.hsslive.cn',
       'https://live.hsslive.cn',
+      'http://nuxt2.hsslive.cn',
       'https://nuxt2.hsslive.cn',
+      'http://next.hsslive.cn',
       'https://next.hsslive.cn',
+      'http://desk.hsslive.cn',
       'https://desk.hsslive.cn',
     ];
     // @ts-ignore

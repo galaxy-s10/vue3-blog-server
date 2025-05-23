@@ -16,6 +16,10 @@ ENV BILLD_PORT ${BILLD_PORT}
 ENV BILLD_TAG ${BILLD_TAG}
 ENV BILLD_PUBLICDIR ${BILLD_PUBLICDIR}
 
+ENV NODE_APP_RELEASE_PROJECT_NAME ${BILLD_JOBNAME}
+ENV NODE_APP_RELEASE_PROJECT_ENV ${BILLD_ENV}
+ENV NODE_APP_RELEASE_PROJECT_PORT ${BILLD_PORT}
+
 # https://github.com/pnpm/pnpm/issues/4495
 ENV PNPM_HOME="/pnpm/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
@@ -40,13 +44,13 @@ RUN echo 设置pnpm淘宝镜像:
 RUN pnpm config set registry https://registry.npmmirror.com/
 RUN pnpm config set @billd:registry https://registry.hsslive.cn/
 
-RUN echo 开始全局安装pm2:
-RUN pnpm i pm2@5.4.2 -g
+# RUN echo 开始全局安装pm2:
+# RUN pnpm i pm2@5.4.2 -g
 
 RUN echo node版本: $(node -v)
 RUN echo npm版本: $(npm -v)
 RUN echo pnpm版本: $(pnpm -v)
-RUN echo pm2版本: $(pm2 -v)
+# RUN echo pm2版本: $(pm2 -v)
 RUN echo git版本: $(git --version)
 
 RUN echo 当前路径: $(pwd)
@@ -64,10 +68,8 @@ RUN pnpm i
 RUN echo 开始打包:
 RUN npm run build
 
-VOLUME [ ${BILLD_PUBLICDIR}/ ]
+# VOLUME [ ${BILLD_PUBLICDIR}/ ]
 
 # pm2环境变量管理:https://pm2.io/docs/runtime/best-practices/environment-variables/
-CMD NODE_APP_RELEASE_PROJECT_NAME=${BILLD_JOBNAME} \
-  NODE_APP_RELEASE_PROJECT_ENV=${BILLD_ENV} \
-  NODE_APP_RELEASE_PROJECT_PORT=${BILLD_PORT} \
-  pm2-runtime start './dist/index.js' -i 1 --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}
+# CMD pm2-runtime start './dist/index.js' -i 1 --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}
+CMD node './dist/index.js' --name ${BILLD_JOBNAME}-${BILLD_ENV}-${BILLD_PORT}

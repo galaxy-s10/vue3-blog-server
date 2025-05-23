@@ -22,6 +22,7 @@
     "release": "standard-version",
     "release:first": "standard-version --first-release",
     "start": "cross-env NODE_ENV=production NODE_APP_RELEASE_PROJECT_NAME=vue3-blog-server NODE_APP_RELEASE_PROJECT_ENV=prod NODE_APP_RELEASE_PROJECT_PORT=3300 node ./dist/index.js",
+    "sync-codeup": "ts-node ./deploy/handleSyncCodeup.mjs",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "config": {

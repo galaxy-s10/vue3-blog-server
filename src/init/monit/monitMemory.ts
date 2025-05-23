@@ -1,8 +1,6 @@
 import schedule from 'node-schedule';
 
 import { MONIT_JOB, MONIT_TYPE, PROJECT_ENV } from '@/constant';
-import otherController from '@/controller/other.controller';
-import { QQ_EMAIL_USER } from '@/secret/secret';
 import monitService from '@/service/monit.service';
 import { chalkINFO, chalkSUCCESS, chalkWARN } from '@/utils/chalkTip';
 import { clearCache, restartPm2, showMemory } from '@/utils/clearCache';
@@ -36,7 +34,7 @@ const handleOverBuff = async ({ currBuffCacheUsed, emial }) => {
       title: str,
       ...emial,
     });
-    await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
+    // await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
     console.log(chalkINFO(str));
     await monitService.create({
       type: MONIT_TYPE.CLEAR_CACHE,
@@ -57,7 +55,7 @@ const handleRestartPm2 = async ({ total, free, currBuffCacheUsed, emial }) => {
       title: str,
       ...emial,
     });
-    await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
+    // await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
     await monitService.create({
       type: MONIT_TYPE.RESTART_PM2,
       info: emialContent,
@@ -122,7 +120,7 @@ export const main = async () => {
         title: str,
         ...emial,
       });
-      await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
+      // await otherController.sendEmail(QQ_EMAIL_USER, str, emialContent);
       await monitService.create({
         type: MONIT_TYPE.MEMORY_THRESHOLD,
         info: emialContent,
