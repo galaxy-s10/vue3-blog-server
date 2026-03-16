@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import customParser from 'socket.io-msgpack-parser';
 
 import {
   IData,
@@ -11,7 +12,6 @@ import WsRedisController from './redis.controller';
 
 import { pubClient } from '@/config/redis/pub';
 import { REDIS_PREFIX } from '@/constant';
-import interactionController from '@/controller/interaction.controller';
 import interactionStatisController from '@/controller/interactionStatis.controller';
 import { InteractionStatisType } from '@/interface';
 import { REDIS_CONFIG } from '@/secret/secret';
@@ -65,7 +65,8 @@ function getClient(socket: Socket) {
 export const connectWebSocket = (server) => {
   console.log(chalkINFO('当前非beta环境，初始化websocket'));
 
-  const io = new Server(server);
+  const io = new Server(server, { parser: customParser });
+  // const io = new Server(server);
 
   async function emitNum(client_ip: string) {
     const { visitor, user, history } = await getOnline();
@@ -281,25 +282,25 @@ export const connectWebSocket = (server) => {
 
     // 用户发送消息
     socket.on(wsMsgType.userSendMsg, (data) => {
-      prettierLog('用户发送消息', socket);
+      // prettierLog('用户发送消息', socket);
       // socket.emit会将消息发送给发件人
       // socket.broadcast.emit会将消息发送给除了发件人以外的所有人
       // io.emit会将消息发送给所有人，包括发件人
-      const { id, ip } = getClient(socket);
-      io.emit(wsMsgType.userSendMsg, {
-        id,
+      // const { id, ip } = getClient(socket);
+      io.volatile.emit(wsMsgType.userSendMsg, {
+        id: socket.id,
         userInfo: data.userInfo,
         value: data.value,
         created_at: new Date().toLocaleString(),
       });
-      interactionController.common.create({
-        ip,
-        ip_data: '',
-        user_info: JSON.stringify(data.userInfo),
-        user_type: data.userInfo.userType,
-        type: wsMsgType.userSendMsg,
-        value: JSON.stringify(data.value),
-      });
+      // interactionController.common.create({
+      //   ip,
+      //   ip_data: '',
+      //   user_info: JSON.stringify(data.userInfo),
+      //   user_type: data.userInfo.userType,
+      //   type: wsMsgType.userSendMsg,
+      //   value: JSON.stringify(data.value),
+      // });
     });
 
     // 游客切换头像
@@ -334,6 +335,9 @@ export const connectWebSocket = (server) => {
       prettierLog('已断开连接', socket);
       console.log(reason);
       WsRedisController.die(socket.id);
+      Object.keys(wsConnectStatus).forEach((key) => {
+        socket.removeAllListeners(wsConnectStatus[key]);
+      });
     });
   });
 };

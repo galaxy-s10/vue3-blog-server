@@ -2,12 +2,8 @@ import { performance } from 'perf_hooks';
 
 import { ParameterizedContext } from 'koa';
 
-import { authJwt } from './auth/authJwt';
-
-import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE, PROJECT_ENV } from '@/constant';
-import logController from '@/controller/log.controller';
+import { ALLOW_HTTP_CODE, ERROR_HTTP_CODE } from '@/constant';
 import { CustomError } from '@/model/customError.model';
-import { isAdmin, strSlice } from '@/utils';
 import { chalkINFO, chalkWARN } from '@/utils/chalkTip';
 
 // 全局错误处理中间件
@@ -16,54 +12,54 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
   // 这个中间件是第一个中间件，得是异步的，否则直接就next到下一个中间件了
   const startTime = performance.now();
   let duration = -1;
-  const insertLog = async (info: {
-    statusCode: number;
-    errorCode: number;
-    duration: number;
-    error: string;
-    message: string;
-  }) => {
-    if (PROJECT_ENV !== 'beta') {
-      if ([200, 304].includes(info.statusCode)) {
-        return;
-      }
-      console.log(chalkINFO(`当前不是beta环境，写入日志`));
-      // 将请求写入日志表
-      const { userInfo } = await authJwt(ctx);
-      const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
-      const api_user_agent = strSlice(
-        String(ctx.request.headers['user-agent']),
-        490
-      );
-      const forwarded = strSlice(
-        String(ctx.request.headers['x-forwarded-for']),
-        490
-      );
-      const referer = strSlice(String(ctx.request.headers.referer), 490);
+  // const insertLog = async (info: {
+  //   statusCode: number;
+  //   errorCode: number;
+  //   duration: number;
+  //   error: string;
+  //   message: string;
+  // }) => {
+  //   if (PROJECT_ENV !== 'beta') {
+  //     if ([200, 304].includes(info.statusCode)) {
+  //       return;
+  //     }
+  //     console.log(chalkINFO(`当前不是beta环境，写入日志`));
+  //     // 将请求写入日志表
+  //     const { userInfo } = await authJwt(ctx);
+  //     const ip = strSlice(String(ctx.request.headers['x-real-ip']), 490);
+  //     const api_user_agent = strSlice(
+  //       String(ctx.request.headers['user-agent']),
+  //       490
+  //     );
+  //     const forwarded = strSlice(
+  //       String(ctx.request.headers['x-forwarded-for']),
+  //       490
+  //     );
+  //     const referer = strSlice(String(ctx.request.headers.referer), 490);
 
-      logController.common.create({
-        user_id: userInfo?.id || -1,
-        api_user_agent,
-        api_from: isAdmin(ctx) ? 2 : 1,
-        api_body: JSON.stringify(ctx.request.body || {}),
-        api_query: JSON.stringify(ctx.query),
-        api_real_ip: ip,
-        api_forwarded_for: forwarded,
-        api_referer: referer,
-        api_method: ctx.request.method,
-        // ctx.request.host存在时获取主机（hostname:port）。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
-        api_host: ctx.request.host, // ctx.request.hostname不带端口号;ctx.request.host带端口号
-        // ctx.request.hostname存在时获取主机名。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
-        api_hostname: ctx.request.hostname, // ctx.request.hostname不带端口号;ctx.request.host带端口号
-        api_path: ctx.request.path,
-        api_status_code: info.statusCode,
-        api_error: info.error,
-        api_err_msg: info.message,
-        api_duration: info.duration,
-        api_err_code: info.errorCode,
-      });
-    }
-  };
+  //     logController.common.create({
+  //       user_id: userInfo?.id || -1,
+  //       api_user_agent,
+  //       api_from: isAdmin(ctx) ? 2 : 1,
+  //       api_body: JSON.stringify(ctx.request.body || {}),
+  //       api_query: JSON.stringify(ctx.query),
+  //       api_real_ip: ip,
+  //       api_forwarded_for: forwarded,
+  //       api_referer: referer,
+  //       api_method: ctx.request.method,
+  //       // ctx.request.host存在时获取主机（hostname:port）。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
+  //       api_host: ctx.request.host, // ctx.request.hostname不带端口号;ctx.request.host带端口号
+  //       // ctx.request.hostname存在时获取主机名。当 app.proxy 是 true 时支持 X-Forwarded-Host，否则使用 Host。
+  //       api_hostname: ctx.request.hostname, // ctx.request.hostname不带端口号;ctx.request.host带端口号
+  //       api_path: ctx.request.path,
+  //       api_status_code: info.statusCode,
+  //       api_error: info.error,
+  //       api_err_msg: info.message,
+  //       api_duration: info.duration,
+  //       api_err_code: info.errorCode,
+  //     });
+  //   }
+  // };
   try {
     await next();
     console.log(
@@ -100,31 +96,31 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
           statusCode
         )
       ) {
-        const defaultSuccess = {
-          statusCode,
-          errorCode: statusCode,
-          error: msg,
-          message: msg,
-          duration,
-        };
-        // 服务端返回http状态码200、304、404、405，写入日志表
-        console.log(
-          chalkINFO(`服务端返回http状态码200、304、404、405，写入日志表`)
-        );
-        insertLog(defaultSuccess);
+        // const defaultSuccess = {
+        //   statusCode,
+        //   errorCode: statusCode,
+        //   error: msg,
+        //   message: msg,
+        //   duration,
+        // };
+        // // 服务端返回http状态码200、304、404、405，写入日志表
+        // console.log(
+        //   chalkINFO(`服务端返回http状态码200、304、404、405，写入日志表`)
+        // );
+        // insertLog(defaultSuccess);
       } else {
-        const defaultSuccess = {
-          statusCode,
-          errorCode: ERROR_HTTP_CODE.errStatusCode,
-          error: msg,
-          message: msg,
-          duration,
-        };
-        // 服务端返回http状态码不是200、304、404、405，写入日志表
-        console.log(
-          chalkINFO(`服务端返回http状态码不是200、304、404、405，写入日志表，`)
-        );
-        insertLog(defaultSuccess);
+        // const defaultSuccess = {
+        //   statusCode,
+        //   errorCode: ERROR_HTTP_CODE.errStatusCode,
+        //   error: msg,
+        //   message: msg,
+        //   duration,
+        // };
+        // // 服务端返回http状态码不是200、304、404、405，写入日志表
+        // console.log(
+        //   chalkINFO(`服务端返回http状态码不是200、304、404、405，写入日志表，`)
+        // );
+        // insertLog(defaultSuccess);
       }
       throw new CustomError(msg, statusCode, statusCode);
     }
@@ -145,15 +141,15 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
     }
     ctx.app.emit('error', error, ctx);
     if (!(error instanceof CustomError)) {
-      const defaultError = {
-        statusCode: ALLOW_HTTP_CODE.serverError,
-        errorCode: ERROR_HTTP_CODE.serverError,
-        error: error?.message,
-        message: '服务器错误！',
-        duration,
-      };
+      // const defaultError = {
+      //   statusCode: ALLOW_HTTP_CODE.serverError,
+      //   errorCode: ERROR_HTTP_CODE.serverError,
+      //   error: error?.message,
+      //   message: '服务器错误！',
+      //   duration,
+      // };
       // 不是CustomError，也写入日志表
-      insertLog(defaultError);
+      // insertLog(defaultError);
       return;
     }
     // 是CustomError，判断errorCode，非法的错误（频繁请求和被禁用）不写入日志
@@ -162,13 +158,13 @@ export const catchErrorMiddle = async (ctx: ParameterizedContext, next) => {
         error.errorCode
       )
     ) {
-      insertLog({
-        statusCode: error.statusCode,
-        error: error.message,
-        errorCode: error.errorCode,
-        message: error.message,
-        duration,
-      });
+      // insertLog({
+      //   statusCode: error.statusCode,
+      //   error: error.message,
+      //   errorCode: error.errorCode,
+      //   message: error.message,
+      //   duration,
+      // });
     }
   }
 };

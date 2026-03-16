@@ -59,6 +59,7 @@
     "redis": "^4.0.4",
     "sequelize": "^6.25.2",
     "socket.io": "^4.4.1",
+    "socket.io-msgpack-parser": "^3.0.2",
     "ssh2": "^1.7.0",
     "trash": "^8.1.1"
   },
